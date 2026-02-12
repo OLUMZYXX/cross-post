@@ -1,9 +1,9 @@
 import { StatusBar } from "expo-status-bar";
-import { Text, View, ScrollView, Image } from "react-native";
+import { Text, View, ScrollView, Image, RefreshControl } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function SentPosts({ posts }) {
+export default function SentPosts({ posts, refreshing, onRefresh }) {
   const samplePosts =
     posts?.length > 0
       ? posts
@@ -69,6 +69,9 @@ export default function SentPosts({ posts }) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ade80" colors={["#4ade80"]} progressBackgroundColor="#111827" />
+          }
         >
           {samplePosts.map((post) => (
             <View

@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
-import { Text, View, TouchableOpacity, ScrollView, Modal } from "react-native";
-import React, { useState } from "react";
+import { Text, View, TouchableOpacity, ScrollView, Modal, RefreshControl } from "react-native";
+import React, { useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import CreatePost from "./CreatePost";
 import SentPosts from "./SentPosts";
@@ -21,6 +21,15 @@ export default function HomePage({ user, onLogout }) {
     "LinkedIn",
   ]);
   const { showToast } = useToast();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+      showToast({ type: "success", title: "Refreshed", message: "Content is up to date.", duration: 2000 });
+    }, 1500);
+  }, [showToast]);
 
   const handleTabChange = (tabId) => {
     if (tabId === "create") {
@@ -100,7 +109,7 @@ export default function HomePage({ user, onLogout }) {
   if (activeTab === "sent") {
     return (
       <View className="flex-1 bg-gray-950">
-        <SentPosts posts={sentPosts} />
+        <SentPosts posts={sentPosts} refreshing={refreshing} onRefresh={onRefresh} />
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       </View>
     );
@@ -115,31 +124,39 @@ export default function HomePage({ user, onLogout }) {
             <Text className="text-gray-400 text-sm">Performance</Text>
             <Text className="text-white text-2xl font-bold">Analytics</Text>
           </View>
-          <View className="bg-gray-900/80 rounded-2xl p-5 border border-gray-800 mb-4">
-            <Text className="text-gray-400 text-xs mb-3">TOTAL REACH</Text>
-            <Text className="text-white text-3xl font-bold">12,450</Text>
-            <Text className="text-green-400 text-xs mt-1">+18% this week</Text>
-          </View>
-          <View className="flex-row justify-between mb-4">
-            <View className="flex-1 mr-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-              <Text className="text-gray-400 text-xs mb-2">POSTS</Text>
-              <Text className="text-white text-xl font-bold">24</Text>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ade80" colors={["#4ade80"]} progressBackgroundColor="#111827" />
+            }
+          >
+            <View className="bg-gray-900/80 rounded-2xl p-5 border border-gray-800 mb-4">
+              <Text className="text-gray-400 text-xs mb-3">TOTAL REACH</Text>
+              <Text className="text-white text-3xl font-bold">12,450</Text>
+              <Text className="text-green-400 text-xs mt-1">+18% this week</Text>
             </View>
-            <View className="flex-1 ml-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-              <Text className="text-gray-400 text-xs mb-2">ENGAGEMENT</Text>
-              <Text className="text-white text-xl font-bold">8.2%</Text>
+            <View className="flex-row justify-between mb-4">
+              <View className="flex-1 mr-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
+                <Text className="text-gray-400 text-xs mb-2">POSTS</Text>
+                <Text className="text-white text-xl font-bold">24</Text>
+              </View>
+              <View className="flex-1 ml-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
+                <Text className="text-gray-400 text-xs mb-2">ENGAGEMENT</Text>
+                <Text className="text-white text-xl font-bold">8.2%</Text>
+              </View>
             </View>
-          </View>
-          <View className="flex-row justify-between">
-            <View className="flex-1 mr-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-              <Text className="text-gray-400 text-xs mb-2">LIKES</Text>
-              <Text className="text-white text-xl font-bold">512</Text>
+            <View className="flex-row justify-between">
+              <View className="flex-1 mr-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
+                <Text className="text-gray-400 text-xs mb-2">LIKES</Text>
+                <Text className="text-white text-xl font-bold">512</Text>
+              </View>
+              <View className="flex-1 ml-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
+                <Text className="text-gray-400 text-xs mb-2">COMMENTS</Text>
+                <Text className="text-white text-xl font-bold">62</Text>
+              </View>
             </View>
-            <View className="flex-1 ml-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-              <Text className="text-gray-400 text-xs mb-2">COMMENTS</Text>
-              <Text className="text-white text-xl font-bold">62</Text>
-            </View>
-          </View>
+          </ScrollView>
         </View>
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       </View>
@@ -155,7 +172,13 @@ export default function HomePage({ user, onLogout }) {
             <Text className="text-gray-400 text-sm">Preferences</Text>
             <Text className="text-white text-2xl font-bold">Settings</Text>
           </View>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 80 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ade80" colors={["#4ade80"]} progressBackgroundColor="#111827" />
+            }
+          >
             <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-4">
               <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-800">
                 <View className="w-9 h-9 rounded-full bg-blue-500/20 items-center justify-center mr-3">
@@ -238,6 +261,9 @@ export default function HomePage({ user, onLogout }) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ade80" colors={["#4ade80"]} progressBackgroundColor="#111827" />
+          }
         >
           <View className="bg-gray-900/80 rounded-3xl p-6 border border-gray-800 mb-6">
             <View className="flex-row items-center justify-between mb-4">
