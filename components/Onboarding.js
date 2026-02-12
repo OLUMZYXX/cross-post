@@ -37,6 +37,7 @@ const onboardingData = [
 
 export default function Onboarding({ onComplete }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -88,12 +89,15 @@ export default function Onboarding({ onComplete }) {
           tension: 40,
           useNativeDriver: true,
         }),
-      ]).start();
+      ]).start(() => {
+        setIsAnimating(false);
+      });
     });
   };
 
   const goToNext = () => {
-    if (currentIndex < onboardingData.length - 1) {
+    if (currentIndex < onboardingData.length - 1 && !isAnimating) {
+      setIsAnimating(true);
       animateTransition("next", () => {
         setCurrentIndex((prev) => prev + 1);
       });
@@ -101,7 +105,8 @@ export default function Onboarding({ onComplete }) {
   };
 
   const goToBack = () => {
-    if (currentIndex > 0) {
+    if (currentIndex > 0 && !isAnimating) {
+      setIsAnimating(true);
       animateTransition("back", () => {
         setCurrentIndex((prev) => prev - 1);
       });
@@ -123,14 +128,16 @@ export default function Onboarding({ onComplete }) {
           useNativeDriver: true,
         }).start();
 
-        const threshold = width * 0.2;
-        if (
-          gestureState.dx < -threshold &&
-          currentIndex < onboardingData.length - 1
-        ) {
-          goToNext();
-        } else if (gestureState.dx > threshold && currentIndex > 0) {
-          goToBack();
+        if (!isAnimating) {
+          const threshold = width * 0.2;
+          if (
+            gestureState.dx < -threshold &&
+            currentIndex < onboardingData.length - 1
+          ) {
+            goToNext();
+          } else if (gestureState.dx > threshold && currentIndex > 0) {
+            goToBack();
+          }
         }
       },
     }),
@@ -138,6 +145,8 @@ export default function Onboarding({ onComplete }) {
 
   const currentSlide = onboardingData[currentIndex];
   const isLastSlide = currentIndex === onboardingData.length - 1;
+
+  if (!currentSlide) return null;
 
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 100],
