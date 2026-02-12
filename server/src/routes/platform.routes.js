@@ -1,9 +1,18 @@
 import express from "express";
+import { asyncHandler } from "../middleware/asyncHandler.js";
+import { authenticate } from "../middleware/auth.js";
+import {
+  listPlatforms,
+  connectPlatform,
+  disconnectPlatform,
+} from "../controllers/platform.controller.js";
 
 const router = express.Router();
 
-router.get("/test", (req, res) =>
-  res.json({ message: "Platforms test endpoint" }),
-);
+router.use(authenticate);
+
+router.get("/", asyncHandler(listPlatforms));
+router.post("/connect", asyncHandler(connectPlatform));
+router.delete("/:id", asyncHandler(disconnectPlatform));
 
 export default router;

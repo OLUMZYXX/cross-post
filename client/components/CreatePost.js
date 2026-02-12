@@ -8,12 +8,12 @@ import {
   Image,
   Modal,
 } from "react-native";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useToast } from "./Toast";
+import { postAPI } from "../services/api";
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
 function pad(n) {
   return String(n).padStart(2, "0");
 }
@@ -35,7 +35,6 @@ function buildDateChips() {
   return chips;
 }
 
-// ─── Scheduling modal ─────────────────────────────────────────────────────────
 function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
   const dateChips = buildDateChips();
   const [selectedDateIdx, setSelectedDateIdx] = useState(0);
@@ -69,7 +68,7 @@ function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
     base.setHours(h, minute, 0, 0);
 
     if (base <= new Date()) {
-      return; // can't schedule in the past — button will be disabled
+      return;
     }
 
     const label = base.toLocaleString("en-US", {
@@ -101,12 +100,10 @@ function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
       >
         <TouchableOpacity activeOpacity={1} onPress={() => {}}>
           <View className="bg-gray-900 rounded-t-3xl px-6 pt-5 pb-10 border-t border-gray-800">
-            {/* handle */}
             <View className="w-10 h-1 bg-gray-700 rounded-full self-center mb-6" />
 
             <Text className="text-white text-lg font-bold mb-6">When do you want to post?</Text>
 
-            {/* ── Post Now ───────────────────────────────────────────── */}
             <TouchableOpacity
               onPress={onPostNow}
               className="flex-row items-center bg-green-500 rounded-2xl p-4 mb-3"
@@ -121,7 +118,6 @@ function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
               <Ionicons name="chevron-forward" size={20} color="#14532d" />
             </TouchableOpacity>
 
-            {/* ── Schedule ───────────────────────────────────────────── */}
             <View className="bg-gray-800 rounded-2xl p-4">
               <View className="flex-row items-center mb-4">
                 <View className="w-10 h-10 rounded-full bg-blue-500/20 items-center justify-center mr-3">
@@ -130,7 +126,6 @@ function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
                 <Text className="text-white font-bold text-base">Schedule for Later</Text>
               </View>
 
-              {/* Date chips */}
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -158,9 +153,7 @@ function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
                 ))}
               </ScrollView>
 
-              {/* Time picker */}
               <View className="flex-row items-center justify-center mb-4">
-                {/* Hour */}
                 <View className="items-center">
                   <TouchableOpacity
                     onPress={() => adjustHour(1)}
@@ -181,7 +174,6 @@ function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
 
                 <Text className="text-white text-2xl font-bold mx-2">:</Text>
 
-                {/* Minute */}
                 <View className="items-center">
                   <TouchableOpacity
                     onPress={() => adjustMinute(5)}
@@ -200,7 +192,6 @@ function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
                   </TouchableOpacity>
                 </View>
 
-                {/* AM/PM */}
                 <View className="ml-3 bg-gray-700 rounded-xl overflow-hidden">
                   {["AM", "PM"].map((period) => (
                     <TouchableOpacity
@@ -220,7 +211,6 @@ function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
                 </View>
               </View>
 
-              {/* Confirm schedule button */}
               <TouchableOpacity
                 onPress={handleConfirmSchedule}
                 disabled={isPast}
@@ -250,12 +240,12 @@ function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
 export default function CreatePost({
   connectedPlatforms,
   allPlatforms,
   onClose,
   onSaveDraft,
+  onPostPublished,
   initialDraft,
 }) {
   const [caption, setCaption] = useState(initialDraft?.caption || "");
@@ -292,37 +282,65 @@ export default function CreatePost({
     setShowScheduleModal(false);
     setIsPosting(true);
 
-    for (const platform of selectedPlatforms) {
-      let postType = "post";
-      if (mediaType === "video") {
-        postType =
-          platform === "Facebook" || platform === "Instagram" ? "reel" : "video";
-      }
-      console.log(`Posting to ${platform} as ${postType}:`, {
+    try {
+      const { data: createData } = await postAPI.create({
         caption,
-        media: selectedMedia[0] ?? null,
+        media: selectedMedia,
+        platforms: selectedPlatforms,
+        status: "draft",
       });
-      await new Promise((r) => setTimeout(r, 800));
-    }
 
-    setIsPosting(false);
-    showToast({
-      type: "success",
-      title: "Post published!",
-      message: `Shared to ${selectedPlatforms.join(", ")} successfully.`,
-    });
-    onClose();
+      const { data: publishData } = await postAPI.publish(createData.post.id);
+
+      showToast({
+        type: "success",
+        title: "Post published!",
+        message: `Shared to ${selectedPlatforms.join(", ")} successfully.`,
+      });
+
+      onPostPublished?.(publishData.post);
+      onClose();
+    } catch (err) {
+      showToast({
+        type: "error",
+        title: "Publish failed",
+        message: err.message,
+      });
+    } finally {
+      setIsPosting(false);
+    }
   };
 
-  const schedulePost = (_date, label) => {
+  const schedulePost = async (date, label) => {
     setShowScheduleModal(false);
-    showToast({
-      type: "info",
-      title: "Post scheduled!",
-      message: `Will publish on ${label}.`,
-      duration: 4000,
-    });
-    onClose();
+    setIsPosting(true);
+
+    try {
+      const { data: createData } = await postAPI.create({
+        caption,
+        media: selectedMedia,
+        platforms: selectedPlatforms,
+        status: "draft",
+      });
+
+      await postAPI.schedule(createData.post.id, date.toISOString());
+
+      showToast({
+        type: "info",
+        title: "Post scheduled!",
+        message: `Will publish on ${label}.`,
+        duration: 4000,
+      });
+      onClose();
+    } catch (err) {
+      showToast({
+        type: "error",
+        title: "Scheduling failed",
+        message: err.message,
+      });
+    } finally {
+      setIsPosting(false);
+    }
   };
 
   const handlePostPress = () => {
@@ -330,7 +348,7 @@ export default function CreatePost({
     setShowScheduleModal(true);
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     if (!caption && selectedMedia.length === 0) {
       showToast({
         type: "warning",
@@ -340,17 +358,46 @@ export default function CreatePost({
       return;
     }
 
-    onSaveDraft?.({
-      id: initialDraft?.id || Date.now(),
-      caption,
-      platforms: selectedPlatforms,
-      media: selectedMedia,
-      mediaType,
-      savedAt: new Date().toLocaleString(),
-    });
+    try {
+      if (initialDraft?.serverId) {
+        await postAPI.update(initialDraft.serverId, {
+          caption,
+          media: selectedMedia,
+          platforms: selectedPlatforms,
+          status: "draft",
+        });
+      } else {
+        await postAPI.create({
+          caption,
+          media: selectedMedia,
+          platforms: selectedPlatforms,
+          status: "draft",
+        });
+      }
 
-    showToast({ type: "success", title: "Draft saved", message: "You can edit it later." });
-    onClose();
+      onSaveDraft?.({
+        id: initialDraft?.id || Date.now(),
+        caption,
+        platforms: selectedPlatforms,
+        media: selectedMedia,
+        mediaType,
+        savedAt: new Date().toLocaleString(),
+      });
+
+      showToast({ type: "success", title: "Draft saved", message: "You can edit it later." });
+      onClose();
+    } catch (err) {
+      onSaveDraft?.({
+        id: initialDraft?.id || Date.now(),
+        caption,
+        platforms: selectedPlatforms,
+        media: selectedMedia,
+        mediaType,
+        savedAt: new Date().toLocaleString(),
+      });
+      showToast({ type: "warning", title: "Saved locally", message: "Server unavailable, draft saved on device." });
+      onClose();
+    }
   };
 
   const handleMediaSelect = async () => {
@@ -401,11 +448,11 @@ export default function CreatePost({
         <View className="absolute top-96 -left-20 w-64 h-64 rounded-full bg-emerald-500/5" />
       </View>
 
-      {/* Header */}
       <View className="px-6 pt-16 pb-4">
         <View className="flex-row items-center justify-between">
           <TouchableOpacity
             onPress={onClose}
+            disabled={isPosting}
             className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
           >
             <Ionicons name="arrow-back" size={20} color="#fff" />
@@ -428,7 +475,6 @@ export default function CreatePost({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* Caption + media card */}
         <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-4 overflow-hidden">
           <TextInput
             value={caption}
@@ -439,6 +485,7 @@ export default function CreatePost({
             className="text-white text-base p-4 min-h-[140px]"
             textAlignVertical="top"
             maxLength={500}
+            editable={!isPosting}
           />
 
           {selectedMedia.length > 0 && (
@@ -460,6 +507,7 @@ export default function CreatePost({
                 )}
                 <TouchableOpacity
                   onPress={removeMedia}
+                  disabled={isPosting}
                   className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 items-center justify-center"
                 >
                   <Ionicons name="close" size={16} color="#fff" />
@@ -468,12 +516,12 @@ export default function CreatePost({
             </View>
           )}
 
-          {/* Action bar */}
           <View className="flex-row items-center justify-between px-4 py-3 border-t border-gray-800">
             <Text className="text-gray-500 text-xs">{caption.length}/500</Text>
             <View className="flex-row items-center">
               <TouchableOpacity
                 onPress={handleMediaSelect}
+                disabled={isPosting}
                 className="flex-row items-center bg-gray-800 rounded-full px-4 py-2 mr-2"
               >
                 <Ionicons name="images-outline" size={18} color="#4ade80" />
@@ -481,6 +529,7 @@ export default function CreatePost({
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSaveDraft}
+                disabled={isPosting}
                 className="flex-row items-center bg-gray-800 rounded-full px-4 py-2"
               >
                 <Ionicons name="bookmark-outline" size={18} color="#f59e0b" />
@@ -490,7 +539,6 @@ export default function CreatePost({
           </View>
         </View>
 
-        {/* Platform selection */}
         <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-4">
           <Text className="text-white font-bold mb-3">Post to</Text>
           <View className="flex-row flex-wrap">
@@ -500,6 +548,7 @@ export default function CreatePost({
                 <TouchableOpacity
                   key={platform}
                   onPress={() => togglePlatform(platform)}
+                  disabled={isPosting}
                   className={`flex-row items-center mr-2 mb-2 px-3 py-2 rounded-full border ${
                     isSelected
                       ? "bg-green-500/20 border-green-500"
@@ -530,7 +579,6 @@ export default function CreatePost({
           )}
         </View>
 
-        {/* Preview */}
         {selectedPlatforms.length > 0 &&
           (caption.length > 0 || selectedMedia.length > 0) && (
             <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-4">
@@ -580,7 +628,6 @@ export default function CreatePost({
           )}
       </ScrollView>
 
-      {/* Schedule modal */}
       <ScheduleModal
         visible={showScheduleModal}
         onClose={() => setShowScheduleModal(false)}

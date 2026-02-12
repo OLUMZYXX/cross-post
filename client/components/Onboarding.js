@@ -138,7 +138,6 @@ function WelcomeScene() {
     <Animated.View
       style={[styles.sceneContainer, { transform: [{ scale: scaleAnim }] }]}
     >
-      {/* Center phone */}
       <View style={styles.centerDevice}>
         <View style={styles.deviceScreen}>
           <Ionicons name="grid" size={24} color="#4ade80" />
@@ -149,7 +148,6 @@ function WelcomeScene() {
         </View>
       </View>
 
-      {/* Floating social icons */}
       <FloatingIcon
         name="logo-twitter"
         size={26}
@@ -199,13 +197,11 @@ function WelcomeScene() {
         floatRange={9}
       />
 
-      {/* Connection lines */}
       <View style={[styles.connectionLine, { top: 55, left: width * 0.22, width: 30, transform: [{ rotate: "-20deg" }] }]} />
       <View style={[styles.connectionLine, { top: 65, right: width * 0.2, width: 35, transform: [{ rotate: "15deg" }] }]} />
       <View style={[styles.connectionLine, { bottom: 60, left: width * 0.2, width: 25, transform: [{ rotate: "25deg" }] }]} />
       <View style={[styles.connectionLine, { bottom: 55, right: width * 0.22, width: 30, transform: [{ rotate: "-10deg" }] }]} />
 
-      {/* Glow dots */}
       <GlowDot size={6} color="#4ade80" style={{ position: "absolute", top: 5, left: width * 0.25 }} delay={200} />
       <GlowDot size={4} color="#22d3ee" style={{ position: "absolute", top: 90, right: width * 0.06 }} delay={500} />
       <GlowDot size={5} color="#a78bfa" style={{ position: "absolute", bottom: 15, left: width * 0.3 }} delay={800} />
@@ -260,18 +256,15 @@ function ConnectScene() {
     <Animated.View
       style={[styles.sceneContainer, { transform: [{ scale: scaleAnim }] }]}
     >
-      {/* Center hub */}
       <View style={styles.hubCenter}>
         <View style={styles.hubInner}>
           <Ionicons name="link" size={28} color="#4ade80" />
         </View>
       </View>
 
-      {/* Orbit ring */}
       <View style={styles.orbitRing} />
       <View style={styles.orbitRingOuter} />
 
-      {/* Orbiting platforms */}
       <Animated.View
         style={[styles.orbitContainer, { transform: [{ rotate: spin }] }]}
       >
@@ -301,7 +294,6 @@ function ConnectScene() {
         })}
       </Animated.View>
 
-      {/* Glow effects */}
       <GlowDot size={8} color="#4ade80" style={{ position: "absolute", top: 0, left: width * 0.2 }} delay={100} />
       <GlowDot size={5} color="#f472b6" style={{ position: "absolute", top: 20, right: width * 0.08 }} delay={300} />
       <GlowDot size={6} color="#60a5fa" style={{ position: "absolute", bottom: 10, left: width * 0.15 }} delay={600} />
@@ -347,7 +339,6 @@ function PublishScene() {
     <Animated.View
       style={[styles.sceneContainer, { transform: [{ scale: scaleAnim }] }]}
     >
-      {/* Rocket */}
       <Animated.View
         style={[
           styles.rocketContainer,
@@ -359,7 +350,6 @@ function PublishScene() {
         </View>
       </Animated.View>
 
-      {/* Trail particles */}
       <FloatingIcon
         name="sparkles"
         size={16}
@@ -385,7 +375,6 @@ function PublishScene() {
         floatRange={5}
       />
 
-      {/* Clock & calendar for scheduling */}
       <FloatingIcon
         name="time"
         size={26}
@@ -403,7 +392,6 @@ function PublishScene() {
         floatRange={6}
       />
 
-      {/* Analytics icons */}
       <FloatingIcon
         name="trending-up"
         size={24}
@@ -421,7 +409,6 @@ function PublishScene() {
         floatRange={5}
       />
 
-      {/* Send icons */}
       <FloatingIcon
         name="send"
         size={18}
@@ -439,7 +426,6 @@ function PublishScene() {
         floatRange={4}
       />
 
-      {/* Glow dots */}
       <GlowDot size={6} color="#4ade80" style={{ position: "absolute", top: 5, right: width * 0.25 }} delay={200} />
       <GlowDot size={5} color="#fbbf24" style={{ position: "absolute", bottom: 60, right: width * 0.2 }} delay={500} />
       <GlowDot size={4} color="#f472b6" style={{ position: "absolute", top: 85, left: width * 0.28 }} delay={700} />
@@ -471,7 +457,6 @@ export default function Onboarding({ onComplete }) {
   const textFade = useRef(new Animated.Value(1)).current;
   const textSlide = useRef(new Animated.Value(0)).current;
 
-  // Refs so PanResponder always sees latest values
   const currentIndexRef = useRef(currentIndex);
   const isAnimatingRef = useRef(isAnimating);
   currentIndexRef.current = currentIndex;
@@ -613,7 +598,6 @@ export default function Onboarding({ onComplete }) {
     <View style={styles.container}>
       <StatusBar style="light" />
 
-      {/* Ambient background */}
       <View style={styles.backgroundContainer}>
         <View style={[styles.bgGlow, styles.bgGlow1]} />
         <View style={[styles.bgGlow, styles.bgGlow2]} />
@@ -625,7 +609,6 @@ export default function Onboarding({ onComplete }) {
         style={{ flex: 1, transform: [{ translateX: swipeAnim }] }}
       >
         <View style={styles.content}>
-          {/* Header */}
           <View style={styles.header}>
             <View style={styles.stepPill}>
               <View style={styles.stepDot} />
@@ -639,14 +622,12 @@ export default function Onboarding({ onComplete }) {
             </TouchableOpacity>
           </View>
 
-          {/* Progress bar */}
           <View style={styles.progressBarContainer}>
             <Animated.View
               style={[styles.progressBar, { width: progressWidth }]}
             />
           </View>
 
-          {/* Scene illustration */}
           <Animated.View
             style={[
               styles.sceneWrapper,
@@ -659,7 +640,6 @@ export default function Onboarding({ onComplete }) {
             <SceneRenderer key={currentIndex} scene={currentSlide.scene} />
           </Animated.View>
 
-          {/* Text content */}
           <Animated.View
             style={[
               styles.textContainer,
@@ -680,7 +660,6 @@ export default function Onboarding({ onComplete }) {
             <Text style={styles.description}>{currentSlide.description}</Text>
           </Animated.View>
 
-          {/* Dots */}
           <View style={styles.dotsContainer}>
             {onboardingData.map((_, index) => (
               <View
@@ -694,7 +673,6 @@ export default function Onboarding({ onComplete }) {
           </View>
         </View>
 
-        {/* Footer */}
         <View style={styles.footer}>
           {isLastSlide ? (
             <TouchableOpacity onPress={onComplete} style={styles.getStartedButton}>
@@ -834,7 +812,6 @@ const styles = StyleSheet.create({
     position: "relative",
   },
 
-  // Welcome scene
   centerDevice: {
     width: 72,
     height: 100,
@@ -869,7 +846,6 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
 
-  // Connect scene
   hubCenter: {
     width: 64,
     height: 64,
@@ -923,7 +899,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // Publish scene
   rocketContainer: {
     zIndex: 10,
   },
@@ -943,7 +918,6 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
 
-  // Text area
   textContainer: {
     alignItems: "center",
     paddingHorizontal: 8,
@@ -983,7 +957,6 @@ const styles = StyleSheet.create({
     maxWidth: 300,
   },
 
-  // Dots
   dotsContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -1006,7 +979,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#1f2937",
   },
 
-  // Footer
   footer: {
     paddingHorizontal: 24,
     paddingBottom: 44,

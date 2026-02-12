@@ -7,13 +7,37 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { authAPI, saveToken } from "../services/api";
+import { useToast } from "./Toast";
 
 export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
+
+  const handleSignIn = async () => {
+    if (!email.trim() || !password) {
+      showToast({ type: "warning", title: "Missing fields", message: "Please enter your email and password." });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data } = await authAPI.signin(email.trim(), password);
+      await saveToken(data.token);
+      showToast({ type: "success", title: "Welcome back!", message: `Signed in as ${data.user.name}.` });
+      onNavigateToHome(data.user);
+    } catch (err) {
+      showToast({ type: "error", title: "Sign in failed", message: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View className="flex-1 bg-gray-950">
@@ -60,6 +84,7 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
                       keyboardType="email-address"
                       autoCapitalize="none"
                       className="text-white text-base"
+                      editable={!loading}
                     />
                   </View>
                 </View>
@@ -76,23 +101,29 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
                       placeholderTextColor="#6b7280"
                       secureTextEntry
                       className="text-white text-base"
+                      editable={!loading}
                     />
                   </View>
                 </View>
 
-                <TouchableOpacity className="mb-6">
+                <TouchableOpacity className="mb-6" disabled={loading}>
                   <Text className="text-green-400 text-sm text-right font-medium">
                     Forgot Password?
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={onNavigateToHome}
-                  className="bg-green-500 py-4 rounded-xl border border-green-400 mb-4"
+                  onPress={handleSignIn}
+                  disabled={loading}
+                  className={`py-4 rounded-xl border border-green-400 mb-4 ${loading ? "bg-green-500/50" : "bg-green-500"}`}
                 >
-                  <Text className="text-gray-950 text-center text-lg font-bold">
-                    Login
-                  </Text>
+                  {loading ? (
+                    <ActivityIndicator color="#030712" />
+                  ) : (
+                    <Text className="text-gray-950 text-center text-lg font-bold">
+                      Login
+                    </Text>
+                  )}
                 </TouchableOpacity>
 
                 <View className="flex-row items-center mb-4">
@@ -102,7 +133,7 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
                 </View>
 
                 <TouchableOpacity
-                  onPress={() => onNavigateToHome({ name: "John" })}
+                  disabled={loading}
                   className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center mb-3"
                 >
                   <Ionicons
@@ -116,7 +147,10 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
                   </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center">
+                <TouchableOpacity
+                  disabled={loading}
+                  className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center"
+                >
                   <Ionicons
                     name="logo-apple"
                     size={20}
@@ -134,7 +168,7 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
               <Text className="text-gray-400 text-base">
                 Don't have an account?{" "}
               </Text>
-              <TouchableOpacity onPress={onNavigateToSignUp}>
+              <TouchableOpacity onPress={onNavigateToSignUp} disabled={loading}>
                 <Text className="text-green-400 text-base font-semibold">
                   Sign Up
                 </Text>

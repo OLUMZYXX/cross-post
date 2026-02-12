@@ -1,35 +1,60 @@
 import { StatusBar } from "expo-status-bar";
-import { Text, View, TouchableOpacity, ScrollView, Modal, RefreshControl } from "react-native";
-import React, { useState, useCallback } from "react";
+import { Text, View, TouchableOpacity, ScrollView, Modal, RefreshControl, ActivityIndicator } from "react-native";
+import { useState, useCallback, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import CreatePost from "./CreatePost";
 import SentPosts from "./SentPosts";
 import BottomNav from "./BottomNav";
 import { useToast } from "./Toast";
+import { postAPI, platformAPI, clearToken } from "../services/api";
 
 export default function HomePage({ user, onLogout }) {
-  const [showMorePlatforms, setShowMorePlatforms] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [editingDraft, setEditingDraft] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [sentPosts, setSentPosts] = useState([]);
   const [drafts, setDrafts] = useState([]);
-  const [connectedPlatforms, setConnectedPlatforms] = useState([
-    "Twitter",
-    "Instagram",
-    "LinkedIn",
-  ]);
+  const [connectedPlatforms, setConnectedPlatforms] = useState([]);
+  const [loadingPlatforms, setLoadingPlatforms] = useState(true);
   const { showToast } = useToast();
   const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh = useCallback(() => {
+  const fetchPlatforms = useCallback(async () => {
+    try {
+      const { data } = await platformAPI.list();
+      setConnectedPlatforms(data.platforms.map((p) => p.name));
+    } catch {
+    } finally {
+      setLoadingPlatforms(false);
+    }
+  }, []);
+
+  const fetchPosts = useCallback(async () => {
+    try {
+      const { data } = await postAPI.list();
+      const published = data.posts.filter((p) => p.status === "published");
+      setSentPosts(published);
+    } catch {
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPlatforms();
+    fetchPosts();
+  }, [fetchPlatforms, fetchPosts]);
+
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
+    try {
+      await Promise.all([fetchPlatforms(), fetchPosts()]);
       showToast({ type: "success", title: "Refreshed", message: "Content is up to date.", duration: 2000 });
-    }, 1500);
-  }, [showToast]);
+    } catch {
+      showToast({ type: "error", title: "Refresh failed", message: "Could not refresh data." });
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchPlatforms, fetchPosts, showToast]);
 
   const handleTabChange = (tabId) => {
     if (tabId === "create") {
@@ -69,6 +94,24 @@ export default function HomePage({ user, onLogout }) {
     (p) => !connectedPlatforms.includes(p),
   );
 
+  const handleConnectPlatform = async (platformName) => {
+    try {
+      await platformAPI.connect(platformName);
+      setConnectedPlatforms((prev) => [...prev, platformName]);
+      showToast({
+        type: "success",
+        title: `${platformName} connected`,
+        message: `Your ${platformName} account has been linked.`,
+      });
+    } catch (err) {
+      showToast({
+        type: "error",
+        title: "Connection failed",
+        message: err.message,
+      });
+    }
+  };
+
   const handleSaveDraft = (draft) => {
     setDrafts((prev) => {
       const exists = prev.findIndex((d) => d.id === draft.id);
@@ -91,6 +134,15 @@ export default function HomePage({ user, onLogout }) {
     setShowCreatePost(true);
   };
 
+  const handlePostPublished = (post) => {
+    setSentPosts((prev) => [post, ...prev]);
+  };
+
+  const handleLogout = async () => {
+    await clearToken();
+    onLogout();
+  };
+
   if (showCreatePost) {
     return (
       <CreatePost
@@ -101,6 +153,7 @@ export default function HomePage({ user, onLogout }) {
           setEditingDraft(null);
         }}
         onSaveDraft={handleSaveDraft}
+        onPostPublished={handlePostPublished}
         initialDraft={editingDraft}
       />
     );
@@ -139,7 +192,7 @@ export default function HomePage({ user, onLogout }) {
             <View className="flex-row justify-between mb-4">
               <View className="flex-1 mr-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
                 <Text className="text-gray-400 text-xs mb-2">POSTS</Text>
-                <Text className="text-white text-xl font-bold">24</Text>
+                <Text className="text-white text-xl font-bold">{sentPosts.length || 24}</Text>
               </View>
               <View className="flex-1 ml-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
                 <Text className="text-gray-400 text-xs mb-2">ENGAGEMENT</Text>
@@ -220,7 +273,7 @@ export default function HomePage({ user, onLogout }) {
               </TouchableOpacity>
             </View>
             <TouchableOpacity
-              onPress={onLogout}
+              onPress={handleLogout}
               className="bg-red-500/10 rounded-2xl p-4 border border-red-500/20 flex-row items-center justify-center"
             >
               <Ionicons name="log-out-outline" size={18} color="#ef4444" />
@@ -251,7 +304,7 @@ export default function HomePage({ user, onLogout }) {
             </Text>
           </View>
           <TouchableOpacity
-            onPress={onLogout}
+            onPress={handleLogout}
             className="bg-gray-800 px-4 py-2 rounded-xl border border-gray-700"
           >
             <Text className="text-gray-300 text-sm font-medium">Logout</Text>
@@ -331,72 +384,100 @@ export default function HomePage({ user, onLogout }) {
             Connected Platforms
           </Text>
 
-          <View className="flex-row flex-wrap justify-between mb-6">
-            {connectedPlatforms.map((platform) => (
-              <View
-                key={platform}
-                className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
-              >
+          {loadingPlatforms ? (
+            <View className="items-center py-8">
+              <ActivityIndicator color="#4ade80" />
+            </View>
+          ) : (
+            <View className="flex-row flex-wrap justify-between mb-6">
+              {connectedPlatforms.map((platform) => (
                 <View
-                  className={`w-12 h-12 rounded-full ${allPlatforms[platform].bg} items-center justify-center mb-3`}
+                  key={platform}
+                  className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
                 >
-                  <Ionicons
-                    name={allPlatforms[platform].icon}
-                    size={24}
-                    color="#fff"
-                  />
+                  <View
+                    className={`w-12 h-12 rounded-full ${allPlatforms[platform]?.bg || "bg-gray-700"} items-center justify-center mb-3`}
+                  >
+                    <Ionicons
+                      name={allPlatforms[platform]?.icon || "globe-outline"}
+                      size={24}
+                      color="#fff"
+                    />
+                  </View>
+                  <Text className="text-white font-bold mb-1">{platform}</Text>
+                  <Text className="text-green-400 text-xs">Connected</Text>
                 </View>
-                <Text className="text-white font-bold mb-1">{platform}</Text>
-                <Text className="text-green-400 text-xs">Connected</Text>
-              </View>
-            ))}
+              ))}
 
-            <TouchableOpacity
-              onPress={() => setModalVisible(true)}
-              className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
-              style={{ borderStyle: "dashed" }}
-            >
-              <View className="w-12 h-12 rounded-full bg-gray-700/50 items-center justify-center mb-3">
-                <Ionicons name="add" size={24} color="#9ca3af" />
-              </View>
-              <Text className="text-gray-400 font-bold mb-1">Add More</Text>
-              <Text className="text-gray-500 text-xs">Connect platform</Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity
+                onPress={() => setModalVisible(true)}
+                className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
+                style={{ borderStyle: "dashed" }}
+              >
+                <View className="w-12 h-12 rounded-full bg-gray-700/50 items-center justify-center mb-3">
+                  <Ionicons name="add" size={24} color="#9ca3af" />
+                </View>
+                <Text className="text-gray-400 font-bold mb-1">Add More</Text>
+                <Text className="text-gray-500 text-xs">Connect platform</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <Text className="text-white text-lg font-bold mb-4">
             Recent Activity
           </Text>
 
-          <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
-            <View className="flex-row items-center">
-              <View className="w-10 h-10 rounded-full bg-green-500/20 items-center justify-center mr-3">
-                <Text className="text-lg">📝</Text>
+          {sentPosts.length > 0 ? (
+            sentPosts.slice(0, 3).map((post) => (
+              <View key={post.id} className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
+                <View className="flex-row items-center">
+                  <View className="w-10 h-10 rounded-full bg-green-500/20 items-center justify-center mr-3">
+                    <Text className="text-lg">📝</Text>
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-white font-medium" numberOfLines={1}>
+                      {post.caption || "Post published"}
+                    </Text>
+                    <Text className="text-gray-500 text-xs">
+                      {new Date(post.publishedAt).toLocaleDateString()} · {post.platforms?.length || 0} platforms
+                    </Text>
+                  </View>
+                </View>
               </View>
-              <View className="flex-1">
-                <Text className="text-white font-medium">
-                  Post published successfully
-                </Text>
-                <Text className="text-gray-500 text-xs">
-                  2 hours ago • 3 platforms
-                </Text>
+            ))
+          ) : (
+            <>
+              <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
+                <View className="flex-row items-center">
+                  <View className="w-10 h-10 rounded-full bg-green-500/20 items-center justify-center mr-3">
+                    <Text className="text-lg">📝</Text>
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-white font-medium">
+                      Post published successfully
+                    </Text>
+                    <Text className="text-gray-500 text-xs">
+                      2 hours ago • 3 platforms
+                    </Text>
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>
 
-          <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
-            <View className="flex-row items-center">
-              <View className="w-10 h-10 rounded-full bg-blue-500/20 items-center justify-center mr-3">
-                <Text className="text-lg">🔗</Text>
+              <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
+                <View className="flex-row items-center">
+                  <View className="w-10 h-10 rounded-full bg-blue-500/20 items-center justify-center mr-3">
+                    <Text className="text-lg">🔗</Text>
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-white font-medium">
+                      Twitter account connected
+                    </Text>
+                    <Text className="text-gray-500 text-xs">Yesterday</Text>
+                  </View>
+                </View>
               </View>
-              <View className="flex-1">
-                <Text className="text-white font-medium">
-                  Twitter account connected
-                </Text>
-                <Text className="text-gray-500 text-xs">Yesterday</Text>
-              </View>
-            </View>
-          </View>
+            </>
+          )}
 
           <View className="h-16" />
         </ScrollView>
@@ -416,14 +497,7 @@ export default function HomePage({ user, onLogout }) {
             {availablePlatforms.map((platform) => (
               <TouchableOpacity
                 key={platform}
-                onPress={() => {
-                  setConnectedPlatforms([...connectedPlatforms, platform]);
-                  showToast({
-                    type: "success",
-                    title: `${platform} connected`,
-                    message: `Your ${platform} account has been linked.`,
-                  });
-                }}
+                onPress={() => handleConnectPlatform(platform)}
                 className="flex-row items-center mb-3"
               >
                 <View

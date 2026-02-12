@@ -1,22 +1,43 @@
 import "./global.css";
 import { useState, useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import HomePage from "./components/HomePage";
 import Onboarding from "./components/Onboarding";
 import { ToastProvider } from "./components/Toast";
+import { authAPI, getToken, clearToken } from "./services/api";
 
 const ONBOARDING_KEY = "@crosspost_onboarded";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState(null);
-  const [user, setUser] = useState({ name: "User" });
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    AsyncStorage.getItem(ONBOARDING_KEY).then((value) => {
-      setCurrentScreen(value === "true" ? "signin" : "onboarding");
-    });
+    (async () => {
+      const onboarded = await AsyncStorage.getItem(ONBOARDING_KEY);
+
+      if (onboarded !== "true") {
+        setCurrentScreen("onboarding");
+        return;
+      }
+
+      const token = await getToken();
+      if (token) {
+        try {
+          const { data } = await authAPI.getMe();
+          setUser(data.user);
+          setCurrentScreen("home");
+          return;
+        } catch {
+          await clearToken();
+        }
+      }
+
+      setCurrentScreen("signin");
+    })();
   }, []);
 
   const completeOnboarding = async () => {
@@ -24,7 +45,13 @@ export default function App() {
     setCurrentScreen("signup");
   };
 
-  if (!currentScreen) return null;
+  if (!currentScreen) {
+    return (
+      <View className="flex-1 bg-gray-950 items-center justify-center">
+        <ActivityIndicator size="large" color="#4ade80" />
+      </View>
+    );
+  }
 
   const renderScreen = () => {
     if (currentScreen === "onboarding") {
@@ -47,8 +74,8 @@ export default function App() {
       return (
         <SignIn
           onNavigateToSignUp={() => setCurrentScreen("signup")}
-          onNavigateToHome={() => {
-            setUser({ name: "User" });
+          onNavigateToHome={(userData) => {
+            setUser(userData);
             setCurrentScreen("home");
           }}
         />
@@ -59,7 +86,10 @@ export default function App() {
       return (
         <HomePage
           user={user}
-          onLogout={() => setCurrentScreen("signin")}
+          onLogout={() => {
+            setUser(null);
+            setCurrentScreen("signin");
+          }}
         />
       );
     }
