@@ -9,6 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
   const [name, setName] = useState("");
@@ -131,14 +132,24 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
                   onPress={() => onNavigateToHome({ name: "John" })}
                   className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center mb-3"
                 >
-                  <Text className="text-2xl mr-3">🔵</Text>
+                  <Ionicons
+                    name="logo-google"
+                    size={20}
+                    color="#fff"
+                    style={{ marginRight: 12 }}
+                  />
                   <Text className="text-white text-base font-medium">
                     Continue with Google
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center">
-                  <Text className="text-2xl mr-3">🍎</Text>
+                  <Ionicons
+                    name="logo-apple"
+                    size={20}
+                    color="#fff"
+                    style={{ marginRight: 12 }}
+                  />
                   <Text className="text-white text-base font-medium">
                     Continue with Apple
                   </Text>

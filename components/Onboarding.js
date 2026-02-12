@@ -6,8 +6,10 @@ import {
   Dimensions,
   Animated,
   PanResponder,
+  StyleSheet,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 
@@ -17,21 +19,21 @@ const onboardingData = [
     subtitle: "THE FUTURE OF SHARING",
     description:
       "Share your content across multiple social platforms with just one tap.",
-    icon: "📱",
+    icon: "phone-portrait",
   },
   {
     title: "Connect Your\nAccounts",
     subtitle: "SEAMLESS INTEGRATION",
     description:
       "Link your favorite social media accounts like Twitter, Instagram, LinkedIn, and more.",
-    icon: "🔗",
+    icon: "link",
   },
   {
     title: "Post\nEverywhere",
     subtitle: "ONE TAP PUBLISHING",
     description:
       "Write your post once and publish it to all your connected platforms simultaneously.",
-    icon: "🚀",
+    icon: "rocket",
   },
 ];
 
@@ -154,112 +156,108 @@ export default function Onboarding({ onComplete }) {
   });
 
   return (
-    <View className="flex-1 bg-gray-950">
+    <View style={styles.container}>
       <StatusBar style="light" />
 
-      <View className="absolute top-0 left-0 right-0 bottom-0">
-        <View className="absolute top-20 -left-20 w-64 h-64 rounded-full bg-green-500/10" />
-        <View className="absolute top-40 -right-32 w-80 h-80 rounded-full bg-emerald-500/10" />
-        <View className="absolute -bottom-20 left-10 w-72 h-72 rounded-full bg-teal-500/10" />
+      <View style={styles.backgroundContainer}>
+        <View style={[styles.bgCircle, styles.bgCircle1]} />
+        <View style={[styles.bgCircle, styles.bgCircle2]} />
+        <View style={[styles.bgCircle, styles.bgCircle3]} />
       </View>
 
       <Animated.View
         {...panResponder.panHandlers}
         style={{ flex: 1, transform: [{ translateX: swipeAnim }] }}
       >
-        <View className="flex-1 px-6 pt-16">
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-green-400 text-xs tracking-widest font-medium">
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.headerText}>
               {String(currentIndex + 1).padStart(2, "0")} /{" "}
               {String(onboardingData.length).padStart(2, "0")}
             </Text>
             <TouchableOpacity onPress={onComplete}>
-              <Text className="text-gray-500 text-sm">Skip</Text>
+              <Text style={styles.skipText}>Skip</Text>
             </TouchableOpacity>
           </View>
 
-          <View className="h-1 bg-gray-800 rounded-full mb-10 overflow-hidden">
+          <View style={styles.progressBarContainer}>
             <Animated.View
-              className="h-1 bg-green-400 rounded-full"
-              style={{ width: progressWidth }}
+              style={[styles.progressBar, { width: progressWidth }]}
             />
           </View>
 
           <Animated.View
             className="flex-1 justify-center items-center"
-            style={{
-              opacity: fadeAnim,
-              transform: [{ translateX: slideAnim }, { scale: scaleAnim }],
-            }}
+            style={[
+              styles.slideContent,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateX: slideAnim }, { scale: scaleAnim }],
+              },
+            ]}
           >
-            <View className="items-center mb-6">
-              <View className="w-32 h-32 rounded-full bg-gray-900 border-2 border-green-500/30 items-center justify-center">
-                <View className="w-24 h-24 rounded-full bg-gray-800 border border-green-400/20 items-center justify-center">
-                  <Text className="text-5xl">{currentSlide.icon}</Text>
+            <View style={styles.iconContainer}>
+              <View style={styles.iconOuter}>
+                <View style={styles.iconInner}>
+                  <Ionicons
+                    name={currentSlide.icon}
+                    size={48}
+                    color="#4ade80"
+                  />
                 </View>
               </View>
-              <View className="w-40 h-1 bg-green-400/20 rounded-full mt-4" />
+              <View style={styles.iconDivider} />
             </View>
 
-            <View className="bg-gray-900/80 rounded-3xl p-6 border border-gray-800 w-full">
-              <View className="items-center">
-                <Text className="text-green-400 text-xs tracking-widest mb-3 font-semibold text-center">
-                  {currentSlide.subtitle}
-                </Text>
-                <Text className="text-4xl font-bold text-white mb-4 leading-tight text-center">
-                  {currentSlide.title}
-                </Text>
-                <View className="w-16 h-1 bg-green-500 rounded-full mb-4" />
-                <Text className="text-gray-400 text-base leading-6 text-center">
+            <View style={styles.card}>
+              <View style={styles.cardContent}>
+                <Text style={styles.subtitle}>{currentSlide.subtitle}</Text>
+                <Text style={styles.title}>{currentSlide.title}</Text>
+                <View style={styles.titleDivider} />
+                <Text style={styles.description}>
                   {currentSlide.description}
                 </Text>
               </View>
             </View>
 
-            <View className="flex-row justify-center items-center mt-8">
+            <View style={styles.dotsContainer}>
               {onboardingData.map((_, index) => (
                 <Animated.View
                   key={index}
-                  className={`h-2 rounded-full mx-1 ${
+                  style={[
+                    styles.dot,
                     index === currentIndex
-                      ? "w-8 bg-green-400"
-                      : "w-2 bg-gray-700"
-                  }`}
+                      ? styles.dotActive
+                      : styles.dotInactive,
+                  ]}
                 />
               ))}
             </View>
           </Animated.View>
         </View>
-
-        <View className="px-6 pb-10">
+        <View style={styles.footer}>
           {isLastSlide ? (
             <TouchableOpacity
               onPress={onComplete}
-              className="bg-green-500 py-5 rounded-2xl border border-green-400"
+              style={styles.getStartedButton}
             >
-              <Text className="text-gray-950 text-center text-lg font-bold tracking-wide">
-                Get Started
-              </Text>
+              <Text style={styles.getStartedText}>Get Started</Text>
             </TouchableOpacity>
           ) : (
-            <View className="flex-row items-center justify-between">
+            <View style={styles.navigationButtons}>
               <TouchableOpacity
                 onPress={goToBack}
-                className={`py-4 px-6 ${currentIndex === 0 ? "opacity-0" : ""}`}
+                style={[styles.backButton, currentIndex === 0 && styles.hidden]}
                 disabled={currentIndex === 0}
               >
-                <Text className="text-gray-500 text-base font-medium">
-                  Back
-                </Text>
+                <Text style={styles.backText}>Back</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={goToNext}
-                className="bg-green-500 py-4 px-10 rounded-2xl flex-row items-center justify-center border border-green-400"
+                style={styles.continueButton}
               >
-                <Text className="text-gray-950 text-base font-bold mr-2">
-                  Continue
-                </Text>
-                <Text className="text-gray-950 text-lg">→</Text>
+                <Text style={styles.continueText}>Continue</Text>
+                <Text style={styles.arrow}>→</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -268,3 +266,226 @@ export default function Onboarding({ onComplete }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#030712",
+  },
+  backgroundContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  bgCircle: {
+    position: "absolute",
+    borderRadius: 9999,
+  },
+  bgCircle1: {
+    top: 80,
+    left: -80,
+    width: 256,
+    height: 256,
+    backgroundColor: "rgba(34, 197, 94, 0.1)",
+  },
+  bgCircle2: {
+    top: 160,
+    right: -128,
+    width: 320,
+    height: 320,
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
+  },
+  bgCircle3: {
+    bottom: -80,
+    left: 40,
+    width: 288,
+    height: 288,
+    backgroundColor: "rgba(20, 184, 166, 0.1)",
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 64,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  headerText: {
+    color: "#4ade80",
+    fontSize: 12,
+    letterSpacing: 2,
+    fontWeight: "500",
+  },
+  skipText: {
+    color: "#6b7280",
+    fontSize: 14,
+  },
+  progressBarContainer: {
+    height: 4,
+    backgroundColor: "#1f2937",
+    borderRadius: 9999,
+    marginBottom: 40,
+    overflow: "hidden",
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: "#4ade80",
+    borderRadius: 9999,
+  },
+  slideContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  iconOuter: {
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    backgroundColor: "#111827",
+    borderWidth: 2,
+    borderColor: "rgba(34, 197, 94, 0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconInner: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: "#1f2937",
+    borderWidth: 1,
+    borderColor: "rgba(74, 222, 128, 0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconDivider: {
+    width: 160,
+    height: 4,
+    backgroundColor: "rgba(74, 222, 128, 0.2)",
+    borderRadius: 9999,
+    marginTop: 16,
+  },
+  card: {
+    backgroundColor: "rgba(17, 24, 39, 0.8)",
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "#1f2937",
+    width: "100%",
+  },
+  cardContent: {
+    alignItems: "center",
+  },
+  subtitle: {
+    color: "#4ade80",
+    fontSize: 12,
+    letterSpacing: 2,
+    marginBottom: 12,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#ffffff",
+    marginBottom: 16,
+    lineHeight: 44,
+    textAlign: "center",
+  },
+  titleDivider: {
+    width: 64,
+    height: 4,
+    backgroundColor: "#22c55e",
+    borderRadius: 9999,
+    marginBottom: 16,
+  },
+  description: {
+    color: "#9ca3af",
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: "center",
+  },
+  dotsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 32,
+  },
+  dot: {
+    height: 8,
+    borderRadius: 9999,
+    marginHorizontal: 4,
+  },
+  dotActive: {
+    width: 32,
+    backgroundColor: "#4ade80",
+  },
+  dotInactive: {
+    width: 8,
+    backgroundColor: "#374151",
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  getStartedButton: {
+    backgroundColor: "#22c55e",
+    paddingVertical: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#4ade80",
+  },
+  getStartedText: {
+    color: "#030712",
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+    letterSpacing: 1,
+  },
+  navigationButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  backButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+  },
+  hidden: {
+    opacity: 0,
+  },
+  backText: {
+    color: "#6b7280",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  continueButton: {
+    backgroundColor: "#22c55e",
+    paddingVertical: 16,
+    paddingHorizontal: 40,
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#4ade80",
+  },
+  continueText: {
+    color: "#030712",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginRight: 8,
+  },
+  arrow: {
+    color: "#030712",
+    fontSize: 18,
+  },
+});
