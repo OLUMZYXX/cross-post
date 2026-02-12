@@ -1,10 +1,12 @@
 import { StatusBar } from "expo-status-bar";
 import { Text, View, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { useState } from "react";
+import CreatePost from "./CreatePost";
 
 export default function HomePage({ user, onLogout }) {
   const [showMorePlatforms, setShowMorePlatforms] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [showCreatePost, setShowCreatePost] = useState(false);
   const [connectedPlatforms, setConnectedPlatforms] = useState([
     "Twitter",
     "Instagram",
@@ -24,6 +26,17 @@ export default function HomePage({ user, onLogout }) {
   const availablePlatforms = Object.keys(allPlatforms).filter(
     (p) => !connectedPlatforms.includes(p),
   );
+
+  if (showCreatePost) {
+    return (
+      <CreatePost
+        connectedPlatforms={connectedPlatforms}
+        allPlatforms={allPlatforms}
+        onClose={() => setShowCreatePost(false)}
+      />
+    );
+  }
+
   return (
     <View className="flex-1 bg-gray-950">
       <StatusBar style="light" />
@@ -62,7 +75,10 @@ export default function HomePage({ user, onLogout }) {
             <Text className="text-gray-400 text-sm mb-4">
               Share your content across all connected platforms with one tap.
             </Text>
-            <TouchableOpacity className="bg-green-500 py-3 rounded-xl border border-green-400">
+            <TouchableOpacity
+              onPress={() => setShowCreatePost(true)}
+              className="bg-green-500 py-3 rounded-xl border border-green-400"
+            >
               <Text className="text-gray-950 text-center font-bold">
                 + New Post
               </Text>
