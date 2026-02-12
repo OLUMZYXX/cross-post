@@ -18,11 +18,16 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { showToast } = useToast();
 
   const handleSignIn = async () => {
     if (!email.trim() || !password) {
-      showToast({ type: "warning", title: "Missing fields", message: "Please enter your email and password." });
+      showToast({
+        type: "warning",
+        title: "Missing fields",
+        message: "Please enter your email and password.",
+      });
       return;
     }
 
@@ -30,10 +35,18 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
     try {
       const { data } = await authAPI.signin(email.trim(), password);
       await saveToken(data.token);
-      showToast({ type: "success", title: "Welcome back!", message: `Signed in as ${data.user.name}.` });
+      showToast({
+        type: "success",
+        title: "Welcome back!",
+        message: `Signed in as ${data.user.name}.`,
+      });
       onNavigateToHome(data.user);
     } catch (err) {
-      showToast({ type: "error", title: "Sign in failed", message: err.message });
+      showToast({
+        type: "error",
+        title: "Sign in failed",
+        message: err.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -93,16 +106,26 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
                   <Text className="text-gray-400 text-sm mb-2 font-medium">
                     Password
                   </Text>
-                  <View className="bg-gray-800 rounded-xl border border-gray-700 px-4 py-4">
+                  <View className="bg-gray-800 rounded-xl border border-gray-700 px-4 py-4 flex-row items-center">
                     <TextInput
                       value={password}
                       onChangeText={setPassword}
                       placeholder="Enter your password"
                       placeholderTextColor="#6b7280"
-                      secureTextEntry
-                      className="text-white text-base"
+                      secureTextEntry={!showPassword}
+                      className="text-white text-base flex-1"
                       editable={!loading}
                     />
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                      className="ml-2"
+                    >
+                      <Ionicons
+                        name={showPassword ? "eye-off" : "eye"}
+                        size={20}
+                        color="#6b7280"
+                      />
+                    </TouchableOpacity>
                   </View>
                 </View>
 

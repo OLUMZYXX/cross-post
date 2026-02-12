@@ -20,30 +20,56 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { showToast } = useToast();
 
   const handleSignUp = async () => {
     if (!name.trim() || !email.trim() || !password || !confirmPassword) {
-      showToast({ type: "warning", title: "Missing fields", message: "Please fill in all fields." });
+      showToast({
+        type: "warning",
+        title: "Missing fields",
+        message: "Please fill in all fields.",
+      });
       return;
     }
     if (password !== confirmPassword) {
-      showToast({ type: "error", title: "Passwords don't match", message: "Please make sure your passwords match." });
+      showToast({
+        type: "error",
+        title: "Passwords don't match",
+        message: "Please make sure your passwords match.",
+      });
       return;
     }
     if (password.length < 6) {
-      showToast({ type: "warning", title: "Weak password", message: "Password must be at least 6 characters." });
+      showToast({
+        type: "warning",
+        title: "Weak password",
+        message: "Password must be at least 6 characters.",
+      });
       return;
     }
 
     setLoading(true);
     try {
-      const { data } = await authAPI.signup(name.trim(), email.trim(), password);
+      const { data } = await authAPI.signup(
+        name.trim(),
+        email.trim(),
+        password,
+      );
       await saveToken(data.token);
-      showToast({ type: "success", title: "Welcome!", message: "Account created successfully." });
+      showToast({
+        type: "success",
+        title: "Welcome!",
+        message: "Account created successfully.",
+      });
       onNavigateToHome(data.user);
     } catch (err) {
-      showToast({ type: "error", title: "Sign up failed", message: err.message });
+      showToast({
+        type: "error",
+        title: "Sign up failed",
+        message: err.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -119,16 +145,26 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
                   <Text className="text-gray-400 text-sm mb-2 font-medium">
                     Password
                   </Text>
-                  <View className="bg-gray-800 rounded-xl border border-gray-700 px-4 py-4">
+                  <View className="bg-gray-800 rounded-xl border border-gray-700 px-4 py-4 flex-row items-center">
                     <TextInput
                       value={password}
                       onChangeText={setPassword}
                       placeholder="Create a password"
                       placeholderTextColor="#6b7280"
-                      secureTextEntry
-                      className="text-white text-base"
+                      secureTextEntry={!showPassword}
+                      className="text-white text-base flex-1"
                       editable={!loading}
                     />
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                      className="ml-2"
+                    >
+                      <Ionicons
+                        name={showPassword ? "eye-off" : "eye"}
+                        size={20}
+                        color="#6b7280"
+                      />
+                    </TouchableOpacity>
                   </View>
                 </View>
 
@@ -136,16 +172,28 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
                   <Text className="text-gray-400 text-sm mb-2 font-medium">
                     Confirm Password
                   </Text>
-                  <View className="bg-gray-800 rounded-xl border border-gray-700 px-4 py-4">
+                  <View className="bg-gray-800 rounded-xl border border-gray-700 px-4 py-4 flex-row items-center">
                     <TextInput
                       value={confirmPassword}
                       onChangeText={setConfirmPassword}
                       placeholder="Confirm your password"
                       placeholderTextColor="#6b7280"
-                      secureTextEntry
-                      className="text-white text-base"
+                      secureTextEntry={!showConfirmPassword}
+                      className="text-white text-base flex-1"
                       editable={!loading}
                     />
+                    <TouchableOpacity
+                      onPress={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="ml-2"
+                    >
+                      <Ionicons
+                        name={showConfirmPassword ? "eye-off" : "eye"}
+                        size={20}
+                        color="#6b7280"
+                      />
+                    </TouchableOpacity>
                   </View>
                 </View>
 

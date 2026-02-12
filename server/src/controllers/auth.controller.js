@@ -43,12 +43,14 @@ export async function signin(req, res) {
 
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
-    throw Errors.unauthorized("Invalid email or password");
+    throw Errors.unauthorized(
+      "The email entered cannot be found or does not exist",
+    );
   }
 
   const match = await user.comparePassword(password);
   if (!match) {
-    throw Errors.unauthorized("Invalid email or password");
+    throw Errors.unauthorized("The password is incorrect");
   }
 
   const token = generateToken(user);

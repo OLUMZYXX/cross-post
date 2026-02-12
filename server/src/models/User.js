@@ -14,9 +14,9 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
-  password: {
+  passwordHash: {
     type: String,
-    required: true,
+    required: false,
   },
   createdAt: {
     type: Date,
@@ -25,9 +25,10 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
-  this.passwordHash = await bcrypt.hash(this.password, 12);
-  this.password = undefined;
+  if (this.password && !this.passwordHash) {
+    this.passwordHash = await bcrypt.hash(this.password, 12);
+    this.password = undefined;
+  }
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
