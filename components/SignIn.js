@@ -100,7 +100,10 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
                   <View className="flex-1 h-px bg-gray-700" />
                 </View>
 
-                <TouchableOpacity className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center mb-3">
+                <TouchableOpacity
+                  onPress={() => onNavigateToHome({ name: "John" })}
+                  className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center mb-3"
+                >
                   <Text className="text-2xl mr-3">🔵</Text>
                   <Text className="text-white text-base font-medium">
                     Continue with Google

@@ -7,6 +7,7 @@ import Onboarding from "./components/Onboarding";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState("onboarding");
+  const [user, setUser] = useState({ name: "User" });
 
   if (currentScreen === "onboarding") {
     return <Onboarding onComplete={() => setCurrentScreen("signup")} />;
@@ -16,7 +17,10 @@ export default function App() {
     return (
       <SignUp
         onNavigateToSignIn={() => setCurrentScreen("signin")}
-        onNavigateToHome={() => setCurrentScreen("home")}
+        onNavigateToHome={(userData) => {
+          setUser(userData);
+          setCurrentScreen("home");
+        }}
       />
     );
   }
@@ -25,13 +29,18 @@ export default function App() {
     return (
       <SignIn
         onNavigateToSignUp={() => setCurrentScreen("signup")}
-        onNavigateToHome={() => setCurrentScreen("home")}
+        onNavigateToHome={() => {
+          setUser({ name: "User" });
+          setCurrentScreen("home");
+        }}
       />
     );
   }
 
   if (currentScreen === "home") {
-    return <HomePage onLogout={() => setCurrentScreen("onboarding")} />;
+    return (
+      <HomePage user={user} onLogout={() => setCurrentScreen("onboarding")} />
+    );
   }
 
   return <Onboarding onComplete={() => setCurrentScreen("signup")} />;

@@ -112,7 +112,10 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
                   </View>
                 </View>
 
-                <TouchableOpacity className="bg-green-500 py-4 rounded-xl border border-green-400 mb-4">
+                <TouchableOpacity
+                  onPress={() => onNavigateToHome({ name })}
+                  className="bg-green-500 py-4 rounded-xl border border-green-400 mb-4"
+                >
                   <Text className="text-gray-950 text-center text-lg font-bold">
                     Create Account
                   </Text>
@@ -124,7 +127,10 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
                   <View className="flex-1 h-px bg-gray-700" />
                 </View>
 
-                <TouchableOpacity className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center mb-3">
+                <TouchableOpacity
+                  onPress={() => onNavigateToHome({ name: "John" })}
+                  className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center mb-3"
+                >
                   <Text className="text-2xl mr-3">🔵</Text>
                   <Text className="text-white text-base font-medium">
                     Continue with Google

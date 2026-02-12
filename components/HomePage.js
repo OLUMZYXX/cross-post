@@ -1,7 +1,29 @@
 import { StatusBar } from "expo-status-bar";
-import { Text, View, TouchableOpacity, ScrollView } from "react-native";
+import { Text, View, TouchableOpacity, ScrollView, Modal } from "react-native";
+import { useState } from "react";
 
-export default function HomePage({ onLogout }) {
+export default function HomePage({ user, onLogout }) {
+  const [showMorePlatforms, setShowMorePlatforms] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [connectedPlatforms, setConnectedPlatforms] = useState([
+    "Twitter",
+    "Instagram",
+    "LinkedIn",
+  ]);
+
+  const allPlatforms = {
+    Twitter: { icon: "🐦", color: "blue-500" },
+    Instagram: { icon: "📸", color: "pink-500" },
+    LinkedIn: { icon: "💼", color: "blue-600" },
+    Facebook: { icon: "📘", color: "blue-700" },
+    TikTok: { icon: "🎵", color: "black" },
+    YouTube: { icon: "📺", color: "red-500" },
+    Reddit: { icon: "🟠", color: "orange-500" },
+  };
+
+  const availablePlatforms = Object.keys(allPlatforms).filter(
+    (p) => !connectedPlatforms.includes(p),
+  );
   return (
     <View className="flex-1 bg-gray-950">
       <StatusBar style="light" />
@@ -15,7 +37,9 @@ export default function HomePage({ onLogout }) {
         <View className="flex-row items-center justify-between mb-8">
           <View>
             <Text className="text-gray-400 text-sm">Welcome back</Text>
-            <Text className="text-white text-2xl font-bold">Cross-Post</Text>
+            <Text className="text-white text-2xl font-bold">
+              {user?.name?.split(" ")[0] || "User"}
+            </Text>
           </View>
           <TouchableOpacity
             onPress={onLogout}
@@ -50,37 +74,33 @@ export default function HomePage({ onLogout }) {
           </Text>
 
           <View className="flex-row flex-wrap justify-between mb-6">
-            <View className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
-              <View className="w-12 h-12 rounded-full bg-blue-500/20 items-center justify-center mb-3">
-                <Text className="text-2xl">🐦</Text>
+            {connectedPlatforms.map((platform) => (
+              <View
+                key={platform}
+                className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
+              >
+                <View
+                  className={`w-12 h-12 rounded-full bg-${allPlatforms[platform].color}/20 items-center justify-center mb-3`}
+                >
+                  <Text className="text-2xl">
+                    {allPlatforms[platform].icon}
+                  </Text>
+                </View>
+                <Text className="text-white font-bold mb-1">{platform}</Text>
+                <Text className="text-green-400 text-xs">Connected</Text>
               </View>
-              <Text className="text-white font-bold mb-1">Twitter</Text>
-              <Text className="text-green-400 text-xs">Connected</Text>
-            </View>
+            ))}
 
-            <View className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
-              <View className="w-12 h-12 rounded-full bg-pink-500/20 items-center justify-center mb-3">
-                <Text className="text-2xl">📸</Text>
-              </View>
-              <Text className="text-white font-bold mb-1">Instagram</Text>
-              <Text className="text-green-400 text-xs">Connected</Text>
-            </View>
-
-            <View className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
-              <View className="w-12 h-12 rounded-full bg-blue-600/20 items-center justify-center mb-3">
-                <Text className="text-2xl">💼</Text>
-              </View>
-              <Text className="text-white font-bold mb-1">LinkedIn</Text>
-              <Text className="text-green-400 text-xs">Connected</Text>
-            </View>
-
-            <View className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3 border-dashed">
+            <TouchableOpacity
+              onPress={() => setModalVisible(true)}
+              className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3 border-dashed"
+            >
               <View className="w-12 h-12 rounded-full bg-gray-700/50 items-center justify-center mb-3">
                 <Text className="text-2xl">➕</Text>
               </View>
               <Text className="text-gray-400 font-bold mb-1">Add More</Text>
               <Text className="text-gray-500 text-xs">Connect platform</Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
           <Text className="text-white text-lg font-bold mb-4">
@@ -120,6 +140,46 @@ export default function HomePage({ onLogout }) {
           <View className="h-20" />
         </ScrollView>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-gray-900 rounded-3xl p-6 w-80">
+            <Text className="text-white text-lg font-bold mb-4">
+              Add Social Media
+            </Text>
+            {availablePlatforms.map((platform) => (
+              <TouchableOpacity
+                key={platform}
+                onPress={() => {
+                  setConnectedPlatforms([...connectedPlatforms, platform]);
+                }}
+                className="flex-row items-center mb-3"
+              >
+                <View
+                  className={`w-10 h-10 rounded-full bg-${allPlatforms[platform].color}/20 items-center justify-center mr-3`}
+                >
+                  <Text className="text-xl">{allPlatforms[platform].icon}</Text>
+                </View>
+                <Text className="text-white font-medium flex-1">
+                  {platform}
+                </Text>
+                <Text className="text-green-400 text-xl">➕</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              className="bg-gray-800 py-3 rounded-xl mt-4"
+            >
+              <Text className="text-white text-center">Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
