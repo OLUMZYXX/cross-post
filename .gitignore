@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Copilot instructions
+.github/copilot-instructions.md
