@@ -69,3 +69,28 @@ export async function me(req, res) {
 
   res.json({ success: true, data: { user: sanitiseUser(user) } });
 }
+
+export async function updateProfile(req, res) {
+  const { name, email } = req.body;
+
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    throw Errors.notFound("User not found");
+  }
+
+  if (email && email.toLowerCase().trim() !== user.email) {
+    const existing = await User.findOne({ email: email.toLowerCase() });
+    if (existing) {
+      throw Errors.conflict("Email is already in use");
+    }
+    user.email = email.toLowerCase().trim();
+  }
+
+  if (name) {
+    user.name = name.trim();
+  }
+
+  await user.save();
+
+  res.json({ success: true, data: { user: sanitiseUser(user) } });
+}

@@ -1,14 +1,28 @@
 import { StatusBar } from "expo-status-bar";
-import { Text, View, TouchableOpacity, ScrollView, Modal, RefreshControl, ActivityIndicator } from "react-native";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  RefreshControl,
+  ActivityIndicator,
+  Linking,
+} from "react-native";
 import { useState, useCallback, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import CreatePost from "./CreatePost";
 import SentPosts from "./SentPosts";
 import BottomNav from "./BottomNav";
+import EditProfile from "./EditProfile";
+import ConnectedAccounts from "./ConnectedAccounts";
+import NotificationSettings from "./NotificationSettings";
+import PrivacySecurity from "./PrivacySecurity";
+import HelpSupport from "./HelpSupport";
 import { useToast } from "./Toast";
 import { postAPI, platformAPI, clearToken } from "../services/api";
 
-export default function HomePage({ user, onLogout }) {
+export default function HomePage({ user, onUpdateUser, onLogout }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [editingDraft, setEditingDraft] = useState(null);
@@ -17,6 +31,9 @@ export default function HomePage({ user, onLogout }) {
   const [drafts, setDrafts] = useState([]);
   const [connectedPlatforms, setConnectedPlatforms] = useState([]);
   const [loadingPlatforms, setLoadingPlatforms] = useState(true);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [allPosts, setAllPosts] = useState([]);
+  const [settingsScreen, setSettingsScreen] = useState(null);
   const { showToast } = useToast();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -33,28 +50,89 @@ export default function HomePage({ user, onLogout }) {
   const fetchPosts = useCallback(async () => {
     try {
       const { data } = await postAPI.list();
+      setAllPosts(data.posts);
       const published = data.posts.filter((p) => p.status === "published");
       setSentPosts(published);
-    } catch {
+    } catch {}
+  }, []);
+
+  const fetchRecentActivities = useCallback(async () => {
+    try {
+      // Fetch published posts
+      const { data: postsData } = await postAPI.list();
+      const publishedPosts = postsData.posts.filter(
+        (p) => p.status === "published",
+      );
+
+      // Fetch connected platforms
+      const { data: platformsData } = await platformAPI.list();
+      const platforms = platformsData.platforms;
+
+      // Combine and sort activities
+      const activities = [
+        ...publishedPosts.map((post) => ({
+          id: `post-${post.id}`,
+          type: "post",
+          title: post.caption || "Post published",
+          timestamp: new Date(post.publishedAt),
+          platforms: post.platforms?.length || 0,
+          icon: "📝",
+        })),
+        ...platforms.map((platform) => ({
+          id: `platform-${platform.id}`,
+          type: "platform",
+          title: `${platform.name} account connected`,
+          timestamp: new Date(platform.connectedAt),
+          platforms: 1,
+          icon: "🔗",
+        })),
+      ].sort((a, b) => b.timestamp - a.timestamp);
+
+      setRecentActivities(activities.slice(0, 5)); // Show latest 5 activities
+    } catch (error) {
+      console.error("Error fetching activities:", error);
     }
   }, []);
 
   useEffect(() => {
     fetchPlatforms();
     fetchPosts();
-  }, [fetchPlatforms, fetchPosts]);
+    fetchRecentActivities();
+  }, [fetchPlatforms, fetchPosts, fetchRecentActivities]);
+
+  // Real-time updates every 2 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchRecentActivities();
+    }, 120000); // 2 minutes
+
+    return () => clearInterval(interval);
+  }, [fetchRecentActivities]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([fetchPlatforms(), fetchPosts()]);
-      showToast({ type: "success", title: "Refreshed", message: "Content is up to date.", duration: 2000 });
+      await Promise.all([
+        fetchPlatforms(),
+        fetchPosts(),
+        fetchRecentActivities(),
+      ]);
+      showToast({
+        type: "success",
+        title: "Refreshed",
+        message: "Content is up to date.",
+        duration: 2000,
+      });
     } catch {
-      showToast({ type: "error", title: "Refresh failed", message: "Could not refresh data." });
+      showToast({
+        type: "error",
+        title: "Refresh failed",
+        message: "Could not refresh data.",
+      });
     } finally {
       setRefreshing(false);
     }
-  }, [fetchPlatforms, fetchPosts, showToast]);
+  }, [fetchPlatforms, fetchPosts, fetchRecentActivities, showToast]);
 
   const handleTabChange = (tabId) => {
     if (tabId === "create") {
@@ -96,8 +174,23 @@ export default function HomePage({ user, onLogout }) {
 
   const handleConnectPlatform = async (platformName) => {
     try {
+      const oauthMethods = {
+        Facebook: () => platformAPI.initiateFacebookAuth(user.id),
+        Twitter: () => platformAPI.initiateTwitterAuth(),
+        Instagram: () => platformAPI.initiateInstagramAuth(),
+        TikTok: () => platformAPI.initiateTikTokAuth(),
+      };
+
+      if (oauthMethods[platformName]) {
+        const { data } = await oauthMethods[platformName]();
+        await Linking.openURL(data.authUrl);
+        setModalVisible(false);
+        return;
+      }
+
       await platformAPI.connect(platformName);
       setConnectedPlatforms((prev) => [...prev, platformName]);
+      await fetchRecentActivities();
       showToast({
         type: "success",
         title: `${platformName} connected`,
@@ -136,6 +229,7 @@ export default function HomePage({ user, onLogout }) {
 
   const handlePostPublished = (post) => {
     setSentPosts((prev) => [post, ...prev]);
+    fetchRecentActivities(); // Refresh activities after publishing
   };
 
   const handleLogout = async () => {
@@ -162,13 +256,40 @@ export default function HomePage({ user, onLogout }) {
   if (activeTab === "sent") {
     return (
       <View className="flex-1 bg-gray-950">
-        <SentPosts posts={sentPosts} refreshing={refreshing} onRefresh={onRefresh} />
+        <SentPosts
+          posts={sentPosts}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       </View>
     );
   }
 
   if (activeTab === "analytics") {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+    const totalReach = sentPosts.reduce((s, p) => s + (p.platforms?.length || 0), 0);
+    const thisWeekPosts = sentPosts.filter((p) => new Date(p.publishedAt) >= weekAgo);
+    const lastWeekPosts = sentPosts.filter((p) => {
+      const d = new Date(p.publishedAt);
+      return d >= twoWeeksAgo && d < weekAgo;
+    });
+    const growthPercent = lastWeekPosts.length > 0
+      ? Math.round(((thisWeekPosts.length - lastWeekPosts.length) / lastWeekPosts.length) * 100)
+      : thisWeekPosts.length > 0 ? 100 : 0;
+    const scheduledCount = allPosts.filter((p) => p.status === "scheduled").length;
+    const draftCount = allPosts.filter((p) => p.status === "draft").length;
+
+    const platformCounts = {};
+    sentPosts.forEach((p) => {
+      (p.platforms || []).forEach((name) => {
+        platformCounts[name] = (platformCounts[name] || 0) + 1;
+      });
+    });
+
     return (
       <View className="flex-1 bg-gray-950">
         <StatusBar style="light" />
@@ -181,33 +302,69 @@ export default function HomePage({ user, onLogout }) {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100 }}
             refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ade80" colors={["#4ade80"]} progressBackgroundColor="#111827" />
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#4ade80"
+                colors={["#4ade80"]}
+                progressBackgroundColor="#111827"
+              />
             }
           >
             <View className="bg-gray-900/80 rounded-2xl p-5 border border-gray-800 mb-4">
               <Text className="text-gray-400 text-xs mb-3">TOTAL REACH</Text>
-              <Text className="text-white text-3xl font-bold">12,450</Text>
-              <Text className="text-green-400 text-xs mt-1">+18% this week</Text>
+              <Text className="text-white text-3xl font-bold">
+                {totalReach.toLocaleString()}
+              </Text>
+              <Text className={`text-xs mt-1 ${growthPercent >= 0 ? "text-green-400" : "text-red-400"}`}>
+                {growthPercent >= 0 ? "+" : ""}{growthPercent}% this week
+              </Text>
             </View>
             <View className="flex-row justify-between mb-4">
               <View className="flex-1 mr-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-                <Text className="text-gray-400 text-xs mb-2">POSTS</Text>
-                <Text className="text-white text-xl font-bold">{sentPosts.length || 24}</Text>
+                <Text className="text-gray-400 text-xs mb-2">PUBLISHED</Text>
+                <Text className="text-white text-xl font-bold">
+                  {sentPosts.length}
+                </Text>
               </View>
               <View className="flex-1 ml-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-                <Text className="text-gray-400 text-xs mb-2">ENGAGEMENT</Text>
-                <Text className="text-white text-xl font-bold">8.2%</Text>
+                <Text className="text-gray-400 text-xs mb-2">THIS WEEK</Text>
+                <Text className="text-white text-xl font-bold">
+                  {thisWeekPosts.length}
+                </Text>
               </View>
             </View>
-            <View className="flex-row justify-between">
+            <View className="flex-row justify-between mb-4">
               <View className="flex-1 mr-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-                <Text className="text-gray-400 text-xs mb-2">LIKES</Text>
-                <Text className="text-white text-xl font-bold">512</Text>
+                <Text className="text-gray-400 text-xs mb-2">SCHEDULED</Text>
+                <Text className="text-white text-xl font-bold">{scheduledCount}</Text>
               </View>
               <View className="flex-1 ml-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-                <Text className="text-gray-400 text-xs mb-2">COMMENTS</Text>
-                <Text className="text-white text-xl font-bold">62</Text>
+                <Text className="text-gray-400 text-xs mb-2">DRAFTS</Text>
+                <Text className="text-white text-xl font-bold">{draftCount}</Text>
               </View>
+            </View>
+
+            {Object.keys(platformCounts).length > 0 && (
+              <>
+                <Text className="text-gray-400 text-xs mb-3 mt-2">POSTS PER PLATFORM</Text>
+                {Object.entries(platformCounts)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([name, count]) => (
+                    <View key={name} className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-2 flex-row items-center">
+                      <View className={`w-9 h-9 rounded-full ${allPlatforms[name]?.bg || "bg-gray-700"} items-center justify-center mr-3`}>
+                        <Ionicons name={allPlatforms[name]?.icon || "globe-outline"} size={18} color="#fff" />
+                      </View>
+                      <Text className="text-white text-sm font-medium flex-1">{name}</Text>
+                      <Text className="text-green-400 font-bold">{count}</Text>
+                    </View>
+                  ))}
+              </>
+            )}
+
+            <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mt-2">
+              <Text className="text-gray-400 text-xs mb-2">CONNECTED PLATFORMS</Text>
+              <Text className="text-white text-xl font-bold">{connectedPlatforms.length}</Text>
             </View>
           </ScrollView>
         </View>
@@ -217,6 +374,33 @@ export default function HomePage({ user, onLogout }) {
   }
 
   if (activeTab === "settings") {
+    if (settingsScreen === "editProfile") {
+      return (
+        <EditProfile
+          user={user}
+          onBack={() => setSettingsScreen(null)}
+          onUpdateUser={onUpdateUser}
+        />
+      );
+    }
+    if (settingsScreen === "connectedAccounts") {
+      return (
+        <ConnectedAccounts
+          onBack={() => { setSettingsScreen(null); fetchPlatforms(); }}
+          onOpenConnectModal={() => { setSettingsScreen(null); setModalVisible(true); }}
+        />
+      );
+    }
+    if (settingsScreen === "notifications") {
+      return <NotificationSettings onBack={() => setSettingsScreen(null)} />;
+    }
+    if (settingsScreen === "privacy") {
+      return <PrivacySecurity onBack={() => setSettingsScreen(null)} />;
+    }
+    if (settingsScreen === "help") {
+      return <HelpSupport onBack={() => setSettingsScreen(null)} />;
+    }
+
     return (
       <View className="flex-1 bg-gray-950">
         <StatusBar style="light" />
@@ -229,46 +413,68 @@ export default function HomePage({ user, onLogout }) {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 80 }}
             refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ade80" colors={["#4ade80"]} progressBackgroundColor="#111827" />
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#4ade80"
+                colors={["#4ade80"]}
+                progressBackgroundColor="#111827"
+              />
             }
           >
             <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-4">
-              <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-800">
+              <TouchableOpacity onPress={() => setSettingsScreen("editProfile")} className="flex-row items-center p-4 border-b border-gray-800">
                 <View className="w-9 h-9 rounded-full bg-blue-500/20 items-center justify-center mr-3">
                   <Ionicons name="person-outline" size={18} color="#3b82f6" />
                 </View>
                 <Text className="text-white flex-1 text-sm">Edit Profile</Text>
                 <Ionicons name="chevron-forward" size={16} color="#6b7280" />
               </TouchableOpacity>
-              <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-800">
+              <TouchableOpacity onPress={() => setSettingsScreen("connectedAccounts")} className="flex-row items-center p-4 border-b border-gray-800">
                 <View className="w-9 h-9 rounded-full bg-green-500/20 items-center justify-center mr-3">
                   <Ionicons name="link-outline" size={18} color="#22c55e" />
                 </View>
-                <Text className="text-white flex-1 text-sm">Connected Accounts</Text>
-                <Text className="text-gray-500 text-xs mr-2">{connectedPlatforms.length}</Text>
+                <Text className="text-white flex-1 text-sm">
+                  Connected Accounts
+                </Text>
+                <Text className="text-gray-500 text-xs mr-2">
+                  {connectedPlatforms.length}
+                </Text>
                 <Ionicons name="chevron-forward" size={16} color="#6b7280" />
               </TouchableOpacity>
-              <TouchableOpacity className="flex-row items-center p-4">
+              <TouchableOpacity onPress={() => setSettingsScreen("notifications")} className="flex-row items-center p-4">
                 <View className="w-9 h-9 rounded-full bg-purple-500/20 items-center justify-center mr-3">
-                  <Ionicons name="notifications-outline" size={18} color="#a855f7" />
+                  <Ionicons
+                    name="notifications-outline"
+                    size={18}
+                    color="#a855f7"
+                  />
                 </View>
                 <Text className="text-white flex-1 text-sm">Notifications</Text>
                 <Ionicons name="chevron-forward" size={16} color="#6b7280" />
               </TouchableOpacity>
             </View>
             <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-4">
-              <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-800">
+              <TouchableOpacity onPress={() => setSettingsScreen("privacy")} className="flex-row items-center p-4 border-b border-gray-800">
                 <View className="w-9 h-9 rounded-full bg-yellow-500/20 items-center justify-center mr-3">
                   <Ionicons name="shield-outline" size={18} color="#eab308" />
                 </View>
-                <Text className="text-white flex-1 text-sm">Privacy & Security</Text>
+                <Text className="text-white flex-1 text-sm">
+                  Privacy & Security
+                </Text>
                 <Ionicons name="chevron-forward" size={16} color="#6b7280" />
               </TouchableOpacity>
-              <TouchableOpacity className="flex-row items-center p-4">
+              <TouchableOpacity onPress={() => setSettingsScreen("help")} className="flex-row items-center p-4">
                 <View className="w-9 h-9 rounded-full bg-gray-500/20 items-center justify-center mr-3">
-                  <Ionicons name="help-circle-outline" size={18} color="#9ca3af" />
+                  <Ionicons
+                    name="help-circle-outline"
+                    size={18}
+                    color="#9ca3af"
+                  />
                 </View>
-                <Text className="text-white flex-1 text-sm">Help & Support</Text>
+                <Text className="text-white flex-1 text-sm">
+                  Help & Support
+                </Text>
                 <Ionicons name="chevron-forward" size={16} color="#6b7280" />
               </TouchableOpacity>
             </View>
@@ -277,7 +483,9 @@ export default function HomePage({ user, onLogout }) {
               className="bg-red-500/10 rounded-2xl p-4 border border-red-500/20 flex-row items-center justify-center"
             >
               <Ionicons name="log-out-outline" size={18} color="#ef4444" />
-              <Text className="text-red-400 font-medium text-sm ml-2">Log Out</Text>
+              <Text className="text-red-400 font-medium text-sm ml-2">
+                Log Out
+              </Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -315,7 +523,13 @@ export default function HomePage({ user, onLogout }) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ade80" colors={["#4ade80"]} progressBackgroundColor="#111827" />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#4ade80"
+              colors={["#4ade80"]}
+              progressBackgroundColor="#111827"
+            />
           }
         >
           <View className="bg-gray-900/80 rounded-3xl p-6 border border-gray-800 mb-6">
@@ -345,7 +559,9 @@ export default function HomePage({ user, onLogout }) {
               <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-white text-lg font-bold">Drafts</Text>
                 <View className="bg-yellow-500/20 rounded-full px-2.5 py-0.5">
-                  <Text className="text-yellow-400 text-xs font-bold">{drafts.length}</Text>
+                  <Text className="text-yellow-400 text-xs font-bold">
+                    {drafts.length}
+                  </Text>
                 </View>
               </View>
               {drafts.map((draft) => (
@@ -359,11 +575,15 @@ export default function HomePage({ user, onLogout }) {
                       <Ionicons name="bookmark" size={18} color="#f59e0b" />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-white text-sm font-medium" numberOfLines={1}>
+                      <Text
+                        className="text-white text-sm font-medium"
+                        numberOfLines={1}
+                      >
                         {draft.caption || "No caption"}
                       </Text>
                       <Text className="text-gray-500 text-xs mt-0.5">
-                        {draft.savedAt} · {draft.platforms?.length || 0} platforms
+                        {draft.savedAt} · {draft.platforms?.length || 0}{" "}
+                        platforms
                         {draft.media?.length > 0 ? " · has media" : ""}
                       </Text>
                     </View>
@@ -371,7 +591,11 @@ export default function HomePage({ user, onLogout }) {
                       onPress={() => handleDeleteDraft(draft.id)}
                       className="w-8 h-8 rounded-full bg-gray-800 items-center justify-center ml-2"
                     >
-                      <Ionicons name="trash-outline" size={14} color="#ef4444" />
+                      <Ionicons
+                        name="trash-outline"
+                        size={14}
+                        color="#ef4444"
+                      />
                     </TouchableOpacity>
                   </View>
                 </TouchableOpacity>
@@ -427,56 +651,45 @@ export default function HomePage({ user, onLogout }) {
             Recent Activity
           </Text>
 
-          {sentPosts.length > 0 ? (
-            sentPosts.slice(0, 3).map((post) => (
-              <View key={post.id} className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
+          {recentActivities.length > 0 ? (
+            recentActivities.map((activity) => (
+              <View
+                key={activity.id}
+                className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
+              >
                 <View className="flex-row items-center">
                   <View className="w-10 h-10 rounded-full bg-green-500/20 items-center justify-center mr-3">
-                    <Text className="text-lg">📝</Text>
+                    <Text className="text-lg">{activity.icon}</Text>
                   </View>
                   <View className="flex-1">
                     <Text className="text-white font-medium" numberOfLines={1}>
-                      {post.caption || "Post published"}
+                      {activity.title}
                     </Text>
                     <Text className="text-gray-500 text-xs">
-                      {new Date(post.publishedAt).toLocaleDateString()} · {post.platforms?.length || 0} platforms
+                      {activity.timestamp.toLocaleDateString()} •{" "}
+                      {activity.platforms} platform
+                      {activity.platforms !== 1 ? "s" : ""}
                     </Text>
                   </View>
                 </View>
               </View>
             ))
           ) : (
-            <>
-              <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
-                <View className="flex-row items-center">
-                  <View className="w-10 h-10 rounded-full bg-green-500/20 items-center justify-center mr-3">
-                    <Text className="text-lg">📝</Text>
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-white font-medium">
-                      Post published successfully
-                    </Text>
-                    <Text className="text-gray-500 text-xs">
-                      2 hours ago • 3 platforms
-                    </Text>
-                  </View>
+            <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-full bg-gray-500/20 items-center justify-center mr-3">
+                  <Text className="text-lg">📅</Text>
+                </View>
+                <View className="flex-1">
+                  <Text className="text-white font-medium">
+                    No recent activity
+                  </Text>
+                  <Text className="text-gray-500 text-xs">
+                    Your activities will appear here
+                  </Text>
                 </View>
               </View>
-
-              <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
-                <View className="flex-row items-center">
-                  <View className="w-10 h-10 rounded-full bg-blue-500/20 items-center justify-center mr-3">
-                    <Text className="text-lg">🔗</Text>
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-white font-medium">
-                      Twitter account connected
-                    </Text>
-                    <Text className="text-gray-500 text-xs">Yesterday</Text>
-                  </View>
-                </View>
-              </View>
-            </>
+            </View>
           )}
 
           <View className="h-16" />

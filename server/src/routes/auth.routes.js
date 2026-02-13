@@ -2,7 +2,7 @@ import express from "express";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { authenticate } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
-import { signup, signin, me } from "../controllers/auth.controller.js";
+import { signup, signin, me, updateProfile } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
@@ -26,5 +26,15 @@ router.post(
 );
 
 router.get("/me", authenticate, asyncHandler(me));
+
+router.put(
+  "/profile",
+  authenticate,
+  validate({
+    name: ["required"],
+    email: ["required", "email"],
+  }),
+  asyncHandler(updateProfile),
+);
 
 export default router;

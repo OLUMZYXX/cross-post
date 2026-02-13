@@ -64,6 +64,8 @@ export const authAPI = {
   signin: (email, password) => api.post("/auth/signin", { email, password }),
 
   getMe: () => api.get("/auth/me"),
+
+  updateProfile: (name, email) => api.put("/auth/profile", { name, email }),
 };
 
 export const postAPI = {
@@ -86,9 +88,21 @@ export const postAPI = {
 export const platformAPI = {
   list: () => api.get("/platforms"),
 
-  connect: (name) => api.post("/platforms/connect", { name }),
+  connect: (name, oauthData = {}) =>
+    api.post("/platforms/connect", { name, ...oauthData }),
 
   disconnect: (id) => api.delete(`/platforms/${id}`),
+
+  initiateFacebookAuth: (state) =>
+    api.get(
+      `/platforms/auth/facebook?state=${encodeURIComponent(state || "")}`,
+    ),
+
+  initiateTwitterAuth: () => api.get("/platforms/auth/twitter"),
+
+  initiateInstagramAuth: () => api.get("/platforms/auth/instagram"),
+
+  initiateTikTokAuth: () => api.get("/platforms/auth/tiktok"),
 };
 
 export default api;

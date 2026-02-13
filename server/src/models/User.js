@@ -24,14 +24,23 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+userSchema.virtual("password").set(function (value) {
+  this._password = value;
+});
+
 userSchema.pre("save", async function () {
-  if (this.password && !this.passwordHash) {
-    this.passwordHash = await bcrypt.hash(this.password, 12);
-    this.password = undefined;
+  if (this._password) {
+    this.passwordHash = await bcrypt.hash(this._password, 12);
+    this._password = undefined;
   }
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.passwordHash) {
+    throw new Error(
+      "Account password needs to be reset. Please sign up again.",
+    );
+  }
   return bcrypt.compare(candidatePassword, this.passwordHash);
 };
 

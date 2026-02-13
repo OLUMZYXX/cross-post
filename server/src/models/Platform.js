@@ -18,6 +18,27 @@ const platformSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  // OAuth fields
+  accessToken: {
+    type: String,
+    default: null,
+  },
+  refreshToken: {
+    type: String,
+    default: null,
+  },
+  tokenExpiresAt: {
+    type: Date,
+    default: null,
+  },
+  platformUserId: {
+    type: String,
+    default: null,
+  },
+  platformUsername: {
+    type: String,
+    default: null,
+  },
 });
 
 export default mongoose.model("Platform", platformSchema);

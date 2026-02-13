@@ -12,8 +12,8 @@ export default function BottomNav({ activeTab, onTabChange }) {
   ];
 
   return (
-    <View className="absolute bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 pb-6 pt-3 px-4">
-      <View className="flex-row items-end justify-around">
+    <View className="absolute bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 pb-6 pt-3 px-2">
+      <View className="flex-row items-end">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
 
@@ -22,8 +22,7 @@ export default function BottomNav({ activeTab, onTabChange }) {
               <TouchableOpacity
                 key={tab.id}
                 onPress={() => onTabChange(tab.id)}
-                className="items-center"
-                style={{ marginTop: -28 }}
+                style={{ flex: 1, alignItems: "center", marginTop: -28 }}
               >
                 <View className="w-14 h-14 rounded-full bg-green-500 items-center justify-center border-4 border-gray-950">
                   <Ionicons name="add" size={28} color="#030712" />
@@ -39,11 +38,11 @@ export default function BottomNav({ activeTab, onTabChange }) {
             <TouchableOpacity
               key={tab.id}
               onPress={() => onTabChange(tab.id)}
-              className="items-center py-1 px-3"
+              style={{ flex: 1, alignItems: "center", paddingVertical: 4 }}
             >
               <Ionicons
                 name={isActive ? tab.activeIcon : tab.icon}
-                size={24}
+                size={22}
                 color={isActive ? "#4ade80" : "#6b7280"}
               />
               <Text

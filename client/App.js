@@ -1,6 +1,6 @@
 import "./global.css";
 import { useState, useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, View, Linking } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
@@ -14,6 +14,38 @@ const ONBOARDING_KEY = "@crosspost_onboarded";
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState(null);
   const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const handleDeepLink = async (event) => {
+      const url = event.url;
+      const match = url.match(/crosspost:\/\/oauth\/(\w+)\/callback/);
+      if (!match) return;
+
+      const platform = match[1];
+      const urlObj = new URL(
+        url.replace("crosspost://", "http://dummy.com/"),
+      );
+      const params = urlObj.searchParams;
+      const displayName =
+        platform.charAt(0).toUpperCase() + platform.slice(1);
+
+      if (params.get("success") === "true") {
+        alert(`${displayName} connected successfully!`);
+      } else {
+        alert(`${displayName} connection failed: ${params.get("error")}`);
+      }
+    };
+
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink({ url });
+      }
+    });
+
+    return () => subscription?.remove();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -86,6 +118,7 @@ export default function App() {
       return (
         <HomePage
           user={user}
+          onUpdateUser={setUser}
           onLogout={() => {
             setUser(null);
             setCurrentScreen("signin");
