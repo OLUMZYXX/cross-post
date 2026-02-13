@@ -14,9 +14,12 @@
       "backgroundColor": "#022c22"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.crosspost",
+      "usesAppleSignIn": true
     },
     "android": {
+      "package": "com.yourcompany.crosspost",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#022c22"
@@ -25,6 +28,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-apple-authentication",
+      "expo-web-browser"
+    ]
   }
 }

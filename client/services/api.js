@@ -66,6 +66,11 @@ export const authAPI = {
   getMe: () => api.get("/auth/me"),
 
   updateProfile: (name, email) => api.put("/auth/profile", { name, email }),
+
+  googleAuth: (accessToken) => api.post("/auth/google", { accessToken }),
+
+  appleAuth: (identityToken, fullName, email) =>
+    api.post("/auth/apple", { identityToken, fullName, email }),
 };
 
 export const postAPI = {

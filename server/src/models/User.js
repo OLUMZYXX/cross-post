@@ -18,6 +18,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  googleId: {
+    type: String,
+    default: null,
+  },
+  appleId: {
+    type: String,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
