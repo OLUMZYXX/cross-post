@@ -5,6 +5,7 @@ import {
   FACEBOOK_APP_SECRET,
   CLIENT_URL,
 } from "../config/env.js";
+import { createState, getState } from "../utils/oauthState.js";
 
 const SUPPORTED_PLATFORMS = [
   "Twitter",
@@ -66,72 +67,40 @@ export async function disconnectPlatform(req, res) {
 
 // Facebook OAuth functions
 export async function initiateFacebookAuth(req, res) {
-  const { state } = req.query; // Can include user ID or other state
-
-  // Use web redirect first, then handle deep linking from there
+  const stateId = createState({ userId: req.user.id });
   const redirectUri = `${CLIENT_URL}/api/platforms/auth/facebook/callback`;
-
-  console.log("Facebook App ID:", FACEBOOK_APP_ID);
-  console.log("Redirect URI:", redirectUri);
 
   const facebookAuthUrl =
     `https://www.facebook.com/v18.0/dialog/oauth?` +
     `client_id=${FACEBOOK_APP_ID}&` +
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-    `scope=email,public_profile,pages_manage_posts,pages_read_engagement&` +
+    `scope=email,public_profile,pages_show_list,pages_manage_posts,pages_read_engagement&` +
     `response_type=code&` +
-    `state=${encodeURIComponent(state || "")}`;
-
-  console.log("Generated Facebook Auth URL:", facebookAuthUrl);
+    `state=${stateId}&` +
+    `auth_type=rerequest`;
 
   res.json({ success: true, data: { authUrl: facebookAuthUrl } });
+}
+
+function buildRedirectHtml(title, url) {
+  return `<!DOCTYPE html><html><head><title>${title}</title><script>window.location.href="${url}";</script></head><body><p>${title}</p><p><a href="${url}">Click here if not redirected</a></p></body></html>`;
 }
 
 export async function handleFacebookCallback(req, res) {
   const { code, state, error } = req.query;
 
-  if (error) {
-    const appUrl = `crosspost://oauth/facebook/callback?error=${error}`;
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Facebook Connection Failed</title>
-          <script>
-            window.location.href = "${appUrl}";
-          </script>
-        </head>
-        <body>
-          <p>Facebook connection failed: ${error}</p>
-          <p>If you're not redirected automatically, <a href="${appUrl}">click here</a>.</p>
-        </body>
-      </html>
-    `);
-    return;
+  if (error || !code) {
+    const appUrl = `crosspost://oauth/facebook/callback?error=${encodeURIComponent(error || "no_code")}`;
+    return res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
   }
 
-  if (!code) {
-    const appUrl = `crosspost://oauth/facebook/callback?error=no_code`;
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Facebook Connection Failed</title>
-          <script>
-            window.location.href = "${appUrl}";
-          </script>
-        </head>
-        <body>
-          <p>Facebook connection failed: No authorization code received</p>
-          <p>If you're not redirected automatically, <a href="${appUrl}">click here</a>.</p>
-        </body>
-      </html>
-    `);
-    return;
+  const stateData = getState(state);
+  if (!stateData) {
+    const appUrl = `crosspost://oauth/facebook/callback?error=invalid_state`;
+    return res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
   }
 
   try {
-    // Exchange code for access token
     const tokenResponse = await fetch(
       `https://graph.facebook.com/v18.0/oauth/access_token?` +
         `client_id=${FACEBOOK_APP_ID}&` +
@@ -144,10 +113,9 @@ export async function handleFacebookCallback(req, res) {
 
     if (tokenData.error) {
       const appUrl = `crosspost://oauth/facebook/callback?error=${encodeURIComponent(tokenData.error.message)}`;
-      return res.redirect(appUrl);
+      return res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
     }
 
-    // Get user profile
     const profileResponse = await fetch(
       `https://graph.facebook.com/me?` +
         `fields=id,name,email&` +
@@ -156,58 +124,68 @@ export async function handleFacebookCallback(req, res) {
 
     const profile = await profileResponse.json();
 
-    // Create platform connection with OAuth data
-    // Note: In a real app, you'd get userId from JWT token or state parameter
-    // For now, we'll assume the state contains the user ID
-    const userId = state; // This should be the user ID passed in state
+    const permissionsResponse = await fetch(
+      `https://graph.facebook.com/me/permissions?access_token=${tokenData.access_token}`,
+    );
+    const permissionsData = await permissionsResponse.json();
+    console.log(
+      "Facebook granted permissions:",
+      JSON.stringify(permissionsData, null, 2),
+    );
 
-    const existing = await Platform.findOne({ userId, name: "Facebook" });
-    if (!existing) {
-      const platform = new Platform({
-        userId,
+    // Fetch user's Facebook Pages to store page access token for publishing
+    let pageId = null;
+    let pageAccessToken = null;
+    const pagesRes = await fetch(
+      `https://graph.facebook.com/v18.0/me/accounts?access_token=${tokenData.access_token}`,
+    );
+    const pagesData = await pagesRes.json();
+    console.log("Facebook Pages response:", JSON.stringify(pagesData, null, 2));
+
+    if (!pagesData.data || pagesData.data.length === 0) {
+      const appUrl = `crosspost://oauth/facebook/callback?error=Failed%20to%20connect%20Facebook.%20No%20Facebook%20Pages%20found.%20Please%20create%20a%20Facebook%20Page%20and%20try%20again.`;
+      return res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
+    }
+
+    if (pagesData.data && pagesData.data.length > 0) {
+      pageId = pagesData.data[0].id;
+      pageAccessToken = pagesData.data[0].access_token;
+      console.log(
+        `Facebook Page found: id=${pageId}, name=${pagesData.data[0].name}`,
+      );
+    } else {
+      console.log("No Facebook Pages found for this user");
+    }
+
+    const existing = await Platform.findOne({
+      userId: stateData.userId,
+      name: "Facebook",
+    });
+
+    if (existing) {
+      existing.accessToken = tokenData.access_token;
+      existing.platformUserId = profile.id;
+      existing.platformUsername = pagesData.data[0].name;
+      existing.pageId = pageId;
+      existing.pageAccessToken = pageAccessToken;
+      await existing.save();
+    } else {
+      await new Platform({
+        userId: stateData.userId,
         name: "Facebook",
         accessToken: tokenData.access_token,
         platformUserId: profile.id,
-        platformUsername: profile.name,
-      });
-      await platform.save();
+        platformUsername: pagesData.data[0].name,
+        pageId,
+        pageAccessToken,
+      }).save();
     }
 
     const appUrl = `crosspost://oauth/facebook/callback?success=true&name=${encodeURIComponent(profile.name)}`;
-
-    // Return HTML page that redirects to the app
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Facebook Connected</title>
-          <script>
-            window.location.href = "${appUrl}";
-          </script>
-        </head>
-        <body>
-          <p>Facebook connected successfully! Redirecting back to app...</p>
-          <p>If you're not redirected automatically, <a href="${appUrl}">click here</a>.</p>
-        </body>
-      </html>
-    `);
+    res.send(buildRedirectHtml("Facebook Connected", appUrl));
   } catch (err) {
     console.error("Facebook OAuth error:", err);
     const appUrl = `crosspost://oauth/facebook/callback?error=server_error`;
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Facebook Connection Failed</title>
-          <script>
-            window.location.href = "${appUrl}";
-          </script>
-        </head>
-        <body>
-          <p>Facebook connection failed: Server error</p>
-          <p>If you're not redirected automatically, <a href="${appUrl}">click here</a>.</p>
-        </body>
-      </html>
-    `);
+    res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
   }
 }

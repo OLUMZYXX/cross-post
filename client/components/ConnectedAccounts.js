@@ -78,10 +78,10 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                   <Ionicons name={style.icon || "globe-outline"} size={22} color={style.color || "#fff"} />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-bold text-sm">{platform.name}</Text>
-                  <Text className="text-gray-500 text-xs">
-                    {platform.platformUsername || "Connected"}
+                  <Text className="text-white font-bold text-sm" numberOfLines={1}>
+                    {platform.platformUsername || platform.name}
                   </Text>
+                  <Text className="text-gray-500 text-xs">{platform.name}</Text>
                 </View>
                 <TouchableOpacity
                   onPress={() => handleDisconnect(platform)}

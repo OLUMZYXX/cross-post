@@ -33,6 +33,15 @@ const postSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  publishResults: [
+    {
+      platform: String,
+      success: Boolean,
+      externalId: String,
+      externalUrl: String,
+      error: String,
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
@@ -43,9 +52,8 @@ const postSchema = new mongoose.Schema({
   },
 });
 
-postSchema.pre("save", function (next) {
+postSchema.pre("save", function () {
   this.updatedAt = Date.now();
-  next();
 });
 
 export default mongoose.model("Post", postSchema);

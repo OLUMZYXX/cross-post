@@ -39,6 +39,15 @@ const platformSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  // Facebook/Instagram Page fields
+  pageId: {
+    type: String,
+    default: null,
+  },
+  pageAccessToken: {
+    type: String,
+    default: null,
+  },
 });
 
 export default mongoose.model("Platform", platformSchema);

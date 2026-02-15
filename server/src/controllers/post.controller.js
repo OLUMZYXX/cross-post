@@ -1,5 +1,7 @@
 import Post from "../models/Post.js";
 import { Errors } from "../utils/AppError.js";
+import { publishToAllPlatforms } from "../services/publishPost.js";
+import { SERVER_URL } from "../config/env.js";
 
 export async function listPosts(req, res) {
   const posts = await Post.find({ userId: req.user.id }).sort({
@@ -20,13 +22,25 @@ export async function getPost(req, res) {
 }
 
 export async function createPost(req, res) {
-  const { caption, media, platforms, status } = req.body;
+  const { caption, platforms, status } = req.body;
+
+  // Handle file uploads from multer (multipart/form-data)
+  const mediaUrls = (req.files || []).map(
+    (file) => `${SERVER_URL}/uploads/${file.filename}`,
+  );
+
+  // platforms may come as a single string or array from FormData
+  const platformList = Array.isArray(platforms)
+    ? platforms
+    : platforms
+      ? [platforms]
+      : [];
 
   const post = new Post({
     userId: req.user.id,
     caption: caption || "",
-    media: media || [],
-    platforms: platforms || [],
+    media: mediaUrls,
+    platforms: platformList,
     status: status || "draft",
   });
 
@@ -49,7 +63,10 @@ export async function updatePost(req, res) {
   const { caption, media, platforms, status } = req.body;
 
   if (caption !== undefined) post.caption = caption;
-  if (media !== undefined) post.media = media;
+  if (media !== undefined)
+    post.media = media.map((item) =>
+      typeof item === "string" ? item : item.uri,
+    );
   if (platforms !== undefined) post.platforms = platforms;
   if (status !== undefined) post.status = status;
 
@@ -82,12 +99,18 @@ export async function publishPost(req, res) {
     throw Errors.badRequest("Select at least one platform to publish");
   }
 
-  post.status = "published";
+  // Publish to all selected platforms via their APIs
+  const results = await publishToAllPlatforms(req.user.id, post);
+
+  const anySuccess = results.some((r) => r.success);
+
+  post.publishResults = results;
   post.publishedAt = new Date();
+  post.status = anySuccess ? "published" : "draft";
 
   await post.save();
 
-  res.json({ success: true, data: { post } });
+  res.json({ success: true, data: { post, publishResults: results } });
 }
 
 export async function schedulePost(req, res) {

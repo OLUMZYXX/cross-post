@@ -6,19 +6,81 @@ import {
 } from "../config/env.js";
 import { createState, getState } from "../utils/oauthState.js";
 
+/**
+ * Confirm Instagram connection — called from the app after user reviews their account
+ */
+export async function confirmInstagramConnection(req, res) {
+  const { stateId } = req.body;
+
+  if (!stateId) {
+    return res
+      .status(400)
+      .json({ success: false, error: { message: "Missing stateId" } });
+  }
+
+  const pendingData = getState(stateId);
+  if (!pendingData) {
+    return res.status(400).json({
+      success: false,
+      error: { message: "Invalid or expired confirmation. Please try again." },
+    });
+  }
+
+  // Verify the logged-in user matches the one who started the OAuth flow
+  if (pendingData.userId !== req.user.id) {
+    return res
+      .status(403)
+      .json({ success: false, error: { message: "User mismatch" } });
+  }
+
+  const { accessToken, platformUserId, platformUsername, tokenExpiresAt } =
+    pendingData;
+
+  const existing = await Platform.findOne({
+    userId: pendingData.userId,
+    name: "Instagram",
+  });
+
+  if (existing) {
+    existing.accessToken = accessToken;
+    existing.platformUserId = platformUserId;
+    existing.platformUsername = platformUsername;
+    existing.tokenExpiresAt = tokenExpiresAt ? new Date(tokenExpiresAt) : null;
+    await existing.save();
+  } else {
+    await new Platform({
+      userId: pendingData.userId,
+      name: "Instagram",
+      accessToken,
+      platformUserId,
+      platformUsername,
+      tokenExpiresAt: tokenExpiresAt ? new Date(tokenExpiresAt) : null,
+    }).save();
+  }
+
+  res.json({
+    success: true,
+    data: { platformUsername, platformUserId },
+  });
+}
+
 function buildRedirectHtml(title, url) {
   return `<!DOCTYPE html><html><head><title>${title}</title><script>window.location.href="${url}";</script></head><body><p>${title}</p><p><a href="${url}">Click here if not redirected</a></p></body></html>`;
 }
 
+/**
+ * Instagram Login flow — uses instagram.com login page directly
+ * Docs: https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login
+ */
 export async function initiateInstagramAuth(req, res) {
   const stateId = createState({ userId: req.user.id });
   const redirectUri = `${CLIENT_URL}/api/platforms/auth/instagram/callback`;
 
   const authUrl =
-    `https://www.facebook.com/v18.0/dialog/oauth?` +
+    `https://www.instagram.com/oauth/authorize?` +
     `client_id=${INSTAGRAM_APP_ID}&` +
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-    `scope=${encodeURIComponent("instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement")}&` +
+    `scope=${encodeURIComponent("instagram_business_basic,instagram_business_content_publish,instagram_business_manage_messages")}&` +
     `response_type=code&` +
     `state=${stateId}`;
 
@@ -26,82 +88,96 @@ export async function initiateInstagramAuth(req, res) {
 }
 
 export async function handleInstagramCallback(req, res) {
-  const { code, state, error } = req.query;
+  const { code, state, error, error_reason } = req.query;
 
   if (error || !code) {
-    const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent(error || "no_code")}`;
+    const errMsg = error_reason || error || "no_code";
+    const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent(errMsg)}`;
     return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
   }
 
   const stateData = getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/instagram/callback?error=invalid_state`;
-    return res.send(
-      buildRedirectHtml("Instagram Connection Failed", appUrl),
-    );
+    return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
   }
 
   try {
     const redirectUri = `${CLIENT_URL}/api/platforms/auth/instagram/callback`;
+
+    // Exchange code for short-lived token via Instagram API
+    const tokenBody = new URLSearchParams({
+      client_id: INSTAGRAM_APP_ID,
+      client_secret: INSTAGRAM_APP_SECRET,
+      grant_type: "authorization_code",
+      redirect_uri: redirectUri,
+      code,
+    });
+
     const tokenResponse = await fetch(
-      `https://graph.facebook.com/v18.0/oauth/access_token?` +
-        `client_id=${INSTAGRAM_APP_ID}&` +
-        `client_secret=${INSTAGRAM_APP_SECRET}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `code=${code}`,
+      "https://api.instagram.com/oauth/access_token",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: tokenBody.toString(),
+      },
     );
 
     const tokenData = await tokenResponse.json();
+    console.log("Instagram token response:", JSON.stringify(tokenData, null, 2));
 
-    if (tokenData.error) {
-      const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent(tokenData.error.message)}`;
-      return res.send(
-        buildRedirectHtml("Instagram Connection Failed", appUrl),
-      );
+    if (tokenData.error_type || tokenData.error_message) {
+      const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent(tokenData.error_message || "Token exchange failed")}`;
+      return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
     }
 
-    const pagesResponse = await fetch(
-      `https://graph.facebook.com/v18.0/me/accounts?access_token=${tokenData.access_token}`,
+    const shortToken = tokenData.access_token;
+    const igUserId = String(tokenData.user_id);
+
+    // Exchange short-lived token for long-lived token (60 days)
+    const longTokenRes = await fetch(
+      `https://graph.instagram.com/access_token?` +
+        `grant_type=ig_exchange_token&` +
+        `client_secret=${INSTAGRAM_APP_SECRET}&` +
+        `access_token=${shortToken}`,
     );
-    const pagesData = await pagesResponse.json();
+    const longTokenData = await longTokenRes.json();
+    console.log("Instagram long-lived token:", JSON.stringify(longTokenData, null, 2));
 
-    let igUsername = "Instagram User";
-    let igUserId = null;
+    const accessToken = longTokenData.access_token || shortToken;
+    const expiresIn = longTokenData.expires_in; // seconds
 
-    if (pagesData.data && pagesData.data.length > 0) {
-      const page = pagesData.data[0];
-      const igResponse = await fetch(
-        `https://graph.facebook.com/v18.0/${page.id}?fields=instagram_business_account&access_token=${page.access_token}`,
-      );
-      const igData = await igResponse.json();
+    // Get user profile (username, account type)
+    const profileRes = await fetch(
+      `https://graph.instagram.com/v21.0/me?fields=user_id,username,account_type,profile_picture_url&access_token=${accessToken}`,
+    );
+    const profile = await profileRes.json();
+    console.log("Instagram profile:", JSON.stringify(profile, null, 2));
 
-      if (igData.instagram_business_account) {
-        const igProfileResponse = await fetch(
-          `https://graph.facebook.com/v18.0/${igData.instagram_business_account.id}?fields=username&access_token=${tokenData.access_token}`,
-        );
-        const igProfile = await igProfileResponse.json();
-        igUsername = igProfile.username || igUsername;
-        igUserId = igData.instagram_business_account.id;
-      }
-    }
+    const igUsername = profile.username || "Instagram User";
+    const profilePic = profile.profile_picture_url || "";
+    const accountType = profile.account_type || "";
 
-    const existing = await Platform.findOne({
+    // Store pending data in OAuth state for confirmation step
+    const confirmStateId = createState({
       userId: stateData.userId,
-      name: "Instagram",
+      accessToken,
+      platformUserId: igUserId,
+      platformUsername: igUsername,
+      tokenExpiresAt: expiresIn
+        ? new Date(Date.now() + expiresIn * 1000).toISOString()
+        : null,
     });
 
-    if (!existing) {
-      await new Platform({
-        userId: stateData.userId,
-        name: "Instagram",
-        accessToken: tokenData.access_token,
-        platformUserId: igUserId,
-        platformUsername: igUsername,
-      }).save();
-    }
-
-    const appUrl = `crosspost://oauth/instagram/callback?success=true&name=${encodeURIComponent(igUsername)}`;
-    res.send(buildRedirectHtml("Instagram Connected", appUrl));
+    // Redirect to app with account info for user to confirm (NOT auto-saved)
+    const appUrl =
+      `crosspost://oauth/instagram/callback?confirm=true` +
+      `&username=${encodeURIComponent(igUsername)}` +
+      `&userId=${encodeURIComponent(igUserId)}` +
+      `&accountType=${encodeURIComponent(accountType)}` +
+      `&profilePic=${encodeURIComponent(profilePic)}` +
+      `&stateId=${confirmStateId}`;
+    res.send(buildRedirectHtml("Instagram - Confirm Account", appUrl));
   } catch (err) {
     console.error("Instagram OAuth error:", err);
     const appUrl = `crosspost://oauth/instagram/callback?error=server_error`;

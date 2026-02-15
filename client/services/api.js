@@ -7,8 +7,7 @@ const BASE_URL = "http://192.168.1.40:4000/api";
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 15000,
-  headers: { "Content-Type": "application/json" },
+  timeout: 120000,
 });
 
 api.interceptors.request.use(
@@ -16,6 +15,10 @@ api.interceptors.request.use(
     const token = await AsyncStorage.getItem(TOKEN_KEY);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Only set Content-Type for non-FormData requests (axios sets it automatically for FormData)
+    if (!(config.data instanceof FormData)) {
+      config.headers["Content-Type"] = "application/json";
     }
     return config;
   },
@@ -78,7 +81,30 @@ export const postAPI = {
 
   get: (id) => api.get(`/posts/${id}`),
 
-  create: (postData) => api.post("/posts", postData),
+  create: ({ caption, media, platforms, status }) => {
+    const formData = new FormData();
+    if (caption) formData.append("caption", caption);
+    if (status) formData.append("status", status);
+    if (platforms) {
+      platforms.forEach((p) => formData.append("platforms", p));
+    }
+    if (media && media.length > 0) {
+      media.forEach((item) => {
+        const uri = typeof item === "string" ? item : item.uri;
+        const name =
+          (typeof item === "object" && item.name) ||
+          `media_${Date.now()}.${uri.split(".").pop() || "jpg"}`;
+        const type =
+          typeof item === "object" && item.type === "video"
+            ? "video/mp4"
+            : "image/jpeg";
+        formData.append("media", { uri, name, type });
+      });
+    }
+    return api.post("/posts", formData, {
+      timeout: 300000,
+    });
+  },
 
   update: (id, postData) => api.put(`/posts/${id}`, postData),
 
@@ -98,16 +124,22 @@ export const platformAPI = {
 
   disconnect: (id) => api.delete(`/platforms/${id}`),
 
-  initiateFacebookAuth: (state) =>
-    api.get(
-      `/platforms/auth/facebook?state=${encodeURIComponent(state || "")}`,
-    ),
+  initiateFacebookAuth: () => api.get("/platforms/auth/facebook"),
 
   initiateTwitterAuth: () => api.get("/platforms/auth/twitter"),
 
   initiateInstagramAuth: () => api.get("/platforms/auth/instagram"),
 
+  confirmInstagramConnection: (stateId) =>
+    api.post("/platforms/auth/instagram/confirm", { stateId }),
+
   initiateTikTokAuth: () => api.get("/platforms/auth/tiktok"),
+
+  initiateLinkedInAuth: () => api.get("/platforms/auth/linkedin"),
+
+  initiateYouTubeAuth: () => api.get("/platforms/auth/youtube"),
+
+  initiateRedditAuth: () => api.get("/platforms/auth/reddit"),
 };
 
 export default api;

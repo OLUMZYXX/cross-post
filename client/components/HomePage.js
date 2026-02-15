@@ -22,13 +22,14 @@ import HelpSupport from "./HelpSupport";
 import { useToast } from "./Toast";
 import { postAPI, platformAPI, clearToken } from "../services/api";
 
-export default function HomePage({ user, onUpdateUser, onLogout }) {
+export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [editingDraft, setEditingDraft] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [sentPosts, setSentPosts] = useState([]);
   const [drafts, setDrafts] = useState([]);
+  const [connectedPlatformObjects, setConnectedPlatformObjects] = useState([]);
   const [connectedPlatforms, setConnectedPlatforms] = useState([]);
   const [loadingPlatforms, setLoadingPlatforms] = useState(true);
   const [recentActivities, setRecentActivities] = useState([]);
@@ -40,6 +41,7 @@ export default function HomePage({ user, onUpdateUser, onLogout }) {
   const fetchPlatforms = useCallback(async () => {
     try {
       const { data } = await platformAPI.list();
+      setConnectedPlatformObjects(data.platforms);
       setConnectedPlatforms(data.platforms.map((p) => p.name));
     } catch {
     } finally {
@@ -71,7 +73,7 @@ export default function HomePage({ user, onUpdateUser, onLogout }) {
       // Combine and sort activities
       const activities = [
         ...publishedPosts.map((post) => ({
-          id: `post-${post.id}`,
+          id: `post-${post._id || post.id}`,
           type: "post",
           title: post.caption || "Post published",
           timestamp: new Date(post.publishedAt),
@@ -79,7 +81,7 @@ export default function HomePage({ user, onUpdateUser, onLogout }) {
           icon: "📝",
         })),
         ...platforms.map((platform) => ({
-          id: `platform-${platform.id}`,
+          id: `platform-${platform._id || platform.name}`,
           type: "platform",
           title: `${platform.name} account connected`,
           timestamp: new Date(platform.connectedAt),
@@ -99,6 +101,14 @@ export default function HomePage({ user, onUpdateUser, onLogout }) {
     fetchPosts();
     fetchRecentActivities();
   }, [fetchPlatforms, fetchPosts, fetchRecentActivities]);
+
+  // Re-fetch platforms when OAuth completes (deep link callback)
+  useEffect(() => {
+    if (oauthRefreshKey > 0) {
+      fetchPlatforms();
+      fetchRecentActivities();
+    }
+  }, [oauthRefreshKey, fetchPlatforms, fetchRecentActivities]);
 
   // Real-time updates every 2 minutes
   useEffect(() => {
@@ -172,13 +182,21 @@ export default function HomePage({ user, onUpdateUser, onLogout }) {
     (p) => !connectedPlatforms.includes(p),
   );
 
+  const getPlatformUsername = (platformName) => {
+    const obj = connectedPlatformObjects.find((p) => p.name === platformName);
+    return obj?.platformUsername || null;
+  };
+
   const handleConnectPlatform = async (platformName) => {
     try {
       const oauthMethods = {
-        Facebook: () => platformAPI.initiateFacebookAuth(user.id),
+        Facebook: () => platformAPI.initiateFacebookAuth(),
         Twitter: () => platformAPI.initiateTwitterAuth(),
         Instagram: () => platformAPI.initiateInstagramAuth(),
         TikTok: () => platformAPI.initiateTikTokAuth(),
+        LinkedIn: () => platformAPI.initiateLinkedInAuth(),
+        YouTube: () => platformAPI.initiateYouTubeAuth(),
+        Reddit: () => platformAPI.initiateRedditAuth(),
       };
 
       if (oauthMethods[platformName]) {
@@ -232,6 +250,28 @@ export default function HomePage({ user, onUpdateUser, onLogout }) {
     fetchRecentActivities(); // Refresh activities after publishing
   };
 
+  const handleDeletePost = async (postId) => {
+    try {
+      await postAPI.delete(postId);
+      setSentPosts((prev) => prev.filter((p) => (p._id || p.id) !== postId));
+      setAllPosts((prev) => prev.filter((p) => (p._id || p.id) !== postId));
+      fetchRecentActivities();
+      showToast({
+        type: "success",
+        title: "Post deleted",
+        message: "The post has been removed.",
+        duration: 2000,
+      });
+    } catch (err) {
+      showToast({
+        type: "error",
+        title: "Delete failed",
+        message: err.message || "Could not delete the post.",
+      });
+      throw err;
+    }
+  };
+
   const handleLogout = async () => {
     await clearToken();
     onLogout();
@@ -241,6 +281,7 @@ export default function HomePage({ user, onUpdateUser, onLogout }) {
     return (
       <CreatePost
         connectedPlatforms={connectedPlatforms}
+        connectedPlatformObjects={connectedPlatformObjects}
         allPlatforms={allPlatforms}
         onClose={() => {
           setShowCreatePost(false);
@@ -260,6 +301,7 @@ export default function HomePage({ user, onUpdateUser, onLogout }) {
           posts={sentPosts}
           refreshing={refreshing}
           onRefresh={onRefresh}
+          onDeletePost={handleDeletePost}
         />
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       </View>
@@ -614,24 +656,29 @@ export default function HomePage({ user, onUpdateUser, onLogout }) {
             </View>
           ) : (
             <View className="flex-row flex-wrap justify-between mb-6">
-              {connectedPlatforms.map((platform) => (
-                <View
-                  key={platform}
-                  className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
-                >
+              {connectedPlatforms.map((platform) => {
+                const username = getPlatformUsername(platform);
+                return (
                   <View
-                    className={`w-12 h-12 rounded-full ${allPlatforms[platform]?.bg || "bg-gray-700"} items-center justify-center mb-3`}
+                    key={platform}
+                    className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
                   >
-                    <Ionicons
-                      name={allPlatforms[platform]?.icon || "globe-outline"}
-                      size={24}
-                      color="#fff"
-                    />
+                    <View
+                      className={`w-12 h-12 rounded-full ${allPlatforms[platform]?.bg || "bg-gray-700"} items-center justify-center mb-3`}
+                    >
+                      <Ionicons
+                        name={allPlatforms[platform]?.icon || "globe-outline"}
+                        size={24}
+                        color="#fff"
+                      />
+                    </View>
+                    <Text className="text-white font-bold mb-1" numberOfLines={1}>
+                      {username || platform}
+                    </Text>
+                    <Text className="text-green-400 text-xs">{platform}</Text>
                   </View>
-                  <Text className="text-white font-bold mb-1">{platform}</Text>
-                  <Text className="text-green-400 text-xs">Connected</Text>
-                </View>
-              ))}
+                );
+              })}
 
               <TouchableOpacity
                 onPress={() => setModalVisible(true)}

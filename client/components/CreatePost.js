@@ -242,12 +242,17 @@ function ScheduleModal({ visible, onClose, onPostNow, onSchedule }) {
 
 export default function CreatePost({
   connectedPlatforms,
+  connectedPlatformObjects = [],
   allPlatforms,
   onClose,
   onSaveDraft,
   onPostPublished,
   initialDraft,
 }) {
+  const getPlatformUsername = (platformName) => {
+    const obj = connectedPlatformObjects.find((p) => p.name === platformName);
+    return obj?.platformUsername || null;
+  };
   const [caption, setCaption] = useState(initialDraft?.caption || "");
   const [selectedPlatforms, setSelectedPlatforms] = useState(
     initialDraft?.platforms || [...connectedPlatforms],
@@ -290,13 +295,33 @@ export default function CreatePost({
         status: "draft",
       });
 
-      const { data: publishData } = await postAPI.publish(createData.post.id);
+      const { data: publishData } = await postAPI.publish(createData.post._id);
 
-      showToast({
-        type: "success",
-        title: "Post published!",
-        message: `Shared to ${selectedPlatforms.join(", ")} successfully.`,
-      });
+      const results = publishData.publishResults || [];
+      const succeeded = results.filter((r) => r.success);
+      const failed = results.filter((r) => !r.success);
+
+      if (failed.length === 0) {
+        showToast({
+          type: "success",
+          title: "Post published!",
+          message: `Shared to ${selectedPlatforms.join(", ")} successfully.`,
+        });
+      } else if (succeeded.length > 0) {
+        showToast({
+          type: "warning",
+          title: "Partially published",
+          message: `Published to ${succeeded.map((r) => r.platform).join(", ")}. Failed: ${failed.map((r) => r.platform).join(", ")}.`,
+          duration: 5000,
+        });
+      } else {
+        showToast({
+          type: "error",
+          title: "Publish failed",
+          message: failed[0]?.error || "Could not publish to any platform.",
+          duration: 5000,
+        });
+      }
 
       onPostPublished?.(publishData.post);
       onClose();
@@ -323,7 +348,7 @@ export default function CreatePost({
         status: "draft",
       });
 
-      await postAPI.schedule(createData.post.id, date.toISOString());
+      await postAPI.schedule(createData.post._id, date.toISOString());
 
       showToast({
         type: "info",
@@ -564,8 +589,9 @@ export default function CreatePost({
                     className={`text-sm font-medium ml-1.5 ${
                       isSelected ? "text-green-400" : "text-gray-400"
                     }`}
+                    numberOfLines={1}
                   >
-                    {platform}
+                    {getPlatformUsername(platform) || platform}
                   </Text>
                   {isSelected && (
                     <Ionicons name="checkmark" size={14} color="#22c55e" style={{ marginLeft: 6 }} />
