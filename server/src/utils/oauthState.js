@@ -19,6 +19,17 @@ export function getState(stateId) {
   return data;
 }
 
+// Read state without consuming it (for preview endpoints)
+export function peekState(stateId) {
+  const data = states.get(stateId);
+  if (!data) return null;
+  if (Date.now() > data.expiresAt) {
+    states.delete(stateId);
+    return null;
+  }
+  return data;
+}
+
 export function generateCodeVerifier() {
   return crypto.randomBytes(32).toString("base64url");
 }

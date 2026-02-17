@@ -6,9 +6,8 @@ import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import HomePage from "./components/HomePage";
 import Onboarding from "./components/Onboarding";
-import InstagramConfirm from "./components/InstagramConfirm";
 import { ToastProvider } from "./components/Toast";
-import { authAPI, getToken, clearToken } from "./services/api";
+import { authAPI, platformAPI, getToken, clearToken } from "./services/api";
 
 const ONBOARDING_KEY = "@crosspost_onboarded";
 
@@ -16,7 +15,6 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState(null);
   const [user, setUser] = useState(null);
   const [oauthRefreshKey, setOauthRefreshKey] = useState(0);
-  const [instagramConfirmData, setInstagramConfirmData] = useState(null);
 
   useEffect(() => {
     const handleDeepLink = async (event) => {
@@ -25,22 +23,36 @@ export default function App() {
       if (!match) return;
 
       const platform = match[1];
-      const urlObj = new URL(
-        url.replace("crosspost://", "http://dummy.com/"),
-      );
+      const urlObj = new URL(url.replace("crosspost://", "http://dummy.com/"));
       const params = urlObj.searchParams;
-      const displayName =
-        platform.charAt(0).toUpperCase() + platform.slice(1);
+      const displayName = platform.charAt(0).toUpperCase() + platform.slice(1);
 
-      // Instagram confirmation flow — show account details before saving
-      if (platform === "instagram" && params.get("confirm") === "true") {
-        setInstagramConfirmData({
-          username: params.get("username") || "Unknown",
-          userId: params.get("userId") || "",
-          accountType: params.get("accountType") || "",
-          profilePic: params.get("profilePic") || "",
-          stateId: params.get("stateId") || "",
-        });
+      // If Facebook returned code+state directly to the app, POST to server to complete the exchange
+      if (
+        platform === "facebook" &&
+        params.get("code") &&
+        params.get("state")
+      ) {
+        try {
+          const code = params.get("code");
+          const state = params.get("state");
+          const res = await platformAPI.completeFacebookAuth(code, state);
+
+          if (res?.data?.missingPages) {
+            alert(
+              `${displayName} connected — no Facebook Pages were found. Create or link a Facebook Page (or ensure your account manages one) to enable page publishing.`,
+            );
+          } else {
+            alert(`${displayName} connected successfully!`);
+          }
+
+          setOauthRefreshKey((prev) => prev + 1);
+        } catch (err) {
+          alert(
+            `${displayName} connection failed: ${err.message || "server error"}`,
+          );
+        }
+
         return;
       }
 
@@ -103,23 +115,6 @@ export default function App() {
   }
 
   const renderScreen = () => {
-    // Instagram account confirmation overlay
-    if (instagramConfirmData) {
-      return (
-        <InstagramConfirm
-          accountData={instagramConfirmData}
-          onConfirm={(username) => {
-            setInstagramConfirmData(null);
-            alert(`Instagram (@${username}) connected successfully!`);
-            setOauthRefreshKey((prev) => prev + 1);
-          }}
-          onCancel={() => {
-            setInstagramConfirmData(null);
-          }}
-        />
-      );
-    }
-
     if (currentScreen === "onboarding") {
       return <Onboarding onComplete={completeOnboarding} />;
     }

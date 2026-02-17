@@ -1,4 +1,5 @@
 import Post from "../models/Post.js";
+import Media from "../models/Media.js";
 import { Errors } from "../utils/AppError.js";
 import { publishToAllPlatforms } from "../services/publishPost.js";
 import { SERVER_URL } from "../config/env.js";
@@ -25,9 +26,25 @@ export async function createPost(req, res) {
   const { caption, platforms, status } = req.body;
 
   // Handle file uploads from multer (multipart/form-data)
-  const mediaUrls = (req.files || []).map(
-    (file) => `${SERVER_URL}/uploads/${file.filename}`,
-  );
+  const mediaUrls = [];
+  for (const file of (req.files || [])) {
+    // Guard against storing very large files inside a MongoDB document
+    const MAX_DB_FILE = 15 * 1024 * 1024; // 15MB
+    if (file.size > MAX_DB_FILE) {
+      throw Errors.badRequest(
+        "One of the files is too large to store in MongoDB (max 15MB). Use smaller files or external storage.",
+      );
+    }
+
+    const m = new Media({
+      filename: file.originalname,
+      data: file.buffer,
+      contentType: file.mimetype,
+      size: file.size,
+    });
+    await m.save();
+    mediaUrls.push(`${SERVER_URL}/api/media/${m._id}`);
+  }
 
   // platforms may come as a single string or array from FormData
   const platformList = Array.isArray(platforms)

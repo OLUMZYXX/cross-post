@@ -4,13 +4,54 @@ import {
   INSTAGRAM_APP_SECRET,
   CLIENT_URL,
 } from "../config/env.js";
-import { createState, getState } from "../utils/oauthState.js";
+import { createState, getState, peekState } from "../utils/oauthState.js";
+
+/**
+ * Return pending Instagram account info for the confirm screen
+ * Does NOT consume the state — it stays valid for the actual confirm call
+ */
+export async function getInstagramPendingInfo(req, res) {
+  const { stateId } = req.query;
+  console.log("Instagram pending info request, stateId:", stateId);
+  if (!stateId) {
+    return res
+      .status(400)
+      .json({ success: false, error: { message: "Missing stateId" } });
+  }
+
+  const data = peekState(stateId);
+  console.log("Instagram pending data found:", !!data);
+  if (!data) {
+    return res.status(400).json({
+      success: false,
+      error: { message: "Invalid or expired session. Please try again." },
+    });
+  }
+
+  console.log("Instagram pending - state userId:", data.userId, "req userId:", req.user.id);
+  if (data.userId !== req.user.id) {
+    return res
+      .status(403)
+      .json({ success: false, error: { message: "User mismatch" } });
+  }
+
+  res.json({
+    success: true,
+    data: {
+      username: data.platformUsername,
+      userId: data.platformUserId,
+      accountType: data.accountType,
+      profilePic: data.profilePic,
+    },
+  });
+}
 
 /**
  * Confirm Instagram connection — called from the app after user reviews their account
  */
 export async function confirmInstagramConnection(req, res) {
   const { stateId } = req.body;
+  console.log("Instagram confirm request, stateId:", stateId);
 
   if (!stateId) {
     return res
@@ -19,6 +60,7 @@ export async function confirmInstagramConnection(req, res) {
   }
 
   const pendingData = getState(stateId);
+  console.log("Instagram confirm data found:", !!pendingData);
   if (!pendingData) {
     return res.status(400).json({
       success: false,
@@ -27,6 +69,7 @@ export async function confirmInstagramConnection(req, res) {
   }
 
   // Verify the logged-in user matches the one who started the OAuth flow
+  console.log("Instagram confirm - state userId:", pendingData.userId, "req userId:", req.user.id);
   if (pendingData.userId !== req.user.id) {
     return res
       .status(403)
@@ -58,6 +101,7 @@ export async function confirmInstagramConnection(req, res) {
     }).save();
   }
 
+  console.log("Instagram platform saved successfully for user:", pendingData.userId, "username:", platformUsername);
   res.json({
     success: true,
     data: { platformUsername, platformUserId },
@@ -132,7 +176,6 @@ export async function handleInstagramCallback(req, res) {
     }
 
     const shortToken = tokenData.access_token;
-    const igUserId = String(tokenData.user_id);
 
     // Exchange short-lived token for long-lived token (60 days)
     const longTokenRes = await fetch(
@@ -155,29 +198,40 @@ export async function handleInstagramCallback(req, res) {
     console.log("Instagram profile:", JSON.stringify(profile, null, 2));
 
     const igUsername = profile.username || "Instagram User";
-    const profilePic = profile.profile_picture_url || "";
-    const accountType = profile.account_type || "";
+    // Use profile.id (string) — NOT tokenData.user_id (number loses precision)
+    const igUserId = profile.id;
 
-    // Store pending data in OAuth state for confirmation step
-    const confirmStateId = createState({
+    const tokenExpiresAt = expiresIn
+      ? new Date(Date.now() + expiresIn * 1000)
+      : null;
+
+    // Save the connection directly (same as other platforms)
+    const existing = await Platform.findOne({
       userId: stateData.userId,
-      accessToken,
-      platformUserId: igUserId,
-      platformUsername: igUsername,
-      tokenExpiresAt: expiresIn
-        ? new Date(Date.now() + expiresIn * 1000).toISOString()
-        : null,
+      name: "Instagram",
     });
 
-    // Redirect to app with account info for user to confirm (NOT auto-saved)
-    const appUrl =
-      `crosspost://oauth/instagram/callback?confirm=true` +
-      `&username=${encodeURIComponent(igUsername)}` +
-      `&userId=${encodeURIComponent(igUserId)}` +
-      `&accountType=${encodeURIComponent(accountType)}` +
-      `&profilePic=${encodeURIComponent(profilePic)}` +
-      `&stateId=${confirmStateId}`;
-    res.send(buildRedirectHtml("Instagram - Confirm Account", appUrl));
+    if (existing) {
+      existing.accessToken = accessToken;
+      existing.platformUserId = igUserId;
+      existing.platformUsername = igUsername;
+      existing.tokenExpiresAt = tokenExpiresAt;
+      await existing.save();
+    } else {
+      await new Platform({
+        userId: stateData.userId,
+        name: "Instagram",
+        accessToken,
+        platformUserId: igUserId,
+        platformUsername: igUsername,
+        tokenExpiresAt,
+      }).save();
+    }
+
+    console.log("Instagram connected for user:", stateData.userId, "username:", igUsername);
+
+    const appUrl = `crosspost://oauth/instagram/callback?success=true&name=${encodeURIComponent(igUsername)}`;
+    res.send(buildRedirectHtml("Instagram Connected", appUrl));
   } catch (err) {
     console.error("Instagram OAuth error:", err);
     const appUrl = `crosspost://oauth/instagram/callback?error=server_error`;

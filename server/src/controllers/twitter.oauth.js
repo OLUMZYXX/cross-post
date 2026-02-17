@@ -72,6 +72,7 @@ export async function handleTwitterCallback(req, res) {
     );
 
     const tokenData = await tokenResponse.json();
+    console.log("Twitter token response:", JSON.stringify(tokenData, null, 2));
 
     if (tokenData.error) {
       const msg = tokenData.error_description || tokenData.error;
@@ -85,6 +86,7 @@ export async function handleTwitterCallback(req, res) {
     );
 
     const profileData = await profileResponse.json();
+    console.log("Twitter profile:", JSON.stringify(profileData, null, 2));
     const profile = profileData.data;
 
     const existing = await Platform.findOne({
@@ -92,7 +94,13 @@ export async function handleTwitterCallback(req, res) {
       name: "Twitter",
     });
 
-    if (!existing) {
+    if (existing) {
+      existing.accessToken = tokenData.access_token;
+      existing.refreshToken = tokenData.refresh_token;
+      existing.platformUserId = profile.id;
+      existing.platformUsername = profile.username;
+      await existing.save();
+    } else {
       await new Platform({
         userId: stateData.userId,
         name: "Twitter",
@@ -102,6 +110,8 @@ export async function handleTwitterCallback(req, res) {
         platformUsername: profile.username,
       }).save();
     }
+
+    console.log("Twitter connected for user:", stateData.userId, "username:", profile.username);
 
     const appUrl = `crosspost://oauth/twitter/callback?success=true&name=${encodeURIComponent(profile.username)}`;
     res.send(buildRedirectHtml("Twitter Connected", appUrl));

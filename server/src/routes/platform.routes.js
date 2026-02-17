@@ -6,7 +6,11 @@ import {
   connectPlatform,
   disconnectPlatform,
   initiateFacebookAuth,
+  completeFacebookAuth,
+  getFacebookDebug,
   handleFacebookCallback,
+  listFacebookPages,
+  selectFacebookPage,
 } from "../controllers/platform.controller.js";
 import {
   initiateTwitterAuth,
@@ -16,6 +20,7 @@ import {
   initiateInstagramAuth,
   handleInstagramCallback,
   confirmInstagramConnection,
+  getInstagramPendingInfo,
 } from "../controllers/instagram.oauth.js";
 import {
   initiateTikTokAuth,
@@ -53,9 +58,17 @@ router.post("/connect", asyncHandler(connectPlatform));
 router.delete("/:id", asyncHandler(disconnectPlatform));
 
 router.get("/auth/facebook", asyncHandler(initiateFacebookAuth));
+router.post("/auth/facebook/complete", asyncHandler(completeFacebookAuth));
+router.get("/auth/facebook/debug", asyncHandler(getFacebookDebug));
+router.get("/auth/facebook/pages", asyncHandler(listFacebookPages));
+router.post("/auth/facebook/select-page", asyncHandler(selectFacebookPage));
 router.get("/auth/twitter", asyncHandler(initiateTwitterAuth));
 router.get("/auth/instagram", asyncHandler(initiateInstagramAuth));
-router.post("/auth/instagram/confirm", asyncHandler(confirmInstagramConnection));
+router.get("/auth/instagram/pending", asyncHandler(getInstagramPendingInfo));
+router.post(
+  "/auth/instagram/confirm",
+  asyncHandler(confirmInstagramConnection),
+);
 router.get("/auth/tiktok", asyncHandler(initiateTikTokAuth));
 router.get("/auth/linkedin", asyncHandler(initiateLinkedInAuth));
 router.get("/auth/youtube", asyncHandler(initiateYouTubeAuth));

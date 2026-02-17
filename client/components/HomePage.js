@@ -22,7 +22,12 @@ import HelpSupport from "./HelpSupport";
 import { useToast } from "./Toast";
 import { postAPI, platformAPI, clearToken } from "../services/api";
 
-export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey }) {
+export default function HomePage({
+  user,
+  onUpdateUser,
+  onLogout,
+  oauthRefreshKey,
+}) {
   const [modalVisible, setModalVisible] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [editingDraft, setEditingDraft] = useState(null);
@@ -178,8 +183,11 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
     },
   };
 
+  // Exclude platforms that should not be offered in the "Add Social Media" modal
+  const EXCLUDED_FROM_ADD = ["LinkedIn", "Reddit"];
+
   const availablePlatforms = Object.keys(allPlatforms).filter(
-    (p) => !connectedPlatforms.includes(p),
+    (p) => !connectedPlatforms.includes(p) && !EXCLUDED_FROM_ADD.includes(p),
   );
 
   const getPlatformUsername = (platformName) => {
@@ -190,7 +198,7 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
   const handleConnectPlatform = async (platformName) => {
     try {
       const oauthMethods = {
-        Facebook: () => platformAPI.initiateFacebookAuth(),
+        Facebook: () => platformAPI.initiateFacebookAuth(true),
         Twitter: () => platformAPI.initiateTwitterAuth(),
         Instagram: () => platformAPI.initiateInstagramAuth(),
         TikTok: () => platformAPI.initiateTikTokAuth(),
@@ -313,16 +321,30 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-    const totalReach = sentPosts.reduce((s, p) => s + (p.platforms?.length || 0), 0);
-    const thisWeekPosts = sentPosts.filter((p) => new Date(p.publishedAt) >= weekAgo);
+    const totalReach = sentPosts.reduce(
+      (s, p) => s + (p.platforms?.length || 0),
+      0,
+    );
+    const thisWeekPosts = sentPosts.filter(
+      (p) => new Date(p.publishedAt) >= weekAgo,
+    );
     const lastWeekPosts = sentPosts.filter((p) => {
       const d = new Date(p.publishedAt);
       return d >= twoWeeksAgo && d < weekAgo;
     });
-    const growthPercent = lastWeekPosts.length > 0
-      ? Math.round(((thisWeekPosts.length - lastWeekPosts.length) / lastWeekPosts.length) * 100)
-      : thisWeekPosts.length > 0 ? 100 : 0;
-    const scheduledCount = allPosts.filter((p) => p.status === "scheduled").length;
+    const growthPercent =
+      lastWeekPosts.length > 0
+        ? Math.round(
+            ((thisWeekPosts.length - lastWeekPosts.length) /
+              lastWeekPosts.length) *
+              100,
+          )
+        : thisWeekPosts.length > 0
+          ? 100
+          : 0;
+    const scheduledCount = allPosts.filter(
+      (p) => p.status === "scheduled",
+    ).length;
     const draftCount = allPosts.filter((p) => p.status === "draft").length;
 
     const platformCounts = {};
@@ -358,8 +380,11 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
               <Text className="text-white text-3xl font-bold">
                 {totalReach.toLocaleString()}
               </Text>
-              <Text className={`text-xs mt-1 ${growthPercent >= 0 ? "text-green-400" : "text-red-400"}`}>
-                {growthPercent >= 0 ? "+" : ""}{growthPercent}% this week
+              <Text
+                className={`text-xs mt-1 ${growthPercent >= 0 ? "text-green-400" : "text-red-400"}`}
+              >
+                {growthPercent >= 0 ? "+" : ""}
+                {growthPercent}% this week
               </Text>
             </View>
             <View className="flex-row justify-between mb-4">
@@ -379,25 +404,42 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
             <View className="flex-row justify-between mb-4">
               <View className="flex-1 mr-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
                 <Text className="text-gray-400 text-xs mb-2">SCHEDULED</Text>
-                <Text className="text-white text-xl font-bold">{scheduledCount}</Text>
+                <Text className="text-white text-xl font-bold">
+                  {scheduledCount}
+                </Text>
               </View>
               <View className="flex-1 ml-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
                 <Text className="text-gray-400 text-xs mb-2">DRAFTS</Text>
-                <Text className="text-white text-xl font-bold">{draftCount}</Text>
+                <Text className="text-white text-xl font-bold">
+                  {draftCount}
+                </Text>
               </View>
             </View>
 
             {Object.keys(platformCounts).length > 0 && (
               <>
-                <Text className="text-gray-400 text-xs mb-3 mt-2">POSTS PER PLATFORM</Text>
+                <Text className="text-gray-400 text-xs mb-3 mt-2">
+                  POSTS PER PLATFORM
+                </Text>
                 {Object.entries(platformCounts)
                   .sort((a, b) => b[1] - a[1])
                   .map(([name, count]) => (
-                    <View key={name} className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-2 flex-row items-center">
-                      <View className={`w-9 h-9 rounded-full ${allPlatforms[name]?.bg || "bg-gray-700"} items-center justify-center mr-3`}>
-                        <Ionicons name={allPlatforms[name]?.icon || "globe-outline"} size={18} color="#fff" />
+                    <View
+                      key={name}
+                      className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-2 flex-row items-center"
+                    >
+                      <View
+                        className={`w-9 h-9 rounded-full ${allPlatforms[name]?.bg || "bg-gray-700"} items-center justify-center mr-3`}
+                      >
+                        <Ionicons
+                          name={allPlatforms[name]?.icon || "globe-outline"}
+                          size={18}
+                          color="#fff"
+                        />
                       </View>
-                      <Text className="text-white text-sm font-medium flex-1">{name}</Text>
+                      <Text className="text-white text-sm font-medium flex-1">
+                        {name}
+                      </Text>
                       <Text className="text-green-400 font-bold">{count}</Text>
                     </View>
                   ))}
@@ -405,8 +447,12 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
             )}
 
             <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mt-2">
-              <Text className="text-gray-400 text-xs mb-2">CONNECTED PLATFORMS</Text>
-              <Text className="text-white text-xl font-bold">{connectedPlatforms.length}</Text>
+              <Text className="text-gray-400 text-xs mb-2">
+                CONNECTED PLATFORMS
+              </Text>
+              <Text className="text-white text-xl font-bold">
+                {connectedPlatforms.length}
+              </Text>
             </View>
           </ScrollView>
         </View>
@@ -428,8 +474,14 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
     if (settingsScreen === "connectedAccounts") {
       return (
         <ConnectedAccounts
-          onBack={() => { setSettingsScreen(null); fetchPlatforms(); }}
-          onOpenConnectModal={() => { setSettingsScreen(null); setModalVisible(true); }}
+          onBack={() => {
+            setSettingsScreen(null);
+            fetchPlatforms();
+          }}
+          onOpenConnectModal={() => {
+            setSettingsScreen(null);
+            setModalVisible(true);
+          }}
         />
       );
     }
@@ -465,14 +517,20 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
             }
           >
             <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-4">
-              <TouchableOpacity onPress={() => setSettingsScreen("editProfile")} className="flex-row items-center p-4 border-b border-gray-800">
+              <TouchableOpacity
+                onPress={() => setSettingsScreen("editProfile")}
+                className="flex-row items-center p-4 border-b border-gray-800"
+              >
                 <View className="w-9 h-9 rounded-full bg-blue-500/20 items-center justify-center mr-3">
                   <Ionicons name="person-outline" size={18} color="#3b82f6" />
                 </View>
                 <Text className="text-white flex-1 text-sm">Edit Profile</Text>
                 <Ionicons name="chevron-forward" size={16} color="#6b7280" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setSettingsScreen("connectedAccounts")} className="flex-row items-center p-4 border-b border-gray-800">
+              <TouchableOpacity
+                onPress={() => setSettingsScreen("connectedAccounts")}
+                className="flex-row items-center p-4 border-b border-gray-800"
+              >
                 <View className="w-9 h-9 rounded-full bg-green-500/20 items-center justify-center mr-3">
                   <Ionicons name="link-outline" size={18} color="#22c55e" />
                 </View>
@@ -484,7 +542,10 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
                 </Text>
                 <Ionicons name="chevron-forward" size={16} color="#6b7280" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setSettingsScreen("notifications")} className="flex-row items-center p-4">
+              <TouchableOpacity
+                onPress={() => setSettingsScreen("notifications")}
+                className="flex-row items-center p-4"
+              >
                 <View className="w-9 h-9 rounded-full bg-purple-500/20 items-center justify-center mr-3">
                   <Ionicons
                     name="notifications-outline"
@@ -497,7 +558,10 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
               </TouchableOpacity>
             </View>
             <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-4">
-              <TouchableOpacity onPress={() => setSettingsScreen("privacy")} className="flex-row items-center p-4 border-b border-gray-800">
+              <TouchableOpacity
+                onPress={() => setSettingsScreen("privacy")}
+                className="flex-row items-center p-4 border-b border-gray-800"
+              >
                 <View className="w-9 h-9 rounded-full bg-yellow-500/20 items-center justify-center mr-3">
                   <Ionicons name="shield-outline" size={18} color="#eab308" />
                 </View>
@@ -506,7 +570,10 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
                 </Text>
                 <Ionicons name="chevron-forward" size={16} color="#6b7280" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setSettingsScreen("help")} className="flex-row items-center p-4">
+              <TouchableOpacity
+                onPress={() => setSettingsScreen("help")}
+                className="flex-row items-center p-4"
+              >
                 <View className="w-9 h-9 rounded-full bg-gray-500/20 items-center justify-center mr-3">
                   <Ionicons
                     name="help-circle-outline"
@@ -672,7 +739,10 @@ export default function HomePage({ user, onUpdateUser, onLogout, oauthRefreshKey
                         color="#fff"
                       />
                     </View>
-                    <Text className="text-white font-bold mb-1" numberOfLines={1}>
+                    <Text
+                      className="text-white font-bold mb-1"
+                      numberOfLines={1}
+                    >
                       {username || platform}
                     </Text>
                     <Text className="text-green-400 text-xs">{platform}</Text>
