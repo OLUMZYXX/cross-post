@@ -248,6 +248,7 @@ export default function HomePage({
 
   const handleConnectPlatform = async (platformName) => {
     try {
+      console.log(`[${platformName}] Starting OAuth flow...`);
       const oauthMethods = {
         Facebook: () => platformAPI.initiateFacebookAuth(),
         Twitter: () => platformAPI.initiateTwitterAuth(),
@@ -259,8 +260,12 @@ export default function HomePage({
       };
 
       if (oauthMethods[platformName]) {
-        const { data } = await oauthMethods[platformName]();
-        await Linking.openURL(data.authUrl);
+        console.log(`[${platformName}] Calling API initiate method...`);
+        const response = await oauthMethods[platformName]();
+        console.log(`[${platformName}] API response:`, JSON.stringify(response, null, 2));
+        console.log(`[${platformName}] Auth URL:`, response.data.authUrl);
+        await Linking.openURL(response.data.authUrl);
+        console.log(`[${platformName}] Opened auth URL in browser`);
         setModalVisible(false);
         return;
       }
@@ -274,6 +279,9 @@ export default function HomePage({
         message: `Your ${platformName} account has been linked.`,
       });
     } catch (err) {
+      console.error(`[${platformName}] Connection error:`, err);
+      console.error(`[${platformName}] Error message:`, err.message);
+      console.error(`[${platformName}] Error code:`, err.code);
       showToast({
         type: "error",
         title: "Connection failed",
