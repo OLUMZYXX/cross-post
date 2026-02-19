@@ -128,10 +128,7 @@ export async function handleFacebookCallback(req, res) {
       `https://graph.facebook.com/me/permissions?access_token=${tokenData.access_token}`,
     );
     const permissionsData = await permissionsResponse.json();
-    // console.log(
-      "Facebook granted permissions:",
-      JSON.stringify(permissionsData, null, 2),
-    );
+    // console.log("Facebook granted permissions:", JSON.stringify(permissionsData, null, 2));
 
     // Fetch user's Facebook Pages to store page access token for publishing
     let pageId = null;
@@ -231,9 +228,7 @@ export async function handleFacebookCallback(req, res) {
     pageAccessToken = firstPage.access_token;
 
     const pageNames = pages.map((p) => p.name).join(", ");
-    // console.log(
-      `Facebook Pages found: ${pages.length} pages — ${pageNames}`,
-    );
+    // console.log(`Facebook Pages found: ${pages.length} pages — ${pageNames}`);
 
     const existing = await Platform.findOne({
       userId: stateData.userId,
@@ -395,9 +390,7 @@ export async function selectFacebookPage(req, res) {
 
   await platform.save();
 
-  // console.log(
-    `Facebook pages updated: ${platform.selectedPageIds.length} selected — ${selectedNames.join(", ")}`,
-  );
+  // console.log(`Facebook pages updated: ${platform.selectedPageIds.length} selected — ${selectedNames.join(", ")}`);
 
   res.json({
     success: true,
