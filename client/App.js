@@ -80,13 +80,13 @@ export default function App() {
     return () => subscription?.remove();
   }, []);
 
-  // Check biometric lock when app comes to foreground
+  // Check biometric lock when app comes to foreground from background.
+  // We intentionally only check "background → active" (not "inactive → active")
+  // because system dialogs like the biometric/password prompt cause "inactive"
+  // briefly — triggering the lock again would create an endless password loop.
   useEffect(() => {
     const subscription = AppState.addEventListener("change", async (nextState) => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextState === "active"
-      ) {
+      if (appState.current === "background" && nextState === "active") {
         const enabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
         const token = await getToken();
         if (enabled === "true" && token) {
