@@ -4,7 +4,7 @@ import {
   publishToAllPlatforms,
   deleteFromAllPlatforms,
 } from "../services/publishPost.js";
-import { SERVER_URL } from "../config/env.js";
+import { SERVER_URL, OPENAI_API_KEY } from "../config/env.js";
 import { uploadToGridFS, deleteFromGridFS } from "../utils/gridfs.js";
 
 export async function listPosts(req, res) {
@@ -163,4 +163,77 @@ export async function schedulePost(req, res) {
   await post.save();
 
   res.json({ success: true, data: { post } });
+}
+
+export async function rephraseCaption(req, res) {
+  const { caption, tone } = req.body;
+
+  if (!caption || !caption.trim()) {
+    throw Errors.badRequest("Caption is required");
+  }
+
+  if (!OPENAI_API_KEY) {
+    throw Errors.badRequest(
+      "AI rephrasing is not configured. Add OPENAI_API_KEY to your environment variables.",
+    );
+  }
+
+  const toneInstructions = {
+    professional:
+      "Rewrite this social media post in a professional, polished tone. Keep it concise and business-appropriate.",
+    casual:
+      "Rewrite this social media post in a casual, relaxed tone. Make it feel like a conversation with a friend.",
+    friendly:
+      "Rewrite this social media post in a warm, friendly and approachable tone. Make it feel inviting.",
+    witty:
+      "Rewrite this social media post in a witty, clever tone. Add a touch of humor while keeping the message clear.",
+    bold:
+      "Rewrite this social media post in a bold, confident and attention-grabbing tone. Make it stand out.",
+    inspirational:
+      "Rewrite this social media post in an inspirational, motivating tone. Make the reader feel empowered.",
+  };
+
+  const instruction =
+    toneInstructions[tone] ||
+    "Rewrite this social media post to sound better while keeping the same meaning.";
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a social media copywriter. You only return the rewritten post text — no quotes, no explanation, no hashtags unless the original had them. Keep it under 500 characters.",
+        },
+        {
+          role: "user",
+          content: `${instruction}\n\nOriginal post:\n${caption}`,
+        },
+      ],
+      max_tokens: 300,
+      temperature: 0.8,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw Errors.badRequest(
+      err?.error?.message || "AI service request failed",
+    );
+  }
+
+  const data = await response.json();
+  const rephrased = data.choices?.[0]?.message?.content?.trim();
+
+  if (!rephrased) {
+    throw Errors.badRequest("AI returned an empty response. Try again.");
+  }
+
+  res.json({ success: true, data: { rephrased } });
 }

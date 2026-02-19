@@ -7,12 +7,22 @@ import {
   TextInput,
   Image,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useToast } from "./Toast";
 import { postAPI } from "../services/api";
+
+const TONE_OPTIONS = [
+  { key: "professional", label: "Professional", icon: "briefcase-outline", color: "#3b82f6" },
+  { key: "casual", label: "Casual", icon: "cafe-outline", color: "#f59e0b" },
+  { key: "friendly", label: "Friendly", icon: "heart-outline", color: "#ec4899" },
+  { key: "witty", label: "Witty", icon: "bulb-outline", color: "#a855f7" },
+  { key: "bold", label: "Bold", icon: "flash-outline", color: "#ef4444" },
+  { key: "inspirational", label: "Inspirational", icon: "sparkles-outline", color: "#14b8a6" },
+];
 
 function pad(n) {
   return String(n).padStart(2, "0");
@@ -268,7 +278,38 @@ export default function CreatePost({
   const [mediaType, setMediaType] = useState(initialDraft?.mediaType || null);
   const [isPosting, setIsPosting] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showRephraseModal, setShowRephraseModal] = useState(false);
+  const [isRephrasing, setIsRephrasing] = useState(false);
+  const [rephrasedText, setRephrasedText] = useState(null);
+  const [selectedTone, setSelectedTone] = useState(null);
   const { showToast } = useToast();
+
+  const handleRephrase = async (tone) => {
+    if (!caption.trim()) {
+      showToast({ type: "warning", title: "Nothing to rephrase", message: "Write something first." });
+      return;
+    }
+    setSelectedTone(tone);
+    setIsRephrasing(true);
+    setRephrasedText(null);
+    try {
+      const { data } = await postAPI.rephrase(caption, tone);
+      setRephrasedText(data.rephrased);
+    } catch (err) {
+      showToast({ type: "error", title: "Rephrase failed", message: err.message });
+    } finally {
+      setIsRephrasing(false);
+    }
+  };
+
+  const applyRephrase = () => {
+    if (rephrasedText) {
+      setCaption(rephrasedText);
+    }
+    setShowRephraseModal(false);
+    setRephrasedText(null);
+    setSelectedTone(null);
+  };
 
   const togglePlatform = (platform) => {
     if (selectedPlatforms.includes(platform)) {
@@ -552,12 +593,28 @@ export default function CreatePost({
             <Text className="text-gray-500 text-xs">{caption.length}/500</Text>
             <View className="flex-row items-center">
               <TouchableOpacity
+                onPress={() => {
+                  if (!caption.trim()) {
+                    showToast({ type: "warning", title: "Nothing to rephrase", message: "Write something first." });
+                    return;
+                  }
+                  setRephrasedText(null);
+                  setSelectedTone(null);
+                  setShowRephraseModal(true);
+                }}
+                disabled={isPosting}
+                className="flex-row items-center bg-purple-500/20 rounded-full px-4 py-2 mr-2"
+              >
+                <Ionicons name="sparkles" size={18} color="#a855f7" />
+                <Text className="text-purple-400 text-xs font-medium ml-2">Rephrase</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
                 onPress={handleMediaSelect}
                 disabled={isPosting}
                 className="flex-row items-center bg-gray-800 rounded-full px-4 py-2 mr-2"
               >
                 <Ionicons name="images-outline" size={18} color="#4ade80" />
-                <Text className="text-green-400 text-xs font-medium ml-2">Add Media</Text>
+                <Text className="text-green-400 text-xs font-medium ml-2">Media</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSaveDraft}
@@ -565,7 +622,6 @@ export default function CreatePost({
                 className="flex-row items-center bg-gray-800 rounded-full px-4 py-2"
               >
                 <Ionicons name="bookmark-outline" size={18} color="#f59e0b" />
-                <Text className="text-yellow-400 text-xs font-medium ml-2">Draft</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -673,6 +729,92 @@ export default function CreatePost({
         onPostNow={publishNow}
         onSchedule={schedulePost}
       />
+
+      <Modal visible={showRephraseModal} transparent animationType="slide" onRequestClose={() => setShowRephraseModal(false)}>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setShowRephraseModal(false)}
+          className="flex-1 bg-black/60 justify-end"
+        >
+          <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+            <View className="bg-gray-900 rounded-t-3xl px-6 pt-5 pb-10 border-t border-gray-800">
+              <View className="w-10 h-1 bg-gray-700 rounded-full self-center mb-5" />
+              <View className="flex-row items-center mb-5">
+                <Ionicons name="sparkles" size={22} color="#a855f7" />
+                <Text className="text-white text-lg font-bold ml-2">Rephrase with AI</Text>
+              </View>
+
+              <Text className="text-gray-400 text-xs mb-3">CHOOSE A TONE</Text>
+              <View className="flex-row flex-wrap mb-4">
+                {TONE_OPTIONS.map((tone) => (
+                  <TouchableOpacity
+                    key={tone.key}
+                    onPress={() => handleRephrase(tone.key)}
+                    disabled={isRephrasing}
+                    className={`flex-row items-center mr-2 mb-2 px-3.5 py-2.5 rounded-full border ${
+                      selectedTone === tone.key
+                        ? "border-purple-500 bg-purple-500/20"
+                        : "border-gray-700 bg-gray-800"
+                    }`}
+                  >
+                    <Ionicons
+                      name={tone.icon}
+                      size={14}
+                      color={selectedTone === tone.key ? tone.color : "#9ca3af"}
+                    />
+                    <Text
+                      className={`text-xs font-medium ml-1.5 ${
+                        selectedTone === tone.key ? "text-purple-300" : "text-gray-400"
+                      }`}
+                    >
+                      {tone.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {isRephrasing && (
+                <View className="bg-gray-800 rounded-2xl p-5 items-center mb-4">
+                  <ActivityIndicator color="#a855f7" />
+                  <Text className="text-gray-400 text-xs mt-2">Rephrasing...</Text>
+                </View>
+              )}
+
+              {rephrasedText && !isRephrasing && (
+                <View className="mb-4">
+                  <Text className="text-gray-400 text-xs mb-2">RESULT</Text>
+                  <View className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
+                    <Text className="text-white text-sm leading-5">{rephrasedText}</Text>
+                  </View>
+                  <View className="flex-row mt-3">
+                    <TouchableOpacity
+                      onPress={applyRephrase}
+                      className="flex-1 bg-purple-500 py-3 rounded-xl mr-2"
+                    >
+                      <Text className="text-white text-center font-bold text-sm">Use This</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleRephrase(selectedTone)}
+                      className="flex-1 bg-gray-800 py-3 rounded-xl border border-gray-700"
+                    >
+                      <Text className="text-gray-300 text-center font-bold text-sm">Try Again</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {!rephrasedText && !isRephrasing && (
+                <View className="bg-gray-800/50 rounded-2xl p-4 items-center">
+                  <Ionicons name="sparkles-outline" size={24} color="#6b7280" />
+                  <Text className="text-gray-500 text-xs mt-2 text-center">
+                    Pick a tone above to rephrase your post
+                  </Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }

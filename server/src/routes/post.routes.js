@@ -10,6 +10,7 @@ import {
   deletePost,
   publishPost,
   schedulePost,
+  rephraseCaption,
 } from "../controllers/post.controller.js";
 
 const router = express.Router();
@@ -27,6 +28,7 @@ router.get("/:id", asyncHandler(getPost));
 router.post("/", upload.array("media"), asyncHandler(createPost));
 router.put("/:id", asyncHandler(updatePost));
 router.delete("/:id", asyncHandler(deletePost));
+router.post("/rephrase", asyncHandler(rephraseCaption));
 router.post("/:id/publish", asyncHandler(publishPost));
 router.post("/:id/schedule", asyncHandler(schedulePost));
 

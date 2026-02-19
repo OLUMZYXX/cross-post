@@ -124,6 +124,8 @@ export const postAPI = {
 
   schedule: (id, scheduledAt) =>
     api.post(`/posts/${id}/schedule`, { scheduledAt }),
+
+  rephrase: (caption, tone) => api.post("/posts/rephrase", { caption, tone }),
 };
 
 export const platformAPI = {

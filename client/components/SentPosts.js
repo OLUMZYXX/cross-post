@@ -182,11 +182,13 @@ export default function SentPosts({
 
                   <View className="flex-row flex-wrap mb-3">
                     {(post.platforms || []).map((platform) => {
+                      const baseName = platform.split(":")[0];
                       const result = (post.publishResults || []).find(
-                        (r) => r.platform === platform,
+                        (r) => r.platform === baseName || r.platform === platform,
                       );
                       const succeeded = result?.success;
                       const failed = result && !result.success;
+                      const style = allPlatforms[baseName];
 
                       return (
                         <View
@@ -197,14 +199,14 @@ export default function SentPosts({
                               : "bg-gray-800"
                           }`}
                         >
-                          {allPlatforms[platform] && (
+                          {style && (
                             <Ionicons
-                              name={allPlatforms[platform].icon}
+                              name={style.icon}
                               size={12}
                               color={
                                 failed
                                   ? "#ef4444"
-                                  : allPlatforms[platform].color
+                                  : style.color
                               }
                             />
                           )}
@@ -213,7 +215,7 @@ export default function SentPosts({
                               failed ? "text-red-400" : "text-gray-400"
                             }`}
                           >
-                            {platform}
+                            {baseName}
                           </Text>
                           {succeeded && (
                             <Ionicons
