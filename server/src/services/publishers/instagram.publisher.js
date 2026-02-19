@@ -57,11 +57,15 @@ export async function publishToInstagram(platform, post) {
   );
 
   const containerData = await containerRes.json();
-  console.log("Instagram container response:", JSON.stringify(containerData, null, 2));
+  console.log(
+    "Instagram container response:",
+    JSON.stringify(containerData, null, 2),
+  );
 
   if (containerData.error) {
     throw new Error(
-      containerData.error.message || "Failed to create Instagram media container",
+      containerData.error.message ||
+        "Failed to create Instagram media container",
     );
   }
 
@@ -81,7 +85,9 @@ export async function publishToInstagram(platform, post) {
     const statusData = await statusRes.json();
     status = statusData.status_code;
     attempts++;
-    console.log(`Instagram container processing: ${status} (attempt ${attempts})`);
+    console.log(
+      `Instagram container processing: ${status} (attempt ${attempts})`,
+    );
   }
 
   if (status !== "FINISHED") {
@@ -104,7 +110,10 @@ export async function publishToInstagram(platform, post) {
   );
 
   const publishData = await publishRes.json();
-  console.log("Instagram publish response:", JSON.stringify(publishData, null, 2));
+  console.log(
+    "Instagram publish response:",
+    JSON.stringify(publishData, null, 2),
+  );
 
   if (publishData.error) {
     throw new Error(

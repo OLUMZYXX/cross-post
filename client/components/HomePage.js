@@ -543,7 +543,7 @@ export default function HomePage({
       return <NotificationSettings onBack={() => setSettingsScreen(null)} />;
     }
     if (settingsScreen === "privacy") {
-      return <PrivacySecurity onBack={() => setSettingsScreen(null)} />;
+      return <PrivacySecurity onBack={() => setSettingsScreen(null)} user={user} />;
     }
     if (settingsScreen === "help") {
       return <HelpSupport onBack={() => setSettingsScreen(null)} />;

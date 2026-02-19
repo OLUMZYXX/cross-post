@@ -67,7 +67,8 @@ export async function publishToTikTok(platform, post) {
 export async function deleteFromTikTok(platform, externalId) {
   const { accessToken } = platform;
   if (!accessToken) throw new Error("No access token for TikTok deletion");
-  if (!externalId) throw new Error("No externalId provided for TikTok deletion");
+  if (!externalId)
+    throw new Error("No externalId provided for TikTok deletion");
 
   // Best-effort deletion via TikTok API; endpoint may vary by integration
   try {
@@ -82,7 +83,11 @@ export async function deleteFromTikTok(platform, externalId) {
 
     const data = await res.json().catch(() => null);
     if (!res.ok || data?.error) {
-      throw new Error(data?.message || data?.error_description || "Failed to delete TikTok post");
+      throw new Error(
+        data?.message ||
+          data?.error_description ||
+          "Failed to delete TikTok post",
+      );
     }
 
     return true;

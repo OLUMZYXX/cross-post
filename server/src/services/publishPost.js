@@ -165,19 +165,31 @@ export async function deleteFromAllPlatforms(userId, post) {
     const externalId = pr.externalId;
 
     if (!externalId || !pr.success) {
-      results.push({ platform: platformName, success: false, error: "No external id or not published" });
+      results.push({
+        platform: platformName,
+        success: false,
+        error: "No external id or not published",
+      });
       continue;
     }
 
     const platform = connectedPlatforms.find((p) => p.name === platformName);
     if (!platform) {
-      results.push({ platform: platformName, success: false, error: "Platform not connected" });
+      results.push({
+        platform: platformName,
+        success: false,
+        error: "Platform not connected",
+      });
       continue;
     }
 
     const deleter = deleters[platformName];
     if (!deleter) {
-      results.push({ platform: platformName, success: false, error: "Deletion not supported for this platform" });
+      results.push({
+        platform: platformName,
+        success: false,
+        error: "Deletion not supported for this platform",
+      });
       continue;
     }
 
@@ -191,7 +203,11 @@ export async function deleteFromAllPlatforms(userId, post) {
       results.push({ platform: platformName, success: true });
     } catch (err) {
       console.error(`Failed to delete on ${platformName}:`, err.message || err);
-      results.push({ platform: platformName, success: false, error: err.message || String(err) });
+      results.push({
+        platform: platformName,
+        success: false,
+        error: err.message || String(err),
+      });
     }
   }
 

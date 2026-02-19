@@ -77,7 +77,12 @@ export async function publishToFacebook(platform, post) {
   // Determine which pages to post to
   let pagesToPost = [];
 
-  if (pages && pages.length > 0 && selectedPageIds && selectedPageIds.length > 0) {
+  if (
+    pages &&
+    pages.length > 0 &&
+    selectedPageIds &&
+    selectedPageIds.length > 0
+  ) {
     // Multi-page mode: post to all selected pages
     pagesToPost = pages.filter((p) => selectedPageIds.includes(p.pageId));
   }
@@ -150,14 +155,25 @@ export async function publishToFacebook(platform, post) {
   return results;
 }
 
-export async function deleteFromFacebook(platform, externalId, pageAccessToken) {
+export async function deleteFromFacebook(
+  platform,
+  externalId,
+  pageAccessToken,
+) {
   // Use the page-specific token if provided, otherwise fall back to platform tokens
-  const token = pageAccessToken || platform.pageAccessToken || platform.accessToken;
-  if (!token) throw new Error("No page or user access token available for Facebook deletion");
+  const token =
+    pageAccessToken || platform.pageAccessToken || platform.accessToken;
+  if (!token)
+    throw new Error(
+      "No page or user access token available for Facebook deletion",
+    );
 
-  const res = await fetch(`https://graph.facebook.com/v18.0/${externalId}?access_token=${token}`, {
-    method: "DELETE",
-  });
+  const res = await fetch(
+    `https://graph.facebook.com/v18.0/${externalId}?access_token=${token}`,
+    {
+      method: "DELETE",
+    },
+  );
 
   const data = await res.json().catch(() => null);
   if (!res.ok || (data && data.error)) {

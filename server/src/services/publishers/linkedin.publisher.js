@@ -58,16 +58,22 @@ export async function publishToLinkedIn(platform, post) {
 export async function deleteFromLinkedIn(platform, externalId) {
   const { accessToken } = platform;
   if (!accessToken) throw new Error("No access token for LinkedIn deletion");
-  if (!externalId) throw new Error("No externalId provided for LinkedIn deletion");
+  if (!externalId)
+    throw new Error("No externalId provided for LinkedIn deletion");
 
-  const res = await fetch(`https://api.linkedin.com/v2/ugcPosts/${externalId}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  const res = await fetch(
+    `https://api.linkedin.com/v2/ugcPosts/${externalId}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data?.message || `Failed to delete LinkedIn post: ${res.status}`);
+    throw new Error(
+      data?.message || `Failed to delete LinkedIn post: ${res.status}`,
+    );
   }
 
   return true;

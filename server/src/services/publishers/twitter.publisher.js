@@ -35,17 +35,21 @@ export async function publishToTwitter(platform, post) {
 export async function deleteFromTwitter(platform, externalId) {
   const { accessToken } = platform;
 
-  const response = await fetch(`https://api.twitter.com/2/tweets/${externalId}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
+  const response = await fetch(
+    `https://api.twitter.com/2/tweets/${externalId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     },
-  });
+  );
 
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const msg = data?.title || data?.detail || data?.error || "Failed to delete tweet";
+    const msg =
+      data?.title || data?.detail || data?.error || "Failed to delete tweet";
     throw new Error(msg);
   }
 

@@ -1,20 +1,24 @@
 import "./global.css";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ActivityIndicator, View, Linking } from "react-native";
+import { ActivityIndicator, View, Linking, AppState } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import HomePage from "./components/HomePage";
 import Onboarding from "./components/Onboarding";
+import BiometricLock from "./components/BiometricLock";
 import { ToastProvider } from "./components/Toast";
 import { authAPI, platformAPI, getToken, clearToken } from "./services/api";
 
 const ONBOARDING_KEY = "@crosspost_onboarded";
+const BIOMETRIC_KEY = "@crosspost_biometric_enabled";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState(null);
   const [user, setUser] = useState(null);
   const [oauthRefreshKey, setOauthRefreshKey] = useState(0);
+  const [biometricLocked, setBiometricLocked] = useState(false);
+  const appState = useRef(AppState.currentState);
 
   useEffect(() => {
     const handleDeepLink = async (event) => {
@@ -76,6 +80,25 @@ export default function App() {
     return () => subscription?.remove();
   }, []);
 
+  // Check biometric lock when app comes to foreground
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", async (nextState) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextState === "active"
+      ) {
+        const enabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
+        const token = await getToken();
+        if (enabled === "true" && token) {
+          setBiometricLocked(true);
+        }
+      }
+      appState.current = nextState;
+    });
+
+    return () => subscription?.remove();
+  }, []);
+
   useEffect(() => {
     (async () => {
       const onboarded = await AsyncStorage.getItem(ONBOARDING_KEY);
@@ -91,6 +114,13 @@ export default function App() {
           const { data } = await authAPI.getMe();
           setUser(data.user);
           setCurrentScreen("home");
+
+          // Check if biometric lock should show on initial load
+          const biometricEnabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
+          if (biometricEnabled === "true") {
+            setBiometricLocked(true);
+          }
+
           return;
         } catch {
           await clearToken();
@@ -160,5 +190,12 @@ export default function App() {
     return null;
   };
 
-  return <ToastProvider>{renderScreen()}</ToastProvider>;
+  return (
+    <ToastProvider>
+      {renderScreen()}
+      {biometricLocked && (
+        <BiometricLock onUnlock={() => setBiometricLocked(false)} />
+      )}
+    </ToastProvider>
+  );
 }

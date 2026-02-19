@@ -1,6 +1,9 @@
 import Post from "../models/Post.js";
 import { Errors } from "../utils/AppError.js";
-import { publishToAllPlatforms, deleteFromAllPlatforms } from "../services/publishPost.js";
+import {
+  publishToAllPlatforms,
+  deleteFromAllPlatforms,
+} from "../services/publishPost.js";
 import { SERVER_URL } from "../config/env.js";
 import { uploadToGridFS, deleteFromGridFS } from "../utils/gridfs.js";
 
