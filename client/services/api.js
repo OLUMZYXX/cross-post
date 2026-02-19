@@ -92,6 +92,20 @@ export const postAPI = {
   get: (id) => api.get(`/posts/${id}`),
 
   create: ({ caption, media, platforms, status }) => {
+    // If media items have cloudinaryUrl, send as JSON with URLs (no file upload needed)
+    const hasCloudinaryUrls =
+      media && media.length > 0 && media.every((m) => m.cloudinaryUrl);
+
+    if (hasCloudinaryUrls) {
+      return api.post("/posts", {
+        caption,
+        status,
+        platforms,
+        mediaUrls: media.map((m) => m.cloudinaryUrl),
+      });
+    }
+
+    // Fallback: upload raw files via FormData
     const formData = new FormData();
     if (caption) formData.append("caption", caption);
     if (status) formData.append("status", status);

@@ -26,17 +26,21 @@ export async function getPost(req, res) {
 }
 
 export async function createPost(req, res) {
-  const { caption, platforms, status } = req.body;
+  const { caption, platforms, status, mediaUrls: cloudinaryUrls } = req.body;
 
-  // Upload files to MongoDB GridFS
+  // Use Cloudinary URLs if provided, otherwise upload files to GridFS
   const mediaUrls = [];
-  for (const file of req.files || []) {
-    const { fileId } = await uploadToGridFS(
-      file.buffer,
-      file.originalname,
-      file.mimetype,
-    );
-    mediaUrls.push(`${SERVER_URL}/media/${fileId}`);
+  if (cloudinaryUrls && cloudinaryUrls.length > 0) {
+    mediaUrls.push(...cloudinaryUrls);
+  } else {
+    for (const file of req.files || []) {
+      const { fileId } = await uploadToGridFS(
+        file.buffer,
+        file.originalname,
+        file.mimetype,
+      );
+      mediaUrls.push(`${SERVER_URL}/media/${fileId}`);
+    }
   }
 
   // platforms may come as a single string or array from FormData

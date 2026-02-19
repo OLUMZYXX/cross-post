@@ -12,8 +12,10 @@ import {
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import * as VideoThumbnails from "expo-video-thumbnails";
 import { useToast } from "./Toast";
 import { postAPI } from "../services/api";
+import { uploadToCloudinary } from "../services/cloudinary";
 
 const TONE_OPTIONS = [
   { key: "professional", label: "Professional", icon: "briefcase-outline", color: "#3b82f6" },
@@ -276,6 +278,7 @@ export default function CreatePost({
   );
   const [selectedMedia, setSelectedMedia] = useState(initialDraft?.media || []);
   const [mediaType, setMediaType] = useState(initialDraft?.mediaType || null);
+  const [isUploading, setIsUploading] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showRephraseModal, setShowRephraseModal] = useState(false);
@@ -486,30 +489,55 @@ export default function CreatePost({
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images", "videos"],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
+      allowsEditing: false,
+      quality: 1,
     });
 
     if (!result.canceled) {
       const asset = result.assets[0];
       const type = asset.type === "video" ? "video" : "image";
+
+      // Generate thumbnail for videos
+      let thumbnail = null;
+      if (type === "video") {
+        try {
+          const { uri: thumbUri } = await VideoThumbnails.getThumbnailAsync(
+            asset.uri,
+            { time: 500 },
+          );
+          thumbnail = thumbUri;
+        } catch {}
+      }
+
+      const mediaItem = {
+        type,
+        uri: asset.uri,
+        thumbnail,
+        name: asset.fileName || `selected_${type}.${type === "image" ? "jpg" : "mp4"}`,
+        width: asset.width,
+        height: asset.height,
+      };
+
       setMediaType(type);
-      setSelectedMedia([
-        {
-          type,
-          uri: asset.uri,
-          name: asset.fileName || `selected_${type}.${type === "image" ? "jpg" : "mp4"}`,
-          width: asset.width,
-          height: asset.height,
-        },
-      ]);
+      setIsUploading(true);
+
+      // Upload to Cloudinary for optimization
+      try {
+        const { url } = await uploadToCloudinary(asset.uri, type);
+        mediaItem.cloudinaryUrl = url;
+      } catch {
+        // Cloudinary upload failed — keep local URI as fallback
+      }
+
+      setSelectedMedia([mediaItem]);
+      setIsUploading(false);
     }
   };
 
   const removeMedia = () => {
     setSelectedMedia([]);
     setMediaType(null);
+    setIsUploading(false);
   };
 
   return (
@@ -533,11 +561,11 @@ export default function CreatePost({
           <Text className="text-white text-lg font-bold">Create Post</Text>
           <TouchableOpacity
             onPress={handlePostPress}
-            disabled={isPosting}
-            className={`px-5 py-2.5 rounded-xl ${isPosting ? "bg-green-500/50" : "bg-green-500"}`}
+            disabled={isPosting || isUploading}
+            className={`px-5 py-2.5 rounded-xl ${isPosting || isUploading ? "bg-green-500/50" : "bg-green-500"}`}
           >
             <Text className="text-gray-950 font-bold text-sm">
-              {isPosting ? "Posting..." : "Post"}
+              {isPosting ? "Posting..." : isUploading ? "Uploading..." : "Post"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -570,12 +598,30 @@ export default function CreatePost({
                     className="w-full h-48"
                     resizeMode="cover"
                   />
+                ) : selectedMedia[0].thumbnail ? (
+                  <View className="w-full h-48">
+                    <Image
+                      source={{ uri: selectedMedia[0].thumbnail }}
+                      className="w-full h-full"
+                      resizeMode="cover"
+                    />
+                    <View className="absolute inset-0 items-center justify-center">
+                      <View className="w-14 h-14 rounded-full bg-black/50 items-center justify-center">
+                        <Ionicons name="play" size={28} color="#fff" />
+                      </View>
+                    </View>
+                  </View>
                 ) : (
                   <View className="w-full h-48 bg-gray-800 items-center justify-center">
-                    <View className="w-16 h-16 rounded-full bg-gray-700 items-center justify-center mb-2">
-                      <Ionicons name="play" size={32} color="#fff" />
+                    <View className="w-14 h-14 rounded-full bg-gray-700 items-center justify-center">
+                      <Ionicons name="play" size={28} color="#fff" />
                     </View>
-                    <Text className="text-gray-400 text-xs">{selectedMedia[0].name}</Text>
+                  </View>
+                )}
+                {isUploading && (
+                  <View className="absolute inset-0 bg-black/40 items-center justify-center">
+                    <ActivityIndicator color="#4ade80" size="large" />
+                    <Text className="text-white text-xs mt-2 font-medium">Optimizing...</Text>
                   </View>
                 )}
                 <TouchableOpacity
@@ -702,6 +748,19 @@ export default function CreatePost({
                             className="w-full h-full"
                             resizeMode="cover"
                           />
+                        ) : selectedMedia[0].thumbnail ? (
+                          <View className="w-full h-full">
+                            <Image
+                              source={{ uri: selectedMedia[0].thumbnail }}
+                              className="w-full h-full"
+                              resizeMode="cover"
+                            />
+                            <View className="absolute inset-0 items-center justify-center">
+                              <View className="w-10 h-10 rounded-full bg-black/50 items-center justify-center">
+                                <Ionicons name="play" size={20} color="#fff" />
+                              </View>
+                            </View>
+                          </View>
                         ) : (
                           <View className="items-center">
                             <Ionicons name="videocam" size={36} color="#9ca3af" />
