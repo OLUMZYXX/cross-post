@@ -1,9 +1,10 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_BASE_URL } from "../config/apiConfig";
 
 const TOKEN_KEY = "@crosspost_token";
 
-const BASE_URL = "http://192.168.1.40:4000/api";
+const BASE_URL = API_BASE_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,
