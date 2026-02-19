@@ -28,9 +28,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
   const [pagePickerVisible, setPagePickerVisible] = useState(false);
   const [fbPages, setFbPages] = useState([]);
   const [loadingPages, setLoadingPages] = useState(false);
-  const [switchingPageId, setSwitchingPageId] = useState(null);
-  const [fbLoginModalVisible, setFbLoginModalVisible] = useState(false);
-  const [fbLoginErrorMessage, setFbLoginErrorMessage] = useState("");
+  const [togglingPageId, setTogglingPageId] = useState(null);
   const { showToast } = useToast();
 
   const fetchPlatforms = useCallback(async () => {
@@ -65,55 +63,51 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
       setFbPages(data.pages);
     } catch (err) {
       showToast({ type: "error", title: "Failed", message: err.message });
-      const msg = err?.message || "Failed to fetch Facebook pages";
-      setFbLoginErrorMessage(msg);
-      setFbLoginModalVisible(true);
       setPagePickerVisible(false);
     } finally {
       setLoadingPages(false);
     }
   };
 
-  const handleFacebookReauth = async () => {
+  const handleTogglePage = async (pageId, currentlySelected) => {
+    setTogglingPageId(pageId);
     try {
-      const { data } = await platformAPI.initiateFacebookAuth(true);
-      await Linking.openURL(data.authUrl);
-      setFbLoginModalVisible(false);
-    } catch (err) {
-      showToast({ type: "error", title: "Failed", message: err.message });
-    }
-  };
+      const newSelected = !currentlySelected;
+      await platformAPI.toggleFacebookPage(pageId, newSelected);
 
-  const handleFacebookDebug = async () => {
-    try {
-      const { data } = await platformAPI.getFacebookDebug();
-      const accountsCount = data.accounts?.data?.length || 0;
-      const isValid = data.debug?.data?.is_valid ? "valid" : "invalid";
-      const scopes = (data.debug?.data?.scopes || []).join(", ");
-      alert(
-        `Saved pageId: ${data.platform.pageId || "none"}\nPages returned by Graph API: ${accountsCount}\nToken: ${isValid}\nScopes: ${scopes}`,
+      // Update local state
+      setFbPages((prev) =>
+        prev.map((p) =>
+          p.id === pageId ? { ...p, isSelected: newSelected } : p,
+        ),
       );
-    } catch (err) {
-      showToast({ type: "error", title: "Failed", message: err.message });
-    }
-  };
 
-  const handleSelectPage = async (pageId) => {
-    setSwitchingPageId(pageId);
-    try {
-      const { data } = await platformAPI.selectFacebookPage(pageId);
+      const pageName = fbPages.find((p) => p.id === pageId)?.name || pageId;
       showToast({
         type: "success",
-        title: "Page switched",
-        message: `Now connected to "${data.pageName}"`,
+        title: newSelected ? "Page enabled" : "Page disabled",
+        message: newSelected
+          ? `"${pageName}" will be included when posting`
+          : `"${pageName}" will not be included when posting`,
       });
-      setPagePickerVisible(false);
-      fetchPlatforms();
     } catch (err) {
       showToast({ type: "error", title: "Failed", message: err.message });
     } finally {
-      setSwitchingPageId(null);
+      setTogglingPageId(null);
     }
+  };
+
+  const handleClosePagePicker = () => {
+    setPagePickerVisible(false);
+    fetchPlatforms(); // Refresh to update displayed username
+  };
+
+  const getFbSelectedCount = (platform) => {
+    if (platform.name !== "Facebook") return null;
+    const selected = platform.selectedPageIds?.length || 0;
+    const total = platform.pages?.length || 0;
+    if (total === 0) return null;
+    return `${selected}/${total} pages`;
   };
 
   return (
@@ -139,6 +133,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
         >
           {platforms.map((platform) => {
             const style = PLATFORM_STYLES[platform.name] || {};
+            const pageInfo = getFbSelectedCount(platform);
             return (
               <View
                 key={platform._id}
@@ -163,14 +158,8 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                     </Text>
                     <Text className="text-gray-500 text-xs">
                       {platform.name}
+                      {pageInfo ? ` · ${pageInfo}` : ""}
                     </Text>
-                    {platform.name === "Facebook" ? (
-                      <Text className="text-gray-400 text-xs mt-1">
-                        {platform.pageId
-                          ? "Page connected"
-                          : "No Page connected — create/link a Facebook Page to publish posts"}
-                      </Text>
-                    ) : null}
                   </View>
                   <TouchableOpacity
                     onPress={() => handleDisconnect(platform)}
@@ -187,13 +176,9 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                     onPress={handleOpenPagePicker}
                     className="mt-3 bg-blue-500/10 py-2.5 rounded-lg border border-blue-500/20 flex-row items-center justify-center"
                   >
-                    <Ionicons
-                      name="swap-horizontal"
-                      size={16}
-                      color="#3b82f6"
-                    />
+                    <Ionicons name="list" size={16} color="#3b82f6" />
                     <Text className="text-blue-400 text-xs font-medium ml-2">
-                      Switch Page
+                      Manage Pages
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -218,15 +203,15 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
         animationType="slide"
         transparent={true}
         visible={pagePickerVisible}
-        onRequestClose={() => setPagePickerVisible(false)}
+        onRequestClose={handleClosePagePicker}
       >
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-gray-900 rounded-3xl p-6 w-80 max-h-96">
             <Text className="text-white text-lg font-bold mb-2">
-              Select Facebook Page
+              Facebook Pages
             </Text>
             <Text className="text-gray-400 text-xs mb-4">
-              Choose which page to post to
+              Select which pages to post to when publishing
             </Text>
 
             {loadingPages ? (
@@ -236,9 +221,8 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
             ) : fbPages.length === 0 ? (
               <View className="py-6 px-2 items-center">
                 <Text className="text-gray-400 text-sm text-center mb-4">
-                  We couldn't find any Facebook Pages on your account. Make sure
-                  you logged into the Facebook account that manages a Page, or
-                  create a new Page and then try again.
+                  No Facebook Pages found. Make sure you gave access to your
+                  pages during Facebook login, or create a new Page.
                 </Text>
                 <TouchableOpacity
                   onPress={() =>
@@ -256,8 +240,8 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                 {fbPages.map((page) => (
                   <TouchableOpacity
                     key={page.id}
-                    onPress={() => handleSelectPage(page.id)}
-                    disabled={switchingPageId !== null}
+                    onPress={() => handleTogglePage(page.id, page.isSelected)}
+                    disabled={togglingPageId !== null}
                     className={`flex-row items-center p-3 rounded-xl mb-2 ${
                       page.isSelected
                         ? "bg-blue-500/20 border border-blue-500/30"
@@ -284,57 +268,29 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                         </Text>
                       ) : null}
                     </View>
-                    {switchingPageId === page.id ? (
+                    {togglingPageId === page.id ? (
                       <ActivityIndicator size="small" color="#3b82f6" />
-                    ) : page.isSelected ? (
+                    ) : (
                       <Ionicons
-                        name="checkmark-circle"
-                        size={20}
-                        color="#3b82f6"
+                        name={
+                          page.isSelected
+                            ? "checkbox"
+                            : "square-outline"
+                        }
+                        size={22}
+                        color={page.isSelected ? "#3b82f6" : "#6b7280"}
                       />
-                    ) : null}
+                    )}
                   </TouchableOpacity>
                 ))}
               </ScrollView>
             )}
 
             <TouchableOpacity
-              onPress={() => setPagePickerVisible(false)}
+              onPress={handleClosePagePicker}
               className="bg-gray-800 py-3 rounded-xl mt-4"
             >
-              <Text className="text-white text-center">Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={fbLoginModalVisible}
-        onRequestClose={() => setFbLoginModalVisible(false)}
-      >
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-gray-900 rounded-3xl p-6 w-80">
-            <Text className="text-white text-lg font-bold mb-2">
-              Facebook Login Required
-            </Text>
-            <Text className="text-gray-400 text-sm mb-4">
-              {fbLoginErrorMessage}
-            </Text>
-            <TouchableOpacity
-              onPress={handleFacebookReauth}
-              className="bg-blue-500 py-3 rounded-xl"
-            >
-              <Text className="text-white text-center">
-                Login with Facebook
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setFbLoginModalVisible(false)}
-              className="bg-gray-800 py-3 rounded-xl mt-4"
-            >
-              <Text className="text-white text-center">Close</Text>
+              <Text className="text-white text-center">Done</Text>
             </TouchableOpacity>
           </View>
         </View>

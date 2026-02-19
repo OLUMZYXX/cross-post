@@ -15,8 +15,13 @@ import {
 
 const router = express.Router();
 
-// store uploaded files in memory and push into MongoDB (no local disk files)
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname) || ".jpg";
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+  },
+});
 const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
 
 router.use(authenticate);

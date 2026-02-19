@@ -198,7 +198,7 @@ export default function HomePage({
   const handleConnectPlatform = async (platformName) => {
     try {
       const oauthMethods = {
-        Facebook: () => platformAPI.initiateFacebookAuth(true),
+        Facebook: () => platformAPI.initiateFacebookAuth(),
         Twitter: () => platformAPI.initiateTwitterAuth(),
         Instagram: () => platformAPI.initiateInstagramAuth(),
         TikTok: () => platformAPI.initiateTikTokAuth(),

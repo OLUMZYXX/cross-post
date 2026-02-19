@@ -48,6 +48,16 @@ const platformSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  // Multiple Facebook Pages support
+  pages: [
+    {
+      pageId: String,
+      pageAccessToken: String,
+      pageName: String,
+      category: String,
+    },
+  ],
+  selectedPageIds: [String],
 });
 
 export default mongoose.model("Platform", platformSchema);

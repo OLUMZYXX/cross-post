@@ -8,6 +8,3 @@ yarn-error.log*
 .DS_Store
 coverage/
 .nyc_output
-
-# ignore TikTok site verification file
-/public/tiktokMdwBtLkC6uVcXtUBDEm0nNuarAbqWsLY.txt

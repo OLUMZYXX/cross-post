@@ -124,20 +124,12 @@ export const platformAPI = {
 
   disconnect: (id) => api.delete(`/platforms/${id}`),
 
-  initiateFacebookAuth: (useAppRedirect = false) =>
-    api.get(
-      `/platforms/auth/facebook${useAppRedirect ? "?useAppRedirect=true" : ""}`,
-    ),
-
-  completeFacebookAuth: (code, state) =>
-    api.post("/platforms/auth/facebook/complete", { code, state }),
-
-  getFacebookDebug: () => api.get("/platforms/auth/facebook/debug"),
+  initiateFacebookAuth: () => api.get("/platforms/auth/facebook"),
 
   listFacebookPages: () => api.get("/platforms/auth/facebook/pages"),
 
-  selectFacebookPage: (pageId) =>
-    api.post("/platforms/auth/facebook/select-page", { pageId }),
+  toggleFacebookPage: (pageId, selected) =>
+    api.post("/platforms/auth/facebook/select-page", { pageId, selected }),
 
   initiateTwitterAuth: () => api.get("/platforms/auth/twitter"),
 

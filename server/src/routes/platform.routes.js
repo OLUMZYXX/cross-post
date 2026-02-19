@@ -6,8 +6,6 @@ import {
   connectPlatform,
   disconnectPlatform,
   initiateFacebookAuth,
-  completeFacebookAuth,
-  getFacebookDebug,
   handleFacebookCallback,
   listFacebookPages,
   selectFacebookPage,
@@ -58,8 +56,6 @@ router.post("/connect", asyncHandler(connectPlatform));
 router.delete("/:id", asyncHandler(disconnectPlatform));
 
 router.get("/auth/facebook", asyncHandler(initiateFacebookAuth));
-router.post("/auth/facebook/complete", asyncHandler(completeFacebookAuth));
-router.get("/auth/facebook/debug", asyncHandler(getFacebookDebug));
 router.get("/auth/facebook/pages", asyncHandler(listFacebookPages));
 router.post("/auth/facebook/select-page", asyncHandler(selectFacebookPage));
 router.get("/auth/twitter", asyncHandler(initiateTwitterAuth));
