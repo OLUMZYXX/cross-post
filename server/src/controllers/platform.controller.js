@@ -128,7 +128,7 @@ export async function handleFacebookCallback(req, res) {
       `https://graph.facebook.com/me/permissions?access_token=${tokenData.access_token}`,
     );
     const permissionsData = await permissionsResponse.json();
-    console.log(
+    // console.log(
       "Facebook granted permissions:",
       JSON.stringify(permissionsData, null, 2),
     );
@@ -140,20 +140,20 @@ export async function handleFacebookCallback(req, res) {
       `https://graph.facebook.com/v18.0/me/accounts?limit=100&access_token=${tokenData.access_token}`,
     );
     const pagesData = await pagesRes.json();
-    console.log("Facebook Pages response:", JSON.stringify(pagesData, null, 2));
+    // console.log("Facebook Pages response:", JSON.stringify(pagesData, null, 2));
 
     let pages = pagesData.data || [];
 
     // In Development mode, /me/accounts often returns empty even when pages are authorized.
     // Fall back to fetching pages directly by ID from the token's granular_scopes.
     if (pages.length === 0) {
-      console.log("me/accounts returned empty, trying granular_scopes fallback...");
+      // console.log("me/accounts returned empty, trying granular_scopes fallback...");
       try {
         const debugRes = await fetch(
           `https://graph.facebook.com/debug_token?input_token=${tokenData.access_token}&access_token=${FACEBOOK_APP_ID}|${FACEBOOK_APP_SECRET}`,
         );
         const debugData = await debugRes.json();
-        console.log("Facebook token debug:", JSON.stringify(debugData, null, 2));
+        // console.log("Facebook token debug:", JSON.stringify(debugData, null, 2));
 
         // Extract page IDs from granular_scopes (e.g. pages_manage_posts target_ids)
         const granularScopes = debugData.data?.granular_scopes || [];
@@ -165,7 +165,7 @@ export async function handleFacebookCallback(req, res) {
         }
 
         if (pageIds.size > 0) {
-          console.log("Found page IDs from granular_scopes:", [...pageIds]);
+          // console.log("Found page IDs from granular_scopes:", [...pageIds]);
           // Fetch each page directly by ID to get name and page access token
           for (const pid of pageIds) {
             try {
@@ -173,17 +173,17 @@ export async function handleFacebookCallback(req, res) {
                 `https://graph.facebook.com/v18.0/${pid}?fields=id,name,access_token,category&access_token=${tokenData.access_token}`,
               );
               const pageInfo = await pageRes.json();
-              console.log(`Fetched page ${pid}:`, JSON.stringify(pageInfo, null, 2));
+              // console.log(`Fetched page ${pid}:`, JSON.stringify(pageInfo, null, 2));
               if (pageInfo.id && !pageInfo.error) {
                 pages.push(pageInfo);
               }
             } catch (pgErr) {
-              console.warn(`Failed to fetch page ${pid}:`, pgErr.message);
+              // console.warn(`Failed to fetch page ${pid}:`, pgErr.message);
             }
           }
         }
       } catch (dbgErr) {
-        console.warn("Failed to debug Facebook token:", dbgErr?.message || dbgErr);
+        // console.warn("Failed to debug Facebook token:", dbgErr?.message || dbgErr);
       }
     }
 
@@ -231,7 +231,7 @@ export async function handleFacebookCallback(req, res) {
     pageAccessToken = firstPage.access_token;
 
     const pageNames = pages.map((p) => p.name).join(", ");
-    console.log(
+    // console.log(
       `Facebook Pages found: ${pages.length} pages — ${pageNames}`,
     );
 
@@ -266,7 +266,7 @@ export async function handleFacebookCallback(req, res) {
     const appUrl = `crosspost://oauth/facebook/callback?success=true&name=${encodeURIComponent(pageNames)}`;
     res.send(buildRedirectHtml("Facebook Connected", appUrl));
   } catch (err) {
-    console.error("Facebook OAuth error:", err);
+    // console.error("Facebook OAuth error:", err);
     const appUrl = `crosspost://oauth/facebook/callback?error=server_error`;
     res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
   }
@@ -395,7 +395,7 @@ export async function selectFacebookPage(req, res) {
 
   await platform.save();
 
-  console.log(
+  // console.log(
     `Facebook pages updated: ${platform.selectedPageIds.length} selected — ${selectedNames.join(", ")}`,
   );
 

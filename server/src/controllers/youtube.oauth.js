@@ -110,7 +110,7 @@ export async function handleYouTubeCallback(req, res) {
     const appUrl = `crosspost://oauth/youtube/callback?success=true&name=${encodeURIComponent(channelName)}`;
     res.send(buildRedirectHtml("YouTube Connected", appUrl));
   } catch (err) {
-    console.error("YouTube OAuth error:", err);
+    // console.error("YouTube OAuth error:", err);
     const appUrl = `crosspost://oauth/youtube/callback?error=server_error`;
     res.send(buildRedirectHtml("YouTube Connection Failed", appUrl));
   }

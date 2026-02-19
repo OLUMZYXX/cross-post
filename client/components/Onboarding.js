@@ -610,11 +610,16 @@ export default function Onboarding({ onComplete }) {
       >
         <View style={styles.content}>
           <View style={styles.header}>
-            <View style={styles.stepPill}>
-              <View style={styles.stepDot} />
-              <Text style={styles.stepText}>
-                Step {currentIndex + 1} of {onboardingData.length}
-              </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <View style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: "#22c55e", alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="share-social" size={16} color="#030712" />
+              </View>
+              <View style={styles.stepPill}>
+                <View style={styles.stepDot} />
+                <Text style={styles.stepText}>
+                  Step {currentIndex + 1} of {onboardingData.length}
+                </Text>
+              </View>
             </View>
             <TouchableOpacity onPress={onComplete} style={styles.skipButton}>
               <Text style={styles.skipText}>Skip</Text>

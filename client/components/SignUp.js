@@ -125,6 +125,9 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
         <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
           <View className="flex-1 px-6 pt-16 pb-10">
             <View className="mb-8">
+              <View className="w-16 h-16 rounded-2xl bg-green-500 items-center justify-center mb-5">
+                <Ionicons name="share-social" size={30} color="#030712" />
+              </View>
               <Text className="text-green-400 text-xs tracking-widest font-semibold mb-2">CREATE ACCOUNT</Text>
               <Text className="text-4xl font-bold text-white mb-2">Join{"\n"}Cross-Post</Text>
               <View className="w-16 h-1 bg-green-500 rounded-full" />

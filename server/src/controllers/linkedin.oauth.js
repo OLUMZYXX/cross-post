@@ -98,7 +98,7 @@ export async function handleLinkedInCallback(req, res) {
     const appUrl = `crosspost://oauth/linkedin/callback?success=true&name=${encodeURIComponent(displayName)}`;
     res.send(buildRedirectHtml("LinkedIn Connected", appUrl));
   } catch (err) {
-    console.error("LinkedIn OAuth error:", err);
+    // console.error("LinkedIn OAuth error:", err);
     const appUrl = `crosspost://oauth/linkedin/callback?error=server_error`;
     res.send(buildRedirectHtml("LinkedIn Connection Failed", appUrl));
   }

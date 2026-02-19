@@ -281,6 +281,9 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
         >
           <View className="flex-1 px-6 pt-16 pb-10">
             <View className="mb-10">
+              <View className="w-16 h-16 rounded-2xl bg-green-500 items-center justify-center mb-5">
+                <Ionicons name="share-social" size={30} color="#030712" />
+              </View>
               <Text className="text-green-400 text-xs tracking-widest font-semibold mb-2">
                 WELCOME BACK
               </Text>

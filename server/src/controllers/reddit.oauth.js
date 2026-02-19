@@ -108,7 +108,7 @@ export async function handleRedditCallback(req, res) {
     const appUrl = `crosspost://oauth/reddit/callback?success=true&name=${encodeURIComponent(username)}`;
     res.send(buildRedirectHtml("Reddit Connected", appUrl));
   } catch (err) {
-    console.error("Reddit OAuth error:", err);
+    // console.error("Reddit OAuth error:", err);
     const appUrl = `crosspost://oauth/reddit/callback?error=server_error`;
     res.send(buildRedirectHtml("Reddit Connection Failed", appUrl));
   }

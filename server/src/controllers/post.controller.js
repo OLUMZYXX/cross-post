@@ -96,7 +96,7 @@ export async function deletePost(req, res) {
   try {
     await deleteFromAllPlatforms(req.user.id, post);
   } catch (err) {
-    console.error("Error deleting remote posts:", err.message || err);
+    // console.error("Error deleting remote posts:", err.message || err);
     // Continue to delete local record even if remote deletions fail
   }
 
