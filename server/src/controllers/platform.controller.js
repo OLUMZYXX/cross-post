@@ -77,7 +77,7 @@ export async function initiateFacebookAuth(req, res) {
     `scope=email,public_profile,pages_show_list,pages_manage_posts,pages_read_engagement&` +
     `response_type=code&` +
     `state=${stateId}&` +
-    `auth_type=rerequest`;
+    `auth_type=reauthenticate`;
 
   res.json({ success: true, data: { authUrl: facebookAuthUrl } });
 }

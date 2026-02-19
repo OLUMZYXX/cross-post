@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Linking,
 } from "react-native";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import CreatePost from "./CreatePost";
 import SentPosts from "./SentPosts";
@@ -19,6 +19,7 @@ import ConnectedAccounts from "./ConnectedAccounts";
 import NotificationSettings from "./NotificationSettings";
 import PrivacySecurity from "./PrivacySecurity";
 import HelpSupport from "./HelpSupport";
+import PageLoadingAnimation from "./PageLoadingAnimation";
 import { useToast } from "./Toast";
 import { postAPI, platformAPI, clearToken } from "../services/api";
 
@@ -42,12 +43,46 @@ export default function HomePage({
   const [settingsScreen, setSettingsScreen] = useState(null);
   const { showToast } = useToast();
   const [refreshing, setRefreshing] = useState(false);
+  const [showLoadingAnimation, setShowLoadingAnimation] = useState(true);
+  const prevTabRef = useRef(activeTab);
 
   const fetchPlatforms = useCallback(async () => {
     try {
       const { data } = await platformAPI.list();
-      setConnectedPlatformObjects(data.platforms);
-      setConnectedPlatforms(data.platforms.map((p) => p.name));
+
+      // Expand Facebook pages into individual platform entries
+      const expandedObjects = [];
+      const expandedNames = [];
+
+      for (const p of data.platforms) {
+        if (
+          p.name === "Facebook" &&
+          p.pages &&
+          p.pages.length > 0 &&
+          p.selectedPageIds &&
+          p.selectedPageIds.length > 0
+        ) {
+          const selectedPages = p.pages.filter((pg) =>
+            p.selectedPageIds.includes(pg.pageId),
+          );
+          for (const page of selectedPages) {
+            const identifier = `Facebook:${page.pageId}`;
+            expandedObjects.push({
+              ...p,
+              _id: `${p._id}_page_${page.pageId}`,
+              name: identifier,
+              platformUsername: page.pageName,
+            });
+            expandedNames.push(identifier);
+          }
+        } else {
+          expandedObjects.push(p);
+          expandedNames.push(p.name);
+        }
+      }
+
+      setConnectedPlatformObjects(expandedObjects);
+      setConnectedPlatforms(expandedNames);
     } catch {
     } finally {
       setLoadingPlatforms(false);
@@ -153,6 +188,11 @@ export default function HomePage({
     if (tabId === "create") {
       setShowCreatePost(true);
     } else {
+      // Show loading animation when navigating back to home tab
+      if (tabId === "home" && prevTabRef.current !== "home") {
+        setShowLoadingAnimation(true);
+      }
+      prevTabRef.current = tabId;
       setActiveTab(tabId);
     }
   };
@@ -183,12 +223,23 @@ export default function HomePage({
     },
   };
 
+  // Helper: resolve style for any platform identifier (e.g. "Facebook:abc123" -> Facebook style)
+  const getPlatformStyle = (identifier) => {
+    const baseName = identifier.split(":")[0];
+    return allPlatforms[baseName] || allPlatforms[identifier] || {};
+  };
+
   // Exclude platforms that should not be offered in the "Add Social Media" modal
   const EXCLUDED_FROM_ADD = ["LinkedIn", "Reddit"];
 
-  const availablePlatforms = Object.keys(allPlatforms).filter(
-    (p) => !connectedPlatforms.includes(p) && !EXCLUDED_FROM_ADD.includes(p),
-  );
+  // Check if Facebook is connected (any Facebook:xxx entry)
+  const hasFacebook = connectedPlatforms.some((p) => p.startsWith("Facebook"));
+
+  const availablePlatforms = Object.keys(allPlatforms).filter((p) => {
+    if (EXCLUDED_FROM_ADD.includes(p)) return false;
+    if (p === "Facebook") return !hasFacebook;
+    return !connectedPlatforms.includes(p);
+  });
 
   const getPlatformUsername = (platformName) => {
     const obj = connectedPlatformObjects.find((p) => p.name === platformName);
@@ -423,26 +474,29 @@ export default function HomePage({
                 </Text>
                 {Object.entries(platformCounts)
                   .sort((a, b) => b[1] - a[1])
-                  .map(([name, count]) => (
-                    <View
-                      key={name}
-                      className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-2 flex-row items-center"
-                    >
+                  .map(([name, count]) => {
+                    const style = getPlatformStyle(name);
+                    return (
                       <View
-                        className={`w-9 h-9 rounded-full ${allPlatforms[name]?.bg || "bg-gray-700"} items-center justify-center mr-3`}
+                        key={name}
+                        className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-2 flex-row items-center"
                       >
-                        <Ionicons
-                          name={allPlatforms[name]?.icon || "globe-outline"}
-                          size={18}
-                          color="#fff"
-                        />
+                        <View
+                          className={`w-9 h-9 rounded-full ${style.bg || "bg-gray-700"} items-center justify-center mr-3`}
+                        >
+                          <Ionicons
+                            name={style.icon || "globe-outline"}
+                            size={18}
+                            color="#fff"
+                          />
+                        </View>
+                        <Text className="text-white text-sm font-medium flex-1">
+                          {name.split(":")[0]}
+                        </Text>
+                        <Text className="text-green-400 font-bold">{count}</Text>
                       </View>
-                      <Text className="text-white text-sm font-medium flex-1">
-                        {name}
-                      </Text>
-                      <Text className="text-green-400 font-bold">{count}</Text>
-                    </View>
-                  ))}
+                    );
+                  })}
               </>
             )}
 
@@ -607,6 +661,12 @@ export default function HomePage({
     <View className="flex-1 bg-gray-950">
       <StatusBar style="light" />
 
+      {showLoadingAnimation && (
+        <PageLoadingAnimation
+          onFinish={() => setShowLoadingAnimation(false)}
+        />
+      )}
+
       <View className="absolute top-0 left-0 right-0 bottom-0">
         <View className="absolute top-10 -right-16 w-48 h-48 rounded-full bg-green-500/5" />
         <View className="absolute top-96 -left-20 w-64 h-64 rounded-full bg-emerald-500/5" />
@@ -725,16 +785,18 @@ export default function HomePage({
             <View className="flex-row flex-wrap justify-between mb-6">
               {connectedPlatforms.map((platform) => {
                 const username = getPlatformUsername(platform);
+                const style = getPlatformStyle(platform);
+                const baseName = platform.split(":")[0];
                 return (
                   <View
                     key={platform}
                     className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
                   >
                     <View
-                      className={`w-12 h-12 rounded-full ${allPlatforms[platform]?.bg || "bg-gray-700"} items-center justify-center mb-3`}
+                      className={`w-12 h-12 rounded-full ${style.bg || "bg-gray-700"} items-center justify-center mb-3`}
                     >
                       <Ionicons
-                        name={allPlatforms[platform]?.icon || "globe-outline"}
+                        name={style.icon || "globe-outline"}
                         size={24}
                         color="#fff"
                       />
@@ -743,9 +805,9 @@ export default function HomePage({
                       className="text-white font-bold mb-1"
                       numberOfLines={1}
                     >
-                      {username || platform}
+                      {username || baseName}
                     </Text>
-                    <Text className="text-green-400 text-xs">{platform}</Text>
+                    <Text className="text-green-400 text-xs">{baseName}</Text>
                   </View>
                 );
               })}

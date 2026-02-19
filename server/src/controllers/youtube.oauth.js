@@ -27,7 +27,7 @@ export async function initiateYouTubeAuth(req, res) {
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
     `scope=${encodeURIComponent(scopes)}&` +
     `access_type=offline&` +
-    `prompt=consent&` +
+    `prompt=select_account+consent&` +
     `state=${stateId}`;
 
   res.json({ success: true, data: { authUrl } });

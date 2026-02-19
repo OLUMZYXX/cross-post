@@ -20,7 +20,8 @@ export async function initiateLinkedInAuth(req, res) {
     `client_id=${LINKEDIN_CLIENT_ID}&` +
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
     `scope=${encodeURIComponent("openid profile w_member_social")}&` +
-    `state=${stateId}`;
+    `state=${stateId}&` +
+    `prompt=login`;
 
   res.json({ success: true, data: { authUrl } });
 }

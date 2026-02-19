@@ -74,6 +74,15 @@ export const authAPI = {
 
   appleAuth: (identityToken, fullName, email) =>
     api.post("/auth/apple", { identityToken, fullName, email }),
+
+  setup2FA: () => api.post("/auth/2fa/setup"),
+
+  verify2FA: (code) => api.post("/auth/2fa/verify", { code }),
+
+  disable2FA: (code) => api.post("/auth/2fa/disable", { code }),
+
+  login2FA: (tempToken, code) =>
+    api.post("/auth/2fa/login", { tempToken, code }),
 };
 
 export const postAPI = {

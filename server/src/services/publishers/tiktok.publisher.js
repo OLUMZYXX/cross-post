@@ -63,3 +63,30 @@ export async function publishToTikTok(platform, post) {
     "TikTok requires a publicly accessible video URL. Local files are not supported yet.",
   );
 }
+
+export async function deleteFromTikTok(platform, externalId) {
+  const { accessToken } = platform;
+  if (!accessToken) throw new Error("No access token for TikTok deletion");
+  if (!externalId) throw new Error("No externalId provided for TikTok deletion");
+
+  // Best-effort deletion via TikTok API; endpoint may vary by integration
+  try {
+    const res = await fetch(`https://open.tiktokapis.com/v2/post/remove/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ publish_id: externalId }),
+    });
+
+    const data = await res.json().catch(() => null);
+    if (!res.ok || data?.error) {
+      throw new Error(data?.message || data?.error_description || "Failed to delete TikTok post");
+    }
+
+    return true;
+  } catch (err) {
+    throw new Error(err.message || "TikTok deletion failed");
+  }
+}

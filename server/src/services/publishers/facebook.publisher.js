@@ -120,6 +120,9 @@ export async function publishToFacebook(platform, post) {
         caption,
         media,
       );
+      // Store the page token alongside the result so deletion works per-page
+      result.pageAccessToken = page.pageAccessToken;
+      result.pageName = page.pageName || page.pageId;
       console.log(
         `Facebook: posted to page ${page.pageId} (${page.pageName || "unknown"})`,
       );
@@ -139,11 +142,27 @@ export async function publishToFacebook(platform, post) {
     );
   }
 
-  // Return the first successful result (external ID/URL) for backward compat
-  // but log all results
   if (results.length > 1) {
     console.log(`Facebook: successfully posted to ${results.length} pages`);
   }
 
-  return results[0];
+  // Return all results so each page post gets tracked individually
+  return results;
+}
+
+export async function deleteFromFacebook(platform, externalId, pageAccessToken) {
+  // Use the page-specific token if provided, otherwise fall back to platform tokens
+  const token = pageAccessToken || platform.pageAccessToken || platform.accessToken;
+  if (!token) throw new Error("No page or user access token available for Facebook deletion");
+
+  const res = await fetch(`https://graph.facebook.com/v18.0/${externalId}?access_token=${token}`, {
+    method: "DELETE",
+  });
+
+  const data = await res.json().catch(() => null);
+  if (!res.ok || (data && data.error)) {
+    throw new Error(data?.error?.message || "Failed to delete Facebook post");
+  }
+
+  return true;
 }

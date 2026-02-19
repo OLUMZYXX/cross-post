@@ -34,7 +34,36 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
   const fetchPlatforms = useCallback(async () => {
     try {
       const { data } = await platformAPI.list();
-      setPlatforms(data.platforms);
+
+      // Expand Facebook pages into individual entries
+      const expanded = [];
+      for (const p of data.platforms) {
+        if (
+          p.name === "Facebook" &&
+          p.pages &&
+          p.pages.length > 0 &&
+          p.selectedPageIds &&
+          p.selectedPageIds.length > 0
+        ) {
+          const selectedPages = p.pages.filter((pg) =>
+            p.selectedPageIds.includes(pg.pageId),
+          );
+          for (const page of selectedPages) {
+            expanded.push({
+              ...p,
+              _id: `${p._id}_page_${page.pageId}`,
+              _parentId: p._id,
+              name: "Facebook",
+              platformUsername: page.pageName,
+              _pageId: page.pageId,
+            });
+          }
+        } else {
+          expanded.push(p);
+        }
+      }
+
+      setPlatforms(expanded);
     } catch {
     } finally {
       setLoading(false);
@@ -47,6 +76,13 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
 
   const handleDisconnect = async (platform) => {
     try {
+      // For expanded Facebook pages, if it has a page ID we toggle it off instead of disconnecting
+      if (platform._pageId) {
+        await platformAPI.toggleFacebookPage(platform._pageId, false);
+        setPlatforms((prev) => prev.filter((p) => p._id !== platform._id));
+        showToast({ type: "success", title: `${platform.platformUsername || "Page"} removed` });
+        return;
+      }
       await platformAPI.disconnect(platform._id);
       setPlatforms((prev) => prev.filter((p) => p._id !== platform._id));
       showToast({ type: "success", title: `${platform.name} disconnected` });
@@ -171,7 +207,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                   </TouchableOpacity>
                 </View>
 
-                {platform.name === "Facebook" && (
+                {platform.name === "Facebook" && !platform._pageId && (
                   <TouchableOpacity
                     onPress={handleOpenPagePicker}
                     className="mt-3 bg-blue-500/10 py-2.5 rounded-lg border border-blue-500/20 flex-row items-center justify-center"

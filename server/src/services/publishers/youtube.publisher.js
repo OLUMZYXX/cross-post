@@ -91,3 +91,20 @@ export async function publishToYouTube(platform, post) {
     externalUrl: `https://www.youtube.com/watch?v=${uploadData.id}`,
   };
 }
+
+export async function deleteFromYouTube(platform, externalId) {
+  const { accessToken } = platform;
+  if (!accessToken) throw new Error("No access token for YouTube deletion");
+
+  const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${externalId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data?.error?.message || `Failed to delete YouTube video: ${res.status}`);
+  }
+
+  return true;
+}

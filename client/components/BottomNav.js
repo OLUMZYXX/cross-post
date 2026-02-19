@@ -5,10 +5,31 @@ import { Ionicons } from "@expo/vector-icons";
 export default function BottomNav({ activeTab, onTabChange }) {
   const tabs = [
     { id: "home", icon: "home-outline", activeIcon: "home", label: "Home" },
-    { id: "sent", icon: "paper-plane-outline", activeIcon: "paper-plane", label: "Sent" },
-    { id: "create", icon: "add", activeIcon: "add", label: "Create", isCenter: true },
-    { id: "analytics", icon: "stats-chart-outline", activeIcon: "stats-chart", label: "Analytics" },
-    { id: "settings", icon: "settings-outline", activeIcon: "settings", label: "Settings" },
+    {
+      id: "sent",
+      icon: "paper-plane-outline",
+      activeIcon: "paper-plane",
+      label: "Sent",
+    },
+    {
+      id: "create",
+      icon: "add",
+      activeIcon: "add",
+      label: "Create",
+      isCenter: true,
+    },
+    {
+      id: "analytics",
+      icon: "stats-chart-outline",
+      activeIcon: "stats-chart",
+      label: "Analytics",
+    },
+    {
+      id: "settings",
+      icon: "settings-outline",
+      activeIcon: "settings",
+      label: "Settings",
+    },
   ];
 
   return (
@@ -27,9 +48,7 @@ export default function BottomNav({ activeTab, onTabChange }) {
                 <View className="w-14 h-14 rounded-full bg-green-500 items-center justify-center border-4 border-gray-950">
                   <Ionicons name="add" size={28} color="#030712" />
                 </View>
-                <Text className="text-green-400 mt-1 text-xs">
-                  {tab.label}
-                </Text>
+                <Text className="text-green-400 mt-1 text-xs">{tab.label}</Text>
               </TouchableOpacity>
             );
           }

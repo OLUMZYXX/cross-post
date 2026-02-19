@@ -67,23 +67,27 @@ export async function publishToInstagram(platform, post) {
 
   const containerId = containerData.id;
 
-  // For videos, wait for processing to complete
-  if (isVideo) {
-    let status = "IN_PROGRESS";
-    let attempts = 0;
-    while (status === "IN_PROGRESS" && attempts < 30) {
-      await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5s
-      const statusRes = await fetch(
-        `https://graph.instagram.com/v21.0/${containerId}?fields=status_code&access_token=${accessToken}`,
-      );
-      const statusData = await statusRes.json();
-      status = statusData.status_code;
-      attempts++;
-      console.log(`Instagram video processing: ${status} (attempt ${attempts})`);
-    }
-    if (status !== "FINISHED") {
-      throw new Error(`Instagram video processing failed with status: ${status}`);
-    }
+  // Wait for container to be ready before publishing (required for both images and videos)
+  const maxAttempts = isVideo ? 30 : 10;
+  const pollInterval = isVideo ? 5000 : 3000;
+  let status = "IN_PROGRESS";
+  let attempts = 0;
+
+  while (status === "IN_PROGRESS" && attempts < maxAttempts) {
+    await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    const statusRes = await fetch(
+      `https://graph.instagram.com/v21.0/${containerId}?fields=status_code&access_token=${accessToken}`,
+    );
+    const statusData = await statusRes.json();
+    status = statusData.status_code;
+    attempts++;
+    console.log(`Instagram container processing: ${status} (attempt ${attempts})`);
+  }
+
+  if (status !== "FINISHED") {
+    throw new Error(
+      `Instagram media processing failed with status: ${status}. Please try again.`,
+    );
   }
 
   // Step 2: Publish the container
@@ -112,4 +116,10 @@ export async function publishToInstagram(platform, post) {
     externalId: publishData.id,
     externalUrl: `https://www.instagram.com/`,
   };
+}
+
+export async function deleteFromInstagram(/* platform, externalId */) {
+  // Instagram Graph API (with Instagram Login) does not support deleting media.
+  // Silently skip — the local post record will still be removed.
+  return true;
 }

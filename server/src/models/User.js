@@ -26,6 +26,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  twoFactorEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  twoFactorSecret: {
+    type: String,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -55,6 +63,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 userSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   delete userObject.passwordHash;
+  delete userObject.twoFactorSecret;
   return userObject;
 };
 

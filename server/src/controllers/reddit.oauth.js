@@ -21,7 +21,8 @@ export async function initiateRedditAuth(req, res) {
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
     `scope=${encodeURIComponent("submit identity")}&` +
     `state=${stateId}&` +
-    `duration=permanent`;
+    `duration=permanent&` +
+    `prompt=consent`;
 
   res.json({ success: true, data: { authUrl } });
 }

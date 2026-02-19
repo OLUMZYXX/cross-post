@@ -29,7 +29,8 @@ export async function initiateTwitterAuth(req, res) {
     `scope=${encodeURIComponent("tweet.read tweet.write users.read offline.access")}&` +
     `state=${stateId}&` +
     `code_challenge=${codeChallenge}&` +
-    `code_challenge_method=S256`;
+    `code_challenge_method=S256&` +
+    `force_login=true`;
 
   res.json({ success: true, data: { authUrl } });
 }

@@ -40,6 +40,8 @@ const postSchema = new mongoose.Schema({
       externalId: String,
       externalUrl: String,
       error: String,
+      pageAccessToken: String,
+      pageName: String,
     },
   ],
   createdAt: {

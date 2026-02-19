@@ -126,7 +126,8 @@ export async function initiateInstagramAuth(req, res) {
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
     `scope=${encodeURIComponent("instagram_business_basic,instagram_business_content_publish,instagram_business_manage_messages")}&` +
     `response_type=code&` +
-    `state=${stateId}`;
+    `state=${stateId}&` +
+    `force_authentication=1`;
 
   res.json({ success: true, data: { authUrl } });
 }

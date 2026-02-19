@@ -20,7 +20,8 @@ export async function initiateTikTokAuth(req, res) {
     `scope=${encodeURIComponent("user.info.basic,video.publish")}&` +
     `response_type=code&` +
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-    `state=${stateId}`;
+    `state=${stateId}&` +
+    `disable_auto_auth=1`;
 
   res.json({ success: true, data: { authUrl } });
 }

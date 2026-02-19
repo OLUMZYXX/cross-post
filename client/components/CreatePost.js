@@ -249,9 +249,16 @@ export default function CreatePost({
   onPostPublished,
   initialDraft,
 }) {
+  const getPlatformStyle = (identifier) => {
+    const baseName = identifier.split(":")[0];
+    return allPlatforms[baseName] || allPlatforms[identifier] || {};
+  };
   const getPlatformUsername = (platformName) => {
     const obj = connectedPlatformObjects.find((p) => p.name === platformName);
     return obj?.platformUsername || null;
+  };
+  const getDisplayName = (identifier) => {
+    return getPlatformUsername(identifier) || identifier.split(":")[0];
   };
   const [caption, setCaption] = useState(initialDraft?.caption || "");
   const [selectedPlatforms, setSelectedPlatforms] = useState(
@@ -305,7 +312,7 @@ export default function CreatePost({
         showToast({
           type: "success",
           title: "Post published!",
-          message: `Shared to ${selectedPlatforms.join(", ")} successfully.`,
+          message: `Shared to ${selectedPlatforms.map((p) => getDisplayName(p)).join(", ")} successfully.`,
         });
       } else if (succeeded.length > 0) {
         showToast({
@@ -569,6 +576,7 @@ export default function CreatePost({
           <View className="flex-row flex-wrap">
             {connectedPlatforms.map((platform) => {
               const isSelected = selectedPlatforms.includes(platform);
+              const style = getPlatformStyle(platform);
               return (
                 <TouchableOpacity
                   key={platform}
@@ -581,7 +589,7 @@ export default function CreatePost({
                   }`}
                 >
                   <Ionicons
-                    name={allPlatforms[platform].icon}
+                    name={style.icon || "globe-outline"}
                     size={16}
                     color={isSelected ? "#22c55e" : "#9ca3af"}
                   />
@@ -591,7 +599,7 @@ export default function CreatePost({
                     }`}
                     numberOfLines={1}
                   >
-                    {getPlatformUsername(platform) || platform}
+                    {getDisplayName(platform)}
                   </Text>
                   {isSelected && (
                     <Ionicons name="checkmark" size={14} color="#22c55e" style={{ marginLeft: 6 }} />
@@ -610,15 +618,19 @@ export default function CreatePost({
             <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-4">
               <Text className="text-white font-bold mb-3">Preview</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {selectedPlatforms.map((platform) => (
+                {selectedPlatforms.map((platform) => {
+                  const style = getPlatformStyle(platform);
+                  return (
                   <View key={platform} className="bg-gray-800 rounded-2xl p-4 mr-3 w-72">
                     <View className="flex-row items-center mb-3">
                       <View className="w-10 h-10 rounded-full bg-gray-700 items-center justify-center mr-3">
-                        <Ionicons name={allPlatforms[platform].icon} size={20} color="#fff" />
+                        <Ionicons name={style.icon || "globe-outline"} size={20} color="#fff" />
                       </View>
-                      <View>
-                        <Text className="text-white font-bold text-sm">{platform}</Text>
-                        <Text className="text-gray-500 text-xs">@yourhandle</Text>
+                      <View className="flex-1">
+                        <Text className="text-white font-bold text-sm" numberOfLines={1}>
+                          {getDisplayName(platform)}
+                        </Text>
+                        <Text className="text-gray-500 text-xs">{platform.split(":")[0]}</Text>
                       </View>
                     </View>
                     {caption.length > 0 && (
@@ -648,7 +660,8 @@ export default function CreatePost({
                       <Text className="text-gray-500 text-xs">🔄 Share</Text>
                     </View>
                   </View>
-                ))}
+                  );
+                })}
               </ScrollView>
             </View>
           )}

@@ -1,7 +1,8 @@
 import Post from "../models/Post.js";
 import { Errors } from "../utils/AppError.js";
-import { publishToAllPlatforms } from "../services/publishPost.js";
+import { publishToAllPlatforms, deleteFromAllPlatforms } from "../services/publishPost.js";
 import { SERVER_URL } from "../config/env.js";
+import { uploadToGridFS, deleteFromGridFS } from "../utils/gridfs.js";
 
 export async function listPosts(req, res) {
   const posts = await Post.find({ userId: req.user.id }).sort({
@@ -24,10 +25,16 @@ export async function getPost(req, res) {
 export async function createPost(req, res) {
   const { caption, platforms, status } = req.body;
 
-  // Handle file uploads from multer (multipart/form-data)
-  const mediaUrls = (req.files || []).map(
-    (file) => `${SERVER_URL}/uploads/${file.filename}`,
-  );
+  // Upload files to MongoDB GridFS
+  const mediaUrls = [];
+  for (const file of req.files || []) {
+    const { fileId } = await uploadToGridFS(
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+    );
+    mediaUrls.push(`${SERVER_URL}/media/${fileId}`);
+  }
 
   // platforms may come as a single string or array from FormData
   const platformList = Array.isArray(platforms)
@@ -76,14 +83,31 @@ export async function updatePost(req, res) {
 }
 
 export async function deletePost(req, res) {
-  const post = await Post.findOneAndDelete({
-    _id: req.params.id,
-    userId: req.user.id,
-  });
+  const post = await Post.findOne({ _id: req.params.id, userId: req.user.id });
 
   if (!post) {
     throw Errors.notFound("Post not found");
   }
+
+  // Attempt to remove published posts from external platforms
+  try {
+    await deleteFromAllPlatforms(req.user.id, post);
+  } catch (err) {
+    console.error("Error deleting remote posts:", err.message || err);
+    // Continue to delete local record even if remote deletions fail
+  }
+
+  // Clean up media files from GridFS
+  for (const url of post.media || []) {
+    const match = url.match(/\/media\/([a-f0-9]{24})$/);
+    if (match) {
+      try {
+        await deleteFromGridFS(match[1]);
+      } catch {}
+    }
+  }
+
+  await Post.deleteOne({ _id: post._id });
 
   res.json({ success: true, data: null });
 }
