@@ -514,61 +514,109 @@ export default function CreatePost({
       return;
     }
 
+    // If we already have a video selected, don't allow adding more
+    if (mediaType === "video") {
+      showToast({
+        type: "warning",
+        title: "Video already selected",
+        message: "Remove the video first to select different media.",
+      });
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images", "videos"],
+      mediaTypes: mediaType === "image" ? ["images"] : ["images", "videos"],
+      allowsMultipleSelection: mediaType !== "video",
+      selectionLimit: 10 - selectedMedia.length,
       allowsEditing: false,
       quality: 1,
     });
 
     if (!result.canceled) {
-      const asset = result.assets[0];
-      const type = asset.type === "video" ? "video" : "image";
+      const assets = result.assets;
 
-      // Generate thumbnail for videos
-      let thumbnail = null;
-      if (type === "video") {
-        try {
-          const { uri: thumbUri } = await VideoThumbnails.getThumbnailAsync(
-            asset.uri,
-            { time: 500 },
-          );
-          thumbnail = thumbUri;
-        } catch {}
-      }
-
-      const mediaItem = {
-        type,
-        uri: asset.uri,
-        thumbnail,
-        name: asset.fileName || `selected_${type}.${type === "image" ? "jpg" : "mp4"}`,
-        width: asset.width,
-        height: asset.height,
-      };
-
-      setMediaType(type);
-      setIsUploading(true);
-
-      // Upload to Cloudinary for optimization
-      try {
-        const { url } = await uploadToCloudinary(asset.uri, type, asset.mimeType, asset.fileName);
-        mediaItem.cloudinaryUrl = url;
-      } catch (err) {
-        console.warn("Cloudinary upload failed:", err?.message || err);
+      // If any asset is a video, only allow that single video
+      const hasVideo = assets.some((a) => a.type === "video");
+      if (hasVideo && (assets.length > 1 || selectedMedia.length > 0)) {
         showToast({
           type: "warning",
-          title: "Media upload issue",
-          message: "Could not optimize media. Will upload directly when posting.",
+          title: "Video must be solo",
+          message: "Videos can only be posted alone, not with other media.",
+        });
+        return;
+      }
+
+      const newItems = [];
+      for (const asset of assets) {
+        const type = asset.type === "video" ? "video" : "image";
+
+        let thumbnail = null;
+        if (type === "video") {
+          try {
+            const { uri: thumbUri } = await VideoThumbnails.getThumbnailAsync(
+              asset.uri,
+              { time: 500 },
+            );
+            thumbnail = thumbUri;
+          } catch {}
+        }
+
+        newItems.push({
+          type,
+          uri: asset.uri,
+          thumbnail,
+          name: asset.fileName || `selected_${type}.${type === "image" ? "jpg" : "mp4"}`,
+          width: asset.width,
+          height: asset.height,
+          mimeType: asset.mimeType,
+          fileName: asset.fileName,
         });
       }
 
-      setSelectedMedia([mediaItem]);
+      const firstType = newItems[0].type;
+      setMediaType(firstType);
+      setIsUploading(true);
+
+      // Upload all to Cloudinary in parallel
+      const uploadResults = await Promise.allSettled(
+        newItems.map((item) =>
+          uploadToCloudinary(item.uri, item.type, item.mimeType, item.fileName),
+        ),
+      );
+
+      let failCount = 0;
+      uploadResults.forEach((result, i) => {
+        if (result.status === "fulfilled") {
+          newItems[i].cloudinaryUrl = result.value.url;
+        } else {
+          failCount++;
+          console.warn("Cloudinary upload failed:", result.reason?.message || result.reason);
+        }
+      });
+
+      if (failCount > 0) {
+        showToast({
+          type: "warning",
+          title: "Media upload issue",
+          message: `${failCount} file(s) could not be optimized. Will upload directly when posting.`,
+        });
+      }
+
+      setSelectedMedia((prev) =>
+        firstType === "video" ? newItems : [...prev, ...newItems],
+      );
       setIsUploading(false);
     }
   };
 
-  const removeMedia = () => {
-    setSelectedMedia([]);
-    setMediaType(null);
+  const removeMedia = (index) => {
+    setSelectedMedia((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      if (updated.length === 0) {
+        setMediaType(null);
+      }
+      return updated;
+    });
     setIsUploading(false);
   };
 
@@ -623,47 +671,100 @@ export default function CreatePost({
 
           {selectedMedia.length > 0 && (
             <View className="px-4 pb-4">
-              <View className="rounded-xl overflow-hidden bg-gray-800">
-                {mediaType === "image" ? (
+              {mediaType === "video" ? (
+                <View className="rounded-xl overflow-hidden bg-gray-800">
+                  {selectedMedia[0].thumbnail ? (
+                    <View className="w-full h-48">
+                      <Image
+                        source={{ uri: selectedMedia[0].thumbnail }}
+                        className="w-full h-full"
+                        resizeMode="cover"
+                      />
+                      <View className="absolute inset-0 items-center justify-center">
+                        <View className="w-14 h-14 rounded-full bg-black/50 items-center justify-center">
+                          <Ionicons name="play" size={28} color="#fff" />
+                        </View>
+                      </View>
+                    </View>
+                  ) : (
+                    <View className="w-full h-48 bg-gray-800 items-center justify-center">
+                      <View className="w-14 h-14 rounded-full bg-gray-700 items-center justify-center">
+                        <Ionicons name="play" size={28} color="#fff" />
+                      </View>
+                    </View>
+                  )}
+                  {isUploading && (
+                    <View className="absolute inset-0 bg-black/40 items-center justify-center">
+                      <ActivityIndicator color="#4ade80" size="large" />
+                      <Text className="text-white text-xs mt-2 font-medium">Optimizing...</Text>
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    onPress={() => removeMedia(0)}
+                    disabled={isPosting}
+                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 items-center justify-center"
+                  >
+                    <Ionicons name="close" size={16} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              ) : selectedMedia.length === 1 ? (
+                <View className="rounded-xl overflow-hidden bg-gray-800">
                   <Image
                     source={{ uri: selectedMedia[0].uri }}
                     className="w-full h-48"
                     resizeMode="cover"
                   />
-                ) : selectedMedia[0].thumbnail ? (
-                  <View className="w-full h-48">
-                    <Image
-                      source={{ uri: selectedMedia[0].thumbnail }}
-                      className="w-full h-full"
-                      resizeMode="cover"
-                    />
-                    <View className="absolute inset-0 items-center justify-center">
-                      <View className="w-14 h-14 rounded-full bg-black/50 items-center justify-center">
-                        <Ionicons name="play" size={28} color="#fff" />
+                  {isUploading && (
+                    <View className="absolute inset-0 bg-black/40 items-center justify-center">
+                      <ActivityIndicator color="#4ade80" size="large" />
+                      <Text className="text-white text-xs mt-2 font-medium">Optimizing...</Text>
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    onPress={() => removeMedia(0)}
+                    disabled={isPosting}
+                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 items-center justify-center"
+                  >
+                    <Ionicons name="close" size={16} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingRight: 8 }}
+                  >
+                    {selectedMedia.map((item, index) => (
+                      <View
+                        key={index}
+                        className="rounded-xl overflow-hidden bg-gray-800 mr-2"
+                        style={{ width: 140, height: 140 }}
+                      >
+                        <Image
+                          source={{ uri: item.uri }}
+                          className="w-full h-full"
+                          resizeMode="cover"
+                        />
+                        <TouchableOpacity
+                          onPress={() => removeMedia(index)}
+                          disabled={isPosting}
+                          className="absolute top-1 right-1 w-7 h-7 rounded-full bg-black/60 items-center justify-center"
+                        >
+                          <Ionicons name="close" size={14} color="#fff" />
+                        </TouchableOpacity>
                       </View>
+                    ))}
+                  </ScrollView>
+                  {isUploading && (
+                    <View className="absolute inset-0 bg-black/40 rounded-xl items-center justify-center">
+                      <ActivityIndicator color="#4ade80" size="large" />
+                      <Text className="text-white text-xs mt-2 font-medium">Optimizing...</Text>
                     </View>
-                  </View>
-                ) : (
-                  <View className="w-full h-48 bg-gray-800 items-center justify-center">
-                    <View className="w-14 h-14 rounded-full bg-gray-700 items-center justify-center">
-                      <Ionicons name="play" size={28} color="#fff" />
-                    </View>
-                  </View>
-                )}
-                {isUploading && (
-                  <View className="absolute inset-0 bg-black/40 items-center justify-center">
-                    <ActivityIndicator color="#4ade80" size="large" />
-                    <Text className="text-white text-xs mt-2 font-medium">Optimizing...</Text>
-                  </View>
-                )}
-                <TouchableOpacity
-                  onPress={removeMedia}
-                  disabled={isPosting}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 items-center justify-center"
-                >
-                  <Ionicons name="close" size={16} color="#fff" />
-                </TouchableOpacity>
-              </View>
+                  )}
+                  <Text className="text-gray-500 text-xs mt-2">{selectedMedia.length} images selected</Text>
+                </View>
+              )}
             </View>
           )}
 
@@ -773,33 +874,45 @@ export default function CreatePost({
                       </Text>
                     )}
                     {selectedMedia.length > 0 && (
-                      <View className="bg-gray-700 rounded-xl h-32 items-center justify-center overflow-hidden">
-                        {mediaType === "image" ? (
+                      mediaType === "video" ? (
+                        <View className="bg-gray-700 rounded-xl h-32 items-center justify-center overflow-hidden">
+                          {selectedMedia[0].thumbnail ? (
+                            <View className="w-full h-full">
+                              <Image
+                                source={{ uri: selectedMedia[0].thumbnail }}
+                                className="w-full h-full"
+                                resizeMode="cover"
+                              />
+                              <View className="absolute inset-0 items-center justify-center">
+                                <View className="w-10 h-10 rounded-full bg-black/50 items-center justify-center">
+                                  <Ionicons name="play" size={20} color="#fff" />
+                                </View>
+                              </View>
+                            </View>
+                          ) : (
+                            <View className="items-center">
+                              <Ionicons name="videocam" size={36} color="#9ca3af" />
+                              <Text className="text-gray-400 text-xs mt-1">Video</Text>
+                            </View>
+                          )}
+                        </View>
+                      ) : selectedMedia.length === 1 ? (
+                        <View className="bg-gray-700 rounded-xl h-32 items-center justify-center overflow-hidden">
                           <Image
                             source={{ uri: selectedMedia[0].uri }}
                             className="w-full h-full"
                             resizeMode="cover"
                           />
-                        ) : selectedMedia[0].thumbnail ? (
-                          <View className="w-full h-full">
-                            <Image
-                              source={{ uri: selectedMedia[0].thumbnail }}
-                              className="w-full h-full"
-                              resizeMode="cover"
-                            />
-                            <View className="absolute inset-0 items-center justify-center">
-                              <View className="w-10 h-10 rounded-full bg-black/50 items-center justify-center">
-                                <Ionicons name="play" size={20} color="#fff" />
-                              </View>
+                        </View>
+                      ) : (
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                          {selectedMedia.map((item, idx) => (
+                            <View key={idx} className="bg-gray-700 rounded-xl overflow-hidden mr-1" style={{ width: 80, height: 80 }}>
+                              <Image source={{ uri: item.uri }} className="w-full h-full" resizeMode="cover" />
                             </View>
-                          </View>
-                        ) : (
-                          <View className="items-center">
-                            <Ionicons name="videocam" size={36} color="#9ca3af" />
-                            <Text className="text-gray-400 text-xs mt-1">Video</Text>
-                          </View>
-                        )}
-                      </View>
+                          ))}
+                        </ScrollView>
+                      )
                     )}
                     <View className="flex-row mt-3 pt-3 border-t border-gray-700">
                       <Text className="text-gray-500 text-xs mr-4">❤️ Like</Text>
