@@ -32,15 +32,16 @@ api.interceptors.response.use(
   async (error) => {
     const config = error.config;
 
-    // Retry up to 2 times on network errors (no response received)
-    if (!error.response && config && !config._retryCount) {
-      config._retryCount = 0;
-    }
-    if (!error.response && config && config._retryCount < 2) {
-      config._retryCount += 1;
-      // Wait before retrying (3s first retry, 5s second)
-      await new Promise((r) => setTimeout(r, config._retryCount === 1 ? 3000 : 5000));
-      return api(config);
+    // Retry up to 3 times on network errors (no response received)
+    if (!error.response && config) {
+      if (!config._retryCount) config._retryCount = 0;
+      if (config._retryCount < 3) {
+        config._retryCount += 1;
+        const delays = [5000, 10000, 15000];
+        console.log(`[API] Network error, retry ${config._retryCount}/3 for ${config.url}`);
+        await new Promise((r) => setTimeout(r, delays[config._retryCount - 1]));
+        return api(config);
+      }
     }
 
     const apiError = {
@@ -54,9 +55,11 @@ api.interceptors.response.use(
       apiError.status = status;
       apiError.code = data?.error?.code || "SERVER_ERROR";
       apiError.message = data?.error?.message || apiError.message;
+      console.log(`[API] Server error ${status}: ${apiError.message}`, config?.url);
     } else if (error.request) {
       apiError.message = "Unable to reach the server. Check your connection.";
       apiError.code = "NETWORK_ERROR";
+      console.log(`[API] Network error (no response): ${error.message}`, config?.url);
     }
 
     return Promise.reject(apiError);
@@ -66,6 +69,20 @@ api.interceptors.response.use(
 // Wake up Render server (free tier sleeps after inactivity)
 export function wakeUpServer() {
   fetch(API_BASE_URL.replace(/\/api$/, "/health")).catch(() => {});
+}
+
+// Wait for the server to be awake before making critical requests
+export async function ensureServerAwake() {
+  const healthUrl = API_BASE_URL.replace(/\/api$/, "/health");
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      const res = await fetch(healthUrl, { method: "GET" });
+      if (res.ok) return true;
+    } catch {}
+    // Wait longer between attempts to give Render time to cold-start
+    await new Promise((r) => setTimeout(r, attempt * 3000));
+  }
+  return false;
 }
 
 export async function saveToken(token) {
@@ -111,20 +128,22 @@ export const postAPI = {
   get: (id) => api.get(`/posts/${id}`),
 
   create: ({ caption, media, platforms, status }) => {
-    // If media items have cloudinaryUrl, send as JSON with URLs (no file upload needed)
-    const hasCloudinaryUrls =
-      media && media.length > 0 && media.every((m) => m.cloudinaryUrl);
+    // Use JSON when there's no media, or all media items have cloudinaryUrl
+    const hasRawFiles =
+      media && media.length > 0 && !media.every((m) => m.cloudinaryUrl);
 
-    if (hasCloudinaryUrls) {
+    if (!hasRawFiles) {
       return api.post("/posts", {
         caption,
         status,
         platforms,
-        mediaUrls: media.map((m) => m.cloudinaryUrl),
+        ...(media && media.length > 0 && {
+          mediaUrls: media.map((m) => m.cloudinaryUrl),
+        }),
       });
     }
 
-    // Fallback: upload raw files via FormData
+    // Fallback: upload raw files via FormData (only when Cloudinary upload failed)
     const formData = new FormData();
     if (caption) formData.append("caption", caption);
     if (status) formData.append("status", status);
@@ -153,7 +172,7 @@ export const postAPI = {
 
   delete: (id) => api.delete(`/posts/${id}`),
 
-  publish: (id) => api.post(`/posts/${id}/publish`),
+  publish: (id) => api.post(`/posts/${id}/publish`, {}, { timeout: 180000 }),
 
   schedule: (id, scheduledAt) =>
     api.post(`/posts/${id}/schedule`, { scheduledAt }),

@@ -9,15 +9,22 @@ const TOKEN_KEY = "@crosspost_token";
  * @param {"image"|"video"} type - Media type
  * @returns {Promise<{url: string, publicId: string}>}
  */
-export async function uploadToCloudinary(uri, type = "image") {
+export async function uploadToCloudinary(uri, type = "image", mimeType, fileName) {
   const token = await AsyncStorage.getItem(TOKEN_KEY);
-  const ext = type === "video" ? "mp4" : "jpg";
+
+  // Use the actual mimeType from the asset (important for Android where images can be PNG, WebP, etc.)
+  const actualMimeType = mimeType || (type === "video" ? "video/mp4" : "image/jpeg");
+  // Derive extension from fileName or mimeType
+  const ext = fileName
+    ? fileName.split(".").pop()
+    : actualMimeType.split("/")[1] || (type === "video" ? "mp4" : "jpg");
+  const actualName = fileName || `upload_${Date.now()}.${ext}`;
 
   const formData = new FormData();
   formData.append("file", {
     uri,
-    name: `upload_${Date.now()}.${ext}`,
-    type: type === "video" ? "video/mp4" : "image/jpeg",
+    name: actualName,
+    type: actualMimeType,
   });
 
   // Upload through server endpoint (server handles Cloudinary signing)

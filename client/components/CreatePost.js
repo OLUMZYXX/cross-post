@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { useToast } from "./Toast";
-import { postAPI } from "../services/api";
+import { postAPI, ensureServerAwake } from "../services/api";
 import { uploadToCloudinary } from "../services/cloudinary";
 
 const TONE_OPTIONS = [
@@ -339,14 +339,32 @@ export default function CreatePost({
     setIsPosting(true);
 
     try {
+      // Ensure server is awake before posting (handles Render cold starts)
+      console.log("[Publish] Waking up server...");
+      const serverReady = await ensureServerAwake();
+      if (!serverReady) {
+        console.log("[Publish] Server did not respond to health check");
+        showToast({
+          type: "error",
+          title: "Server unavailable",
+          message: "The server is taking too long to respond. Please try again in a moment.",
+          duration: 5000,
+        });
+        setIsPosting(false);
+        return;
+      }
+      console.log("[Publish] Server is awake, creating post...");
+
       const { data: createData } = await postAPI.create({
         caption,
         media: selectedMedia,
         platforms: selectedPlatforms,
         status: "draft",
       });
+      console.log("[Publish] Post created:", createData.post._id);
 
       const { data: publishData } = await postAPI.publish(createData.post._id);
+      console.log("[Publish] Publish results:", JSON.stringify(publishData.publishResults));
 
       const results = publishData.publishResults || [];
       const succeeded = results.filter((r) => r.success);
@@ -377,10 +395,12 @@ export default function CreatePost({
       onPostPublished?.(publishData.post);
       onClose();
     } catch (err) {
+      console.log("[Publish] Error:", err.code, err.message, err.status);
       showToast({
         type: "error",
         title: "Publish failed",
-        message: err.message,
+        message: `${err.message}${err.code ? ` (${err.code})` : ""}`,
+        duration: 5000,
       });
     } finally {
       setIsPosting(false);
@@ -392,6 +412,20 @@ export default function CreatePost({
     setIsPosting(true);
 
     try {
+      console.log("[Schedule] Waking up server...");
+      const serverReady = await ensureServerAwake();
+      if (!serverReady) {
+        console.log("[Schedule] Server did not respond to health check");
+        showToast({
+          type: "error",
+          title: "Server unavailable",
+          message: "The server is taking too long to respond. Please try again in a moment.",
+          duration: 5000,
+        });
+        setIsPosting(false);
+        return;
+      }
+
       const { data: createData } = await postAPI.create({
         caption,
         media: selectedMedia,
@@ -409,10 +443,12 @@ export default function CreatePost({
       });
       onClose();
     } catch (err) {
+      console.log("[Schedule] Error:", err.code, err.message, err.status);
       showToast({
         type: "error",
         title: "Scheduling failed",
-        message: err.message,
+        message: `${err.message}${err.code ? ` (${err.code})` : ""}`,
+        duration: 5000,
       });
     } finally {
       setIsPosting(false);
@@ -523,7 +559,7 @@ export default function CreatePost({
 
       // Upload to Cloudinary for optimization
       try {
-        const { url } = await uploadToCloudinary(asset.uri, type);
+        const { url } = await uploadToCloudinary(asset.uri, type, asset.mimeType, asset.fileName);
         mediaItem.cloudinaryUrl = url;
       } catch {
         // Cloudinary upload failed — keep local URI as fallback
