@@ -23,18 +23,13 @@ export default function App() {
   useEffect(() => {
     const handleDeepLink = async (event) => {
       const url = event.url;
-      console.log("[DEEPLINK_DEBUG] Received deep link:", url);
       const match = url.match(/crosspost:\/\/oauth\/(\w+)\/callback/);
-      if (!match) {
-        console.log("[DEEPLINK_DEBUG] URL did not match OAuth callback pattern");
-        return;
-      }
+      if (!match) return;
 
       const platform = match[1];
       const urlObj = new URL(url.replace("crosspost://", "http://dummy.com/"));
       const params = urlObj.searchParams;
       const displayName = platform.charAt(0).toUpperCase() + platform.slice(1);
-      console.log("[DEEPLINK_DEBUG] Platform:", platform, "Success:", params.get("success"), "Error:", params.get("error"));
 
       // If Facebook returned code+state directly to the app, POST to server to complete the exchange
       if (
