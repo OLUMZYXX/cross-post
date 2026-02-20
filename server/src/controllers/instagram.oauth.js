@@ -19,7 +19,7 @@ export async function getInstagramPendingInfo(req, res) {
       .json({ success: false, error: { message: "Missing stateId" } });
   }
 
-  const data = peekState(stateId);
+  const data = await peekState(stateId);
   // console.log("Instagram pending data found:", !!data);
   if (!data) {
     return res.status(400).json({
@@ -59,7 +59,7 @@ export async function confirmInstagramConnection(req, res) {
       .json({ success: false, error: { message: "Missing stateId" } });
   }
 
-  const pendingData = getState(stateId);
+  const pendingData = await getState(stateId);
   // console.log("Instagram confirm data found:", !!pendingData);
   if (!pendingData) {
     return res.status(400).json({
@@ -117,7 +117,7 @@ function buildRedirectHtml(title, url) {
  * Docs: https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login
  */
 export async function initiateInstagramAuth(req, res) {
-  const stateId = createState({ userId: req.user.id });
+  const stateId = await createState({ userId: req.user.id });
   const redirectUri = `${CLIENT_URL}/api/platforms/auth/instagram/callback`;
 
   const authUrl =
@@ -141,7 +141,7 @@ export async function handleInstagramCallback(req, res) {
     return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
   }
 
-  const stateData = getState(state);
+  const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/instagram/callback?error=invalid_state`;
     return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));

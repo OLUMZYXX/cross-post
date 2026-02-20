@@ -11,7 +11,7 @@ function buildRedirectHtml(title, url) {
 }
 
 export async function initiateYouTubeAuth(req, res) {
-  const stateId = createState({ userId: req.user.id });
+  const stateId = await createState({ userId: req.user.id });
   const redirectUri = `${CLIENT_URL}/api/platforms/auth/youtube/callback`;
 
   const scopes = [
@@ -41,7 +41,7 @@ export async function handleYouTubeCallback(req, res) {
     return res.send(buildRedirectHtml("YouTube Connection Failed", appUrl));
   }
 
-  const stateData = getState(state);
+  const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/youtube/callback?error=invalid_state`;
     return res.send(buildRedirectHtml("YouTube Connection Failed", appUrl));

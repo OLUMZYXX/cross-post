@@ -11,7 +11,7 @@ function buildRedirectHtml(title, url) {
 }
 
 export async function initiateTikTokAuth(req, res) {
-  const stateId = createState({ userId: req.user.id });
+  const stateId = await createState({ userId: req.user.id });
   const redirectUri = `${CLIENT_URL}/api/platforms/auth/tiktok/callback`;
 
   const authUrl =
@@ -34,7 +34,7 @@ export async function handleTikTokCallback(req, res) {
     return res.send(buildRedirectHtml("TikTok Connection Failed", appUrl));
   }
 
-  const stateData = getState(state);
+  const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/tiktok/callback?error=invalid_state`;
     return res.send(buildRedirectHtml("TikTok Connection Failed", appUrl));

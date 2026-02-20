@@ -1,33 +1,32 @@
 import crypto from "crypto";
+import OAuthState from "../models/OAuthState.js";
 
-const states = new Map();
-
-export function createState(data, ttlMs = 600000) {
+export async function createState(data, ttlMs = 600000) {
   const stateId = crypto.randomUUID();
-  states.set(stateId, { ...data, expiresAt: Date.now() + ttlMs });
+  await OAuthState.create({
+    stateId,
+    data,
+    expiresAt: new Date(Date.now() + ttlMs),
+  });
   return stateId;
 }
 
-export function getState(stateId) {
-  const data = states.get(stateId);
-  if (!data) return null;
-  if (Date.now() > data.expiresAt) {
-    states.delete(stateId);
-    return null;
-  }
-  states.delete(stateId);
-  return data;
+export async function getState(stateId) {
+  const doc = await OAuthState.findOneAndDelete({ stateId });
+  if (!doc) return null;
+  if (new Date() > doc.expiresAt) return null;
+  return doc.data;
 }
 
 // Read state without consuming it (for preview endpoints)
-export function peekState(stateId) {
-  const data = states.get(stateId);
-  if (!data) return null;
-  if (Date.now() > data.expiresAt) {
-    states.delete(stateId);
+export async function peekState(stateId) {
+  const doc = await OAuthState.findOne({ stateId });
+  if (!doc) return null;
+  if (new Date() > doc.expiresAt) {
+    await doc.deleteOne();
     return null;
   }
-  return data;
+  return doc.data;
 }
 
 export function generateCodeVerifier() {

@@ -11,7 +11,7 @@ function buildRedirectHtml(title, url) {
 }
 
 export async function initiateRedditAuth(req, res) {
-  const stateId = createState({ userId: req.user.id });
+  const stateId = await createState({ userId: req.user.id });
   const redirectUri = `${CLIENT_URL}/api/platforms/auth/reddit/callback`;
 
   const authUrl =
@@ -35,7 +35,7 @@ export async function handleRedditCallback(req, res) {
     return res.send(buildRedirectHtml("Reddit Connection Failed", appUrl));
   }
 
-  const stateData = getState(state);
+  const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/reddit/callback?error=invalid_state`;
     return res.send(buildRedirectHtml("Reddit Connection Failed", appUrl));

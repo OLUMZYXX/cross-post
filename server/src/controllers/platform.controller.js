@@ -67,7 +67,7 @@ export async function disconnectPlatform(req, res) {
 
 // Facebook OAuth functions
 export async function initiateFacebookAuth(req, res) {
-  const stateId = createState({ userId: req.user.id });
+  const stateId = await createState({ userId: req.user.id });
   const redirectUri = `${CLIENT_URL}/api/platforms/auth/facebook/callback`;
 
   const facebookAuthUrl =
@@ -94,7 +94,7 @@ export async function handleFacebookCallback(req, res) {
     return res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
   }
 
-  const stateData = getState(state);
+  const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/facebook/callback?error=invalid_state`;
     return res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));

@@ -260,22 +260,18 @@ export default function HomePage({
       };
 
       if (oauthMethods[platformName]) {
-        console.log("[OAUTH_DEBUG] Initiating auth for:", platformName);
         const { data } = await oauthMethods[platformName]();
-        console.log("[OAUTH_DEBUG] Auth URL received:", data.authUrl);
 
         // Use ephemeral auth session — no cached cookies, user can pick a different account each time
         const result = await WebBrowser.openAuthSessionAsync(
           data.authUrl,
           "crosspost://",
         );
-        console.log("[OAUTH_DEBUG] WebBrowser result:", result.type);
 
         setModalVisible(false);
 
         if (result.type === "success" && result.url) {
           const url = result.url;
-          console.log("[OAUTH_DEBUG] Callback URL:", url);
           const urlObj = new URL(url.replace("crosspost://", "http://dummy.com/"));
           const params = urlObj.searchParams;
 
@@ -323,7 +319,6 @@ export default function HomePage({
           await fetchPlatforms();
           await fetchRecentActivities();
         } else if (result.type === "cancel") {
-          console.log("[OAUTH_DEBUG] User cancelled auth flow");
         }
         return;
       }
