@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
 import CreatePost from "./CreatePost";
 import SentPosts from "./SentPosts";
 import BottomNav from "./BottomNav";
@@ -259,9 +260,71 @@ export default function HomePage({
       };
 
       if (oauthMethods[platformName]) {
+        console.log("[OAUTH_DEBUG] Initiating auth for:", platformName);
         const { data } = await oauthMethods[platformName]();
-        await Linking.openURL(data.authUrl);
+        console.log("[OAUTH_DEBUG] Auth URL received:", data.authUrl);
+
+        // Use ephemeral auth session — no cached cookies, user can pick a different account each time
+        const result = await WebBrowser.openAuthSessionAsync(
+          data.authUrl,
+          "crosspost://",
+        );
+        console.log("[OAUTH_DEBUG] WebBrowser result:", result.type);
+
         setModalVisible(false);
+
+        if (result.type === "success" && result.url) {
+          const url = result.url;
+          console.log("[OAUTH_DEBUG] Callback URL:", url);
+          const urlObj = new URL(url.replace("crosspost://", "http://dummy.com/"));
+          const params = urlObj.searchParams;
+
+          // Facebook with code+state needs server-side exchange
+          if (
+            platformName === "Facebook" &&
+            params.get("code") &&
+            params.get("state")
+          ) {
+            try {
+              const res = await platformAPI.completeFacebookAuth(
+                params.get("code"),
+                params.get("state"),
+              );
+              if (res?.data?.missingPages) {
+                showToast({
+                  type: "info",
+                  title: `${platformName} connected`,
+                  message: "No Facebook Pages found. Create or link a Page to enable publishing.",
+                });
+              } else {
+                showToast({ type: "success", title: `${platformName} connected!` });
+              }
+            } catch (fbErr) {
+              showToast({ type: "error", title: "Connection failed", message: fbErr.message });
+            }
+            await fetchPlatforms();
+            await fetchRecentActivities();
+            return;
+          }
+
+          if (params.get("success") === "true") {
+            showToast({
+              type: "success",
+              title: `${platformName} connected!`,
+              message: params.get("name") ? `@${params.get("name")}` : undefined,
+            });
+          } else if (params.get("error")) {
+            showToast({
+              type: "error",
+              title: "Connection failed",
+              message: params.get("error"),
+            });
+          }
+          await fetchPlatforms();
+          await fetchRecentActivities();
+        } else if (result.type === "cancel") {
+          console.log("[OAUTH_DEBUG] User cancelled auth flow");
+        }
         return;
       }
 
