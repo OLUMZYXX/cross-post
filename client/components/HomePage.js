@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Linking,
+  BackHandler,
 } from "react-native";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -159,6 +160,33 @@ export default function HomePage({
 
     return () => clearInterval(interval);
   }, [fetchRecentActivities]);
+
+  // Handle Android back button/gesture
+  useEffect(() => {
+    const handler = () => {
+      // If create post is open, close it
+      if (showCreatePost) {
+        setShowCreatePost(false);
+        return true;
+      }
+      // If in a settings sub-screen, go back to settings list
+      if (activeTab === "settings" && settingsScreen) {
+        setSettingsScreen(null);
+        return true;
+      }
+      // If on a non-home tab, go back to home
+      if (activeTab !== "home") {
+        prevTabRef.current = "home";
+        setActiveTab("home");
+        return true;
+      }
+      // On home tab, let default behavior (exit app)
+      return false;
+    };
+
+    const subscription = BackHandler.addEventListener("hardwareBackPress", handler);
+    return () => subscription.remove();
+  }, [showCreatePost, activeTab, settingsScreen]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

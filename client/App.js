@@ -1,6 +1,6 @@
 import "./global.css";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ActivityIndicator, View, Linking, AppState } from "react-native";
+import { ActivityIndicator, View, Linking, AppState, BackHandler } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
@@ -133,6 +133,22 @@ export default function App() {
       setCurrentScreen("signin");
     })();
   }, []);
+
+  // Handle Android back button/gesture for auth screens
+  useEffect(() => {
+    const handler = () => {
+      // From signup, go back to signin
+      if (currentScreen === "signup") {
+        setCurrentScreen("signin");
+        return true;
+      }
+      // On signin/home/onboarding, let default behavior
+      return false;
+    };
+
+    const subscription = BackHandler.addEventListener("hardwareBackPress", handler);
+    return () => subscription.remove();
+  }, [currentScreen]);
 
   const completeOnboarding = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, "true");
