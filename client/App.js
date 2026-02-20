@@ -81,16 +81,26 @@ export default function App() {
   }, []);
 
   // Check biometric lock when app comes to foreground from background.
-  // We intentionally only check "background → active" (not "inactive → active")
-  // because system dialogs like the biometric/password prompt cause "inactive"
-  // briefly — triggering the lock again would create an endless password loop.
+  // Only trigger if the app was in the background for more than 3 seconds,
+  // so that brief system dialogs (image picker, share sheet, etc.) don't
+  // cause a false lock.
+  const backgroundAtRef = useRef(null);
+
   useEffect(() => {
     const subscription = AppState.addEventListener("change", async (nextState) => {
+      if (nextState === "background") {
+        backgroundAtRef.current = Date.now();
+      }
+
       if (appState.current === "background" && nextState === "active") {
-        const enabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
-        const token = await getToken();
-        if (enabled === "true" && token) {
-          setBiometricLocked(true);
+        const elapsed = Date.now() - (backgroundAtRef.current || 0);
+        // Only lock if the app was in the background for at least 3 seconds
+        if (elapsed >= 3000) {
+          const enabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
+          const token = await getToken();
+          if (enabled === "true" && token) {
+            setBiometricLocked(true);
+          }
         }
       }
       appState.current = nextState;
