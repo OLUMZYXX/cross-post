@@ -58,18 +58,17 @@ export default function PrivacySecurity({ onBack, user }) {
     if (compatible && enrolled) {
       const types =
         await LocalAuthentication.supportedAuthenticationTypesAsync();
-      if (
-        types.includes(
-          LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION,
-        )
-      ) {
-        setBiometricType("Face ID");
-      } else if (
-        types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)
-      ) {
-        setBiometricType("Fingerprint");
+      const hasFace = types.includes(
+        LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION,
+      );
+      const hasFingerprint = types.includes(
+        LocalAuthentication.AuthenticationType.FINGERPRINT,
+      );
+
+      if (Platform.OS === "ios") {
+        setBiometricType(hasFace ? "Face ID" : hasFingerprint ? "Touch ID" : "Biometric");
       } else {
-        setBiometricType("Biometric");
+        setBiometricType(hasFingerprint ? "Fingerprint" : hasFace ? "Face Unlock" : "Biometric");
       }
     }
 
@@ -357,7 +356,7 @@ export default function PrivacySecurity({ onBack, user }) {
             <View className="w-10 h-10 rounded-full bg-purple-500/20 items-center justify-center mr-3">
               <Ionicons
                 name={
-                  biometricType === "Face ID"
+                  biometricType === "Face ID" || biometricType === "Face Unlock"
                     ? "scan-outline"
                     : "finger-print-outline"
                 }
