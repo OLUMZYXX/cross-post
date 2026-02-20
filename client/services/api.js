@@ -26,9 +26,23 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+// Retry logic for network errors (handles Render cold starts)
 api.interceptors.response.use(
   (response) => response.data,
-  (error) => {
+  async (error) => {
+    const config = error.config;
+
+    // Retry up to 2 times on network errors (no response received)
+    if (!error.response && config && !config._retryCount) {
+      config._retryCount = 0;
+    }
+    if (!error.response && config && config._retryCount < 2) {
+      config._retryCount += 1;
+      // Wait before retrying (3s first retry, 5s second)
+      await new Promise((r) => setTimeout(r, config._retryCount === 1 ? 3000 : 5000));
+      return api(config);
+    }
+
     const apiError = {
       message: "Something went wrong. Please try again.",
       code: "NETWORK_ERROR",
@@ -48,6 +62,11 @@ api.interceptors.response.use(
     return Promise.reject(apiError);
   },
 );
+
+// Wake up Render server (free tier sleeps after inactivity)
+export function wakeUpServer() {
+  fetch(API_BASE_URL.replace(/\/api$/, "/health")).catch(() => {});
+}
 
 export async function saveToken(token) {
   await AsyncStorage.setItem(TOKEN_KEY, token);

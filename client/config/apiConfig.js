@@ -6,7 +6,7 @@
  * - false → uses the deployed Render server (PRODUCTION_SERVER_URL)
  */
 
-const USE_LOCAL_SERVER = true;
+const USE_LOCAL_SERVER = false;
 
 const LOCAL_SERVER_URL = "http://192.168.1.40:4000/api";
 const PRODUCTION_SERVER_URL = "https://cross-post-d75v.onrender.com/api";

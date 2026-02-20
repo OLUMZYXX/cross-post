@@ -15,11 +15,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.crosspost",
-      "usesAppleSignIn": true
+      "bundleIdentifier": "com.crosspost.app",
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "package": "com.yourcompany.crosspost",
+      "package": "com.crosspost.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#022c22"
@@ -33,6 +36,12 @@
     "plugins": [
       "expo-apple-authentication",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e6e6d941-ff9c-474f-bdb1-5ce54de12693"
+      }
+    },
+    "owner": "mide_1"
   }
 }

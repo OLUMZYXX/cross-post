@@ -8,7 +8,7 @@ import HomePage from "./components/HomePage";
 import Onboarding from "./components/Onboarding";
 import BiometricLock from "./components/BiometricLock";
 import { ToastProvider } from "./components/Toast";
-import { authAPI, platformAPI, getToken, clearToken } from "./services/api";
+import { authAPI, platformAPI, getToken, clearToken, wakeUpServer } from "./services/api";
 
 const ONBOARDING_KEY = "@crosspost_onboarded";
 const BIOMETRIC_KEY = "@crosspost_biometric_enabled";
@@ -100,6 +100,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Pre-warm the server (Render free tier sleeps after inactivity)
+    wakeUpServer();
+
     (async () => {
       // In development, always show onboarding on every reload
       if (__DEV__) {
