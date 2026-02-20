@@ -104,12 +104,6 @@ export default function App() {
     wakeUpServer();
 
     (async () => {
-      // In development, always show onboarding on every reload
-      if (__DEV__) {
-        setCurrentScreen("onboarding");
-        return;
-      }
-
       const onboarded = await AsyncStorage.getItem(ONBOARDING_KEY);
 
       if (onboarded !== "true") {
@@ -141,9 +135,7 @@ export default function App() {
   }, []);
 
   const completeOnboarding = async () => {
-    if (!__DEV__) {
-      await AsyncStorage.setItem(ONBOARDING_KEY, "true");
-    }
+    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
     setCurrentScreen("signup");
   };
 
