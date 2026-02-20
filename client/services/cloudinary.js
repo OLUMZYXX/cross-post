@@ -1,43 +1,40 @@
-import {
-  CLOUDINARY_CLOUD_NAME,
-  CLOUDINARY_UPLOAD_PRESET,
-} from "../config/cloudinaryConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_BASE_URL } from "../config/apiConfig";
+
+const TOKEN_KEY = "@crosspost_token";
 
 /**
- * Upload a file to Cloudinary and return the optimized URL.
+ * Upload a file to Cloudinary via the server (signed upload).
  * @param {string} uri - Local file URI
  * @param {"image"|"video"} type - Media type
  * @returns {Promise<{url: string, publicId: string}>}
  */
 export async function uploadToCloudinary(uri, type = "image") {
-  const resourceType = type === "video" ? "video" : "image";
+  const token = await AsyncStorage.getItem(TOKEN_KEY);
+  const ext = type === "video" ? "mp4" : "jpg";
 
   const formData = new FormData();
-  const ext = type === "video" ? "mp4" : "jpg";
   formData.append("file", {
     uri,
     name: `upload_${Date.now()}.${ext}`,
     type: type === "video" ? "video/mp4" : "image/jpeg",
   });
-  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`,
-    { method: "POST", body: formData },
-  );
+  // Upload through server endpoint (server handles Cloudinary signing)
+  const serverUrl = API_BASE_URL.replace(/\/api$/, "");
+  const response = await fetch(`${serverUrl}/api/upload/cloudinary`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw new Error(err?.error?.message || "Cloudinary upload failed");
+    throw new Error(err?.message || "Upload failed");
   }
 
-  const data = await response.json();
-
-  // Return the auto-optimized URL (f_auto, q_auto)
-  const optimizedUrl = data.secure_url.replace(
-    "/upload/",
-    "/upload/f_auto,q_auto/",
-  );
-
-  return { url: optimizedUrl, publicId: data.public_id };
+  const result = await response.json();
+  return { url: result.data.url, publicId: result.data.publicId };
 }

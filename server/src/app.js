@@ -1,11 +1,14 @@
 import express from "express";
 import cors from "cors";
+import crypto from "crypto";
 import multer from "multer";
 import postRoutes from "./routes/post.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import platformRoutes from "./routes/platform.routes.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { uploadToGridFS, downloadFromGridFS, findFileById } from "./utils/gridfs.js";
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } from "./config/env.js";
+import { authenticate } from "./middleware/auth.js";
 
 const app = express();
 
@@ -56,6 +59,58 @@ app.post("/api/upload/image", uploadSingle.single("image"), async (req, res) => 
   const url = `${req.protocol}://${req.get("host")}/media/${fileId}`;
   res.json({ success: true, data: { url } });
 });
+
+// Upload media to Cloudinary (signed upload via server)
+const uploadCloudinary = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 },
+});
+app.post(
+  "/api/upload/cloudinary",
+  authenticate,
+  uploadCloudinary.single("file"),
+  async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+      return res.status(500).json({ success: false, message: "Cloudinary is not configured" });
+    }
+
+    const resourceType = req.file.mimetype.startsWith("video/") ? "video" : "image";
+    const timestamp = Math.floor(Date.now() / 1000);
+    const folder = "cross-post";
+
+    // Generate signature
+    const paramsToSign = `folder=${folder}&timestamp=${timestamp}${CLOUDINARY_API_SECRET}`;
+    const signature = crypto.createHash("sha1").update(paramsToSign).digest("hex");
+
+    const formData = new FormData();
+    formData.append("file", new Blob([req.file.buffer], { type: req.file.mimetype }), req.file.originalname);
+    formData.append("api_key", CLOUDINARY_API_KEY);
+    formData.append("timestamp", String(timestamp));
+    formData.append("signature", signature);
+    formData.append("folder", folder);
+
+    const cloudRes = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`,
+      { method: "POST", body: formData },
+    );
+
+    if (!cloudRes.ok) {
+      const err = await cloudRes.json().catch(() => ({}));
+      return res.status(500).json({
+        success: false,
+        message: err?.error?.message || "Cloudinary upload failed",
+      });
+    }
+
+    const data = await cloudRes.json();
+    const optimizedUrl = data.secure_url.replace("/upload/", "/upload/f_auto,q_auto/");
+
+    res.json({ success: true, data: { url: optimizedUrl, publicId: data.public_id } });
+  },
+);
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 app.get("/", (_req, res) => res.json({ name: "CROSS-POST API" }));
