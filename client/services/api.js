@@ -9,6 +9,7 @@ const BASE_URL = API_BASE_URL;
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: 120000,
+  adapter: "fetch",
 });
 
 api.interceptors.request.use(
