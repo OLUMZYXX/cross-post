@@ -340,10 +340,8 @@ export default function CreatePost({
 
     try {
       // Ensure server is awake before posting (handles Render cold starts)
-      console.log("[Publish] Waking up server...");
       const serverReady = await ensureServerAwake();
       if (!serverReady) {
-        console.log("[Publish] Server did not respond to health check");
         showToast({
           type: "error",
           title: "Server unavailable",
@@ -353,7 +351,6 @@ export default function CreatePost({
         setIsPosting(false);
         return;
       }
-      console.log("[Publish] Server is awake, creating post...");
 
       const { data: createData } = await postAPI.create({
         caption,
@@ -361,10 +358,8 @@ export default function CreatePost({
         platforms: selectedPlatforms,
         status: "draft",
       });
-      console.log("[Publish] Post created:", createData.post._id);
 
       const { data: publishData } = await postAPI.publish(createData.post._id);
-      console.log("[Publish] Publish results:", JSON.stringify(publishData.publishResults));
 
       const results = publishData.publishResults || [];
       const succeeded = results.filter((r) => r.success);
@@ -395,11 +390,10 @@ export default function CreatePost({
       onPostPublished?.(publishData.post);
       onClose();
     } catch (err) {
-      console.log("[Publish] Error:", err.code, err.message, err.status);
       showToast({
         type: "error",
         title: "Publish failed",
-        message: `${err.message}${err.code ? ` (${err.code})` : ""}`,
+        message: err.message,
         duration: 5000,
       });
     } finally {
@@ -412,10 +406,8 @@ export default function CreatePost({
     setIsPosting(true);
 
     try {
-      console.log("[Schedule] Waking up server...");
       const serverReady = await ensureServerAwake();
       if (!serverReady) {
-        console.log("[Schedule] Server did not respond to health check");
         showToast({
           type: "error",
           title: "Server unavailable",
@@ -443,11 +435,10 @@ export default function CreatePost({
       });
       onClose();
     } catch (err) {
-      console.log("[Schedule] Error:", err.code, err.message, err.status);
       showToast({
         type: "error",
         title: "Scheduling failed",
-        message: `${err.message}${err.code ? ` (${err.code})` : ""}`,
+        message: err.message,
         duration: 5000,
       });
     } finally {

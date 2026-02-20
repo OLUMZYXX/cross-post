@@ -9,8 +9,46 @@ const BASE_URL = API_BASE_URL;
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: 120000,
-  adapter: "fetch",
 });
+
+// Direct fetch helper for routes that have multer middleware (avoids axios XHR issues on Android)
+async function fetchJSON(path, { method = "POST", body, timeout = 120000 } = {}) {
+  const token = await AsyncStorage.getItem(TOKEN_KEY);
+  const url = `${BASE_URL}${path}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: {
+        ...(body !== undefined && { "Content-Type": "application/json" }),
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      ...(body !== undefined && { body: JSON.stringify(body) }),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+
+    const data = await response.json();
+    if (!response.ok) {
+      return Promise.reject({
+        message: data?.error?.message || "Something went wrong. Please try again.",
+        code: data?.error?.code || "SERVER_ERROR",
+        status: response.status,
+      });
+    }
+    return data;
+  } catch (err) {
+    clearTimeout(timer);
+    if (err.code) throw err; // Re-throw server errors
+    return Promise.reject({
+      message: "Unable to reach the server. Check your connection.",
+      code: "NETWORK_ERROR",
+      status: null,
+    });
+  }
+}
 
 api.interceptors.request.use(
   async (config) => {
@@ -39,7 +77,6 @@ api.interceptors.response.use(
       if (config._retryCount < 3) {
         config._retryCount += 1;
         const delays = [5000, 10000, 15000];
-        console.log(`[API] Network error, retry ${config._retryCount}/3 for ${config.url}`);
         await new Promise((r) => setTimeout(r, delays[config._retryCount - 1]));
         return api(config);
       }
@@ -56,11 +93,9 @@ api.interceptors.response.use(
       apiError.status = status;
       apiError.code = data?.error?.code || "SERVER_ERROR";
       apiError.message = data?.error?.message || apiError.message;
-      console.log(`[API] Server error ${status}: ${apiError.message}`, config?.url);
     } else if (error.request) {
       apiError.message = "Unable to reach the server. Check your connection.";
       apiError.code = "NETWORK_ERROR";
-      console.log(`[API] Network error (no response): ${error.message}`, config?.url);
     }
 
     return Promise.reject(apiError);
@@ -129,22 +164,24 @@ export const postAPI = {
   get: (id) => api.get(`/posts/${id}`),
 
   create: ({ caption, media, platforms, status }) => {
-    // Use JSON when there's no media, or all media items have cloudinaryUrl
+    // Use direct fetch (bypasses axios XHR which fails on Android for multer routes)
     const hasRawFiles =
       media && media.length > 0 && !media.every((m) => m.cloudinaryUrl);
 
     if (!hasRawFiles) {
-      return api.post("/posts", {
-        caption,
-        status,
-        platforms,
-        ...(media && media.length > 0 && {
-          mediaUrls: media.map((m) => m.cloudinaryUrl),
-        }),
+      return fetchJSON("/posts", {
+        body: {
+          caption,
+          status,
+          platforms,
+          ...(media && media.length > 0 && {
+            mediaUrls: media.map((m) => m.cloudinaryUrl),
+          }),
+        },
       });
     }
 
-    // Fallback: upload raw files via FormData (only when Cloudinary upload failed)
+    // Fallback: upload raw files via FormData
     const formData = new FormData();
     if (caption) formData.append("caption", caption);
     if (status) formData.append("status", status);
@@ -173,12 +210,12 @@ export const postAPI = {
 
   delete: (id) => api.delete(`/posts/${id}`),
 
-  publish: (id) => api.post(`/posts/${id}/publish`, {}, { timeout: 180000 }),
+  publish: (id) => fetchJSON(`/posts/${id}/publish`, { timeout: 180000 }),
 
   schedule: (id, scheduledAt) =>
-    api.post(`/posts/${id}/schedule`, { scheduledAt }),
+    fetchJSON(`/posts/${id}/schedule`, { body: { scheduledAt } }),
 
-  rephrase: (caption, tone) => api.post("/posts/rephrase", { caption, tone }),
+  rephrase: (caption, tone) => fetchJSON("/posts/rephrase", { body: { caption, tone } }),
 };
 
 export const platformAPI = {
