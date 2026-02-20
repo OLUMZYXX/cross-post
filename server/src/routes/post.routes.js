@@ -21,11 +21,19 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 },
 });
 
+// Only run multer for multipart/form-data requests (JSON posts skip file processing)
+function optionalUpload(req, res, next) {
+  if (req.is("multipart/form-data")) {
+    return upload.array("media")(req, res, next);
+  }
+  next();
+}
+
 router.use(authenticate);
 
 router.get("/", asyncHandler(listPosts));
 router.get("/:id", asyncHandler(getPost));
-router.post("/", upload.array("media"), asyncHandler(createPost));
+router.post("/", optionalUpload, asyncHandler(createPost));
 router.put("/:id", asyncHandler(updatePost));
 router.delete("/:id", asyncHandler(deletePost));
 router.post("/rephrase", asyncHandler(rephraseCaption));
