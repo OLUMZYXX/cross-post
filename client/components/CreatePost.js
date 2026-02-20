@@ -552,8 +552,13 @@ export default function CreatePost({
       try {
         const { url } = await uploadToCloudinary(asset.uri, type, asset.mimeType, asset.fileName);
         mediaItem.cloudinaryUrl = url;
-      } catch {
-        // Cloudinary upload failed — keep local URI as fallback
+      } catch (err) {
+        console.warn("Cloudinary upload failed:", err?.message || err);
+        showToast({
+          type: "warning",
+          title: "Media upload issue",
+          message: "Could not optimize media. Will upload directly when posting.",
+        });
       }
 
       setSelectedMedia([mediaItem]);

@@ -163,7 +163,7 @@ export const postAPI = {
 
   get: (id) => api.get(`/posts/${id}`),
 
-  create: ({ caption, media, platforms, status }) => {
+  create: async ({ caption, media, platforms, status }) => {
     // Use direct fetch (bypasses axios XHR which fails on Android for multer routes)
     const hasRawFiles =
       media && media.length > 0 && !media.every((m) => m.cloudinaryUrl);
@@ -181,7 +181,7 @@ export const postAPI = {
       });
     }
 
-    // Fallback: upload raw files via FormData
+    // Fallback: upload raw files via FormData using fetch (axios XHR fails on Android)
     const formData = new FormData();
     if (caption) formData.append("caption", caption);
     if (status) formData.append("status", status);
@@ -201,9 +201,38 @@ export const postAPI = {
         formData.append("media", { uri, name, type });
       });
     }
-    return api.post("/posts", formData, {
-      timeout: 300000,
-    });
+
+    const token = await AsyncStorage.getItem(TOKEN_KEY);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 300000);
+    try {
+      const response = await fetch(`${BASE_URL}/posts`, {
+        method: "POST",
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      const data = await response.json();
+      if (!response.ok) {
+        return Promise.reject({
+          message: data?.error?.message || "Something went wrong. Please try again.",
+          code: data?.error?.code || "SERVER_ERROR",
+          status: response.status,
+        });
+      }
+      return data;
+    } catch (err) {
+      clearTimeout(timer);
+      if (err.code) throw err;
+      return Promise.reject({
+        message: "Unable to reach the server. Check your connection.",
+        code: "NETWORK_ERROR",
+        status: null,
+      });
+    }
   },
 
   update: (id, postData) => api.put(`/posts/${id}`, postData),
