@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.crosspost.app",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserNotificationsUsageDescription": "CrossPost needs notifications to alert you when posts are published, fail, or are about to go live."
       }
     },
     "android": {
@@ -35,7 +36,14 @@
     },
     "plugins": [
       "expo-apple-authentication",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#4ade80"
+        }
+      ]
     ],
     "extra": {
       "eas": {

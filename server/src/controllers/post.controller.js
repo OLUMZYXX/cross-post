@@ -4,6 +4,7 @@ import {
   publishToAllPlatforms,
   deleteFromAllPlatforms,
 } from "../services/publishPost.js";
+import { notifyPublishResults, createNotification } from "../services/notificationService.js";
 import { SERVER_URL, OPENAI_API_KEY } from "../config/env.js";
 import { uploadToGridFS, deleteFromGridFS } from "../utils/gridfs.js";
 
@@ -141,7 +142,54 @@ export async function publishPost(req, res) {
 
   await post.save();
 
+  // Send notifications about publish results
+  await notifyPublishResults(req.user.id, post, results).catch(() => {});
+
   res.json({ success: true, data: { post, publishResults: results } });
+}
+
+export async function retryPublish(req, res) {
+  const post = await Post.findOne({ _id: req.params.id, userId: req.user.id });
+
+  if (!post) {
+    throw Errors.notFound("Post not found");
+  }
+
+  const { platforms: retryPlatforms } = req.body;
+  if (!retryPlatforms || !Array.isArray(retryPlatforms) || retryPlatforms.length === 0) {
+    throw Errors.badRequest("Specify which platforms to retry");
+  }
+
+  // Temporarily override post.platforms to only retry the failed ones
+  const originalPlatforms = post.platforms;
+  post.platforms = retryPlatforms;
+
+  const retryResults = await publishToAllPlatforms(req.user.id, post);
+
+  // Restore original platforms
+  post.platforms = originalPlatforms;
+
+  // Merge retry results into existing publishResults
+  const existing = post.publishResults || [];
+  for (const retryResult of retryResults) {
+    const idx = existing.findIndex((r) => r.platform === retryResult.platform);
+    if (idx >= 0) {
+      existing[idx] = retryResult;
+    } else {
+      existing.push(retryResult);
+    }
+  }
+
+  post.publishResults = existing;
+  post.status = existing.some((r) => r.success) ? "published" : post.status;
+  if (!post.publishedAt) post.publishedAt = new Date();
+
+  await post.save();
+
+  // Send notifications about retry results
+  await notifyPublishResults(req.user.id, post, retryResults).catch(() => {});
+
+  res.json({ success: true, data: { post, publishResults: existing } });
 }
 
 export async function schedulePost(req, res) {
@@ -165,6 +213,21 @@ export async function schedulePost(req, res) {
   post.scheduledAt = scheduledDate;
 
   await post.save();
+
+  // Notify about scheduled post
+  const scheduleLabel = scheduledDate.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  await createNotification(req.user.id, {
+    type: "post_scheduled",
+    title: "Post Scheduled",
+    message: `Your post is scheduled for ${scheduleLabel}`,
+    postId: post._id,
+  }).catch(() => {});
 
   res.json({ success: true, data: { post } });
 }

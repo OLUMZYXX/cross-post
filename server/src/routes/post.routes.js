@@ -9,6 +9,7 @@ import {
   updatePost,
   deletePost,
   publishPost,
+  retryPublish,
   schedulePost,
   rephraseCaption,
 } from "../controllers/post.controller.js";
@@ -38,6 +39,7 @@ router.put("/:id", asyncHandler(updatePost));
 router.delete("/:id", asyncHandler(deletePost));
 router.post("/rephrase", asyncHandler(rephraseCaption));
 router.post("/:id/publish", asyncHandler(publishPost));
+router.post("/:id/retry", asyncHandler(retryPublish));
 router.post("/:id/schedule", asyncHandler(schedulePost));
 
 export default router;

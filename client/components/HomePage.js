@@ -19,11 +19,12 @@ import BottomNav from "./BottomNav";
 import EditProfile from "./EditProfile";
 import ConnectedAccounts from "./ConnectedAccounts";
 import NotificationSettings from "./NotificationSettings";
+import NotificationsInbox from "./NotificationsInbox";
 import PrivacySecurity from "./PrivacySecurity";
 import HelpSupport from "./HelpSupport";
 import PageLoadingAnimation from "./PageLoadingAnimation";
 import { useToast } from "./Toast";
-import { postAPI, platformAPI, clearToken } from "../services/api";
+import { postAPI, platformAPI, notificationAPI, clearToken } from "../services/api";
 
 export default function HomePage({
   user,
@@ -46,6 +47,8 @@ export default function HomePage({
   const { showToast } = useToast();
   const [refreshing, setRefreshing] = useState(false);
   const [showLoadingAnimation, setShowLoadingAnimation] = useState(true);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const prevTabRef = useRef(activeTab);
 
   const fetchPlatforms = useCallback(async () => {
@@ -100,6 +103,13 @@ export default function HomePage({
     } catch {}
   }, []);
 
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const { data } = await notificationAPI.list();
+      setUnreadNotifications(data.unreadCount || 0);
+    } catch {}
+  }, []);
+
   const fetchRecentActivities = useCallback(async () => {
     try {
       // Fetch published posts
@@ -120,15 +130,15 @@ export default function HomePage({
           title: post.caption || "Post published",
           timestamp: new Date(post.publishedAt),
           platforms: post.platforms?.length || 0,
-          icon: "📝",
+          platformNames: post.platforms || [],
         })),
         ...platforms.map((platform) => ({
           id: `platform-${platform._id || platform.name}`,
           type: "platform",
-          title: `${platform.name} account connected`,
+          title: `${platform.name} connected`,
           timestamp: new Date(platform.connectedAt),
           platforms: 1,
-          icon: "🔗",
+          platformNames: [platform.name],
         })),
       ].sort((a, b) => b.timestamp - a.timestamp);
 
@@ -142,28 +152,36 @@ export default function HomePage({
     fetchPlatforms();
     fetchPosts();
     fetchRecentActivities();
-  }, [fetchPlatforms, fetchPosts, fetchRecentActivities]);
+    fetchUnreadCount();
+  }, [fetchPlatforms, fetchPosts, fetchRecentActivities, fetchUnreadCount]);
 
-  // Re-fetch platforms when OAuth completes (deep link callback)
+  // Re-fetch platforms when OAuth completes (deep link callback) or notification arrives
   useEffect(() => {
     if (oauthRefreshKey > 0) {
       fetchPlatforms();
       fetchRecentActivities();
+      fetchUnreadCount();
     }
-  }, [oauthRefreshKey, fetchPlatforms, fetchRecentActivities]);
+  }, [oauthRefreshKey, fetchPlatforms, fetchRecentActivities, fetchUnreadCount]);
 
   // Real-time updates every 2 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       fetchRecentActivities();
+      fetchUnreadCount();
     }, 120000); // 2 minutes
 
     return () => clearInterval(interval);
-  }, [fetchRecentActivities]);
+  }, [fetchRecentActivities, fetchUnreadCount]);
 
   // Handle Android back button/gesture
   useEffect(() => {
     const handler = () => {
+      // If notifications inbox is open, close it
+      if (showNotifications) {
+        setShowNotifications(false);
+        return true;
+      }
       // If create post is open, close it
       if (showCreatePost) {
         setShowCreatePost(false);
@@ -186,7 +204,7 @@ export default function HomePage({
 
     const subscription = BackHandler.addEventListener("hardwareBackPress", handler);
     return () => subscription.remove();
-  }, [showCreatePost, activeTab, settingsScreen]);
+  }, [showCreatePost, showNotifications, activeTab, settingsScreen]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -195,6 +213,7 @@ export default function HomePage({
         fetchPlatforms(),
         fetchPosts(),
         fetchRecentActivities(),
+        fetchUnreadCount(),
       ]);
       showToast({
         type: "success",
@@ -217,10 +236,6 @@ export default function HomePage({
     if (tabId === "create") {
       setShowCreatePost(true);
     } else {
-      // Show loading animation when navigating back to home tab
-      if (tabId === "home" && prevTabRef.current !== "home") {
-        setShowLoadingAnimation(true);
-      }
       prevTabRef.current = tabId;
       setActiveTab(tabId);
     }
@@ -436,6 +451,20 @@ export default function HomePage({
         onPostPublished={handlePostPublished}
         initialDraft={editingDraft}
       />
+    );
+  }
+
+  if (showNotifications) {
+    return (
+      <View className="flex-1 bg-gray-950">
+        <NotificationsInbox
+          onBack={() => {
+            setShowNotifications(false);
+            fetchUnreadCount();
+          }}
+          onUnreadCountChange={setUnreadNotifications}
+        />
+      </View>
     );
   }
 
@@ -766,12 +795,27 @@ export default function HomePage({
               {user?.name?.split(" ")[0] || "User"}
             </Text>
           </View>
-          <TouchableOpacity
-            onPress={handleLogout}
-            className="bg-gray-800 px-4 py-2 rounded-xl border border-gray-700"
-          >
-            <Text className="text-gray-300 text-sm font-medium">Logout</Text>
-          </TouchableOpacity>
+          <View className="flex-row items-center">
+            <TouchableOpacity
+              onPress={() => setShowNotifications(true)}
+              className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center mr-3 border border-gray-700"
+            >
+              <Ionicons name="notifications-outline" size={20} color="#9ca3af" />
+              {unreadNotifications > 0 && (
+                <View className="absolute -top-1 -right-1 bg-green-500 rounded-full min-w-[18px] h-[18px] items-center justify-center px-1">
+                  <Text className="text-gray-950 text-[10px] font-bold">
+                    {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleLogout}
+              className="bg-gray-800 px-4 py-2 rounded-xl border border-gray-700"
+            >
+              <Text className="text-gray-300 text-sm font-medium">Logout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <ScrollView
@@ -917,43 +961,66 @@ export default function HomePage({
           </Text>
 
           {recentActivities.length > 0 ? (
-            recentActivities.map((activity) => (
-              <View
-                key={activity.id}
-                className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
-              >
-                <View className="flex-row items-center">
-                  <View className="w-10 h-10 rounded-full bg-green-500/20 items-center justify-center mr-3">
-                    <Text className="text-lg">{activity.icon}</Text>
+            <View className="bg-gray-900/80 rounded-2xl border border-gray-800 overflow-hidden mb-3">
+              {recentActivities.map((activity, index) => {
+                const isPost = activity.type === "post";
+                const iconName = isPost ? "paper-plane" : "link";
+                const iconBg = isPost ? "bg-green-500/20" : "bg-blue-500/20";
+                const iconColor = isPost ? "#4ade80" : "#60a5fa";
+                const accentColor = isPost ? "text-green-400" : "text-blue-400";
+
+                // Relative time
+                const now = new Date();
+                const diff = now - activity.timestamp;
+                const mins = Math.floor(diff / 60000);
+                const hrs = Math.floor(diff / 3600000);
+                const days = Math.floor(diff / 86400000);
+                let timeLabel;
+                if (mins < 1) timeLabel = "Just now";
+                else if (mins < 60) timeLabel = `${mins}m ago`;
+                else if (hrs < 24) timeLabel = `${hrs}h ago`;
+                else if (days < 7) timeLabel = `${days}d ago`;
+                else timeLabel = activity.timestamp.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+                return (
+                  <View
+                    key={activity.id}
+                    className={`flex-row items-center px-4 py-3.5 ${index < recentActivities.length - 1 ? "border-b border-gray-800/60" : ""}`}
+                  >
+                    <View className={`w-9 h-9 rounded-xl ${iconBg} items-center justify-center mr-3`}>
+                      <Ionicons name={iconName} size={16} color={iconColor} />
+                    </View>
+                    <View className="flex-1 mr-2">
+                      <Text className="text-white text-sm font-medium" numberOfLines={1}>
+                        {activity.title}
+                      </Text>
+                      <View className="flex-row items-center mt-0.5">
+                        <Text className={`text-xs font-medium ${accentColor}`}>
+                          {isPost ? "Published" : "Connected"}
+                        </Text>
+                        {activity.platforms > 0 && (
+                          <Text className="text-gray-600 text-xs">
+                            {" "}· {activity.platforms} platform{activity.platforms !== 1 ? "s" : ""}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                    <Text className="text-gray-600 text-xs">{timeLabel}</Text>
                   </View>
-                  <View className="flex-1">
-                    <Text className="text-white font-medium" numberOfLines={1}>
-                      {activity.title}
-                    </Text>
-                    <Text className="text-gray-500 text-xs">
-                      {activity.timestamp.toLocaleDateString()} •{" "}
-                      {activity.platforms} platform
-                      {activity.platforms !== 1 ? "s" : ""}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            ))
+                );
+              })}
+            </View>
           ) : (
-            <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3">
-              <View className="flex-row items-center">
-                <View className="w-10 h-10 rounded-full bg-gray-500/20 items-center justify-center mr-3">
-                  <Text className="text-lg">📅</Text>
-                </View>
-                <View className="flex-1">
-                  <Text className="text-white font-medium">
-                    No recent activity
-                  </Text>
-                  <Text className="text-gray-500 text-xs">
-                    Your activities will appear here
-                  </Text>
-                </View>
+            <View className="bg-gray-900/80 rounded-2xl p-6 border border-gray-800 mb-3 items-center">
+              <View className="w-12 h-12 rounded-2xl bg-gray-800 items-center justify-center mb-3">
+                <Ionicons name="time-outline" size={24} color="#6b7280" />
               </View>
+              <Text className="text-white font-medium text-sm mb-1">
+                No recent activity
+              </Text>
+              <Text className="text-gray-500 text-xs text-center">
+                Your posts and connections will show up here
+              </Text>
             </View>
           )}
 

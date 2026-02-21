@@ -241,10 +241,33 @@ export const postAPI = {
 
   publish: (id) => fetchJSON(`/posts/${id}/publish`, { timeout: 180000 }),
 
+  retry: (id, platforms) =>
+    fetchJSON(`/posts/${id}/retry`, { body: { platforms }, timeout: 180000 }),
+
   schedule: (id, scheduledAt) =>
     fetchJSON(`/posts/${id}/schedule`, { body: { scheduledAt } }),
 
   rephrase: (caption, tone) => fetchJSON("/posts/rephrase", { body: { caption, tone } }),
+};
+
+export const notificationAPI = {
+  list: () => api.get("/notifications"),
+
+  markAsRead: (id) => fetchJSON(`/notifications/${id}/read`),
+
+  markAllAsRead: () => fetchJSON("/notifications/read-all"),
+
+  delete: (id) => fetchJSON(`/notifications/${id}`, { method: "DELETE" }),
+
+  clearAll: () => fetchJSON("/notifications/clear"),
+
+  registerPushToken: (pushToken) =>
+    fetchJSON("/notifications/push-token", { body: { pushToken } }),
+
+  getPreferences: () => api.get("/notifications/preferences"),
+
+  updatePreferences: (prefs) =>
+    fetchJSON("/notifications/preferences", { method: "PUT", body: prefs }),
 };
 
 export const platformAPI = {

@@ -34,6 +34,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  pushToken: {
+    type: String,
+    default: null,
+  },
+  notificationPreferences: {
+    pushEnabled: { type: Boolean, default: true },
+    emailEnabled: { type: Boolean, default: false },
+    postAlerts: { type: Boolean, default: true },
+    scheduleReminders: { type: Boolean, default: true },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

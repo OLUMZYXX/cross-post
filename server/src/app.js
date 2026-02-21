@@ -5,6 +5,7 @@ import multer from "multer";
 import postRoutes from "./routes/post.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import platformRoutes from "./routes/platform.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { uploadToGridFS, downloadFromGridFS, findFileById } from "./utils/gridfs.js";
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } from "./config/env.js";
@@ -118,6 +119,7 @@ app.get("/", (_req, res) => res.json({ name: "CROSS-POST API" }));
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/platforms", platformRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use(notFoundHandler);
 

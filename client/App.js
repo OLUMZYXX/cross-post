@@ -1,14 +1,26 @@
 import "./global.css";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ActivityIndicator, View, Linking, AppState, BackHandler } from "react-native";
+import { ActivityIndicator, View, Linking, AppState, BackHandler, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import HomePage from "./components/HomePage";
 import Onboarding from "./components/Onboarding";
 import BiometricLock from "./components/BiometricLock";
 import { ToastProvider } from "./components/Toast";
-import { authAPI, platformAPI, getToken, clearToken, wakeUpServer } from "./services/api";
+import { authAPI, notificationAPI, platformAPI, getToken, clearToken, wakeUpServer } from "./services/api";
+
+// Configure how notifications appear when app is in foreground
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 const ONBOARDING_KEY = "@crosspost_onboarded";
 const BIOMETRIC_KEY = "@crosspost_biometric_enabled";
@@ -19,6 +31,52 @@ export default function App() {
   const [oauthRefreshKey, setOauthRefreshKey] = useState(0);
   const [biometricLocked, setBiometricLocked] = useState(false);
   const appState = useRef(AppState.currentState);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  // Register for push notifications and send token to server
+  const registerForPushNotifications = useCallback(async () => {
+    try {
+      if (!Device.isDevice) {
+        // Push notifications don't work on simulators
+        return;
+      }
+
+      // Check/request permissions
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== "granted") {
+        return;
+      }
+
+      // Get the Expo push token
+      const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+      const tokenData = await Notifications.getExpoPushTokenAsync({
+        ...(projectId && { projectId }),
+      });
+
+      // Send token to server
+      await notificationAPI.registerPushToken(tokenData.data).catch(() => {});
+
+      // Android needs a notification channel
+      if (Platform.OS === "android") {
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "Default",
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: "#4ade80",
+        });
+      }
+    } catch (err) {
+      // Silently fail — push is optional
+    }
+  }, []);
 
   useEffect(() => {
     const handleDeepLink = async (event) => {
@@ -109,6 +167,32 @@ export default function App() {
     return () => subscription?.remove();
   }, []);
 
+  // Set up notification listeners
+  useEffect(() => {
+    // Listener for notifications received while app is foregrounded
+    notificationListener.current = Notifications.addNotificationReceivedListener(() => {
+      // Trigger a refresh of notification count in HomePage
+      setOauthRefreshKey((prev) => prev + 1);
+    });
+
+    // Listener for when user taps on a notification
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {
+      // Navigate to home if not already there
+      if (currentScreen !== "home") {
+        setCurrentScreen("home");
+      }
+    });
+
+    return () => {
+      if (notificationListener.current) {
+        Notifications.removeNotificationSubscription(notificationListener.current);
+      }
+      if (responseListener.current) {
+        Notifications.removeNotificationSubscription(responseListener.current);
+      }
+    };
+  }, [currentScreen]);
+
   useEffect(() => {
     // Pre-warm the server (Render free tier sleeps after inactivity)
     wakeUpServer();
@@ -127,6 +211,9 @@ export default function App() {
           const { data } = await authAPI.getMe();
           setUser(data.user);
           setCurrentScreen("home");
+
+          // Register for push notifications after successful auth
+          registerForPushNotifications();
 
           // Check if biometric lock should show on initial load
           const biometricEnabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
@@ -185,6 +272,7 @@ export default function App() {
           onNavigateToHome={(userData) => {
             setUser(userData);
             setCurrentScreen("home");
+            registerForPushNotifications();
           }}
         />
       );
@@ -197,6 +285,7 @@ export default function App() {
           onNavigateToHome={(userData) => {
             setUser(userData);
             setCurrentScreen("home");
+            registerForPushNotifications();
           }}
         />
       );
