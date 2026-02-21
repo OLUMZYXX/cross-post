@@ -304,3 +304,198 @@ export async function rephraseCaption(req, res) {
 
   res.json({ success: true, data: { rephrased } });
 }
+
+export async function copyrightCheck(req, res) {
+  const { caption, imageUrls } = req.body;
+
+  if ((!caption || !caption.trim()) && (!imageUrls || imageUrls.length === 0)) {
+    throw Errors.badRequest("Provide a caption or images to check.");
+  }
+
+  if (!OPENAI_API_KEY) {
+    throw Errors.badRequest(
+      "AI copyright check is not configured. Add OPENAI_API_KEY to your environment variables.",
+    );
+  }
+
+  const issues = [];
+  const suggestions = [];
+
+  // --- TEXT ANALYSIS (GPT-4o-mini) ---
+  if (caption && caption.trim()) {
+    const textResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `You are a copyright and intellectual property analysis assistant. Analyze the given social media post text for potential copyright issues.
+
+Check for:
+1. Song lyrics (even partial lines from known songs)
+2. Movie or TV show quotes (verbatim or near-verbatim)
+3. Book passages or poem excerpts
+4. Trademarked slogans or catchphrases (e.g. "Just Do It", "I'm Lovin' It")
+5. Copyrighted characters or franchise references used in a way that implies ownership
+6. News article text copied verbatim
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "hasIssues": boolean,
+  "issues": [
+    {
+      "type": "lyrics" | "quote" | "trademark" | "text_copy",
+      "content": "the specific problematic text",
+      "source": "the likely original source",
+      "severity": "low" | "medium" | "high",
+      "explanation": "brief explanation of why this is a concern"
+    }
+  ],
+  "suggestions": ["suggestion 1", "suggestion 2"]
+}
+
+If no issues are found, return {"hasIssues": false, "issues": [], "suggestions": []}.
+Be thorough but avoid false positives for common everyday phrases. Only flag content that clearly originates from a copyrighted work.`,
+          },
+          {
+            role: "user",
+            content: `Analyze this social media post for copyright concerns:\n\n${caption}`,
+          },
+        ],
+        max_tokens: 500,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (!textResponse.ok) {
+      const err = await textResponse.json().catch(() => ({}));
+      throw Errors.badRequest(err?.error?.message || "AI text analysis failed");
+    }
+
+    const textData = await textResponse.json();
+    let textResult;
+    try {
+      textResult = JSON.parse(textData.choices?.[0]?.message?.content || "{}");
+    } catch {
+      textResult = { hasIssues: false, issues: [], suggestions: [] };
+    }
+
+    if (textResult.hasIssues && textResult.issues) {
+      issues.push(...textResult.issues);
+    }
+    if (textResult.suggestions) {
+      suggestions.push(...textResult.suggestions);
+    }
+  }
+
+  // --- IMAGE ANALYSIS (GPT-4o vision, parallel, max 4 images) ---
+  if (imageUrls && imageUrls.length > 0) {
+    const imagesToCheck = imageUrls.slice(0, 4);
+
+    const imagePromises = imagesToCheck.map(async (url) => {
+      try {
+        const imgResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "system",
+                content: `You are a visual copyright analysis assistant. Analyze images for potential copyright issues on social media platforms.
+
+Check for:
+1. Visible watermarks (stock photo sites like Getty, Shutterstock, Adobe Stock, iStock, etc.)
+2. Stock photo identification markers or metadata overlays
+3. Recognizable copyrighted characters (Disney, Marvel, DC, anime characters, etc.)
+4. Brand logos prominently featured (not incidental background logos)
+5. Known copyrighted artwork, paintings, or photographs
+6. Screenshots from movies, TV shows, or video games
+7. Other creators' social media content (visible usernames/watermarks from TikTok, Instagram, etc.)
+
+Respond ONLY with valid JSON:
+{
+  "hasIssues": boolean,
+  "issues": [
+    {
+      "type": "watermark" | "stock_photo" | "character" | "logo" | "artwork" | "screenshot" | "repost",
+      "content": "what was detected",
+      "source": "likely owner/source if identifiable",
+      "severity": "low" | "medium" | "high",
+      "explanation": "brief explanation"
+    }
+  ],
+  "suggestions": ["suggestion 1", "suggestion 2"]
+}
+
+If no issues found, return {"hasIssues": false, "issues": [], "suggestions": []}.
+Only flag clear issues. Do not flag generic objects, common symbols, or incidental branding.`,
+              },
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: "Analyze this image for copyright concerns:" },
+                  { type: "image_url", image_url: { url, detail: "low" } },
+                ],
+              },
+            ],
+            max_tokens: 400,
+            temperature: 0.2,
+            response_format: { type: "json_object" },
+          }),
+        });
+
+        if (!imgResponse.ok) return null;
+
+        const imgData = await imgResponse.json();
+        try {
+          return JSON.parse(imgData.choices?.[0]?.message?.content || "{}");
+        } catch {
+          return null;
+        }
+      } catch {
+        return null;
+      }
+    });
+
+    const imageResults = await Promise.allSettled(imagePromises);
+
+    for (const result of imageResults) {
+      if (result.status === "fulfilled" && result.value?.hasIssues) {
+        issues.push(...(result.value.issues || []));
+        suggestions.push(...(result.value.suggestions || []));
+      }
+    }
+  }
+
+  // Determine overall risk level
+  let riskLevel = "none";
+  if (issues.some((i) => i.severity === "high")) {
+    riskLevel = "high";
+  } else if (issues.some((i) => i.severity === "medium")) {
+    riskLevel = "medium";
+  } else if (issues.length > 0) {
+    riskLevel = "low";
+  }
+
+  const uniqueSuggestions = [...new Set(suggestions)];
+
+  res.json({
+    success: true,
+    data: {
+      riskLevel,
+      hasIssues: issues.length > 0,
+      issues,
+      suggestions: uniqueSuggestions,
+    },
+  });
+}

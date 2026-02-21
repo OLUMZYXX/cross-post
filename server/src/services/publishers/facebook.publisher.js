@@ -1,7 +1,9 @@
 /**
  * Facebook Publisher — posts to Facebook Pages via Graph API
  * Supports posting to multiple selected pages at once.
+ * Supports multi-image posts via unpublished photos + feed post.
  * Docs: https://developers.facebook.com/docs/pages-api/posts
+ * Docs: https://developers.facebook.com/docs/graph-api/reference/page/photos
  */
 
 const isVideo = (url) => url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i);
@@ -9,40 +11,91 @@ const isVideo = (url) => url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i);
 async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
   let response;
 
-  if (
+  const imageUrls =
     media &&
-    media.length > 0 &&
-    typeof media[0] === "string" &&
-    media[0].startsWith("http")
-  ) {
-    if (isVideo(media[0])) {
-      response = await fetch(
-        `https://graph.facebook.com/v18.0/${finalPageId}/videos`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            file_url: media[0],
-            description: caption || "",
-            access_token: finalPageToken,
-          }),
-        },
-      );
-    } else {
-      response = await fetch(
+    media.filter(
+      (m) => typeof m === "string" && m.startsWith("http") && !isVideo(m),
+    );
+
+  const videoUrl =
+    media &&
+    media.find(
+      (m) => typeof m === "string" && m.startsWith("http") && isVideo(m),
+    );
+
+  if (videoUrl) {
+    // Video post — only one video supported
+    response = await fetch(
+      `https://graph.facebook.com/v18.0/${finalPageId}/videos`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_url: videoUrl,
+          description: caption || "",
+          access_token: finalPageToken,
+        }),
+      },
+    );
+  } else if (imageUrls && imageUrls.length > 1) {
+    // Multi-image post — upload each as unpublished, then create feed post
+    const photoIds = [];
+
+    for (const url of imageUrls) {
+      const photoRes = await fetch(
         `https://graph.facebook.com/v18.0/${finalPageId}/photos`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            url: media[0],
-            caption: caption || "",
+            url,
+            published: false,
             access_token: finalPageToken,
           }),
         },
       );
+      const photoData = await photoRes.json();
+      if (photoData.error) {
+        throw new Error(
+          photoData.error.message || "Failed to upload photo to Facebook",
+        );
+      }
+      photoIds.push(photoData.id);
     }
+
+    // Create feed post with all attached photos
+    const feedBody = {
+      message: caption || "",
+      access_token: finalPageToken,
+    };
+    photoIds.forEach((id, i) => {
+      feedBody[`attached_media[${i}]`] = JSON.stringify({ media_fbid: id });
+    });
+
+    response = await fetch(
+      `https://graph.facebook.com/v18.0/${finalPageId}/feed`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(feedBody),
+      },
+    );
+  } else if (imageUrls && imageUrls.length === 1) {
+    // Single image post
+    response = await fetch(
+      `https://graph.facebook.com/v18.0/${finalPageId}/photos`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: imageUrls[0],
+          caption: caption || "",
+          access_token: finalPageToken,
+        }),
+      },
+    );
   } else {
+    // Text-only post
     response = await fetch(
       `https://graph.facebook.com/v18.0/${finalPageId}/feed`,
       {

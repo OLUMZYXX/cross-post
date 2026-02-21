@@ -12,6 +12,7 @@ import {
   retryPublish,
   schedulePost,
   rephraseCaption,
+  copyrightCheck,
 } from "../controllers/post.controller.js";
 
 const router = express.Router();
@@ -38,6 +39,7 @@ router.post("/", optionalUpload, asyncHandler(createPost));
 router.put("/:id", asyncHandler(updatePost));
 router.delete("/:id", asyncHandler(deletePost));
 router.post("/rephrase", asyncHandler(rephraseCaption));
+router.post("/copyright-check", asyncHandler(copyrightCheck));
 router.post("/:id/publish", asyncHandler(publishPost));
 router.post("/:id/retry", asyncHandler(retryPublish));
 router.post("/:id/schedule", asyncHandler(schedulePost));

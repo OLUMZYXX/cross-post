@@ -14,13 +14,17 @@ import { ToastProvider } from "./components/Toast";
 import { authAPI, notificationAPI, platformAPI, getToken, clearToken, wakeUpServer } from "./services/api";
 
 // Configure how notifications appear when app is in foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+  });
+} catch {
+  // May fail in Expo Go — push notifications require a development build
+}
 
 const ONBOARDING_KEY = "@crosspost_onboarded";
 const BIOMETRIC_KEY = "@crosspost_biometric_enabled";
@@ -35,11 +39,19 @@ export default function App() {
   const responseListener = useRef();
 
   // Register for push notifications and send token to server
+  // Note: Remote push notifications require a development build, not Expo Go (SDK 53+)
   const registerForPushNotifications = useCallback(async () => {
     try {
-      if (!Device.isDevice) {
-        // Push notifications don't work on simulators
-        return;
+      if (!Device.isDevice) return;
+
+      // Android needs a notification channel (works in Expo Go for local notifications)
+      if (Platform.OS === "android") {
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "Default",
+          importance: Notifications.AndroidImportance?.MAX ?? 4,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: "#4ade80",
+        }).catch(() => {});
       }
 
       // Check/request permissions
@@ -51,11 +63,9 @@ export default function App() {
         finalStatus = status;
       }
 
-      if (finalStatus !== "granted") {
-        return;
-      }
+      if (finalStatus !== "granted") return;
 
-      // Get the Expo push token
+      // Get the Expo push token — this may fail in Expo Go
       const projectId = Constants.expoConfig?.extra?.eas?.projectId;
       const tokenData = await Notifications.getExpoPushTokenAsync({
         ...(projectId && { projectId }),
@@ -63,18 +73,8 @@ export default function App() {
 
       // Send token to server
       await notificationAPI.registerPushToken(tokenData.data).catch(() => {});
-
-      // Android needs a notification channel
-      if (Platform.OS === "android") {
-        await Notifications.setNotificationChannelAsync("default", {
-          name: "Default",
-          importance: Notifications.AndroidImportance.MAX,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: "#4ade80",
-        });
-      }
-    } catch (err) {
-      // Silently fail — push is optional
+    } catch {
+      // Push registration may fail in Expo Go — that's expected
     }
   }, []);
 
@@ -169,26 +169,30 @@ export default function App() {
 
   // Set up notification listeners
   useEffect(() => {
-    // Listener for notifications received while app is foregrounded
-    notificationListener.current = Notifications.addNotificationReceivedListener(() => {
-      // Trigger a refresh of notification count in HomePage
-      setOauthRefreshKey((prev) => prev + 1);
-    });
+    try {
+      // Listener for notifications received while app is foregrounded
+      notificationListener.current = Notifications.addNotificationReceivedListener(() => {
+        // Trigger a refresh of notification count in HomePage
+        setOauthRefreshKey((prev) => prev + 1);
+      });
 
-    // Listener for when user taps on a notification
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {
-      // Navigate to home if not already there
-      if (currentScreen !== "home") {
-        setCurrentScreen("home");
-      }
-    });
+      // Listener for when user taps on a notification
+      responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {
+        // Navigate to home if not already there
+        if (currentScreen !== "home") {
+          setCurrentScreen("home");
+        }
+      });
+    } catch {
+      // Notification listeners may not work in Expo Go — that's OK
+    }
 
     return () => {
-      if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current);
-      }
-      if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current);
+      try {
+        notificationListener.current?.remove();
+        responseListener.current?.remove();
+      } catch {
+        // Cleanup may fail in Expo Go — safe to ignore
       }
     };
   }, [currentScreen]);

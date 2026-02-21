@@ -285,6 +285,9 @@ export default function CreatePost({
   const [isRephrasing, setIsRephrasing] = useState(false);
   const [rephrasedText, setRephrasedText] = useState(null);
   const [selectedTone, setSelectedTone] = useState(null);
+  const [showCopyrightModal, setShowCopyrightModal] = useState(false);
+  const [isCopyrightChecking, setIsCopyrightChecking] = useState(false);
+  const [copyrightResult, setCopyrightResult] = useState(null);
   const { showToast } = useToast();
 
   const handleRephrase = async (tone) => {
@@ -446,9 +449,58 @@ export default function CreatePost({
     }
   };
 
-  const handlePostPress = () => {
+  const handlePostPress = async () => {
     if (!validateBeforePost()) return;
+
+    // Collect image URLs from uploaded media
+    const imageUrls = selectedMedia
+      .filter((m) => m.type === "image" && m.cloudinaryUrl)
+      .map((m) => m.cloudinaryUrl);
+
+    const hasCaption = caption && caption.trim().length > 0;
+    const hasImages = imageUrls.length > 0;
+
+    // Skip copyright check if no content to analyze
+    if (!hasCaption && !hasImages) {
+      setShowScheduleModal(true);
+      return;
+    }
+
+    // Run copyright check
+    setShowCopyrightModal(true);
+    setIsCopyrightChecking(true);
+    setCopyrightResult(null);
+
+    try {
+      const { data } = await postAPI.copyrightCheck(
+        hasCaption ? caption : null,
+        hasImages ? imageUrls : null,
+      );
+      setCopyrightResult(data);
+    } catch {
+      // On error, skip check and proceed
+      showToast({
+        type: "warning",
+        title: "Copyright check unavailable",
+        message: "Proceeding without copyright analysis.",
+        duration: 2000,
+      });
+      setShowCopyrightModal(false);
+      setShowScheduleModal(true);
+    } finally {
+      setIsCopyrightChecking(false);
+    }
+  };
+
+  const handleCopyrightProceed = () => {
+    setShowCopyrightModal(false);
+    setCopyrightResult(null);
     setShowScheduleModal(true);
+  };
+
+  const handleCopyrightEdit = () => {
+    setShowCopyrightModal(false);
+    setCopyrightResult(null);
   };
 
   const handleSaveDraft = async () => {
@@ -1014,6 +1066,205 @@ export default function CreatePost({
                     Pick a tone above to rephrase your post
                   </Text>
                 </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        visible={showCopyrightModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => {
+          setShowCopyrightModal(false);
+          setCopyrightResult(null);
+        }}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => {
+            if (!isCopyrightChecking) {
+              setShowCopyrightModal(false);
+              setCopyrightResult(null);
+            }
+          }}
+          className="flex-1 bg-black/60 justify-end"
+        >
+          <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+            <View className="bg-gray-900 rounded-t-3xl px-6 pt-5 pb-10 border-t border-gray-800">
+              <View className="w-10 h-1 bg-gray-700 rounded-full self-center mb-5" />
+
+              <View className="flex-row items-center mb-5">
+                <Ionicons name="shield-checkmark" size={22} color="#3b82f6" />
+                <Text className="text-white text-lg font-bold ml-2">Copyright Check</Text>
+              </View>
+
+              {isCopyrightChecking && (
+                <View className="bg-gray-800 rounded-2xl p-8 items-center">
+                  <ActivityIndicator color="#3b82f6" size="large" />
+                  <Text className="text-gray-400 text-sm mt-3">Analyzing your content...</Text>
+                  <Text className="text-gray-500 text-xs mt-1">
+                    Checking text and images for copyright issues
+                  </Text>
+                </View>
+              )}
+
+              {!isCopyrightChecking && copyrightResult && !copyrightResult.hasIssues && (
+                <View>
+                  <View className="bg-green-500/10 rounded-2xl p-5 items-center border border-green-500/20 mb-4">
+                    <Ionicons name="checkmark-circle" size={48} color="#4ade80" />
+                    <Text className="text-green-400 font-bold text-base mt-3">All Clear!</Text>
+                    <Text className="text-gray-400 text-xs mt-1 text-center">
+                      No copyright issues detected in your content
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={handleCopyrightProceed}
+                    className="bg-green-500 py-3.5 rounded-xl items-center"
+                  >
+                    <Text className="text-gray-950 font-bold text-sm">Continue to Post</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {!isCopyrightChecking && copyrightResult && copyrightResult.hasIssues && (
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  style={{ maxHeight: 400 }}
+                >
+                  {(() => {
+                    const riskConfig = {
+                      low: { color: "#4ade80", bg: "bg-green-500/20", border: "border-green-500/30", icon: "information-circle", label: "Low Risk" },
+                      medium: { color: "#eab308", bg: "bg-yellow-500/20", border: "border-yellow-500/30", icon: "warning", label: "Medium Risk" },
+                      high: { color: "#ef4444", bg: "bg-red-500/20", border: "border-red-500/30", icon: "alert-circle", label: "High Risk" },
+                    };
+                    const rc = riskConfig[copyrightResult.riskLevel] || riskConfig.low;
+                    return (
+                      <View
+                        className={`${rc.bg} ${rc.border} border rounded-2xl p-4 flex-row items-center mb-4`}
+                      >
+                        <Ionicons name={rc.icon} size={24} color={rc.color} />
+                        <View className="ml-3 flex-1">
+                          <Text style={{ color: rc.color }} className="font-bold text-sm">
+                            {rc.label}
+                          </Text>
+                          <Text className="text-gray-400 text-xs mt-0.5">
+                            {copyrightResult.issues.length} potential issue
+                            {copyrightResult.issues.length !== 1 ? "s" : ""} found
+                          </Text>
+                        </View>
+                      </View>
+                    );
+                  })()}
+
+                  <Text className="text-gray-400 text-xs mb-2 font-semibold">
+                    ISSUES DETECTED
+                  </Text>
+                  {copyrightResult.issues.map((issue, index) => {
+                    const issueTypeLabels = {
+                      lyrics: "Song Lyrics",
+                      quote: "Movie/TV Quote",
+                      trademark: "Trademark",
+                      text_copy: "Copied Text",
+                      watermark: "Watermark",
+                      stock_photo: "Stock Photo",
+                      character: "Copyrighted Character",
+                      logo: "Brand Logo",
+                      artwork: "Copyrighted Artwork",
+                      screenshot: "Screenshot",
+                      repost: "Reposted Content",
+                    };
+                    return (
+                      <View
+                        key={index}
+                        className="bg-gray-800 rounded-xl p-3.5 mb-2 border border-gray-700"
+                      >
+                        <View className="flex-row items-center mb-2">
+                          <View
+                            className={`px-2 py-0.5 rounded-full ${
+                              issue.severity === "high"
+                                ? "bg-red-500/20"
+                                : issue.severity === "medium"
+                                  ? "bg-yellow-500/20"
+                                  : "bg-green-500/20"
+                            }`}
+                          >
+                            <Text
+                              className={`text-xs font-medium ${
+                                issue.severity === "high"
+                                  ? "text-red-400"
+                                  : issue.severity === "medium"
+                                    ? "text-yellow-400"
+                                    : "text-green-400"
+                              }`}
+                            >
+                              {issueTypeLabels[issue.type] || issue.type}
+                            </Text>
+                          </View>
+                          {issue.source && (
+                            <Text
+                              className="text-gray-500 text-xs ml-2 flex-1"
+                              numberOfLines={1}
+                            >
+                              {issue.source}
+                            </Text>
+                          )}
+                        </View>
+                        {issue.content && (
+                          <Text className="text-white text-xs mb-1.5" numberOfLines={2}>
+                            &quot;{issue.content}&quot;
+                          </Text>
+                        )}
+                        <Text className="text-gray-400 text-xs">{issue.explanation}</Text>
+                      </View>
+                    );
+                  })}
+
+                  {copyrightResult.suggestions.length > 0 && (
+                    <View className="mt-3">
+                      <Text className="text-gray-400 text-xs mb-2 font-semibold">
+                        SUGGESTIONS
+                      </Text>
+                      <View className="bg-blue-500/10 rounded-xl p-3.5 border border-blue-500/20">
+                        {copyrightResult.suggestions.map((suggestion, index) => (
+                          <View key={index} className="flex-row mb-1.5">
+                            <Ionicons
+                              name="bulb-outline"
+                              size={14}
+                              color="#60a5fa"
+                              style={{ marginTop: 1 }}
+                            />
+                            <Text className="text-gray-300 text-xs ml-2 flex-1">
+                              {suggestion}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+
+                  <View className="flex-row mt-4">
+                    <TouchableOpacity
+                      onPress={handleCopyrightEdit}
+                      className="flex-1 bg-blue-500 py-3.5 rounded-xl mr-2 items-center"
+                    >
+                      <Text className="text-white font-bold text-sm">Edit Content</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleCopyrightProceed}
+                      className="flex-1 bg-gray-800 py-3.5 rounded-xl border border-gray-700 items-center"
+                    >
+                      <Text className="text-gray-300 font-bold text-sm">Post Anyway</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {copyrightResult.riskLevel === "high" && (
+                    <Text className="text-red-400/70 text-xs text-center mt-2">
+                      Posting copyrighted content may result in account strikes or takedowns
+                    </Text>
+                  )}
+                </ScrollView>
               )}
             </View>
           </TouchableOpacity>

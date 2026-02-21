@@ -248,6 +248,12 @@ export const postAPI = {
     fetchJSON(`/posts/${id}/schedule`, { body: { scheduledAt } }),
 
   rephrase: (caption, tone) => fetchJSON("/posts/rephrase", { body: { caption, tone } }),
+
+  copyrightCheck: (caption, imageUrls) =>
+    fetchJSON("/posts/copyright-check", {
+      body: { caption, imageUrls },
+      timeout: 30000,
+    }),
 };
 
 export const notificationAPI = {

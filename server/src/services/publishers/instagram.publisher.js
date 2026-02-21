@@ -2,76 +2,24 @@
  * Instagram Publisher — posts via Instagram Graph API with Instagram Login
  * Docs: https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/content-publishing
  *
+ * Supports:
+ * - Single image posts
+ * - Single video posts (Reels)
+ * - Carousel posts (multiple images)
+ *
  * Instagram requires a 2-step process:
- * 1. Create a media container
+ * 1. Create media container(s)
  * 2. Publish the container
  *
- * NOTE: Instagram API requires media (image/video URL). Text-only posts are not supported.
+ * For carousels, it's a 3-step process:
+ * 1. Create individual item containers (unpublished)
+ * 2. Create a carousel container referencing all items
+ * 3. Publish the carousel container
  */
-export async function publishToInstagram(platform, post) {
-  const { accessToken, platformUserId } = platform;
-  const { caption, media } = post;
 
-  if (!platformUserId) {
-    throw new Error(
-      "Instagram user ID not found. Please reconnect your Instagram account.",
-    );
-  }
+const isVideoUrl = (url) => url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i);
 
-  if (!media || media.length === 0) {
-    throw new Error(
-      "Instagram requires an image or video to publish. Text-only posts are not supported.",
-    );
-  }
-
-  const mediaUrl = typeof media[0] === "string" ? media[0] : media[0]?.uri;
-  if (!mediaUrl || !mediaUrl.startsWith("http")) {
-    throw new Error(
-      "Instagram requires a publicly accessible image URL. Local files must be uploaded first.",
-    );
-  }
-
-  // Detect if it's a video
-  const isVideo = mediaUrl.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i);
-
-  // Step 1: Create media container
-  const containerParams = {
-    caption: caption || "",
-    access_token: accessToken,
-  };
-
-  if (isVideo) {
-    containerParams.media_type = "VIDEO";
-    containerParams.video_url = mediaUrl;
-  } else {
-    containerParams.image_url = mediaUrl;
-  }
-
-  const containerRes = await fetch(
-    `https://graph.instagram.com/v21.0/${platformUserId}/media`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(containerParams),
-    },
-  );
-
-  const containerData = await containerRes.json();
-  console.log(
-    "Instagram container response:",
-    JSON.stringify(containerData, null, 2),
-  );
-
-  if (containerData.error) {
-    throw new Error(
-      containerData.error.message ||
-        "Failed to create Instagram media container",
-    );
-  }
-
-  const containerId = containerData.id;
-
-  // Wait for container to be ready before publishing (required for both images and videos)
+async function waitForContainer(containerId, accessToken, isVideo) {
   const maxAttempts = isVideo ? 30 : 10;
   const pollInterval = isVideo ? 5000 : 3000;
   let status = "IN_PROGRESS";
@@ -95,29 +43,180 @@ export async function publishToInstagram(platform, post) {
       `Instagram media processing failed with status: ${status}. Please try again.`,
     );
   }
+}
 
-  // Step 2: Publish the container
+export async function publishToInstagram(platform, post) {
+  const { accessToken, platformUserId } = platform;
+  const { caption, media } = post;
+
+  if (!platformUserId) {
+    throw new Error(
+      "Instagram user ID not found. Please reconnect your Instagram account.",
+    );
+  }
+
+  if (!media || media.length === 0) {
+    throw new Error(
+      "Instagram requires an image or video to publish. Text-only posts are not supported.",
+    );
+  }
+
+  // Get all valid public URLs
+  const mediaUrls = media
+    .map((m) => (typeof m === "string" ? m : m?.uri))
+    .filter((url) => url && url.startsWith("http"));
+
+  if (mediaUrls.length === 0) {
+    throw new Error(
+      "Instagram requires publicly accessible media URLs. Local files must be uploaded first.",
+    );
+  }
+
+  // Single video post
+  const hasVideo = mediaUrls.some((url) => isVideoUrl(url));
+  if (hasVideo || mediaUrls.length === 1) {
+    // Single media post (image or video)
+    const mediaUrl = mediaUrls[0];
+    const isVideo = isVideoUrl(mediaUrl);
+
+    const containerParams = {
+      caption: caption || "",
+      access_token: accessToken,
+    };
+
+    if (isVideo) {
+      containerParams.media_type = "VIDEO";
+      containerParams.video_url = mediaUrl;
+    } else {
+      containerParams.image_url = mediaUrl;
+    }
+
+    const containerRes = await fetch(
+      `https://graph.instagram.com/v21.0/${platformUserId}/media`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(containerParams),
+      },
+    );
+
+    const containerData = await containerRes.json();
+    console.log("Instagram container response:", JSON.stringify(containerData, null, 2));
+
+    if (containerData.error) {
+      throw new Error(
+        containerData.error.message || "Failed to create Instagram media container",
+      );
+    }
+
+    await waitForContainer(containerData.id, accessToken, isVideo);
+
+    const publishRes = await fetch(
+      `https://graph.instagram.com/v21.0/${platformUserId}/media_publish`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          creation_id: containerData.id,
+          access_token: accessToken,
+        }),
+      },
+    );
+
+    const publishData = await publishRes.json();
+    console.log("Instagram publish response:", JSON.stringify(publishData, null, 2));
+
+    if (publishData.error) {
+      throw new Error(
+        publishData.error.message || "Failed to publish to Instagram",
+      );
+    }
+
+    return {
+      externalId: publishData.id,
+      externalUrl: `https://www.instagram.com/`,
+    };
+  }
+
+  // --- CAROUSEL POST (multiple images) ---
+  console.log(`Instagram: creating carousel with ${mediaUrls.length} images`);
+
+  // Step 1: Create individual item containers
+  const childIds = [];
+  for (const url of mediaUrls) {
+    const itemRes = await fetch(
+      `https://graph.instagram.com/v21.0/${platformUserId}/media`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image_url: url,
+          is_carousel_item: true,
+          access_token: accessToken,
+        }),
+      },
+    );
+
+    const itemData = await itemRes.json();
+    console.log("Instagram carousel item response:", JSON.stringify(itemData, null, 2));
+
+    if (itemData.error) {
+      throw new Error(
+        itemData.error.message || "Failed to create carousel item container",
+      );
+    }
+
+    // Wait for each item to finish processing
+    await waitForContainer(itemData.id, accessToken, false);
+    childIds.push(itemData.id);
+  }
+
+  // Step 2: Create carousel container
+  const carouselRes = await fetch(
+    `https://graph.instagram.com/v21.0/${platformUserId}/media`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        media_type: "CAROUSEL",
+        caption: caption || "",
+        children: childIds.join(","),
+        access_token: accessToken,
+      }),
+    },
+  );
+
+  const carouselData = await carouselRes.json();
+  console.log("Instagram carousel container response:", JSON.stringify(carouselData, null, 2));
+
+  if (carouselData.error) {
+    throw new Error(
+      carouselData.error.message || "Failed to create Instagram carousel container",
+    );
+  }
+
+  // Wait for carousel to be ready
+  await waitForContainer(carouselData.id, accessToken, false);
+
+  // Step 3: Publish the carousel
   const publishRes = await fetch(
     `https://graph.instagram.com/v21.0/${platformUserId}/media_publish`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        creation_id: containerId,
+        creation_id: carouselData.id,
         access_token: accessToken,
       }),
     },
   );
 
   const publishData = await publishRes.json();
-  console.log(
-    "Instagram publish response:",
-    JSON.stringify(publishData, null, 2),
-  );
+  console.log("Instagram carousel publish response:", JSON.stringify(publishData, null, 2));
 
   if (publishData.error) {
     throw new Error(
-      publishData.error.message || "Failed to publish to Instagram",
+      publishData.error.message || "Failed to publish carousel to Instagram",
     );
   }
 
