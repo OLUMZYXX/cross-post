@@ -1,117 +1,45 @@
-/**
- * Facebook Publisher — posts to Facebook Pages via Graph API
- * Supports posting to multiple selected pages at once.
- * Supports multi-image posts via unpublished photos + feed post.
- * Docs: https://developers.facebook.com/docs/pages-api/posts
- * Docs: https://developers.facebook.com/docs/graph-api/reference/page/photos
- */
+const GRAPH_URL = "https://graph.facebook.com/v18.0";
 
 const isVideo = (url) =>
   url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i) ||
   url.includes("/video/upload/");
 
-function buildParams(obj) {
-  const params = new URLSearchParams();
+function buildForm(obj) {
+  const form = new FormData();
   Object.entries(obj).forEach(([k, v]) => {
-    if (v !== undefined && v !== null) params.append(k, v);
+    if (v !== undefined && v !== null) form.append(k, String(v));
   });
-  return params;
+  return form;
 }
 
 async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
+  const mediaList = Array.isArray(media) ? [...media] : [];
+
+  const imageUrls = mediaList.filter(
+    (m) => typeof m === "string" && m.startsWith("http") && !isVideo(m),
+  );
+
+  const videoUrl = mediaList.find(
+    (m) => typeof m === "string" && m.startsWith("http") && isVideo(m),
+  );
+
+  console.log("Facebook publish — media:", JSON.stringify(mediaList));
+  console.log("Facebook publish — images:", imageUrls.length, "video:", !!videoUrl);
+
   let response;
 
-  const imageUrls =
-    media &&
-    media.filter(
-      (m) => typeof m === "string" && m.startsWith("http") && !isVideo(m),
-    );
-
-  const videoUrl =
-    media &&
-    media.find(
-      (m) => typeof m === "string" && m.startsWith("http") && isVideo(m),
-    );
-
-  console.log("Facebook publish — media:", JSON.stringify(media));
-  console.log("Facebook publish — imageUrls:", imageUrls?.length, "videoUrl:", !!videoUrl);
-
   if (videoUrl) {
-    response = await fetch(
-      `https://graph.facebook.com/v18.0/${finalPageId}/videos`,
-      {
-        method: "POST",
-        body: buildParams({
-          file_url: videoUrl,
-          description: caption || "",
-          access_token: finalPageToken,
-        }),
-      },
-    );
-  } else if (imageUrls && imageUrls.length > 1) {
-    const photoIds = [];
-
-    for (const url of imageUrls) {
-      const photoRes = await fetch(
-        `https://graph.facebook.com/v18.0/${finalPageId}/photos`,
-        {
-          method: "POST",
-          body: buildParams({
-            url,
-            published: "false",
-            access_token: finalPageToken,
-          }),
-        },
-      );
-      const photoData = await photoRes.json();
-      console.log("Facebook unpublished photo response:", JSON.stringify(photoData));
-      if (photoData.error) {
-        throw new Error(
-          photoData.error.message || "Failed to upload photo to Facebook",
-        );
-      }
-      photoIds.push(photoData.id);
-    }
-
-    const feedParams = buildParams({
-      message: caption || "",
-      access_token: finalPageToken,
-    });
-    photoIds.forEach((id, i) => {
-      feedParams.append(`attached_media[${i}]`, JSON.stringify({ media_fbid: id }));
-    });
-
-    response = await fetch(
-      `https://graph.facebook.com/v18.0/${finalPageId}/feed`,
-      { method: "POST", body: feedParams },
-    );
-  } else if (imageUrls && imageUrls.length === 1) {
-    response = await fetch(
-      `https://graph.facebook.com/v18.0/${finalPageId}/photos`,
-      {
-        method: "POST",
-        body: buildParams({
-          url: imageUrls[0],
-          caption: caption || "",
-          access_token: finalPageToken,
-        }),
-      },
-    );
+    response = await postVideo(finalPageId, finalPageToken, caption, videoUrl);
+  } else if (imageUrls.length > 1) {
+    response = await postMultiImage(finalPageId, finalPageToken, caption, imageUrls);
+  } else if (imageUrls.length === 1) {
+    response = await postSingleImage(finalPageId, finalPageToken, caption, imageUrls[0]);
   } else {
-    response = await fetch(
-      `https://graph.facebook.com/v18.0/${finalPageId}/feed`,
-      {
-        method: "POST",
-        body: buildParams({
-          message: caption || "",
-          access_token: finalPageToken,
-        }),
-      },
-    );
+    response = await postTextOnly(finalPageId, finalPageToken, caption);
   }
 
   const data = await response.json();
-  console.log("Facebook API response:", JSON.stringify(data));
+  console.log("Facebook final response:", JSON.stringify(data));
 
   if (data.error) {
     throw new Error(data.error.message || "Failed to post to Facebook");
@@ -124,12 +52,78 @@ async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
   };
 }
 
+async function postVideo(pageId, token, caption, videoUrl) {
+  return fetch(`${GRAPH_URL}/${pageId}/videos`, {
+    method: "POST",
+    body: buildForm({
+      file_url: videoUrl,
+      description: caption || "",
+      access_token: token,
+    }),
+  });
+}
+
+async function postSingleImage(pageId, token, caption, imageUrl) {
+  return fetch(`${GRAPH_URL}/${pageId}/photos`, {
+    method: "POST",
+    body: buildForm({
+      url: imageUrl,
+      caption: caption || "",
+      access_token: token,
+    }),
+  });
+}
+
+async function postMultiImage(pageId, token, caption, imageUrls) {
+  const photoIds = [];
+
+  for (const url of imageUrls) {
+    const photoRes = await fetch(`${GRAPH_URL}/${pageId}/photos`, {
+      method: "POST",
+      body: buildForm({
+        url,
+        published: "false",
+        access_token: token,
+      }),
+    });
+    const photoData = await photoRes.json();
+    console.log("Facebook unpublished photo:", JSON.stringify(photoData));
+    if (photoData.error) {
+      throw new Error(photoData.error.message || "Failed to upload photo to Facebook");
+    }
+    photoIds.push(photoData.id);
+  }
+
+  const feedForm = buildForm({
+    message: caption || "",
+    access_token: token,
+  });
+  photoIds.forEach((id, i) => {
+    feedForm.append(`attached_media[${i}]`, `{"media_fbid":"${id}"}`);
+  });
+
+  console.log("Facebook feed post — photoIds:", photoIds);
+  return fetch(`${GRAPH_URL}/${pageId}/feed`, {
+    method: "POST",
+    body: feedForm,
+  });
+}
+
+async function postTextOnly(pageId, token, caption) {
+  return fetch(`${GRAPH_URL}/${pageId}/feed`, {
+    method: "POST",
+    body: buildForm({
+      message: caption || "",
+      access_token: token,
+    }),
+  });
+}
+
 export async function publishToFacebook(platform, post) {
   const { accessToken, pageId, pageAccessToken, pages, selectedPageIds } =
     platform;
   const { caption, media } = post;
 
-  // Determine which pages to post to
   let pagesToPost = [];
 
   if (
@@ -138,18 +132,15 @@ export async function publishToFacebook(platform, post) {
     selectedPageIds &&
     selectedPageIds.length > 0
   ) {
-    // Multi-page mode: post to all selected pages
     pagesToPost = pages.filter((p) => selectedPageIds.includes(p.pageId));
   }
 
-  // Fallback: use the single pageId/pageAccessToken
   if (pagesToPost.length === 0) {
     if (pageId && pageAccessToken) {
       pagesToPost = [{ pageId, pageAccessToken }];
     } else {
-      // Last resort: fetch from API
       const pagesRes = await fetch(
-        `https://graph.facebook.com/v18.0/me/accounts?access_token=${accessToken}`,
+        `${GRAPH_URL}/me/accounts?access_token=${accessToken}`,
       );
       const pagesData = await pagesRes.json();
 
@@ -168,7 +159,6 @@ export async function publishToFacebook(platform, post) {
     }
   }
 
-  // Post to all selected pages
   const results = [];
   const errors = [];
 
@@ -180,7 +170,6 @@ export async function publishToFacebook(platform, post) {
         caption,
         media,
       );
-      // Store the page token alongside the result so deletion works per-page
       result.pageAccessToken = page.pageAccessToken;
       result.pageName = page.pageName || page.pageId;
       console.log(
@@ -202,11 +191,6 @@ export async function publishToFacebook(platform, post) {
     );
   }
 
-  if (results.length > 1) {
-    console.log(`Facebook: successfully posted to ${results.length} pages`);
-  }
-
-  // Return all results so each page post gets tracked individually
   return results;
 }
 
@@ -215,7 +199,6 @@ export async function deleteFromFacebook(
   externalId,
   pageAccessToken,
 ) {
-  // Use the page-specific token if provided, otherwise fall back to platform tokens
   const token =
     pageAccessToken || platform.pageAccessToken || platform.accessToken;
   if (!token)
@@ -224,10 +207,8 @@ export async function deleteFromFacebook(
     );
 
   const res = await fetch(
-    `https://graph.facebook.com/v18.0/${externalId}?access_token=${token}`,
-    {
-      method: "DELETE",
-    },
+    `${GRAPH_URL}/${externalId}?access_token=${token}`,
+    { method: "DELETE" },
   );
 
   const data = await res.json().catch(() => null);
