@@ -23,15 +23,30 @@ export function igError(data, fallback) {
   return parts.join(" ");
 }
 
-export async function igPost(path, accessToken, body) {
-  const res = await fetch(igUrl(path, accessToken), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  console.log(`[Instagram] POST ${path}:`, JSON.stringify(data));
-  return data;
+export async function igPost(path, accessToken, body, retries = 3) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const res = await fetch(igUrl(path, accessToken), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    console.log(`[Instagram] POST ${path}:`, JSON.stringify(data));
+
+    const isRateLimit =
+      data?.error?.code === 4 ||
+      data?.error?.code === 32 ||
+      (data?.error?.message || "").toLowerCase().includes("too many");
+
+    if (isRateLimit && attempt < retries) {
+      const delay = Math.pow(2, attempt + 1) * 1000;
+      console.log(`[Instagram] Rate limited, retrying in ${delay}ms (attempt ${attempt + 1}/${retries})`);
+      await new Promise((r) => setTimeout(r, delay));
+      continue;
+    }
+
+    return data;
+  }
 }
 
 export async function waitForContainer(containerId, accessToken, isVideo) {

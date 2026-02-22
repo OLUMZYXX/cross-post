@@ -1,5 +1,6 @@
 const UPLOAD_URL = "https://api.x.com/2/media/upload";
-const CHUNK_SIZE = 5 * 1024 * 1024;
+const CHUNK_SIZE = 2 * 1024 * 1024;
+const MAX_RETRIES = 3;
 
 async function initVideoUpload(accessToken, totalBytes) {
   const res = await fetch(`${UPLOAD_URL}/initialize`, {
@@ -26,13 +27,9 @@ async function initVideoUpload(accessToken, totalBytes) {
   return data.data.id;
 }
 
-async function appendVideoChunks(accessToken, mediaId, buffer) {
-  let segmentIndex = 0;
-
-  for (let offset = 0; offset < buffer.length; offset += CHUNK_SIZE) {
-    const chunk = buffer.subarray(offset, offset + CHUNK_SIZE);
+async function appendChunkWithRetry(accessToken, mediaId, chunk, segmentIndex) {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     const blob = new Blob([chunk], { type: "video/mp4" });
-
     const formData = new FormData();
     formData.append("media", blob, `chunk_${segmentIndex}.mp4`);
     formData.append("segment_index", String(segmentIndex));
@@ -43,13 +40,29 @@ async function appendVideoChunks(accessToken, mediaId, buffer) {
       body: formData,
     });
 
-    if (!res.ok) {
-      const errText = await res.text().catch(() => "");
-      console.log(`[Twitter] Video APPEND ${segmentIndex}: ${res.status} ${errText}`);
-      throw new Error(`APPEND segment ${segmentIndex} failed (${res.status})`);
+    if (res.ok) {
+      console.log(`[Twitter] Video APPEND ${segmentIndex}: OK`);
+      return;
     }
 
-    console.log(`[Twitter] Video APPEND ${segmentIndex}: OK`);
+    const errText = await res.text().catch(() => "");
+    console.log(`[Twitter] Video APPEND ${segmentIndex}: ${res.status} ${errText} (attempt ${attempt + 1}/${MAX_RETRIES})`);
+
+    if (attempt < MAX_RETRIES - 1) {
+      const delay = Math.pow(2, attempt + 1) * 1000;
+      await new Promise((r) => setTimeout(r, delay));
+    } else {
+      throw new Error(`APPEND segment ${segmentIndex} failed (${res.status}) after ${MAX_RETRIES} attempts`);
+    }
+  }
+}
+
+async function appendVideoChunks(accessToken, mediaId, buffer) {
+  let segmentIndex = 0;
+
+  for (let offset = 0; offset < buffer.length; offset += CHUNK_SIZE) {
+    const chunk = buffer.subarray(offset, offset + CHUNK_SIZE);
+    await appendChunkWithRetry(accessToken, mediaId, chunk, segmentIndex);
     segmentIndex++;
   }
 }

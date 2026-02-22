@@ -28,6 +28,51 @@ const publishers = {
   Reddit: publishToReddit,
 };
 
+async function publishSinglePlatform(baseName, platform, publisher, post, facebookPageIds) {
+  try {
+    await ensureValidToken(platform);
+
+    let result;
+    if (baseName === "Facebook" && facebookPageIds.length > 0) {
+      const originalSelected = platform.selectedPageIds;
+      platform.selectedPageIds = facebookPageIds;
+      result = await publisher(platform, post);
+      platform.selectedPageIds = originalSelected;
+    } else {
+      result = await publisher(platform, post);
+    }
+
+    if (Array.isArray(result)) {
+      return result.map((r) => ({
+        platform: baseName,
+        success: true,
+        externalId: r.externalId || null,
+        externalUrl: r.externalUrl || null,
+        pageAccessToken: r.pageAccessToken || null,
+        pageName: r.pageName || null,
+        error: null,
+      }));
+    }
+
+    return [{
+      platform: baseName,
+      success: true,
+      externalId: result.externalId || null,
+      externalUrl: result.externalUrl || null,
+      error: null,
+    }];
+  } catch (err) {
+    console.error(`Failed to publish to ${baseName}:`, err.message);
+    return [{
+      platform: baseName,
+      success: false,
+      externalId: null,
+      externalUrl: null,
+      error: err.message,
+    }];
+  }
+}
+
 const deleters = {
   Twitter: deleteFromTwitter,
   Facebook: deleteFromFacebook,
@@ -62,13 +107,11 @@ export async function publishToAllPlatforms(userId, post) {
     .filter((p) => p.startsWith("Facebook:"))
     .map((p) => p.split(":")[1]);
 
-  // Track which base platforms we've already processed
   const processed = new Set();
+  const publishTasks = [];
 
   for (const identifier of platformIdentifiers) {
     const baseName = identifier.split(":")[0];
-
-    // Skip if already processed (e.g. second Facebook page — handled together)
     if (processed.has(baseName)) continue;
     processed.add(baseName);
 
@@ -97,52 +140,16 @@ export async function publishToAllPlatforms(userId, post) {
       continue;
     }
 
-    try {
-      // Refresh token if expired
-      await ensureValidToken(platform);
+    publishTasks.push(
+      publishSinglePlatform(baseName, platform, publisher, post, facebookPageIds)
+    );
+  }
 
-      // For Facebook, temporarily override selectedPageIds to only post to chosen pages
-      let result;
-      if (baseName === "Facebook" && facebookPageIds.length > 0) {
-        const originalSelected = platform.selectedPageIds;
-        platform.selectedPageIds = facebookPageIds;
-        result = await publisher(platform, post);
-        platform.selectedPageIds = originalSelected;
-      } else {
-        result = await publisher(platform, post);
-      }
+  const settled = await Promise.allSettled(publishTasks);
 
-      // Facebook returns an array of results (one per page)
-      if (Array.isArray(result)) {
-        for (const r of result) {
-          results.push({
-            platform: baseName,
-            success: true,
-            externalId: r.externalId || null,
-            externalUrl: r.externalUrl || null,
-            pageAccessToken: r.pageAccessToken || null,
-            pageName: r.pageName || null,
-            error: null,
-          });
-        }
-      } else {
-        results.push({
-          platform: baseName,
-          success: true,
-          externalId: result.externalId || null,
-          externalUrl: result.externalUrl || null,
-          error: null,
-        });
-      }
-    } catch (err) {
-      console.error(`Failed to publish to ${baseName}:`, err.message);
-      results.push({
-        platform: baseName,
-        success: false,
-        externalId: null,
-        externalUrl: null,
-        error: err.message,
-      });
+  for (const outcome of settled) {
+    if (outcome.status === "fulfilled") {
+      results.push(...outcome.value);
     }
   }
 
