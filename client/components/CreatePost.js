@@ -503,6 +503,14 @@ export default function CreatePost({
     setCopyrightResult(null);
   };
 
+  const handleUseSafeVersion = () => {
+    if (copyrightResult?.safeVersion) {
+      setCaption(copyrightResult.safeVersion);
+    }
+    setShowCopyrightModal(false);
+    setCopyrightResult(null);
+  };
+
   const handleSaveDraft = async () => {
     if (!caption && selectedMedia.length === 0) {
       showToast({
@@ -1221,7 +1229,30 @@ export default function CreatePost({
                     );
                   })}
 
-                  {copyrightResult.suggestions.length > 0 && (
+                  {copyrightResult.brandHashtags?.length > 0 && (
+                    <View className="mt-3">
+                      <Text className="text-gray-400 text-xs mb-2 font-semibold">
+                        BRAND HASHTAGS
+                      </Text>
+                      <View className="bg-purple-500/10 rounded-xl p-3.5 border border-purple-500/20">
+                        <Text className="text-gray-400 text-xs mb-2">
+                          Reference these brands with hashtags instead:
+                        </Text>
+                        <View className="flex-row flex-wrap">
+                          {copyrightResult.brandHashtags.map((tag, index) => (
+                            <View
+                              key={index}
+                              className="bg-purple-500/20 rounded-full px-3 py-1.5 mr-2 mb-1.5"
+                            >
+                              <Text className="text-purple-300 text-xs font-bold">{tag}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
+                    </View>
+                  )}
+
+                  {copyrightResult.suggestions?.length > 0 && (
                     <View className="mt-3">
                       <Text className="text-gray-400 text-xs mb-2 font-semibold">
                         SUGGESTIONS
@@ -1244,20 +1275,55 @@ export default function CreatePost({
                     </View>
                   )}
 
-                  <View className="flex-row mt-4">
-                    <TouchableOpacity
-                      onPress={handleCopyrightEdit}
-                      className="flex-1 bg-blue-500 py-3.5 rounded-xl mr-2 items-center"
-                    >
-                      <Text className="text-white font-bold text-sm">Edit Content</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={handleCopyrightProceed}
-                      className="flex-1 bg-gray-800 py-3.5 rounded-xl border border-gray-700 items-center"
-                    >
-                      <Text className="text-gray-300 font-bold text-sm">Post Anyway</Text>
-                    </TouchableOpacity>
-                  </View>
+                  {copyrightResult.safeVersion ? (
+                    <View className="mt-3">
+                      <Text className="text-gray-400 text-xs mb-2 font-semibold">
+                        SAFE VERSION
+                      </Text>
+                      <View className="bg-green-500/10 rounded-xl p-3.5 border border-green-500/20 mb-4">
+                        <Text className="text-gray-200 text-xs leading-5">
+                          {copyrightResult.safeVersion}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={handleUseSafeVersion}
+                        className="bg-green-500 py-3.5 rounded-xl items-center mb-2"
+                      >
+                        <Text className="text-gray-950 font-bold text-sm">
+                          Use Safe Version
+                        </Text>
+                      </TouchableOpacity>
+                      <View className="flex-row">
+                        <TouchableOpacity
+                          onPress={handleCopyrightEdit}
+                          className="flex-1 bg-blue-500 py-3.5 rounded-xl mr-2 items-center"
+                        >
+                          <Text className="text-white font-bold text-sm">Edit Myself</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={handleCopyrightProceed}
+                          className="flex-1 bg-gray-800 py-3.5 rounded-xl border border-gray-700 items-center"
+                        >
+                          <Text className="text-gray-300 font-bold text-sm">Post Anyway</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ) : (
+                    <View className="flex-row mt-4">
+                      <TouchableOpacity
+                        onPress={handleCopyrightEdit}
+                        className="flex-1 bg-blue-500 py-3.5 rounded-xl mr-2 items-center"
+                      >
+                        <Text className="text-white font-bold text-sm">Edit Content</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={handleCopyrightProceed}
+                        className="flex-1 bg-gray-800 py-3.5 rounded-xl border border-gray-700 items-center"
+                      >
+                        <Text className="text-gray-300 font-bold text-sm">Post Anyway</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
 
                   {copyrightResult.riskLevel === "high" && (
                     <Text className="text-red-400/70 text-xs text-center mt-2">

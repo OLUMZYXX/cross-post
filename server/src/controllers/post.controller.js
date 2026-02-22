@@ -247,17 +247,17 @@ export async function rephraseCaption(req, res) {
 
   const toneInstructions = {
     professional:
-      "Rewrite this social media post in a professional, polished tone. Keep it concise and business-appropriate.",
+      "Rewrite in a professional, polished tone. Business-appropriate but add a few relevant emojis.",
     casual:
-      "Rewrite this social media post in a casual, relaxed tone. Make it feel like a conversation with a friend.",
+      "Rewrite in a casual, relaxed tone like talking to a friend. Add fun relevant emojis throughout.",
     friendly:
-      "Rewrite this social media post in a warm, friendly and approachable tone. Make it feel inviting.",
+      "Rewrite in a warm, friendly and approachable tone. Add welcoming emojis throughout.",
     witty:
-      "Rewrite this social media post in a witty, clever tone. Add a touch of humor while keeping the message clear.",
+      "Rewrite in a witty, clever tone with humor. Add playful emojis that match the wit.",
     bold:
-      "Rewrite this social media post in a bold, confident and attention-grabbing tone. Make it stand out.",
+      "Rewrite in a bold, confident, attention-grabbing tone. Add strong impactful emojis.",
     inspirational:
-      "Rewrite this social media post in an inspirational, motivating tone. Make the reader feel empowered.",
+      "Rewrite in an inspirational, motivating tone. Add uplifting emojis throughout.",
   };
 
   const instruction =
@@ -276,7 +276,7 @@ export async function rephraseCaption(req, res) {
         {
           role: "system",
           content:
-            "You are a social media copywriter. You only return the rewritten post text — no quotes, no explanation, no hashtags unless the original had them. Keep it under 500 characters.",
+            "You are a social media copywriter. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. Keep it under 500 characters.",
         },
         {
           role: "user",
@@ -320,6 +320,8 @@ export async function copyrightCheck(req, res) {
 
   const issues = [];
   const suggestions = [];
+  let brandHashtags = [];
+  let safeVersion = "";
 
   // --- TEXT ANALYSIS (GPT-4o-mini) ---
   if (caption && caption.trim()) {
@@ -343,6 +345,7 @@ Check for:
 4. Trademarked slogans or catchphrases (e.g. "Just Do It", "I'm Lovin' It")
 5. Copyrighted characters or franchise references used in a way that implies ownership
 6. News article text copied verbatim
+7. Brand names used with trademarked phrases
 
 Respond ONLY with valid JSON in this exact format:
 {
@@ -356,11 +359,18 @@ Respond ONLY with valid JSON in this exact format:
       "explanation": "brief explanation of why this is a concern"
     }
   ],
-  "suggestions": ["suggestion 1", "suggestion 2"]
+  "suggestions": ["suggestion 1", "suggestion 2"],
+  "brandHashtags": ["#BrandName"],
+  "safeVersion": "a copyright-free rewritten version of the post that keeps the same meaning, adds relevant emojis, and uses brand hashtags instead of trademarked slogans"
 }
 
-If no issues are found, return {"hasIssues": false, "issues": [], "suggestions": []}.
-Be thorough but avoid false positives for common everyday phrases. Only flag content that clearly originates from a copyrighted work.`,
+IMPORTANT for suggestions:
+- If trademarked slogans or brand references are found, suggest using the brand as a hashtag instead (e.g. use #Nike instead of "Just Do It")
+- Include ALL detected brand names as hashtags in the brandHashtags array
+- Always provide a safeVersion that rewrites the text to avoid all copyright issues while keeping the same meaning
+
+If no issues are found, return {"hasIssues": false, "issues": [], "suggestions": [], "brandHashtags": [], "safeVersion": ""}.
+Be thorough but avoid false positives for common everyday phrases.`,
           },
           {
             role: "user",
@@ -391,6 +401,12 @@ Be thorough but avoid false positives for common everyday phrases. Only flag con
     }
     if (textResult.suggestions) {
       suggestions.push(...textResult.suggestions);
+    }
+    if (textResult.brandHashtags) {
+      brandHashtags.push(...textResult.brandHashtags);
+    }
+    if (textResult.safeVersion) {
+      safeVersion = textResult.safeVersion;
     }
   }
 
@@ -434,10 +450,12 @@ Respond ONLY with valid JSON:
       "explanation": "brief explanation"
     }
   ],
-  "suggestions": ["suggestion 1", "suggestion 2"]
+  "suggestions": ["suggestion 1", "suggestion 2"],
+  "brandHashtags": ["#BrandName"]
 }
 
-If no issues found, return {"hasIssues": false, "issues": [], "suggestions": []}.
+IMPORTANT: If brand logos are detected, include them as hashtags in brandHashtags (e.g. #Nike, #Apple). Suggest mentioning the brand with a hashtag in the caption instead of showing copyrighted logos.
+If no issues found, return {"hasIssues": false, "issues": [], "suggestions": [], "brandHashtags": []}.
 Only flag clear issues. Do not flag generic objects, common symbols, or incidental branding.`,
               },
               {
@@ -470,9 +488,14 @@ Only flag clear issues. Do not flag generic objects, common symbols, or incident
     const imageResults = await Promise.allSettled(imagePromises);
 
     for (const result of imageResults) {
-      if (result.status === "fulfilled" && result.value?.hasIssues) {
-        issues.push(...(result.value.issues || []));
-        suggestions.push(...(result.value.suggestions || []));
+      if (result.status === "fulfilled" && result.value) {
+        if (result.value.hasIssues) {
+          issues.push(...(result.value.issues || []));
+          suggestions.push(...(result.value.suggestions || []));
+        }
+        if (result.value.brandHashtags) {
+          brandHashtags.push(...result.value.brandHashtags);
+        }
       }
     }
   }
@@ -488,6 +511,7 @@ Only flag clear issues. Do not flag generic objects, common symbols, or incident
   }
 
   const uniqueSuggestions = [...new Set(suggestions)];
+  const uniqueHashtags = [...new Set(brandHashtags)];
 
   res.json({
     success: true,
@@ -496,6 +520,8 @@ Only flag clear issues. Do not flag generic objects, common symbols, or incident
       hasIssues: issues.length > 0,
       issues,
       suggestions: uniqueSuggestions,
+      brandHashtags: uniqueHashtags,
+      safeVersion,
     },
   });
 }
