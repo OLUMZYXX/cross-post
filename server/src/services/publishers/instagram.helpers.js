@@ -32,12 +32,14 @@ export async function igPost(path, accessToken, body, retries = 3) {
     });
     const data = await res.json();
 
-    const isRateLimit =
+    const isRetryable =
+      data?.error?.code === 2 ||
       data?.error?.code === 4 ||
       data?.error?.code === 32 ||
-      (data?.error?.message || "").toLowerCase().includes("too many");
+      (data?.error?.message || "").toLowerCase().includes("too many") ||
+      (data?.error?.message || "").toLowerCase().includes("unexpected error");
 
-    if (isRateLimit && attempt < retries) {
+    if (isRetryable && attempt < retries) {
       const delay = Math.pow(2, attempt + 1) * 1000;
       await new Promise((r) => setTimeout(r, delay));
       continue;
