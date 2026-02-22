@@ -1,5 +1,4 @@
 import { isVideoUrl, igPost, igError, waitForContainer, ensureVideoFormat } from "./instagram.helpers.js";
-import { transformForInstagram } from "./instagram.media.js";
 
 export async function publishToInstagram(platform, post) {
   const { accessToken, platformUserId } = platform;
@@ -32,14 +31,13 @@ export async function publishToInstagram(platform, post) {
 
 async function publishSingle(userId, accessToken, caption, mediaUrl) {
   const isVideo = isVideoUrl(mediaUrl);
-
   const containerBody = { caption: caption || "" };
 
   if (isVideo) {
     containerBody.media_type = "REELS";
     containerBody.video_url = ensureVideoFormat(mediaUrl);
   } else {
-    containerBody.image_url = transformForInstagram(mediaUrl);
+    containerBody.image_url = mediaUrl;
   }
 
   const containerData = await igPost(`/${userId}/media`, accessToken, containerBody);
@@ -69,7 +67,7 @@ async function publishCarousel(userId, accessToken, caption, imageUrls) {
     if (i > 0) await new Promise((r) => setTimeout(r, 2000));
 
     const itemData = await igPost(`/${userId}/media`, accessToken, {
-      image_url: transformForInstagram(imageUrls[i]),
+      image_url: imageUrls[i],
       is_carousel_item: true,
     });
 

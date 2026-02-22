@@ -31,7 +31,6 @@ export async function igPost(path, accessToken, body, retries = 3) {
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    console.log(`[Instagram] POST ${path}:`, JSON.stringify(data));
 
     const isRateLimit =
       data?.error?.code === 4 ||
@@ -40,7 +39,6 @@ export async function igPost(path, accessToken, body, retries = 3) {
 
     if (isRateLimit && attempt < retries) {
       const delay = Math.pow(2, attempt + 1) * 1000;
-      console.log(`[Instagram] Rate limited, retrying in ${delay}ms (attempt ${attempt + 1}/${retries})`);
       await new Promise((r) => setTimeout(r, delay));
       continue;
     }
@@ -65,14 +63,13 @@ export async function waitForContainer(containerId, accessToken, isVideo) {
     const data = await res.json();
     status = data.status_code;
     attempts++;
-    console.log(`[Instagram] Container ${containerId} status: ${status} (attempt ${attempts})`);
     if (status === "ERROR" || status === "EXPIRED") break;
   }
 
   if (status !== "FINISHED") {
     throw new Error(
-      `Instagram video processing failed (status: ${status || "unknown"}). ` +
-      `Ensure your video is H.264, AAC audio, 3–90 seconds, under 4GB.`
+      `Instagram media processing failed (status: ${status || "unknown"}). ` +
+      `Ensure your media meets Instagram requirements.`
     );
   }
 }
