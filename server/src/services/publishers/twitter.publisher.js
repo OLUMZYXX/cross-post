@@ -12,27 +12,26 @@ export async function publishToTwitter(platform, post) {
       .map((m) => (typeof m === "string" ? m : m?.uri))
       .filter((url) => url && url.startsWith("http"));
 
+    console.log(`[Twitter] media count: ${media.length}, valid URLs: ${mediaUrls.length}`);
+
     if (mediaUrls.length > 0) {
-      try {
-        const mediaIds = [];
-        const maxMedia = mediaUrls.some((u) => isVideoUrl(u)) ? 1 : 4;
-        const toUpload = mediaUrls.slice(0, maxMedia);
+      const mediaIds = [];
+      const maxMedia = mediaUrls.some((u) => isVideoUrl(u)) ? 1 : 4;
+      const toUpload = mediaUrls.slice(0, maxMedia);
 
-        for (const url of toUpload) {
-          const mediaId = await uploadMediaToTwitter(accessToken, url);
-          mediaIds.push(mediaId);
-        }
-
-        if (mediaIds.length > 0) {
-          tweetBody.media = { media_ids: mediaIds };
-        }
-      } catch (err) {
-        throw new Error(`Twitter media upload failed: ${err.message}`);
+      for (const url of toUpload) {
+        const mediaId = await uploadMediaToTwitter(accessToken, url);
+        mediaIds.push(mediaId);
       }
+
+      if (mediaIds.length > 0) {
+        tweetBody.media = { media_ids: mediaIds };
+      }
+      console.log(`[Twitter] Tweet body:`, JSON.stringify(tweetBody));
     }
   }
 
-  const response = await fetch("https://api.twitter.com/2/tweets", {
+  const response = await fetch("https://api.x.com/2/tweets", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
