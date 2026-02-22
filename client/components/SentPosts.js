@@ -8,11 +8,59 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import React, { useState } from "react";
+
+const screenWidth = Dimensions.get("window").width;
 import { Ionicons } from "@expo/vector-icons";
 import { postAPI } from "../services/api";
 import { useToast } from "./Toast";
+
+function MediaCarousel({ media }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const cardWidth = screenWidth - 32; // account for parent padding
+
+  const handleScroll = (e) => {
+    const index = Math.round(e.nativeEvent.contentOffset.x / cardWidth);
+    setActiveIndex(index);
+  };
+
+  return (
+    <View>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleScroll}
+        decelerationRate="fast"
+        snapToInterval={cardWidth}
+        snapToAlignment="start"
+      >
+        {media.map((uri, idx) => (
+          <Image
+            key={idx}
+            source={{ uri }}
+            style={{ width: cardWidth, height: 192 }}
+            resizeMode="cover"
+          />
+        ))}
+      </ScrollView>
+      {media.length > 1 && (
+        <View className="flex-row justify-center items-center py-2 absolute bottom-0 left-0 right-0">
+          {media.map((_, idx) => (
+            <View
+              key={idx}
+              className={`w-1.5 h-1.5 rounded-full mx-0.5 ${
+                idx === activeIndex ? "bg-white" : "bg-white/40"
+              }`}
+            />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
 
 export default function SentPosts({
   posts,
@@ -285,11 +333,15 @@ export default function SentPosts({
                 style={{ opacity: isDeleting ? 0.5 : 1 }}
               >
                 {post.media && post.media.length > 0 ? (
-                  <Image
-                    source={{ uri: post.media[0] }}
-                    className="w-full h-48"
-                    resizeMode="cover"
-                  />
+                  post.media.length === 1 ? (
+                    <Image
+                      source={{ uri: post.media[0] }}
+                      className="w-full h-48"
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <MediaCarousel media={post.media} />
+                  )
                 ) : (
                   <View className="w-full h-20 bg-gray-800/50 items-center justify-center">
                     <Ionicons name="document-text-outline" size={28} color="#6b7280" />

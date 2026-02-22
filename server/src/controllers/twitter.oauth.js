@@ -26,7 +26,7 @@ export async function initiateTwitterAuth(req, res) {
     `response_type=code&` +
     `client_id=${TWITTER_CLIENT_ID}&` +
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-    `scope=${encodeURIComponent("tweet.read tweet.write users.read offline.access")}&` +
+    `scope=${encodeURIComponent("tweet.read tweet.write users.read media.write offline.access")}&` +
     `state=${stateId}&` +
     `code_challenge=${codeChallenge}&` +
     `code_challenge_method=S256&` +
@@ -93,9 +93,14 @@ export async function handleTwitterCallback(req, res) {
       name: "Twitter",
     });
 
+    const tokenExpiresAt = tokenData.expires_in
+      ? new Date(Date.now() + tokenData.expires_in * 1000)
+      : null;
+
     if (existing) {
       existing.accessToken = tokenData.access_token;
       existing.refreshToken = tokenData.refresh_token;
+      existing.tokenExpiresAt = tokenExpiresAt;
       existing.platformUserId = profile.id;
       existing.platformUsername = profile.username;
       await existing.save();
@@ -105,6 +110,7 @@ export async function handleTwitterCallback(req, res) {
         name: "Twitter",
         accessToken: tokenData.access_token,
         refreshToken: tokenData.refresh_token,
+        tokenExpiresAt,
         platformUserId: profile.id,
         platformUsername: profile.username,
       }).save();

@@ -6,7 +6,9 @@
  * Docs: https://developers.facebook.com/docs/graph-api/reference/page/photos
  */
 
-const isVideo = (url) => url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i);
+const isVideo = (url) =>
+  url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i) ||
+  url.includes("/video/upload/");
 
 async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
   let response;

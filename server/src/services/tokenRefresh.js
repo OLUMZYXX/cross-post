@@ -14,9 +14,9 @@ import {
  * Mutates the platform document and saves it if refreshed.
  */
 export async function ensureValidToken(platform) {
-  // If no expiry is tracked, or token hasn't expired yet, do nothing
-  if (!platform.tokenExpiresAt) return;
-  if (new Date(platform.tokenExpiresAt) > new Date()) return;
+  if (platform.tokenExpiresAt && new Date(platform.tokenExpiresAt) > new Date()) return;
+
+  if (!platform.tokenExpiresAt && !platform.refreshToken) return;
 
   // Token is expired — try to refresh
   if (!platform.refreshToken) {

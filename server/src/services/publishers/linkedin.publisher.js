@@ -5,7 +5,9 @@
  * Images: https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/images-api
  */
 
-const isVideoUrl = (url) => url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i);
+const isVideoUrl = (url) =>
+  url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i) ||
+  url.includes("/video/upload/");
 
 /**
  * Register and upload an image to LinkedIn.

@@ -1,67 +1,12 @@
-/**
- * Twitter Publisher — posts tweets via Twitter API v2
- * Supports text + media (images/video) by downloading and uploading to Twitter
- * Docs: https://developer.twitter.com/en/docs/twitter-api/tweets/manage-tweets/api-reference/post-tweets
- * Media: https://developer.twitter.com/en/docs/twitter-api/v1/media/upload-media/api-reference/post-media-upload
- */
-
-const isVideoUrl = (url) => url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i);
-
-/**
- * Download a file from URL and upload it to Twitter's media endpoint.
- * Twitter requires media to be uploaded via their own upload API first.
- */
-async function uploadMediaToTwitter(accessToken, mediaUrl) {
-  // Download the file
-  const fileRes = await fetch(mediaUrl);
-  if (!fileRes.ok) {
-    throw new Error(`Failed to download media from ${mediaUrl}`);
-  }
-
-  const buffer = await fileRes.arrayBuffer();
-  const base64 = Buffer.from(buffer).toString("base64");
-
-  const isVideo = isVideoUrl(mediaUrl);
-  const mediaType = isVideo ? "video/mp4" : "image/jpeg";
-
-  // Upload to Twitter v1.1 media upload endpoint
-  const formData = new URLSearchParams();
-  formData.append("media_data", base64);
-  formData.append("media_category", isVideo ? "tweet_video" : "tweet_image");
-
-  const uploadRes = await fetch(
-    "https://upload.twitter.com/1.1/media/upload.json",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: formData.toString(),
-    },
-  );
-
-  const uploadData = await uploadRes.json();
-
-  if (!uploadRes.ok || uploadData.errors) {
-    throw new Error(
-      uploadData.errors?.[0]?.message || "Failed to upload media to Twitter",
-    );
-  }
-
-  return uploadData.media_id_string;
-}
+import { uploadMediaToTwitter, isVideoUrl } from "./twitter.helpers.js";
 
 export async function publishToTwitter(platform, post) {
   const { accessToken } = platform;
   const { caption, media } = post;
 
-  // Twitter text limit: 280 characters
   const text = caption.length > 280 ? caption.slice(0, 277) + "..." : caption;
-
   const tweetBody = { text };
 
-  // Upload media if available (up to 4 images or 1 video)
   if (media && media.length > 0) {
     const mediaUrls = media
       .map((m) => (typeof m === "string" ? m : m?.uri))
@@ -70,7 +15,6 @@ export async function publishToTwitter(platform, post) {
     if (mediaUrls.length > 0) {
       try {
         const mediaIds = [];
-        // Twitter allows up to 4 images or 1 video
         const maxMedia = mediaUrls.some((u) => isVideoUrl(u)) ? 1 : 4;
         const toUpload = mediaUrls.slice(0, maxMedia);
 
@@ -83,8 +27,7 @@ export async function publishToTwitter(platform, post) {
           tweetBody.media = { media_ids: mediaIds };
         }
       } catch (err) {
-        // If media upload fails, still post the text
-        console.error("Twitter media upload failed:", err.message);
+        throw new Error(`Twitter media upload failed: ${err.message}`);
       }
     }
   }
