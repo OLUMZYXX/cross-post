@@ -8,6 +8,8 @@ import {
   Image,
   Modal,
   ActivityIndicator,
+  Pressable,
+  StyleSheet,
 } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -1089,18 +1091,17 @@ export default function CreatePost({
           setCopyrightResult(null);
         }}
       >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => {
-            if (!isCopyrightChecking) {
-              setShowCopyrightModal(false);
-              setCopyrightResult(null);
-            }
-          }}
-          className="flex-1 bg-black/60 justify-end"
-        >
-          <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-            <View className="bg-gray-900 rounded-t-3xl px-6 pt-5 pb-10 border-t border-gray-800">
+        <View style={StyleSheet.absoluteFill} className="justify-end">
+          <Pressable
+            onPress={() => {
+              if (!isCopyrightChecking) {
+                setShowCopyrightModal(false);
+                setCopyrightResult(null);
+              }
+            }}
+            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.6)" }]}
+          />
+          <View className="bg-gray-900 rounded-t-3xl px-6 pt-5 pb-10 border-t border-gray-800">
               <View className="w-10 h-1 bg-gray-700 rounded-full self-center mb-5" />
 
               <View className="flex-row items-center mb-5">
@@ -1138,7 +1139,8 @@ export default function CreatePost({
 
               {!isCopyrightChecking && copyrightResult && copyrightResult.hasIssues && (
                 <ScrollView
-                  showsVerticalScrollIndicator={false}
+                  showsVerticalScrollIndicator={true}
+                  nestedScrollEnabled={true}
                   style={{ maxHeight: 400 }}
                 >
                   {(() => {
@@ -1240,12 +1242,16 @@ export default function CreatePost({
                         </Text>
                         <View className="flex-row flex-wrap">
                           {copyrightResult.brandHashtags.map((tag, index) => (
-                            <View
+                            <TouchableOpacity
                               key={index}
+                              onPress={() => {
+                                const separator = caption.length > 0 && !caption.endsWith(" ") ? " " : "";
+                                setCaption((prev) => `${prev}${separator}${tag}`);
+                              }}
                               className="bg-purple-500/20 rounded-full px-3 py-1.5 mr-2 mb-1.5"
                             >
                               <Text className="text-purple-300 text-xs font-bold">{tag}</Text>
-                            </View>
+                            </TouchableOpacity>
                           ))}
                         </View>
                       </View>
@@ -1333,8 +1339,7 @@ export default function CreatePost({
                 </ScrollView>
               )}
             </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
+        </View>
       </Modal>
     </View>
   );

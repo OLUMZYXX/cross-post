@@ -10,6 +10,14 @@ const isVideo = (url) =>
   url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i) ||
   url.includes("/video/upload/");
 
+function buildParams(obj) {
+  const params = new URLSearchParams();
+  Object.entries(obj).forEach(([k, v]) => {
+    if (v !== undefined && v !== null) params.append(k, v);
+  });
+  return params;
+}
+
 async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
   let response;
 
@@ -25,14 +33,15 @@ async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
       (m) => typeof m === "string" && m.startsWith("http") && isVideo(m),
     );
 
+  console.log("Facebook publish — media:", JSON.stringify(media));
+  console.log("Facebook publish — imageUrls:", imageUrls?.length, "videoUrl:", !!videoUrl);
+
   if (videoUrl) {
-    // Video post — only one video supported
     response = await fetch(
       `https://graph.facebook.com/v18.0/${finalPageId}/videos`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: buildParams({
           file_url: videoUrl,
           description: caption || "",
           access_token: finalPageToken,
@@ -40,7 +49,6 @@ async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
       },
     );
   } else if (imageUrls && imageUrls.length > 1) {
-    // Multi-image post — upload each as unpublished, then create feed post
     const photoIds = [];
 
     for (const url of imageUrls) {
@@ -48,15 +56,15 @@ async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
         `https://graph.facebook.com/v18.0/${finalPageId}/photos`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+          body: buildParams({
             url,
-            published: false,
+            published: "false",
             access_token: finalPageToken,
           }),
         },
       );
       const photoData = await photoRes.json();
+      console.log("Facebook unpublished photo response:", JSON.stringify(photoData));
       if (photoData.error) {
         throw new Error(
           photoData.error.message || "Failed to upload photo to Facebook",
@@ -65,31 +73,24 @@ async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
       photoIds.push(photoData.id);
     }
 
-    // Create feed post with all attached photos
-    const feedBody = {
+    const feedParams = buildParams({
       message: caption || "",
       access_token: finalPageToken,
-    };
+    });
     photoIds.forEach((id, i) => {
-      feedBody[`attached_media[${i}]`] = JSON.stringify({ media_fbid: id });
+      feedParams.append(`attached_media[${i}]`, JSON.stringify({ media_fbid: id }));
     });
 
     response = await fetch(
       `https://graph.facebook.com/v18.0/${finalPageId}/feed`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(feedBody),
-      },
+      { method: "POST", body: feedParams },
     );
   } else if (imageUrls && imageUrls.length === 1) {
-    // Single image post
     response = await fetch(
       `https://graph.facebook.com/v18.0/${finalPageId}/photos`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: buildParams({
           url: imageUrls[0],
           caption: caption || "",
           access_token: finalPageToken,
@@ -97,13 +98,11 @@ async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
       },
     );
   } else {
-    // Text-only post
     response = await fetch(
       `https://graph.facebook.com/v18.0/${finalPageId}/feed`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: buildParams({
           message: caption || "",
           access_token: finalPageToken,
         }),
@@ -112,6 +111,7 @@ async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
   }
 
   const data = await response.json();
+  console.log("Facebook API response:", JSON.stringify(data));
 
   if (data.error) {
     throw new Error(data.error.message || "Failed to post to Facebook");
