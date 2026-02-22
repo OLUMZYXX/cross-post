@@ -58,7 +58,7 @@ export async function deleteFromTwitter(platform, externalId) {
   const { accessToken } = platform;
 
   const response = await fetch(
-    `https://api.twitter.com/2/tweets/${externalId}`,
+    `https://api.x.com/2/tweets/${externalId}`,
     {
       method: "DELETE",
       headers: {

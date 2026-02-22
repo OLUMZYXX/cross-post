@@ -194,7 +194,8 @@ export async function deleteFromAllPlatforms(userId, post) {
     }
 
     try {
-      // For Facebook, pass the page-specific access token stored during publish
+      await ensureValidToken(platform);
+
       if (platformName === "Facebook" && pr.pageAccessToken) {
         await deleter(platform, externalId, pr.pageAccessToken);
       } else {
