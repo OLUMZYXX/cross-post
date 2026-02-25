@@ -2,7 +2,7 @@ import Platform from "../models/Platform.js";
 import {
   TIKTOK_CLIENT_KEY,
   TIKTOK_CLIENT_SECRET,
-  CLIENT_URL,
+  SERVER_URL,
 } from "../config/env.js";
 import { createState, getState } from "../utils/oauthState.js";
 
@@ -12,7 +12,7 @@ function buildRedirectHtml(title, url) {
 
 export async function initiateTikTokAuth(req, res) {
   const stateId = await createState({ userId: req.user.id });
-  const redirectUri = `${CLIENT_URL}/api/platforms/auth/tiktok/callback`;
+  const redirectUri = `${SERVER_URL}/api/platforms/auth/tiktok/callback`;
 
   const authUrl =
     `https://www.tiktok.com/v2/auth/authorize/?` +
@@ -41,7 +41,7 @@ export async function handleTikTokCallback(req, res) {
   }
 
   try {
-    const redirectUri = `${CLIENT_URL}/api/platforms/auth/tiktok/callback`;
+    const redirectUri = `${SERVER_URL}/api/platforms/auth/tiktok/callback`;
     const tokenResponse = await fetch(
       "https://open.tiktokapis.com/v2/oauth/token/",
       {
@@ -78,8 +78,7 @@ export async function handleTikTokCallback(req, res) {
 
     const profileData = await profileResponse.json();
     // console.log("TikTok profile response:", JSON.stringify(profileData, null, 2));
-    const displayName =
-      profileData.data?.user?.display_name || "TikTok User";
+    const displayName = profileData.data?.user?.display_name || "TikTok User";
 
     const existing = await Platform.findOne({
       userId: stateData.userId,
