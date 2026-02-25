@@ -19,6 +19,11 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 app.use(express.static("public"));
 
+app.get(
+  "/tiktoksjU2flTW2wY5Cz8uW8PYxfs5y79JZxlL.txt",
+  (_req, res) => res.type("text/plain").send("tiktok-developers-site-verification=sjU2flTW2wY5Cz8uW8PYxfs5y79JZxlL")
+);
+
 // Serve media files from MongoDB GridFS
 app.get("/media/:fileId", async (req, res) => {
   try {
