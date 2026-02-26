@@ -22,7 +22,7 @@ const postSchema = new mongoose.Schema({
   ],
   status: {
     type: String,
-    enum: ["draft", "scheduled", "published"],
+    enum: ["draft", "scheduled", "publishing", "published"],
     default: "draft",
   },
   scheduledAt: {
@@ -53,6 +53,8 @@ const postSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+postSchema.index({ status: 1, scheduledAt: 1 });
 
 postSchema.pre("save", function () {
   this.updatedAt = Date.now();
