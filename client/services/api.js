@@ -247,7 +247,8 @@ export const postAPI = {
   schedule: (id, scheduledAt) =>
     fetchJSON(`/posts/${id}/schedule`, { body: { scheduledAt } }),
 
-  rephrase: (caption, tone) => fetchJSON("/posts/rephrase", { body: { caption, tone } }),
+  rephrase: (caption, tone, maxLength) =>
+    fetchJSON("/posts/rephrase", { body: { caption, tone, ...(maxLength && { maxLength }) } }),
 
   copyrightCheck: (caption, imageUrls) =>
     fetchJSON("/posts/copyright-check", {

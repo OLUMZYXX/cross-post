@@ -292,6 +292,12 @@ export default function CreatePost({
   const [copyrightResult, setCopyrightResult] = useState(null);
   const { showToast } = useToast();
 
+  const getTwitterCharLimit = () => {
+    const hasTwitter = selectedPlatforms.some((p) => p.split(":")[0] === "Twitter");
+    if (hasTwitter && caption.length > 280) return 280;
+    return null;
+  };
+
   const handleRephrase = async (tone) => {
     if (!caption.trim()) {
       showToast({ type: "warning", title: "Nothing to rephrase", message: "Write something first." });
@@ -301,7 +307,8 @@ export default function CreatePost({
     setIsRephrasing(true);
     setRephrasedText(null);
     try {
-      const { data } = await postAPI.rephrase(caption, tone);
+      const maxLength = getTwitterCharLimit();
+      const { data } = await postAPI.rephrase(caption, tone, maxLength);
       setRephrasedText(data.rephrased);
     } catch (err) {
       showToast({ type: "error", title: "Rephrase failed", message: err.message });
@@ -728,9 +735,24 @@ export default function CreatePost({
             multiline
             className="text-white text-base p-4 min-h-[140px]"
             textAlignVertical="top"
-            maxLength={500}
             editable={!isPosting}
           />
+          {selectedPlatforms.some((p) => p.split(":")[0] === "Twitter") && (
+            <View className="flex-row items-center justify-end px-4 pb-2">
+              <Text
+                className={`text-xs font-medium ${
+                  caption.length > 280 ? "text-red-400" : "text-gray-500"
+                }`}
+              >
+                {caption.length}/280
+              </Text>
+              {caption.length > 280 && (
+                <Text className="text-yellow-500 text-xs ml-2">
+                  Rephrase to fit Twitter
+                </Text>
+              )}
+            </View>
+          )}
 
           {selectedMedia.length > 0 && (
             <View className="px-4 pb-4">

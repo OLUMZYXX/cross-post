@@ -233,7 +233,7 @@ export async function schedulePost(req, res) {
 }
 
 export async function rephraseCaption(req, res) {
-  const { caption, tone } = req.body;
+  const { caption, tone, maxLength } = req.body;
 
   if (!caption || !caption.trim()) {
     throw Errors.badRequest("Caption is required");
@@ -264,6 +264,9 @@ export async function rephraseCaption(req, res) {
     toneInstructions[tone] ||
     "Rewrite this social media post to sound better while keeping the same meaning.";
 
+  const charLimit = maxLength && maxLength > 0 ? maxLength : 500;
+  const limitNote = `You MUST keep the result strictly under ${charLimit} characters (including emojis and spaces). Count carefully.`;
+
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -276,7 +279,7 @@ export async function rephraseCaption(req, res) {
         {
           role: "system",
           content:
-            "You are a social media copywriter. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. Keep it under 500 characters.",
+            `You are a social media copywriter. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. ${limitNote}`,
         },
         {
           role: "user",
