@@ -15,6 +15,7 @@ const SUPPORTED_PLATFORMS = [
   "TikTok",
   "YouTube",
   "Reddit",
+  "Telegram",
 ];
 
 export async function listPlatforms(req, res) {
@@ -33,9 +34,15 @@ export async function connectPlatform(req, res) {
     );
   }
 
-  const existing = await Platform.findOne({ userId: req.user.id, name });
-  if (existing) {
-    throw Errors.conflict(`${name} is already connected`);
+  if (platformUserId) {
+    const existing = await Platform.findOne({
+      userId: req.user.id,
+      name,
+      platformUserId,
+    });
+    if (existing) {
+      throw Errors.conflict(`This ${name} account is already connected`);
+    }
   }
 
   const platform = new Platform({

@@ -13,6 +13,7 @@ import {
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
+import TelegramConnectModal from "./TelegramConnectModal";
 import CreatePost from "./CreatePost";
 import SentPosts from "./SentPosts";
 import BottomNav from "./BottomNav";
@@ -49,15 +50,21 @@ export default function HomePage({
   const [showLoadingAnimation, setShowLoadingAnimation] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [telegramModalVisible, setTelegramModalVisible] = useState(false);
   const prevTabRef = useRef(activeTab);
 
   const fetchPlatforms = useCallback(async () => {
     try {
       const { data } = await platformAPI.list();
 
-      // Expand Facebook pages into individual platform entries
       const expandedObjects = [];
       const expandedNames = [];
+
+      const grouped = {};
+      for (const p of data.platforms) {
+        if (!grouped[p.name]) grouped[p.name] = [];
+        grouped[p.name].push(p);
+      }
 
       for (const p of data.platforms) {
         if (
@@ -80,6 +87,13 @@ export default function HomePage({
             });
             expandedNames.push(identifier);
           }
+        } else if (grouped[p.name].length > 1) {
+          const identifier = `${p.name}:${p._id}`;
+          expandedObjects.push({
+            ...p,
+            name: identifier,
+          });
+          expandedNames.push(identifier);
         } else {
           expandedObjects.push(p);
           expandedNames.push(p.name);
@@ -265,6 +279,11 @@ export default function HomePage({
       color: "orange-500",
       bg: "bg-orange-500/20",
     },
+    Telegram: {
+      icon: "paper-plane",
+      color: "sky-500",
+      bg: "bg-sky-500/20",
+    },
   };
 
   // Helper: resolve style for any platform identifier (e.g. "Facebook:abc123" -> Facebook style)
@@ -282,7 +301,7 @@ export default function HomePage({
   const availablePlatforms = Object.keys(allPlatforms).filter((p) => {
     if (EXCLUDED_FROM_ADD.includes(p)) return false;
     if (p === "Facebook") return !hasFacebook;
-    return !connectedPlatforms.includes(p);
+    return true;
   });
 
   const getPlatformUsername = (platformName) => {
@@ -290,7 +309,19 @@ export default function HomePage({
     return obj?.platformUsername || null;
   };
 
+  const handleTelegramConnected = async () => {
+    setTelegramModalVisible(false);
+    await fetchPlatforms();
+    await fetchRecentActivities();
+  };
+
   const handleConnectPlatform = async (platformName) => {
+    if (platformName === "Telegram") {
+      setModalVisible(false);
+      setTelegramModalVisible(true);
+      return;
+    }
+
     try {
       const oauthMethods = {
         Facebook: () => platformAPI.initiateFacebookAuth(),
@@ -1069,6 +1100,12 @@ export default function HomePage({
           </View>
         </View>
       </Modal>
+
+      <TelegramConnectModal
+        visible={telegramModalVisible}
+        onClose={() => setTelegramModalVisible(false)}
+        onConnected={handleTelegramConnected}
+      />
 
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
     </View>

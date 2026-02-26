@@ -89,9 +89,18 @@ export async function handleRedditCallback(req, res) {
     const existing = await Platform.findOne({
       userId: stateData.userId,
       name: "Reddit",
+      platformUserId: profile.id,
     });
 
-    if (!existing) {
+    if (existing) {
+      existing.accessToken = tokenData.access_token;
+      existing.refreshToken = tokenData.refresh_token || null;
+      existing.tokenExpiresAt = tokenData.expires_in
+        ? new Date(Date.now() + tokenData.expires_in * 1000)
+        : null;
+      existing.platformUsername = username;
+      await existing.save();
+    } else {
       await new Platform({
         userId: stateData.userId,
         name: "Reddit",

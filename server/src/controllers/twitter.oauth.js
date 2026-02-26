@@ -91,6 +91,7 @@ export async function handleTwitterCallback(req, res) {
     const existing = await Platform.findOne({
       userId: stateData.userId,
       name: "Twitter",
+      platformUserId: profile.id,
     });
 
     const tokenExpiresAt = tokenData.expires_in

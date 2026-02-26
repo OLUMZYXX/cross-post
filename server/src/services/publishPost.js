@@ -7,6 +7,7 @@ import { publishToTikTok } from "./publishers/tiktok.publisher.js";
 import { publishToLinkedIn } from "./publishers/linkedin.publisher.js";
 import { publishToYouTube } from "./publishers/youtube.publisher.js";
 import { publishToReddit } from "./publishers/reddit.publisher.js";
+import { publishToTelegram } from "./publishers/telegram.publisher.js";
 import { deleteFromTwitter } from "./publishers/twitter.publisher.js";
 import { deleteFromFacebook } from "./publishers/facebook.publisher.js";
 import { deleteFromInstagram } from "./publishers/instagram.publisher.js";
@@ -14,6 +15,7 @@ import { deleteFromTikTok } from "./publishers/tiktok.publisher.js";
 import { deleteFromLinkedIn } from "./publishers/linkedin.publisher.js";
 import { deleteFromYouTube } from "./publishers/youtube.publisher.js";
 import { deleteFromReddit } from "./publishers/reddit.publisher.js";
+import { deleteFromTelegram } from "./publishers/telegram.publisher.js";
 import fs from "fs";
 import path from "path";
 import { CLIENT_URL, SERVER_URL } from "../config/env.js";
@@ -26,6 +28,7 @@ const publishers = {
   LinkedIn: publishToLinkedIn,
   YouTube: publishToYouTube,
   Reddit: publishToReddit,
+  Telegram: publishToTelegram,
 };
 
 async function publishSinglePlatform(baseName, platform, publisher, post, facebookPageIds) {
@@ -81,28 +84,28 @@ const deleters = {
   LinkedIn: deleteFromLinkedIn,
   YouTube: deleteFromYouTube,
   Reddit: deleteFromReddit,
+  Telegram: deleteFromTelegram,
 };
 
 /**
  * Publish a post to all selected platforms.
  * Returns an array of per-platform results.
  */
+function parseIdentifier(identifier) {
+  const parts = identifier.split(":");
+  const baseName = parts[0];
+  const subId = parts.length > 1 ? parts[1] : null;
+  const isFacebookPage = baseName === "Facebook" && subId;
+  const isMultiAccount = !isFacebookPage && subId;
+  return { baseName, subId, isFacebookPage, isMultiAccount };
+}
+
 export async function publishToAllPlatforms(userId, post) {
   const platformIdentifiers = post.platforms || [];
   const results = [];
 
-  // Collect unique base platform names (e.g. "Facebook:abc123" -> "Facebook")
-  const baseNames = [
-    ...new Set(platformIdentifiers.map((p) => p.split(":")[0])),
-  ];
+  const connectedPlatforms = await Platform.find({ userId });
 
-  // Fetch all connected platforms for this user
-  const connectedPlatforms = await Platform.find({
-    userId,
-    name: { $in: baseNames },
-  });
-
-  // Group Facebook page IDs from identifiers like "Facebook:pageId"
   const facebookPageIds = platformIdentifiers
     .filter((p) => p.startsWith("Facebook:"))
     .map((p) => p.split(":")[1]);
@@ -111,11 +114,25 @@ export async function publishToAllPlatforms(userId, post) {
   const publishTasks = [];
 
   for (const identifier of platformIdentifiers) {
-    const baseName = identifier.split(":")[0];
-    if (processed.has(baseName)) continue;
-    processed.add(baseName);
+    const { baseName, subId, isFacebookPage, isMultiAccount } =
+      parseIdentifier(identifier);
 
-    const platform = connectedPlatforms.find((p) => p.name === baseName);
+    if (isFacebookPage) {
+      if (processed.has("Facebook")) continue;
+      processed.add("Facebook");
+    } else {
+      if (processed.has(identifier)) continue;
+      processed.add(identifier);
+    }
+
+    let platform;
+    if (isMultiAccount) {
+      platform = connectedPlatforms.find(
+        (p) => p._id.toString() === subId,
+      );
+    } else {
+      platform = connectedPlatforms.find((p) => p.name === baseName);
+    }
 
     if (!platform) {
       results.push({

@@ -82,11 +82,11 @@ export async function confirmInstagramConnection(req, res) {
   const existing = await Platform.findOne({
     userId: pendingData.userId,
     name: "Instagram",
+    platformUserId,
   });
 
   if (existing) {
     existing.accessToken = accessToken;
-    existing.platformUserId = platformUserId;
     existing.platformUsername = platformUsername;
     existing.tokenExpiresAt = tokenExpiresAt ? new Date(tokenExpiresAt) : null;
     await existing.save();
@@ -207,11 +207,11 @@ export async function handleInstagramCallback(req, res) {
     const existing = await Platform.findOne({
       userId: stateData.userId,
       name: "Instagram",
+      platformUserId: igUserId,
     });
 
     if (existing) {
       existing.accessToken = accessToken;
-      existing.platformUserId = igUserId;
       existing.platformUsername = igUsername;
       existing.tokenExpiresAt = tokenExpiresAt;
       await existing.save();

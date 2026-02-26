@@ -308,6 +308,9 @@ export const platformAPI = {
   initiateYouTubeAuth: () => api.get("/platforms/auth/youtube"),
 
   initiateRedditAuth: () => api.get("/platforms/auth/reddit"),
+
+  connectTelegram: (botToken, channelId) =>
+    api.post("/platforms/auth/telegram/connect", { botToken, channelId }),
 };
 
 export default api;

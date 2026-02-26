@@ -83,12 +83,12 @@ export async function handleTikTokCallback(req, res) {
     const existing = await Platform.findOne({
       userId: stateData.userId,
       name: "TikTok",
+      platformUserId: open_id,
     });
 
     if (existing) {
       existing.accessToken = access_token;
       existing.refreshToken = refresh_token;
-      existing.platformUserId = open_id;
       existing.platformUsername = displayName;
       await existing.save();
     } else {

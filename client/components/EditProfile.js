@@ -18,7 +18,11 @@ export default function EditProfile({ user, onBack, onUpdateUser }) {
 
   const handleSave = async () => {
     if (!name.trim() || !email.trim()) {
-      showToast({ type: "error", title: "Required", message: "Name and email are required." });
+      showToast({
+        type: "error",
+        title: "Required",
+        message: "Name and email are required.",
+      });
       return;
     }
     setSaving(true);
@@ -28,7 +32,11 @@ export default function EditProfile({ user, onBack, onUpdateUser }) {
       showToast({ type: "success", title: "Profile updated" });
       onBack();
     } catch (err) {
-      showToast({ type: "error", title: "Update failed", message: err.message });
+      showToast({
+        type: "error",
+        title: "Update failed",
+        message: err.message,
+      });
     } finally {
       setSaving(false);
     }
@@ -42,14 +50,11 @@ export default function EditProfile({ user, onBack, onUpdateUser }) {
         </TouchableOpacity>
         <Text className="text-white text-xl font-bold">Edit Profile</Text>
       </View>
-
       <View className="items-center mb-8">
         <View className="w-20 h-20 rounded-full bg-green-500/20 items-center justify-center mb-3">
           <Ionicons name="person" size={36} color="#4ade80" />
         </View>
-        <Text className="text-gray-400 text-sm">
-          {user?.email}
-        </Text>
+        <Text className="text-gray-400 text-sm">{user?.email}</Text>
       </View>
 
       <Text className="text-gray-400 text-xs mb-2 ml-1">FULL NAME</Text>
@@ -80,7 +85,9 @@ export default function EditProfile({ user, onBack, onUpdateUser }) {
         {saving ? (
           <ActivityIndicator color="#030712" />
         ) : (
-          <Text className="text-gray-950 text-center font-bold">Save Changes</Text>
+          <Text className="text-gray-950 text-center font-bold">
+            Save Changes
+          </Text>
         )}
       </TouchableOpacity>
     </View>

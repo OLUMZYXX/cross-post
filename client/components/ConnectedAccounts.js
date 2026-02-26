@@ -20,6 +20,7 @@ const PLATFORM_STYLES = {
   TikTok: { icon: "logo-tiktok", bg: "bg-gray-800", color: "#e5e7eb" },
   YouTube: { icon: "logo-youtube", bg: "bg-red-500/20", color: "#ef4444" },
   Reddit: { icon: "logo-reddit", bg: "bg-orange-500/20", color: "#f97316" },
+  Telegram: { icon: "paper-plane", bg: "bg-sky-500/20", color: "#0ea5e9" },
 };
 
 export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {

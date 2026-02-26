@@ -36,6 +36,7 @@ import {
   initiateRedditAuth,
   handleRedditCallback,
 } from "../controllers/reddit.oauth.js";
+import { connectTelegram } from "../controllers/telegram.controller.js";
 
 const router = express.Router();
 
@@ -69,5 +70,6 @@ router.get("/auth/tiktok", asyncHandler(initiateTikTokAuth));
 router.get("/auth/linkedin", asyncHandler(initiateLinkedInAuth));
 router.get("/auth/youtube", asyncHandler(initiateYouTubeAuth));
 router.get("/auth/reddit", asyncHandler(initiateRedditAuth));
+router.post("/auth/telegram/connect", asyncHandler(connectTelegram));
 
 export default router;
