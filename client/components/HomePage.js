@@ -16,6 +16,8 @@ import * as WebBrowser from "expo-web-browser";
 import TelegramConnectModal from "./TelegramConnectModal";
 import CreatePost from "./CreatePost";
 import SentPosts from "./SentPosts";
+import DraftsScreen from "./DraftsScreen";
+import AnalyticsScreen from "./AnalyticsScreen";
 import BottomNav from "./BottomNav";
 import EditProfile from "./EditProfile";
 import ConnectedAccounts from "./ConnectedAccounts";
@@ -32,6 +34,8 @@ export default function HomePage({
   onUpdateUser,
   onLogout,
   oauthRefreshKey,
+  sharedContent,
+  onSharedContentHandled,
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
@@ -51,6 +55,7 @@ export default function HomePage({
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [telegramModalVisible, setTelegramModalVisible] = useState(false);
+  const [sentSubTab, setSentSubTab] = useState("published");
   const prevTabRef = useRef(activeTab);
 
   const fetchPlatforms = useCallback(async () => {
@@ -108,12 +113,16 @@ export default function HomePage({
     }
   }, []);
 
+  const [serverDrafts, setServerDrafts] = useState([]);
+  const [scheduledPosts, setScheduledPosts] = useState([]);
+
   const fetchPosts = useCallback(async () => {
     try {
       const { data } = await postAPI.list();
       setAllPosts(data.posts);
-      const published = data.posts.filter((p) => p.status === "published");
-      setSentPosts(published);
+      setSentPosts(data.posts.filter((p) => p.status === "published"));
+      setServerDrafts(data.posts.filter((p) => p.status === "draft"));
+      setScheduledPosts(data.posts.filter((p) => p.status === "scheduled"));
     } catch {}
   }, []);
 
@@ -177,6 +186,14 @@ export default function HomePage({
       fetchUnreadCount();
     }
   }, [oauthRefreshKey, fetchPlatforms, fetchRecentActivities, fetchUnreadCount]);
+
+  useEffect(() => {
+    if (sharedContent?.text) {
+      setEditingDraft({ caption: sharedContent.text, platforms: [...connectedPlatforms] });
+      setShowCreatePost(true);
+      onSharedContentHandled?.();
+    }
+  }, [sharedContent]);
 
   // Real-time updates every 2 minutes
   useEffect(() => {
@@ -437,9 +454,35 @@ export default function HomePage({
     setShowCreatePost(true);
   };
 
+  const openServerPost = (post) => {
+    setEditingDraft({
+      serverId: post._id,
+      caption: post.caption || "",
+      platforms: post.platforms || [],
+      media: (post.media || []).map((url) => ({ uri: url, cloudinaryUrl: url, type: "image" })),
+      status: post.status,
+      scheduledAt: post.scheduledAt,
+    });
+    setShowCreatePost(true);
+  };
+
+  const handleDeleteServerPost = async (postId) => {
+    try {
+      await postAPI.delete(postId);
+      setServerDrafts((prev) => prev.filter((p) => p._id !== postId));
+      setScheduledPosts((prev) => prev.filter((p) => p._id !== postId));
+      setAllPosts((prev) => prev.filter((p) => (p._id || p.id) !== postId));
+      showToast({ type: "info", title: "Post deleted" });
+    } catch (err) {
+      showToast({ type: "error", title: "Delete failed", message: err.message });
+    }
+  };
+
   const handlePostPublished = (post) => {
     setSentPosts((prev) => [post, ...prev]);
-    fetchRecentActivities(); // Refresh activities after publishing
+    setServerDrafts((prev) => prev.filter((p) => p._id !== (post._id || post.id)));
+    setScheduledPosts((prev) => prev.filter((p) => p._id !== (post._id || post.id)));
+    fetchRecentActivities();
   };
 
   const handleDeletePost = async (postId) => {
@@ -501,164 +544,66 @@ export default function HomePage({
   }
 
   if (activeTab === "sent") {
+    const totalDrafts = drafts.length + serverDrafts.length + scheduledPosts.length;
     return (
       <View className="flex-1 bg-gray-950">
-        <SentPosts
-          posts={sentPosts}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          onDeletePost={handleDeletePost}
-        />
+        <View className="px-6 pt-16 pb-3">
+          <Text className="text-white text-2xl font-bold mb-4">Posts</Text>
+          <View className="flex-row bg-gray-900 rounded-xl p-1">
+            <TouchableOpacity
+              onPress={() => setSentSubTab("published")}
+              className={`flex-1 py-2.5 rounded-lg ${sentSubTab === "published" ? "bg-green-500" : ""}`}
+            >
+              <Text className={`text-center text-sm font-bold ${sentSubTab === "published" ? "text-gray-950" : "text-gray-400"}`}>
+                Published ({sentPosts.length})
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSentSubTab("drafts")}
+              className={`flex-1 py-2.5 rounded-lg ${sentSubTab === "drafts" ? "bg-green-500" : ""}`}
+            >
+              <Text className={`text-center text-sm font-bold ${sentSubTab === "drafts" ? "text-gray-950" : "text-gray-400"}`}>
+                Drafts ({totalDrafts})
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {sentSubTab === "published" ? (
+          <SentPosts
+            posts={sentPosts}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            onDeletePost={handleDeletePost}
+          />
+        ) : (
+          <DraftsScreen
+            localDrafts={drafts}
+            serverDrafts={serverDrafts}
+            scheduledPosts={scheduledPosts}
+            onOpenDraft={openDraft}
+            onOpenServerPost={openServerPost}
+            onDeleteLocalDraft={handleDeleteDraft}
+            onDeleteServerPost={handleDeleteServerPost}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        )}
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       </View>
     );
   }
 
   if (activeTab === "analytics") {
-    const now = new Date();
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-
-    const totalReach = sentPosts.reduce(
-      (s, p) => s + (p.platforms?.length || 0),
-      0,
-    );
-    const thisWeekPosts = sentPosts.filter(
-      (p) => new Date(p.publishedAt) >= weekAgo,
-    );
-    const lastWeekPosts = sentPosts.filter((p) => {
-      const d = new Date(p.publishedAt);
-      return d >= twoWeeksAgo && d < weekAgo;
-    });
-    const growthPercent =
-      lastWeekPosts.length > 0
-        ? Math.round(
-            ((thisWeekPosts.length - lastWeekPosts.length) /
-              lastWeekPosts.length) *
-              100,
-          )
-        : thisWeekPosts.length > 0
-          ? 100
-          : 0;
-    const scheduledCount = allPosts.filter(
-      (p) => p.status === "scheduled",
-    ).length;
-    const draftCount = allPosts.filter((p) => p.status === "draft").length;
-
-    const platformCounts = {};
-    sentPosts.forEach((p) => {
-      (p.platforms || []).forEach((name) => {
-        platformCounts[name] = (platformCounts[name] || 0) + 1;
-      });
-    });
-
     return (
-      <View className="flex-1 bg-gray-950">
-        <StatusBar style="light" />
-        <View className="flex-1 px-6 pt-16">
-          <View className="mb-6">
-            <Text className="text-gray-400 text-sm">Performance</Text>
-            <Text className="text-white text-2xl font-bold">Analytics</Text>
-          </View>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 100 }}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor="#4ade80"
-                colors={["#4ade80"]}
-                progressBackgroundColor="#111827"
-              />
-            }
-          >
-            <View className="bg-gray-900/80 rounded-2xl p-5 border border-gray-800 mb-4">
-              <Text className="text-gray-400 text-xs mb-3">TOTAL REACH</Text>
-              <Text className="text-white text-3xl font-bold">
-                {totalReach.toLocaleString()}
-              </Text>
-              <Text
-                className={`text-xs mt-1 ${growthPercent >= 0 ? "text-green-400" : "text-red-400"}`}
-              >
-                {growthPercent >= 0 ? "+" : ""}
-                {growthPercent}% this week
-              </Text>
-            </View>
-            <View className="flex-row justify-between mb-4">
-              <View className="flex-1 mr-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-                <Text className="text-gray-400 text-xs mb-2">PUBLISHED</Text>
-                <Text className="text-white text-xl font-bold">
-                  {sentPosts.length}
-                </Text>
-              </View>
-              <View className="flex-1 ml-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-                <Text className="text-gray-400 text-xs mb-2">THIS WEEK</Text>
-                <Text className="text-white text-xl font-bold">
-                  {thisWeekPosts.length}
-                </Text>
-              </View>
-            </View>
-            <View className="flex-row justify-between mb-4">
-              <View className="flex-1 mr-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-                <Text className="text-gray-400 text-xs mb-2">SCHEDULED</Text>
-                <Text className="text-white text-xl font-bold">
-                  {scheduledCount}
-                </Text>
-              </View>
-              <View className="flex-1 ml-2 bg-gray-900/80 rounded-2xl p-4 border border-gray-800">
-                <Text className="text-gray-400 text-xs mb-2">DRAFTS</Text>
-                <Text className="text-white text-xl font-bold">
-                  {draftCount}
-                </Text>
-              </View>
-            </View>
-
-            {Object.keys(platformCounts).length > 0 && (
-              <>
-                <Text className="text-gray-400 text-xs mb-3 mt-2">
-                  POSTS PER PLATFORM
-                </Text>
-                {Object.entries(platformCounts)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([name, count]) => {
-                    const style = getPlatformStyle(name);
-                    return (
-                      <View
-                        key={name}
-                        className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-2 flex-row items-center"
-                      >
-                        <View
-                          className={`w-9 h-9 rounded-full ${style.bg || "bg-gray-700"} items-center justify-center mr-3`}
-                        >
-                          <Ionicons
-                            name={style.icon || "globe-outline"}
-                            size={18}
-                            color="#fff"
-                          />
-                        </View>
-                        <Text className="text-white text-sm font-medium flex-1">
-                          {name.split(":")[0]}
-                        </Text>
-                        <Text className="text-green-400 font-bold">{count}</Text>
-                      </View>
-                    );
-                  })}
-              </>
-            )}
-
-            <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mt-2">
-              <Text className="text-gray-400 text-xs mb-2">
-                CONNECTED PLATFORMS
-              </Text>
-              <Text className="text-white text-xl font-bold">
-                {connectedPlatforms.length}
-              </Text>
-            </View>
-          </ScrollView>
-        </View>
-        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-      </View>
+      <AnalyticsScreen
+        sentPosts={sentPosts}
+        allPosts={allPosts}
+        connectedPlatforms={connectedPlatforms}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
     );
   }
 
@@ -884,56 +829,6 @@ export default function HomePage({
               </Text>
             </TouchableOpacity>
           </View>
-
-          {drafts.length > 0 && (
-            <>
-              <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-white text-lg font-bold">Drafts</Text>
-                <View className="bg-yellow-500/20 rounded-full px-2.5 py-0.5">
-                  <Text className="text-yellow-400 text-xs font-bold">
-                    {drafts.length}
-                  </Text>
-                </View>
-              </View>
-              {drafts.map((draft) => (
-                <TouchableOpacity
-                  key={draft.id}
-                  onPress={() => openDraft(draft)}
-                  className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
-                >
-                  <View className="flex-row items-center">
-                    <View className="w-10 h-10 rounded-full bg-yellow-500/20 items-center justify-center mr-3">
-                      <Ionicons name="bookmark" size={18} color="#f59e0b" />
-                    </View>
-                    <View className="flex-1">
-                      <Text
-                        className="text-white text-sm font-medium"
-                        numberOfLines={1}
-                      >
-                        {draft.caption || "No caption"}
-                      </Text>
-                      <Text className="text-gray-500 text-xs mt-0.5">
-                        {draft.savedAt} · {draft.platforms?.length || 0}{" "}
-                        platforms
-                        {draft.media?.length > 0 ? " · has media" : ""}
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => handleDeleteDraft(draft.id)}
-                      className="w-8 h-8 rounded-full bg-gray-800 items-center justify-center ml-2"
-                    >
-                      <Ionicons
-                        name="trash-outline"
-                        size={14}
-                        color="#ef4444"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </TouchableOpacity>
-              ))}
-              <View className="mb-3" />
-            </>
-          )}
 
           <Text className="text-white text-lg font-bold mb-4">
             Connected Platforms

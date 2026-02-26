@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
+import { useShareIntent } from "expo-share-intent";
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import HomePage from "./components/HomePage";
@@ -34,9 +35,22 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [oauthRefreshKey, setOauthRefreshKey] = useState(0);
   const [biometricLocked, setBiometricLocked] = useState(false);
+  const [sharedContent, setSharedContent] = useState(null);
   const appState = useRef(AppState.currentState);
   const notificationListener = useRef();
   const responseListener = useRef();
+
+  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntent();
+
+  useEffect(() => {
+    if (hasShareIntent && shareIntent) {
+      const text = shareIntent.text || shareIntent.webUrl || "";
+      if (text) {
+        setSharedContent({ text });
+        resetShareIntent();
+      }
+    }
+  }, [hasShareIntent, shareIntent]);
 
   // Register for push notifications and send token to server
   // Note: Remote push notifications require a development build, not Expo Go (SDK 53+)
@@ -305,6 +319,8 @@ export default function App() {
             setUser(null);
             setCurrentScreen("signin");
           }}
+          sharedContent={sharedContent}
+          onSharedContentHandled={() => setSharedContent(null)}
         />
       );
     }

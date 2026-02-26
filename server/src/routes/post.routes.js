@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { authenticate } from "../middleware/auth.js";
+import { publishLimiter, createLimiter, rephraseLimiter } from "../middleware/rateLimiter.js";
 import {
   listPosts,
   getPost,
@@ -35,13 +36,13 @@ router.use(authenticate);
 
 router.get("/", asyncHandler(listPosts));
 router.get("/:id", asyncHandler(getPost));
-router.post("/", optionalUpload, asyncHandler(createPost));
+router.post("/", createLimiter, optionalUpload, asyncHandler(createPost));
 router.put("/:id", asyncHandler(updatePost));
 router.delete("/:id", asyncHandler(deletePost));
-router.post("/rephrase", asyncHandler(rephraseCaption));
+router.post("/rephrase", rephraseLimiter, asyncHandler(rephraseCaption));
 router.post("/copyright-check", asyncHandler(copyrightCheck));
-router.post("/:id/publish", asyncHandler(publishPost));
-router.post("/:id/retry", asyncHandler(retryPublish));
+router.post("/:id/publish", publishLimiter, asyncHandler(publishPost));
+router.post("/:id/retry", publishLimiter, asyncHandler(retryPublish));
 router.post("/:id/schedule", asyncHandler(schedulePost));
 
 export default router;
