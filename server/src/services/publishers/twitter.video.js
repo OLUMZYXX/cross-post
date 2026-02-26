@@ -88,7 +88,7 @@ async function finalizeVideoUpload(accessToken, mediaId) {
 }
 
 async function pollVideoStatus(accessToken, mediaId) {
-  const MAX_WAIT = 120000;
+  const MAX_WAIT = 300000;
   const start = Date.now();
 
   while (Date.now() - start < MAX_WAIT) {

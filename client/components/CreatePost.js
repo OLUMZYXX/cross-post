@@ -592,6 +592,7 @@ export default function CreatePost({
       selectionLimit: 10 - selectedMedia.length,
       allowsEditing: false,
       quality: 1,
+      videoMaxDuration: 300,
     });
 
     if (!result.canceled) {

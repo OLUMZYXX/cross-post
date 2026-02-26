@@ -52,7 +52,7 @@ export async function igPost(path, accessToken, body, retries = 3) {
 export async function waitForContainer(containerId, accessToken, isVideo) {
   if (!containerId) throw new Error("Instagram container ID missing — container creation may have failed.");
 
-  const maxAttempts = isVideo ? 36 : 10;
+  const maxAttempts = isVideo ? 60 : 10;
   const pollInterval = isVideo ? 5000 : 3000;
   let status = "IN_PROGRESS";
   let attempts = 0;

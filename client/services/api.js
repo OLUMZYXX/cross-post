@@ -204,7 +204,7 @@ export const postAPI = {
 
     const token = await AsyncStorage.getItem(TOKEN_KEY);
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 300000);
+    const timer = setTimeout(() => controller.abort(), 600000);
     try {
       const response = await fetch(`${BASE_URL}/posts`, {
         method: "POST",
@@ -239,10 +239,10 @@ export const postAPI = {
 
   delete: (id) => api.delete(`/posts/${id}`),
 
-  publish: (id) => fetchJSON(`/posts/${id}/publish`, { timeout: 180000 }),
+  publish: (id) => fetchJSON(`/posts/${id}/publish`, { timeout: 600000 }),
 
   retry: (id, platforms) =>
-    fetchJSON(`/posts/${id}/retry`, { body: { platforms }, timeout: 180000 }),
+    fetchJSON(`/posts/${id}/retry`, { body: { platforms }, timeout: 600000 }),
 
   schedule: (id, scheduledAt) =>
     fetchJSON(`/posts/${id}/schedule`, { body: { scheduledAt } }),

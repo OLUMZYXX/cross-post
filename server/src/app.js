@@ -86,7 +86,7 @@ app.post(
 // Upload media to Cloudinary (signed upload via server)
 const uploadCloudinary = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024 },
+  limits: { fileSize: 500 * 1024 * 1024 },
 });
 app.post(
   "/api/upload/cloudinary",
