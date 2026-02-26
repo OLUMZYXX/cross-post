@@ -28,7 +28,6 @@ export default function AnalyticsScreen({
   const media = useMemo(() => computeMediaStats(sentPosts), [sentPosts]);
   const successFailure = useMemo(() => computeSuccessFailure(sentPosts), [sentPosts]);
 
-  const maxTotal = platformStats.length > 0 ? platformStats[0].total : 0;
 
   return (
     <View className="flex-1 bg-gray-950">
@@ -131,7 +130,7 @@ export default function AnalyticsScreen({
 
           <WeeklyChart days={weekly.days} maxCount={weekly.maxCount} />
 
-          <PlatformBreakdown platformStats={platformStats} maxTotal={maxTotal} />
+          <PlatformBreakdown platformStats={platformStats} />
 
           {sentPosts.length > 0 && (
             <MediaBreakdown

@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import {
   Text,
   View,
@@ -56,10 +55,10 @@ export default function SentPosts({
       <View className="items-center py-4 mb-24">
         <TouchableOpacity
           onPress={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-          className="bg-gray-800 rounded-xl px-6 py-3 flex-row items-center"
+          className="bg-gray-800/60 rounded-xl px-5 py-2.5 flex-row items-center"
         >
-          <Ionicons name="chevron-down" size={16} color="#4ade80" />
-          <Text className="text-green-400 text-sm font-semibold ml-2">
+          <Ionicons name="chevron-down" size={14} color="#4ade80" />
+          <Text className="text-green-400 text-xs font-semibold ml-1.5">
             Load More
           </Text>
         </TouchableOpacity>
@@ -69,80 +68,35 @@ export default function SentPosts({
 
   if (!posts || posts.length === 0) {
     return (
-      <>
-        <StatusBar style="light" />
-        <View className="absolute top-0 left-0 right-0 bottom-0">
-          <View className="absolute top-10 -right-16 w-48 h-48 rounded-full bg-green-500/5" />
-          <View className="absolute top-96 -left-20 w-64 h-64 rounded-full bg-emerald-500/5" />
+      <View className="flex-1 items-center justify-center px-8" style={{ marginTop: -40 }}>
+        <View className="w-16 h-16 rounded-2xl bg-gray-800 items-center justify-center mb-4">
+          <Ionicons name="paper-plane-outline" size={28} color="#6b7280" />
         </View>
-        <View className="flex-1 px-6 pt-16">
-          <View className="mb-6">
-            <Text className="text-gray-400 text-sm">Your Content</Text>
-            <Text className="text-white text-2xl font-bold">Sent Posts</Text>
-          </View>
-          <View
-            className="flex-1 items-center justify-center"
-            style={{ marginTop: -60 }}
-          >
-            <View className="w-20 h-20 rounded-full bg-gray-800/80 items-center justify-center mb-5">
-              <Ionicons
-                name="paper-plane-outline"
-                size={36}
-                color="#4ade80"
-              />
-            </View>
-            <Text className="text-white text-lg font-bold mb-2">
-              No posts sent yet
-            </Text>
-            <Text className="text-gray-500 text-sm text-center px-8">
-              When you publish posts to your connected platforms, they'll appear
-              here.
-            </Text>
-          </View>
-        </View>
-      </>
+        <Text className="text-white text-base font-medium mb-1">No posts yet</Text>
+        <Text className="text-gray-500 text-xs text-center">
+          Published posts will appear here
+        </Text>
+      </View>
     );
   }
 
   return (
-    <>
-      <StatusBar style="light" />
-
-      <View className="absolute top-0 left-0 right-0 bottom-0">
-        <View className="absolute top-10 -right-16 w-48 h-48 rounded-full bg-green-500/5" />
-        <View className="absolute top-96 -left-20 w-64 h-64 rounded-full bg-emerald-500/5" />
-      </View>
-
-      <View className="flex-1 px-6 pt-16">
-        <View className="flex-row items-center justify-between mb-6">
-          <View>
-            <Text className="text-gray-400 text-sm">Your Content</Text>
-            <Text className="text-white text-2xl font-bold">Sent Posts</Text>
-          </View>
-          <View className="bg-green-500/20 rounded-full px-3 py-1">
-            <Text className="text-green-400 text-xs font-bold">
-              {posts.length} {posts.length === 1 ? "post" : "posts"}
-            </Text>
-          </View>
-        </View>
-
-        <FlatList
-          data={visiblePosts}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          ListFooterComponent={renderFooter}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#4ade80"
-              colors={["#4ade80"]}
-              progressBackgroundColor="#111827"
-            />
-          }
+    <FlatList
+      data={visiblePosts}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
+      ListFooterComponent={renderFooter}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 100 }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#4ade80"
+          colors={["#4ade80"]}
+          progressBackgroundColor="#111827"
         />
-      </View>
-    </>
+      }
+    />
   );
 }

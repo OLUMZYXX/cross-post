@@ -1,13 +1,8 @@
-import { StatusBar } from "expo-status-bar";
 import {
   Text,
   View,
   TouchableOpacity,
-  ScrollView,
   Modal,
-  RefreshControl,
-  ActivityIndicator,
-  Linking,
   BackHandler,
 } from "react-native";
 import { useState, useCallback, useEffect, useRef } from "react";
@@ -18,6 +13,8 @@ import CreatePost from "./CreatePost";
 import SentPosts from "./SentPosts";
 import DraftsScreen from "./DraftsScreen";
 import AnalyticsScreen from "./AnalyticsScreen";
+import HomeScreen from "./HomeScreen";
+import SettingsScreen from "./SettingsScreen";
 import BottomNav from "./BottomNav";
 import EditProfile from "./EditProfile";
 import ConnectedAccounts from "./ConnectedAccounts";
@@ -449,6 +446,21 @@ export default function HomePage({
     showToast({ type: "info", title: "Draft deleted" });
   };
 
+  const handleClearAllDrafts = async () => {
+    try {
+      const serverIds = serverDrafts.map((d) => d._id);
+      await Promise.all(serverIds.map((id) => postAPI.delete(id)));
+      setServerDrafts([]);
+      setDrafts([]);
+      setAllPosts((prev) =>
+        prev.filter((p) => p.status !== "draft" && !prev.find((d) => d.id === p.id)),
+      );
+      showToast({ type: "success", title: "All drafts cleared" });
+    } catch (err) {
+      showToast({ type: "error", title: "Clear failed", message: err.message });
+    }
+  };
+
   const openDraft = (draft) => {
     setEditingDraft(draft);
     setShowCreatePost(true);
@@ -547,22 +559,22 @@ export default function HomePage({
     const totalDrafts = drafts.length + serverDrafts.length + scheduledPosts.length;
     return (
       <View className="flex-1 bg-gray-950">
-        <View className="px-6 pt-16 pb-3">
+        <View className="px-5 pt-14 pb-2">
           <Text className="text-white text-2xl font-bold mb-4">Posts</Text>
-          <View className="flex-row bg-gray-900 rounded-xl p-1">
+          <View className="flex-row bg-gray-900 rounded-xl p-1 border border-gray-800/60">
             <TouchableOpacity
               onPress={() => setSentSubTab("published")}
-              className={`flex-1 py-2.5 rounded-lg ${sentSubTab === "published" ? "bg-green-500" : ""}`}
+              className={`flex-1 py-2 rounded-lg ${sentSubTab === "published" ? "bg-green-500" : ""}`}
             >
-              <Text className={`text-center text-sm font-bold ${sentSubTab === "published" ? "text-gray-950" : "text-gray-400"}`}>
+              <Text className={`text-center text-xs font-bold ${sentSubTab === "published" ? "text-gray-950" : "text-gray-500"}`}>
                 Published ({sentPosts.length})
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setSentSubTab("drafts")}
-              className={`flex-1 py-2.5 rounded-lg ${sentSubTab === "drafts" ? "bg-green-500" : ""}`}
+              className={`flex-1 py-2 rounded-lg ${sentSubTab === "drafts" ? "bg-green-500" : ""}`}
             >
-              <Text className={`text-center text-sm font-bold ${sentSubTab === "drafts" ? "text-gray-950" : "text-gray-400"}`}>
+              <Text className={`text-center text-xs font-bold ${sentSubTab === "drafts" ? "text-gray-950" : "text-gray-500"}`}>
                 Drafts ({totalDrafts})
               </Text>
             </TouchableOpacity>
@@ -584,6 +596,7 @@ export default function HomePage({
             onOpenServerPost={openServerPost}
             onDeleteLocalDraft={handleDeleteDraft}
             onDeleteServerPost={handleDeleteServerPost}
+            onClearAllDrafts={handleClearAllDrafts}
             refreshing={refreshing}
             onRefresh={onRefresh}
           />
@@ -643,107 +656,18 @@ export default function HomePage({
 
     return (
       <View className="flex-1 bg-gray-950">
-        <StatusBar style="light" />
-        <View className="flex-1 px-6 pt-16">
-          <View className="mb-6">
-            <Text className="text-gray-400 text-sm">Preferences</Text>
-            <Text className="text-white text-2xl font-bold">Settings</Text>
-          </View>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 80 }}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor="#4ade80"
-                colors={["#4ade80"]}
-                progressBackgroundColor="#111827"
-              />
-            }
-          >
-            <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-4">
-              <TouchableOpacity
-                onPress={() => setSettingsScreen("editProfile")}
-                className="flex-row items-center p-4 border-b border-gray-800"
-              >
-                <View className="w-9 h-9 rounded-full bg-blue-500/20 items-center justify-center mr-3">
-                  <Ionicons name="person-outline" size={18} color="#3b82f6" />
-                </View>
-                <Text className="text-white flex-1 text-sm">Edit Profile</Text>
-                <Ionicons name="chevron-forward" size={16} color="#6b7280" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setSettingsScreen("connectedAccounts")}
-                className="flex-row items-center p-4 border-b border-gray-800"
-              >
-                <View className="w-9 h-9 rounded-full bg-green-500/20 items-center justify-center mr-3">
-                  <Ionicons name="link-outline" size={18} color="#22c55e" />
-                </View>
-                <Text className="text-white flex-1 text-sm">
-                  Connected Accounts
-                </Text>
-                <Text className="text-gray-500 text-xs mr-2">
-                  {connectedPlatforms.length}
-                </Text>
-                <Ionicons name="chevron-forward" size={16} color="#6b7280" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setSettingsScreen("notifications")}
-                className="flex-row items-center p-4"
-              >
-                <View className="w-9 h-9 rounded-full bg-purple-500/20 items-center justify-center mr-3">
-                  <Ionicons
-                    name="notifications-outline"
-                    size={18}
-                    color="#a855f7"
-                  />
-                </View>
-                <Text className="text-white flex-1 text-sm">Notifications</Text>
-                <Ionicons name="chevron-forward" size={16} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
-            <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-4">
-              <TouchableOpacity
-                onPress={() => setSettingsScreen("privacy")}
-                className="flex-row items-center p-4 border-b border-gray-800"
-              >
-                <View className="w-9 h-9 rounded-full bg-yellow-500/20 items-center justify-center mr-3">
-                  <Ionicons name="shield-outline" size={18} color="#eab308" />
-                </View>
-                <Text className="text-white flex-1 text-sm">
-                  Privacy & Security
-                </Text>
-                <Ionicons name="chevron-forward" size={16} color="#6b7280" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setSettingsScreen("help")}
-                className="flex-row items-center p-4"
-              >
-                <View className="w-9 h-9 rounded-full bg-gray-500/20 items-center justify-center mr-3">
-                  <Ionicons
-                    name="help-circle-outline"
-                    size={18}
-                    color="#9ca3af"
-                  />
-                </View>
-                <Text className="text-white flex-1 text-sm">
-                  Help & Support
-                </Text>
-                <Ionicons name="chevron-forward" size={16} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
-            <TouchableOpacity
-              onPress={handleLogout}
-              className="bg-red-500/10 rounded-2xl p-4 border border-red-500/20 flex-row items-center justify-center"
-            >
-              <Ionicons name="log-out-outline" size={18} color="#ef4444" />
-              <Text className="text-red-400 font-medium text-sm ml-2">
-                Log Out
-              </Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
+        <SettingsScreen
+          user={user}
+          connectedPlatformsCount={connectedPlatforms.length}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          onEditProfile={() => setSettingsScreen("editProfile")}
+          onConnectedAccounts={() => setSettingsScreen("connectedAccounts")}
+          onNotifications={() => setSettingsScreen("notifications")}
+          onPrivacy={() => setSettingsScreen("privacy")}
+          onHelp={() => setSettingsScreen("help")}
+          onLogout={handleLogout}
+        />
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       </View>
     );
@@ -751,209 +675,29 @@ export default function HomePage({
 
   return (
     <View className="flex-1 bg-gray-950">
-      <StatusBar style="light" />
-
       {showLoadingAnimation && (
         <PageLoadingAnimation
           onFinish={() => setShowLoadingAnimation(false)}
         />
       )}
 
-      <View className="absolute top-0 left-0 right-0 bottom-0">
-        <View className="absolute top-10 -right-16 w-48 h-48 rounded-full bg-green-500/5" />
-        <View className="absolute top-96 -left-20 w-64 h-64 rounded-full bg-emerald-500/5" />
-      </View>
-
-      <View className="flex-1 px-6 pt-16">
-        <View className="flex-row items-center justify-between mb-8">
-          <View>
-            <Text className="text-gray-400 text-sm">Welcome back</Text>
-            <Text className="text-white text-2xl font-bold">
-              {user?.name?.split(" ")[0] || "User"}
-            </Text>
-          </View>
-          <View className="flex-row items-center">
-            <TouchableOpacity
-              onPress={() => setShowNotifications(true)}
-              className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center mr-3 border border-gray-700"
-            >
-              <Ionicons name="notifications-outline" size={20} color="#9ca3af" />
-              {unreadNotifications > 0 && (
-                <View className="absolute -top-1 -right-1 bg-green-500 rounded-full min-w-[18px] h-[18px] items-center justify-center px-1">
-                  <Text className="text-gray-950 text-[10px] font-bold">
-                    {unreadNotifications > 9 ? "9+" : unreadNotifications}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleLogout}
-              className="bg-gray-800 px-4 py-2 rounded-xl border border-gray-700"
-            >
-              <Text className="text-gray-300 text-sm font-medium">Logout</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#4ade80"
-              colors={["#4ade80"]}
-              progressBackgroundColor="#111827"
-            />
-          }
-        >
-          <View className="bg-gray-900/80 rounded-3xl p-6 border border-gray-800 mb-6">
-            <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-white text-lg font-bold">
-                Create New Post
-              </Text>
-              <View className="w-10 h-10 rounded-full bg-green-500/20 items-center justify-center">
-                <Text className="text-xl">✏️</Text>
-              </View>
-            </View>
-            <Text className="text-gray-400 text-sm mb-4">
-              Share your content across all connected platforms with one tap.
-            </Text>
-            <TouchableOpacity
-              onPress={() => setShowCreatePost(true)}
-              className="bg-green-500 py-3 rounded-xl border border-green-400"
-            >
-              <Text className="text-gray-950 text-center font-bold">
-                + New Post
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text className="text-white text-lg font-bold mb-4">
-            Connected Platforms
-          </Text>
-
-          {loadingPlatforms ? (
-            <View className="items-center py-8">
-              <ActivityIndicator color="#4ade80" />
-            </View>
-          ) : (
-            <View className="flex-row flex-wrap justify-between mb-6">
-              {connectedPlatforms.map((platform) => {
-                const username = getPlatformUsername(platform);
-                const style = getPlatformStyle(platform);
-                const baseName = platform.split(":")[0];
-                return (
-                  <View
-                    key={platform}
-                    className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
-                  >
-                    <View
-                      className={`w-12 h-12 rounded-full ${style.bg || "bg-gray-700"} items-center justify-center mb-3`}
-                    >
-                      <Ionicons
-                        name={style.icon || "globe-outline"}
-                        size={24}
-                        color="#fff"
-                      />
-                    </View>
-                    <Text
-                      className="text-white font-bold mb-1"
-                      numberOfLines={1}
-                    >
-                      {username || baseName}
-                    </Text>
-                    <Text className="text-green-400 text-xs">{baseName}</Text>
-                  </View>
-                );
-              })}
-
-              <TouchableOpacity
-                onPress={() => setModalVisible(true)}
-                className="w-[48%] bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
-                style={{ borderStyle: "dashed" }}
-              >
-                <View className="w-12 h-12 rounded-full bg-gray-700/50 items-center justify-center mb-3">
-                  <Ionicons name="add" size={24} color="#9ca3af" />
-                </View>
-                <Text className="text-gray-400 font-bold mb-1">Add More</Text>
-                <Text className="text-gray-500 text-xs">Connect platform</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <Text className="text-white text-lg font-bold mb-4">
-            Recent Activity
-          </Text>
-
-          {recentActivities.length > 0 ? (
-            <View className="bg-gray-900/80 rounded-2xl border border-gray-800 overflow-hidden mb-3">
-              {recentActivities.map((activity, index) => {
-                const isPost = activity.type === "post";
-                const iconName = isPost ? "paper-plane" : "link";
-                const iconBg = isPost ? "bg-green-500/20" : "bg-blue-500/20";
-                const iconColor = isPost ? "#4ade80" : "#60a5fa";
-                const accentColor = isPost ? "text-green-400" : "text-blue-400";
-
-                // Relative time
-                const now = new Date();
-                const diff = now - activity.timestamp;
-                const mins = Math.floor(diff / 60000);
-                const hrs = Math.floor(diff / 3600000);
-                const days = Math.floor(diff / 86400000);
-                let timeLabel;
-                if (mins < 1) timeLabel = "Just now";
-                else if (mins < 60) timeLabel = `${mins}m ago`;
-                else if (hrs < 24) timeLabel = `${hrs}h ago`;
-                else if (days < 7) timeLabel = `${days}d ago`;
-                else timeLabel = activity.timestamp.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-
-                return (
-                  <View
-                    key={activity.id}
-                    className={`flex-row items-center px-4 py-3.5 ${index < recentActivities.length - 1 ? "border-b border-gray-800/60" : ""}`}
-                  >
-                    <View className={`w-9 h-9 rounded-xl ${iconBg} items-center justify-center mr-3`}>
-                      <Ionicons name={iconName} size={16} color={iconColor} />
-                    </View>
-                    <View className="flex-1 mr-2">
-                      <Text className="text-white text-sm font-medium" numberOfLines={1}>
-                        {activity.title}
-                      </Text>
-                      <View className="flex-row items-center mt-0.5">
-                        <Text className={`text-xs font-medium ${accentColor}`}>
-                          {isPost ? "Published" : "Connected"}
-                        </Text>
-                        {activity.platforms > 0 && (
-                          <Text className="text-gray-600 text-xs">
-                            {" "}· {activity.platforms} platform{activity.platforms !== 1 ? "s" : ""}
-                          </Text>
-                        )}
-                      </View>
-                    </View>
-                    <Text className="text-gray-600 text-xs">{timeLabel}</Text>
-                  </View>
-                );
-              })}
-            </View>
-          ) : (
-            <View className="bg-gray-900/80 rounded-2xl p-6 border border-gray-800 mb-3 items-center">
-              <View className="w-12 h-12 rounded-2xl bg-gray-800 items-center justify-center mb-3">
-                <Ionicons name="time-outline" size={24} color="#6b7280" />
-              </View>
-              <Text className="text-white font-medium text-sm mb-1">
-                No recent activity
-              </Text>
-              <Text className="text-gray-500 text-xs text-center">
-                Your posts and connections will show up here
-              </Text>
-            </View>
-          )}
-
-          <View className="h-16" />
-        </ScrollView>
-      </View>
+      <HomeScreen
+        user={user}
+        sentPosts={sentPosts}
+        allPosts={allPosts}
+        connectedPlatforms={connectedPlatforms}
+        connectedPlatformObjects={connectedPlatformObjects}
+        loadingPlatforms={loadingPlatforms}
+        recentActivities={recentActivities}
+        unreadNotifications={unreadNotifications}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        onCreatePost={() => setShowCreatePost(true)}
+        onNotifications={() => setShowNotifications(true)}
+        onAddPlatform={() => setModalVisible(true)}
+        getPlatformStyle={getPlatformStyle}
+        getPlatformUsername={getPlatformUsername}
+      />
 
       <Modal
         animationType="slide"

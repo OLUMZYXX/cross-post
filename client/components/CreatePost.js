@@ -19,6 +19,7 @@ import { useToast } from "./Toast";
 import { postAPI, ensureServerAwake } from "../services/api";
 import { uploadToCloudinary } from "../services/cloudinary";
 import PlatformPreview from "./PlatformPreview";
+import PlatformSelector from "./PlatformSelector";
 
 const TONE_OPTIONS = [
   { key: "professional", label: "Professional", icon: "briefcase-outline", color: "#3b82f6" },
@@ -707,58 +708,67 @@ export default function CreatePost({
         <View className="absolute top-96 -left-20 w-64 h-64 rounded-full bg-emerald-500/5" />
       </View>
 
-      <View className="px-6 pt-16 pb-4">
+      <View className="px-5 pt-14 pb-3">
         <View className="flex-row items-center justify-between">
           <TouchableOpacity
             onPress={onClose}
             disabled={isPosting}
-            className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
+            className="w-10 h-10 rounded-xl bg-gray-900 border border-gray-800 items-center justify-center"
           >
-            <Ionicons name="arrow-back" size={20} color="#fff" />
+            <Ionicons name="close" size={20} color="#9ca3af" />
           </TouchableOpacity>
-          <Text className="text-white text-lg font-bold">Create Post</Text>
-          <TouchableOpacity
-            onPress={handlePostPress}
-            disabled={isPosting || isUploading}
-            className={`px-5 py-2.5 rounded-xl ${isPosting || isUploading ? "bg-green-500/50" : "bg-green-500"}`}
-          >
-            <Text className="text-gray-950 font-bold text-sm">
-              {isPosting ? "Posting..." : isUploading ? "Uploading..." : "Post"}
-            </Text>
-          </TouchableOpacity>
+          <View className="flex-row items-center">
+            <TouchableOpacity
+              onPress={handleSaveDraft}
+              disabled={isPosting}
+              className="px-4 py-2.5 rounded-xl bg-gray-900 border border-gray-800 mr-2"
+            >
+              <Text className="text-gray-300 font-medium text-sm">Save Draft</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handlePostPress}
+              disabled={isPosting || isUploading}
+              className={`px-5 py-2.5 rounded-xl ${isPosting || isUploading ? "bg-green-500/50" : "bg-green-500"}`}
+            >
+              <Text className="text-gray-950 font-bold text-sm">
+                {isPosting ? "Posting..." : isUploading ? "Wait..." : "Publish"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
       <ScrollView
-        className="flex-1 px-6"
+        className="flex-1 px-5"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-4 overflow-hidden">
+        <View className="bg-gray-900 rounded-2xl border border-gray-800/60 mb-4 overflow-hidden">
           <TextInput
             value={caption}
             onChangeText={setCaption}
-            placeholder="What's on your mind?"
-            placeholderTextColor="#6b7280"
+            placeholder="What do you want to share?"
+            placeholderTextColor="#4b5563"
             multiline
-            className="text-white text-base p-4 min-h-[140px]"
+            className="text-white text-base px-4 pt-4 pb-2 min-h-[120px]"
             textAlignVertical="top"
             editable={!isPosting}
           />
           {selectedPlatforms.some((p) => p.split(":")[0] === "Twitter") && (
-            <View className="flex-row items-center justify-end px-4 pb-2">
+            <View className="flex-row items-center px-4 pb-2">
+              <View className={`h-1 flex-1 rounded-full mr-3 ${caption.length > 280 ? "bg-red-500/30" : "bg-gray-800"}`}>
+                <View
+                  className={`h-full rounded-full ${caption.length > 280 ? "bg-red-500" : "bg-green-500"}`}
+                  style={{ width: `${Math.min((caption.length / 280) * 100, 100)}%` }}
+                />
+              </View>
               <Text
-                className={`text-xs font-medium ${
-                  caption.length > 280 ? "text-red-400" : "text-gray-500"
+                className={`text-[11px] font-medium ${
+                  caption.length > 280 ? "text-red-400" : "text-gray-600"
                 }`}
               >
                 {caption.length}/280
               </Text>
-              {caption.length > 280 && (
-                <Text className="text-yellow-500 text-xs ml-2">
-                  Rephrase to fit Twitter
-                </Text>
-              )}
             </View>
           )}
 
@@ -861,85 +871,44 @@ export default function CreatePost({
             </View>
           )}
 
-          <View className="flex-row items-center justify-between px-4 py-3 border-t border-gray-800">
-            <Text className="text-gray-500 text-xs">{caption.length}/500</Text>
-            <View className="flex-row items-center">
-              <TouchableOpacity
-                onPress={() => {
-                  if (!caption.trim()) {
-                    showToast({ type: "warning", title: "Nothing to rephrase", message: "Write something first." });
-                    return;
-                  }
-                  setRephrasedText(null);
-                  setSelectedTone(null);
-                  setShowRephraseModal(true);
-                }}
-                disabled={isPosting}
-                className="flex-row items-center bg-purple-500/20 rounded-full px-4 py-2 mr-2"
-              >
-                <Ionicons name="sparkles" size={18} color="#a855f7" />
-                <Text className="text-purple-400 text-xs font-medium ml-2">Rephrase</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleMediaSelect}
-                disabled={isPosting}
-                className="flex-row items-center bg-gray-800 rounded-full px-4 py-2 mr-2"
-              >
-                <Ionicons name="images-outline" size={18} color="#4ade80" />
-                <Text className="text-green-400 text-xs font-medium ml-2">Media</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSaveDraft}
-                disabled={isPosting}
-                className="flex-row items-center bg-gray-800 rounded-full px-4 py-2"
-              >
-                <Ionicons name="bookmark-outline" size={18} color="#f59e0b" />
-              </TouchableOpacity>
-            </View>
+          <View className="flex-row items-center px-3 py-2.5 border-t border-gray-800/50">
+            <TouchableOpacity
+              onPress={handleMediaSelect}
+              disabled={isPosting}
+              className="flex-row items-center bg-green-500/10 rounded-lg px-3 py-2 mr-2"
+            >
+              <Ionicons name="image-outline" size={14} color="#4ade80" />
+              <Text className="text-green-400 text-[11px] font-medium ml-1.5">Media</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                if (!caption.trim()) {
+                  showToast({ type: "warning", title: "Nothing to rephrase", message: "Write something first." });
+                  return;
+                }
+                setRephrasedText(null);
+                setSelectedTone(null);
+                setShowRephraseModal(true);
+              }}
+              disabled={isPosting}
+              className="flex-row items-center bg-purple-500/10 rounded-lg px-3 py-2 mr-2"
+            >
+              <Ionicons name="sparkles" size={14} color="#a855f7" />
+              <Text className="text-purple-400 text-[11px] font-medium ml-1.5">AI Rephrase</Text>
+            </TouchableOpacity>
+            <View className="flex-1" />
+            <Text className="text-gray-700 text-[10px]">{caption.length}</Text>
           </View>
         </View>
 
-        <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-4">
-          <Text className="text-white font-bold mb-3">Post to</Text>
-          <View className="flex-row flex-wrap">
-            {connectedPlatforms.map((platform) => {
-              const isSelected = selectedPlatforms.includes(platform);
-              const style = getPlatformStyle(platform);
-              return (
-                <TouchableOpacity
-                  key={platform}
-                  onPress={() => togglePlatform(platform)}
-                  disabled={isPosting}
-                  className={`flex-row items-center mr-2 mb-2 px-3 py-2 rounded-full border ${
-                    isSelected
-                      ? "bg-green-500/20 border-green-500"
-                      : "bg-gray-800 border-gray-700"
-                  }`}
-                >
-                  <Ionicons
-                    name={style.icon || "globe-outline"}
-                    size={16}
-                    color={isSelected ? "#22c55e" : "#9ca3af"}
-                  />
-                  <Text
-                    className={`text-sm font-medium ml-1.5 ${
-                      isSelected ? "text-green-400" : "text-gray-400"
-                    }`}
-                    numberOfLines={1}
-                  >
-                    {getDisplayName(platform)}
-                  </Text>
-                  {isSelected && (
-                    <Ionicons name="checkmark" size={14} color="#22c55e" style={{ marginLeft: 6 }} />
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-          {selectedPlatforms.length === 0 && (
-            <Text className="text-red-400 text-xs mt-2">Select at least one platform</Text>
-          )}
-        </View>
+        <PlatformSelector
+          connectedPlatforms={connectedPlatforms}
+          selectedPlatforms={selectedPlatforms}
+          onToggle={togglePlatform}
+          getPlatformStyle={getPlatformStyle}
+          getDisplayName={getDisplayName}
+          disabled={isPosting}
+        />
 
         <PlatformPreview
           selectedPlatforms={selectedPlatforms}

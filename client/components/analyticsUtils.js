@@ -25,18 +25,31 @@ export function computeOverviewStats(sentPosts, allPosts) {
   return { totalReach, thisWeekCount: thisWeekPosts.length, growthPercent, scheduledCount, draftCount };
 }
 
+function baseName(identifier) {
+  return identifier.split(":")[0];
+}
+
 export function computePlatformStats(sentPosts) {
   const platforms = {};
 
+  const ensure = (name) => {
+    if (!platforms[name]) platforms[name] = { total: 0, success: 0, failed: 0 };
+  };
+
   sentPosts.forEach((post) => {
-    (post.platforms || []).forEach((name) => {
-      if (!platforms[name]) platforms[name] = { total: 0, success: 0, failed: 0 };
+    const targeted = new Set();
+    (post.platforms || []).forEach((id) => {
+      targeted.add(baseName(id));
+    });
+    targeted.forEach((name) => {
+      ensure(name);
       platforms[name].total += 1;
     });
 
     (post.publishResults || []).forEach((result) => {
-      const name = result.platform;
-      if (!platforms[name]) platforms[name] = { total: 0, success: 0, failed: 0 };
+      const name = baseName(result.platform);
+      ensure(name);
+      if (!targeted.has(name)) platforms[name].total += 1;
       if (result.success) platforms[name].success += 1;
       else platforms[name].failed += 1;
     });
@@ -44,7 +57,8 @@ export function computePlatformStats(sentPosts) {
 
   return Object.entries(platforms)
     .map(([name, stats]) => {
-      const successRate = stats.total > 0 ? Math.round((stats.success / stats.total) * 100) : 0;
+      const attempts = stats.success + stats.failed;
+      const successRate = attempts > 0 ? Math.round((stats.success / attempts) * 100) : 0;
       return { name, ...stats, successRate };
     })
     .sort((a, b) => b.total - a.total);

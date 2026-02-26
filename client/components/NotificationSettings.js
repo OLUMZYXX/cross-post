@@ -11,94 +11,101 @@ import { Ionicons } from "@expo/vector-icons";
 import { useToast } from "./Toast";
 import { notificationAPI } from "../services/api";
 
+const TOGGLES = [
+  {
+    label: "Push Notifications",
+    desc: "Receive alerts on your device",
+    key: "pushEnabled",
+    icon: "notifications",
+    color: "#a855f7",
+    section: "channels",
+  },
+  {
+    label: "Email Notifications",
+    desc: "Get updates via email",
+    key: "emailEnabled",
+    icon: "mail",
+    color: "#3b82f6",
+    section: "channels",
+  },
+  {
+    label: "Post Published Alerts",
+    desc: "Notify when posts go live or fail",
+    key: "postAlerts",
+    icon: "paper-plane",
+    color: "#4ade80",
+    section: "alerts",
+  },
+  {
+    label: "Schedule Reminders",
+    desc: "Remind before scheduled posts",
+    key: "scheduleReminders",
+    icon: "time",
+    color: "#f59e0b",
+    section: "alerts",
+  },
+];
+
+function ToggleRow({ item, onToggle, isLast }) {
+  return (
+    <View className={`flex-row items-center p-4 ${!isLast ? "border-b border-gray-800/50" : ""}`}>
+      <View
+        className="w-9 h-9 rounded-xl items-center justify-center mr-3"
+        style={{ backgroundColor: item.color + "20" }}
+      >
+        <Ionicons name={item.icon} size={17} color={item.color} />
+      </View>
+      <View className="flex-1">
+        <Text className="text-white text-sm font-medium">{item.label}</Text>
+        <Text className="text-gray-500 text-[11px] mt-0.5">{item.desc}</Text>
+      </View>
+      <Switch
+        value={item.value}
+        onValueChange={() => onToggle(item.key, item.value, item.label)}
+        trackColor={{ false: "#374151", true: "#166534" }}
+        thumbColor={item.value ? "#4ade80" : "#9ca3af"}
+      />
+    </View>
+  );
+}
+
 export default function NotificationSettings({ onBack }) {
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [emailEnabled, setEmailEnabled] = useState(false);
-  const [postAlerts, setPostAlerts] = useState(true);
-  const [scheduleReminders, setScheduleReminders] = useState(true);
+  const [prefs, setPrefs] = useState({
+    pushEnabled: true,
+    emailEnabled: false,
+    postAlerts: true,
+    scheduleReminders: true,
+  });
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
-  // Load saved preferences from server
   useEffect(() => {
     (async () => {
       try {
         const { data } = await notificationAPI.getPreferences();
-        const prefs = data.preferences;
-        setPushEnabled(prefs.pushEnabled ?? true);
-        setEmailEnabled(prefs.emailEnabled ?? false);
-        setPostAlerts(prefs.postAlerts ?? true);
-        setScheduleReminders(prefs.scheduleReminders ?? true);
+        const p = data.preferences;
+        setPrefs({
+          pushEnabled: p.pushEnabled ?? true,
+          emailEnabled: p.emailEnabled ?? false,
+          postAlerts: p.postAlerts ?? true,
+          scheduleReminders: p.scheduleReminders ?? true,
+        });
       } catch {
-        // Use defaults on error
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  const toggles = [
-    {
-      label: "Push Notifications",
-      desc: "Receive alerts on your device",
-      value: pushEnabled,
-      key: "pushEnabled",
-      icon: "notifications",
-      color: "#a855f7",
-    },
-    {
-      label: "Email Notifications",
-      desc: "Get updates via email",
-      value: emailEnabled,
-      key: "emailEnabled",
-      icon: "mail",
-      color: "#3b82f6",
-    },
-    {
-      label: "Post Published Alerts",
-      desc: "Notify when posts go live or fail",
-      value: postAlerts,
-      key: "postAlerts",
-      icon: "paper-plane",
-      color: "#4ade80",
-    },
-    {
-      label: "Schedule Reminders",
-      desc: "Remind before scheduled posts",
-      value: scheduleReminders,
-      key: "scheduleReminders",
-      icon: "time",
-      color: "#f59e0b",
-    },
-  ];
-
-  const setters = {
-    pushEnabled: setPushEnabled,
-    emailEnabled: setEmailEnabled,
-    postAlerts: setPostAlerts,
-    scheduleReminders: setScheduleReminders,
-  };
-
   const handleToggle = async (key, current, label) => {
     const newValue = !current;
-    setters[key](newValue);
-
+    setPrefs((prev) => ({ ...prev, [key]: newValue }));
     try {
       await notificationAPI.updatePreferences({ [key]: newValue });
-      showToast({
-        type: "success",
-        title: `${label} ${newValue ? "enabled" : "disabled"}`,
-        duration: 1500,
-      });
+      showToast({ type: "success", title: `${label} ${newValue ? "enabled" : "disabled"}`, duration: 1500 });
     } catch {
-      // Revert on error
-      setters[key](current);
-      showToast({
-        type: "error",
-        title: "Failed to update",
-        message: "Could not save preference. Try again.",
-        duration: 3000,
-      });
+      setPrefs((prev) => ({ ...prev, [key]: current }));
+      showToast({ type: "error", title: "Failed to update", duration: 2000 });
     }
   };
 
@@ -110,97 +117,48 @@ export default function NotificationSettings({ onBack }) {
     );
   }
 
+  const channels = TOGGLES.filter((t) => t.section === "channels").map((t) => ({ ...t, value: prefs[t.key] }));
+  const alerts = TOGGLES.filter((t) => t.section === "alerts").map((t) => ({ ...t, value: prefs[t.key] }));
+
   return (
-    <View className="flex-1 bg-gray-950 px-6 pt-16">
-      <View className="flex-row items-center mb-8">
-        <TouchableOpacity onPress={onBack} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+    <View className="flex-1 bg-gray-950 px-5 pt-14">
+      <View className="flex-row items-center mb-6">
+        <TouchableOpacity
+          onPress={onBack}
+          className="w-10 h-10 rounded-xl bg-gray-900 items-center justify-center mr-3 border border-gray-800/60"
+        >
+          <Ionicons name="arrow-back" size={18} color="#fff" />
         </TouchableOpacity>
         <Text className="text-white text-xl font-bold">Notifications</Text>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Text className="text-gray-500 text-xs uppercase font-semibold mb-3 ml-1">
-          Notification Channels
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+        <Text className="text-gray-500 text-[10px] tracking-wider uppercase mb-2 ml-1">
+          Channels
         </Text>
-        <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-6">
-          {toggles.slice(0, 2).map((item, i) => (
-            <View
-              key={item.key}
-              className={`flex-row items-center p-4 ${i === 0 ? "border-b border-gray-800" : ""}`}
-            >
-              <View
-                className="w-9 h-9 rounded-full items-center justify-center mr-3"
-                style={{ backgroundColor: item.color + "20" }}
-              >
-                <Ionicons name={item.icon} size={18} color={item.color} />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white text-sm font-medium">
-                  {item.label}
-                </Text>
-                <Text className="text-gray-500 text-xs mt-0.5">
-                  {item.desc}
-                </Text>
-              </View>
-              <Switch
-                value={item.value}
-                onValueChange={() =>
-                  handleToggle(item.key, item.value, item.label)
-                }
-                trackColor={{ false: "#374151", true: "#166534" }}
-                thumbColor={item.value ? "#4ade80" : "#9ca3af"}
-              />
-            </View>
+        <View className="bg-gray-900 rounded-2xl border border-gray-800/60 mb-5">
+          {channels.map((item, i) => (
+            <ToggleRow key={item.key} item={item} onToggle={handleToggle} isLast={i === channels.length - 1} />
           ))}
         </View>
 
-        <Text className="text-gray-500 text-xs uppercase font-semibold mb-3 ml-1">
+        <Text className="text-gray-500 text-[10px] tracking-wider uppercase mb-2 ml-1">
           Alert Types
         </Text>
-        <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-6">
-          {toggles.slice(2).map((item, i) => (
-            <View
-              key={item.key}
-              className={`flex-row items-center p-4 ${i === 0 ? "border-b border-gray-800" : ""}`}
-            >
-              <View
-                className="w-9 h-9 rounded-full items-center justify-center mr-3"
-                style={{ backgroundColor: item.color + "20" }}
-              >
-                <Ionicons name={item.icon} size={18} color={item.color} />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white text-sm font-medium">
-                  {item.label}
-                </Text>
-                <Text className="text-gray-500 text-xs mt-0.5">
-                  {item.desc}
-                </Text>
-              </View>
-              <Switch
-                value={item.value}
-                onValueChange={() =>
-                  handleToggle(item.key, item.value, item.label)
-                }
-                trackColor={{ false: "#374151", true: "#166534" }}
-                thumbColor={item.value ? "#4ade80" : "#9ca3af"}
-              />
-            </View>
+        <View className="bg-gray-900 rounded-2xl border border-gray-800/60 mb-5">
+          {alerts.map((item, i) => (
+            <ToggleRow key={item.key} item={item} onToggle={handleToggle} isLast={i === alerts.length - 1} />
           ))}
         </View>
 
-        <View className="bg-gray-900/50 rounded-xl p-4 mb-6">
+        <View className="bg-gray-900/50 rounded-2xl p-4 border border-gray-800/40">
           <View className="flex-row items-center mb-2">
-            <Ionicons name="information-circle" size={16} color="#6b7280" />
-            <Text className="text-gray-400 text-xs font-medium ml-1.5">
-              About Notifications
-            </Text>
+            <Ionicons name="information-circle" size={15} color="#4b5563" />
+            <Text className="text-gray-500 text-[11px] font-medium ml-1.5">About</Text>
           </View>
-          <Text className="text-gray-500 text-xs leading-4">
-            Push notifications alert you when posts are published, fail, or are
-            about to go live from a schedule. You can turn off specific
-            categories above.
+          <Text className="text-gray-600 text-[11px] leading-4">
+            Push notifications alert you when posts are published, fail, or go
+            live from a schedule. Toggle specific categories above.
           </Text>
         </View>
       </ScrollView>
