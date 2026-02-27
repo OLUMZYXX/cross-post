@@ -16,11 +16,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { authAPI, saveToken } from "../services/api";
 import { useToast } from "./Toast";
-import {
-  GOOGLE_ANDROID_CLIENT_ID,
-  GOOGLE_IOS_CLIENT_ID,
-  GOOGLE_WEB_CLIENT_ID,
-} from "../config/googleConfig";
+import { GOOGLE_WEB_CLIENT_ID } from "../config/googleConfig";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -35,8 +31,7 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
   const { showToast } = useToast();
 
   const [, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
-    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-    iosClientId: GOOGLE_IOS_CLIENT_ID,
+    iosClientId: GOOGLE_WEB_CLIENT_ID,
     webClientId: GOOGLE_WEB_CLIENT_ID,
   });
 
