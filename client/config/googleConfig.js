@@ -1,5 +1,5 @@
-export const GOOGLE_ANDROID_CLIENT_ID = "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com";
+export const GOOGLE_ANDROID_CLIENT_ID = "1060869198401-l7k002o0r7vdrroe3j114ckoskcgogkd.apps.googleusercontent.com";
 
-export const GOOGLE_IOS_CLIENT_ID = "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com";
+export const GOOGLE_IOS_CLIENT_ID = "1060869198401-l7k002o0r7vdrroe3j114ckoskcgogkd.apps.googleusercontent.com";
 
-export const GOOGLE_WEB_CLIENT_ID = "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com";
+export const GOOGLE_WEB_CLIENT_ID = "1060869198401-l7k002o0r7vdrroe3j114ckoskcgogkd.apps.googleusercontent.com";

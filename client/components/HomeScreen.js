@@ -76,12 +76,6 @@ export default function HomeScreen({
             />
           }
         >
-          <QuickStats
-            publishedCount={sentPosts.length}
-            platformCount={connectedPlatforms.length}
-            scheduledCount={scheduledCount}
-          />
-
           <TouchableOpacity
             onPress={onCreatePost}
             className="rounded-2xl mb-5 overflow-hidden border border-green-500/20"
@@ -102,6 +96,12 @@ export default function HomeScreen({
               </View>
             </View>
           </TouchableOpacity>
+
+          <QuickStats
+            publishedCount={sentPosts.length}
+            platformCount={connectedPlatforms.length}
+            scheduledCount={scheduledCount}
+          />
 
           <View className="flex-row items-center justify-between mb-3">
             <Text className="text-white text-base font-bold">Platforms</Text>

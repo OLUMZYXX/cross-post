@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import * as AuthSession from "expo-auth-session";
+import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { authAPI, saveToken } from "../services/api";
@@ -34,24 +34,11 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
   const [otpCode, setOtpCode] = useState("");
   const { showToast } = useToast();
 
-  const [request, googleResponse, promptGoogleAsync] =
-    AuthSession.useAuthRequest(
-      {
-        clientId:
-          Platform.OS === "android"
-            ? GOOGLE_ANDROID_CLIENT_ID
-            : Platform.OS === "ios"
-              ? GOOGLE_IOS_CLIENT_ID
-              : GOOGLE_WEB_CLIENT_ID,
-        scopes: ["openid", "profile", "email"],
-        responseType: AuthSession.ResponseType.Token,
-        redirectUri: AuthSession.makeRedirectUri({ useProxy: true }),
-      },
-      {
-        authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-        tokenEndpoint: "https://oauth2.googleapis.com/token",
-      },
-    );
+  const [, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+    iosClientId: GOOGLE_IOS_CLIENT_ID,
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+  });
 
   useEffect(() => {
     if (googleResponse?.type === "success") {
