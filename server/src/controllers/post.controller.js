@@ -258,6 +258,18 @@ export async function rephraseCaption(req, res) {
       "Rewrite in a bold, confident, attention-grabbing tone. Add strong impactful emojis.",
     inspirational:
       "Rewrite in an inspirational, motivating tone. Add uplifting emojis throughout.",
+    genz:
+      "Rewrite in a Gen Z internet slang style — use 'no cap', 'lowkey', 'slay', 'it's giving', 'fr fr', 'based'. Keep it short, punchy, and trendy with relevant emojis.",
+    sports:
+      "Rewrite like an excited sports commentator — use action words, hype energy, competitive spirit. Add sports-related emojis throughout.",
+    music:
+      "Rewrite with musical vibes — use rhythm, flow, and melody references. Make it sound like lyrics or a music lover's caption with music emojis.",
+    hype:
+      "Rewrite with maximum hype and excitement — ALL CAPS for emphasis, lots of energy, exclamation marks, fire emojis. Make it feel like an epic announcement.",
+    storyteller:
+      "Rewrite as a short, captivating story or narrative — draw the reader in with vivid language, a hook, and emotional depth. Add subtle emojis.",
+    sarcastic:
+      "Rewrite with dry sarcasm and irony — witty, slightly roasting, tongue-in-cheek humor. Add emojis that play into the sarcasm.",
   };
 
   const instruction =

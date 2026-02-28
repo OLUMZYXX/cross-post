@@ -1,6 +1,6 @@
 import "./global.css";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ActivityIndicator, View, Linking, AppState, BackHandler, Platform } from "react-native";
+import { View, Linking, AppState, BackHandler, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
@@ -11,6 +11,7 @@ import SignIn from "./components/SignIn";
 import HomePage from "./components/HomePage";
 import Onboarding from "./components/Onboarding";
 import BiometricLock from "./components/BiometricLock";
+import ServerLoadingAnimation from "./components/ServerLoadingAnimation";
 import { ToastProvider } from "./components/Toast";
 import { authAPI, notificationAPI, platformAPI, getToken, clearToken, wakeUpServer } from "./services/api";
 
@@ -271,11 +272,7 @@ export default function App() {
   };
 
   if (!currentScreen) {
-    return (
-      <View className="flex-1 bg-gray-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#4ade80" />
-      </View>
-    );
+    return <ServerLoadingAnimation />;
   }
 
   const renderScreen = () => {

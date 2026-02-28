@@ -28,6 +28,12 @@ const TONE_OPTIONS = [
   { key: "witty", label: "Witty", icon: "bulb-outline", color: "#a855f7" },
   { key: "bold", label: "Bold", icon: "flash-outline", color: "#ef4444" },
   { key: "inspirational", label: "Inspirational", icon: "sparkles-outline", color: "#14b8a6" },
+  { key: "genz", label: "Gen Z", icon: "logo-snapchat", color: "#facc15" },
+  { key: "sports", label: "Sports", icon: "football-outline", color: "#f97316" },
+  { key: "music", label: "Music", icon: "musical-notes-outline", color: "#8b5cf6" },
+  { key: "hype", label: "Hype", icon: "megaphone-outline", color: "#ef4444" },
+  { key: "storyteller", label: "Storyteller", icon: "book-outline", color: "#06b6d4" },
+  { key: "sarcastic", label: "Sarcastic", icon: "happy-outline", color: "#f472b6" },
 ];
 
 function pad(n) {
