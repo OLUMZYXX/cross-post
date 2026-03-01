@@ -15,8 +15,8 @@ export const publishLimiter = rateLimit({
 });
 
 export const createLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 10,
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 80,
   keyGenerator: userKeyGenerator,
   message: {
     success: false,
