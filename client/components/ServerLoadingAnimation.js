@@ -12,6 +12,8 @@ const PLATFORMS = [
 ];
 
 const RADIUS = 70;
+const ICON_SIZE = 40;
+const ORBIT_SIZE = (RADIUS + ICON_SIZE / 2) * 2;
 const ORBIT_DURATION = 4000;
 
 export default function ServerLoadingAnimation() {
@@ -133,6 +135,8 @@ export default function ServerLoadingAnimation() {
 
       <Animated.View
         style={{
+          width: ORBIT_SIZE,
+          height: ORBIT_SIZE,
           opacity: platformOpacity,
           transform: [{ rotate: rotationDeg }],
         }}
@@ -147,8 +151,8 @@ export default function ServerLoadingAnimation() {
               key={platform.icon}
               style={{
                 position: "absolute",
-                left: -20 + x,
-                top: -20 + y,
+                left: ORBIT_SIZE / 2 - 20 + x,
+                top: ORBIT_SIZE / 2 - 20 + y,
                 transform: [{ rotate: counterRotationDeg }],
               }}
             >
@@ -165,6 +169,7 @@ export default function ServerLoadingAnimation() {
 
       <Animated.View
         style={{
+          position: "absolute",
           opacity: logoOpacity,
           transform: [{ scale: Animated.multiply(logoScale, logoPulse) }],
         }}
