@@ -1,6 +1,8 @@
 import { StatusBar } from "expo-status-bar";
 import { Text, View, TouchableOpacity, ScrollView, TextInput } from "react-native";
+import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
+import { useToast } from "./Toast";
 import useCreatePost from "../hooks/useCreatePost";
 import PlatformPreview from "./PlatformPreview";
 import PlatformSelector from "./PlatformSelector";
@@ -36,7 +38,17 @@ export default function CreatePost({
     initialDraft, onClose, onSaveDraft, onPostPublished,
   });
 
+  const { showToast } = useToast();
   const isOverLimit = hasTwitterSelected && caption.length > 280;
+
+  const handleCopy = async () => {
+    if (!caption.trim()) {
+      showToast({ type: "warning", title: "Nothing to copy", message: "Write something first." });
+      return;
+    }
+    await Clipboard.setStringAsync(caption);
+    showToast({ type: "success", title: "Copied!", message: "Text copied to clipboard." });
+  };
 
   return (
     <View className="flex-1 bg-gray-950">
@@ -120,6 +132,14 @@ export default function CreatePost({
               color="#a855f7"
               bgClass="bg-purple-500/10"
               onPress={openRephraseModal}
+              disabled={isPosting}
+            />
+            <ToolbarButton
+              icon="copy-outline"
+              label="Copy"
+              color="#f59e0b"
+              bgClass="bg-amber-500/10"
+              onPress={handleCopy}
               disabled={isPosting}
             />
             <ToolbarButton
