@@ -47,10 +47,25 @@ export default function useCreatePost({
   const [isCopyrightChecking, setIsCopyrightChecking] = useState(false);
   const [copyrightResult, setCopyrightResult] = useState(null);
 
+  const hasTwitterSelected = selectedPlatforms.some((p) => p.split(":")[0] === "Twitter");
+
   const getTwitterCharLimit = () => {
-    const hasTwitter = selectedPlatforms.some((p) => p.split(":")[0] === "Twitter");
-    if (hasTwitter && caption.length > 280) return 280;
+    if (hasTwitterSelected && caption.length > 280) return 280;
     return null;
+  };
+
+  const handleShortenForTwitter = async () => {
+    const textToShorten = rephrasedText || caption;
+    if (!textToShorten.trim()) return;
+    setIsRephrasing(true);
+    try {
+      const { data } = await postAPI.rephrase(textToShorten, selectedTone || "casual", 280);
+      setRephrasedText(data.rephrased);
+    } catch (err) {
+      showToast({ type: "error", title: "Shorten failed", message: err.message });
+    } finally {
+      setIsRephrasing(false);
+    }
   };
 
   const togglePlatform = (platform) => {
@@ -279,8 +294,8 @@ export default function useCreatePost({
     isRephrasing, rephrasedText, selectedTone,
     showCopyrightModal, setShowCopyrightModal,
     isCopyrightChecking, copyrightResult,
-    getPlatformStyle, getDisplayName, togglePlatform,
-    handleRephrase, applyRephrase, openRephraseModal,
+    getPlatformStyle, getDisplayName, togglePlatform, hasTwitterSelected,
+    handleRephrase, applyRephrase, openRephraseModal, handleShortenForTwitter,
     publishNow, schedulePost, handlePostPress,
     handleCopyrightProceed, handleCopyrightEdit, handleUseSafeVersion, handleAddHashtag,
     handleSaveDraft, handleMediaSelect, removeMedia,

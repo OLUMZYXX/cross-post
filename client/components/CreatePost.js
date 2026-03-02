@@ -26,8 +26,8 @@ export default function CreatePost({
     isRephrasing, rephrasedText, selectedTone,
     showCopyrightModal, setShowCopyrightModal,
     isCopyrightChecking, copyrightResult,
-    getPlatformStyle, getDisplayName, togglePlatform,
-    handleRephrase, applyRephrase, openRephraseModal,
+    getPlatformStyle, getDisplayName, togglePlatform, hasTwitterSelected,
+    handleRephrase, applyRephrase, openRephraseModal, handleShortenForTwitter,
     publishNow, schedulePost, handlePostPress,
     handleCopyrightProceed, handleCopyrightEdit, handleUseSafeVersion, handleAddHashtag,
     handleSaveDraft, handleMediaSelect, removeMedia,
@@ -36,8 +36,7 @@ export default function CreatePost({
     initialDraft, onClose, onSaveDraft, onPostPublished,
   });
 
-  const hasTwitter = selectedPlatforms.some((p) => p.split(":")[0] === "Twitter");
-  const isOverLimit = hasTwitter && caption.length > 280;
+  const isOverLimit = hasTwitterSelected && caption.length > 280;
 
   return (
     <View className="flex-1 bg-gray-950">
@@ -84,7 +83,7 @@ export default function CreatePost({
             editable={!isPosting}
           />
 
-          {hasTwitter && (
+          {hasTwitterSelected && (
             <View className="flex-row items-center px-4 pb-2">
               <View className={`h-1 flex-1 rounded-full mr-3 ${isOverLimit ? "bg-red-500/30" : "bg-gray-800"}`}>
                 <View
@@ -170,6 +169,8 @@ export default function CreatePost({
         selectedTone={selectedTone}
         onSelectTone={handleRephrase}
         onApply={applyRephrase}
+        hasTwitterSelected={hasTwitterSelected}
+        onShortenForTwitter={handleShortenForTwitter}
       />
 
       <CopyrightModal

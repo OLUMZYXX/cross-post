@@ -31,6 +31,8 @@ export default function RephraseModal({
   selectedTone,
   onSelectTone,
   onApply,
+  hasTwitterSelected,
+  onShortenForTwitter,
 }) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -87,10 +89,29 @@ export default function RephraseModal({
 
             {rephrasedText && !isRephrasing && (
               <View className="mb-4">
-                <Text className="text-gray-500 text-[10px] tracking-wider mb-2">RESULT</Text>
+                <View className="flex-row items-center justify-between mb-2">
+                  <Text className="text-gray-500 text-[10px] tracking-wider">RESULT</Text>
+                  <Text className={`text-[10px] font-semibold ${rephrasedText.length > 280 && hasTwitterSelected ? "text-red-400" : "text-gray-600"}`}>
+                    {rephrasedText.length} chars
+                  </Text>
+                </View>
                 <View className="bg-gray-800/60 rounded-2xl p-4 border border-gray-700/50">
                   <Text className="text-white text-sm leading-5">{rephrasedText}</Text>
                 </View>
+
+                {hasTwitterSelected && rephrasedText.length > 280 && (
+                  <TouchableOpacity
+                    onPress={onShortenForTwitter}
+                    className="flex-row items-center justify-center bg-blue-500/15 border border-blue-500/30 py-3 rounded-xl mt-3"
+                  >
+                    <Ionicons name="logo-twitter" size={16} color="#1DA1F2" />
+                    <Text className="text-blue-400 font-bold text-sm ml-2">Shorten for Twitter</Text>
+                    <View className="bg-red-500/20 rounded-full px-2 py-0.5 ml-2">
+                      <Text className="text-red-400 text-[10px] font-bold">{rephrasedText.length}/280</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+
                 <View className="flex-row mt-3">
                   <TouchableOpacity onPress={onApply} className="flex-1 bg-purple-500 py-3.5 rounded-xl mr-2">
                     <Text className="text-white text-center font-bold text-sm">Use This</Text>
