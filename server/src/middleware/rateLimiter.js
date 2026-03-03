@@ -1,6 +1,6 @@
 import rateLimit from "express-rate-limit";
 
-const userKeyGenerator = (req) => req.user?.id || "anonymous";
+const userKeyGenerator = (req) => req.user?.id || req.ip || "anonymous";
 
 export const publishLimiter = rateLimit({
   windowMs: 10 * 1000,
@@ -27,8 +27,8 @@ export const createLimiter = rateLimit({
 });
 
 export const rephraseLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 20,
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 100,
   keyGenerator: userKeyGenerator,
   message: {
     success: false,
