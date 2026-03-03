@@ -277,7 +277,10 @@ export async function rephraseCaption(req, res) {
     "Rewrite this social media post to sound better while keeping the same meaning.";
 
   const charLimit = maxLength && maxLength > 0 ? maxLength : 500;
-  const limitNote = `You MUST keep the result strictly under ${charLimit} characters (including emojis and spaces). Count carefully.`;
+  const isShortenMode = maxLength && maxLength > 0 && caption.length > maxLength;
+  const limitNote = isShortenMode
+    ? `CRITICAL: The text is currently ${caption.length} characters and MUST be shortened to UNDER ${charLimit} characters. Cut aggressively — remove filler words, shorten sentences, use abbreviations. The final result MUST be ${charLimit} characters or fewer. Count every character including emojis and spaces.`
+    : `You MUST keep the result strictly under ${charLimit} characters (including emojis and spaces). Count carefully.`;
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -298,8 +301,8 @@ export async function rephraseCaption(req, res) {
           content: `${instruction}\n\nOriginal post:\n${caption}`,
         },
       ],
-      max_tokens: 300,
-      temperature: 0.8,
+      max_tokens: isShortenMode ? 150 : 300,
+      temperature: isShortenMode ? 0.5 : 0.8,
     }),
   });
 
