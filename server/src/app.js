@@ -159,7 +159,7 @@ app.post(
 );
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
-app.get("/", (_req, res) => res.json({ name: "CROSS-POST API" }));
+app.get("/", (_req, res) => res.sendFile("index.html", { root: "public" }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
