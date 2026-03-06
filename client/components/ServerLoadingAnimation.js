@@ -17,17 +17,16 @@ const ORBIT_SIZE = (RADIUS + ICON_SIZE / 2) * 2;
 const ORBIT_DURATION = 4000;
 
 export default function ServerLoadingAnimation() {
-  const logoScale = useRef(new Animated.Value(0.3)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const rotation = useRef(new Animated.Value(0)).current;
   const ringScale = useRef(new Animated.Value(0.8)).current;
   const ringOpacity = useRef(new Animated.Value(0)).current;
   const platformOpacity = useRef(new Animated.Value(0)).current;
-  const logoPulse = useRef(new Animated.Value(1)).current;
+  const combinedLogoScale = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.spring(logoScale, {
+      Animated.spring(combinedLogoScale, {
         toValue: 1,
         friction: 5,
         tension: 80,
@@ -89,13 +88,13 @@ export default function ServerLoadingAnimation() {
 
     Animated.loop(
       Animated.sequence([
-        Animated.timing(logoPulse, {
+        Animated.timing(combinedLogoScale, {
           toValue: 1.08,
           duration: 800,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
-        Animated.timing(logoPulse, {
+        Animated.timing(combinedLogoScale, {
           toValue: 1,
           duration: 800,
           easing: Easing.inOut(Easing.ease),
@@ -171,7 +170,7 @@ export default function ServerLoadingAnimation() {
         style={{
           position: "absolute",
           opacity: logoOpacity,
-          transform: [{ scale: Animated.multiply(logoScale, logoPulse) }],
+          transform: [{ scale: combinedLogoScale }],
         }}
       >
         <View className="w-20 h-20 rounded-3xl bg-green-500 items-center justify-center shadow-lg">

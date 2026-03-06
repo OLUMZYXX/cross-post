@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
-import { useShareIntent } from "expo-share-intent";
+import useShareIntentSafe from "./hooks/useShareIntentSafe";
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import HomePage from "./components/HomePage";
@@ -41,7 +41,7 @@ export default function App() {
   const notificationListener = useRef();
   const responseListener = useRef();
 
-  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntent();
+  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntentSafe();
 
   useEffect(() => {
     if (hasShareIntent && shareIntent) {
