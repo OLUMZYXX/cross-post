@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as ImagePicker from "expo-image-picker";
 import * as VideoThumbnails from "expo-video-thumbnails";
+import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import { useToast } from "../components/Toast";
 import { postAPI, ensureServerAwake } from "../services/api";
 import { uploadToCloudinary } from "../services/cloudinary";
@@ -46,6 +47,15 @@ export default function useCreatePost({
   const [showCopyrightModal, setShowCopyrightModal] = useState(false);
   const [isCopyrightChecking, setIsCopyrightChecking] = useState(false);
   const [copyrightResult, setCopyrightResult] = useState(null);
+
+  useEffect(() => {
+    if (isPosting || isUploading) {
+      activateKeepAwakeAsync("publishing").catch(() => {});
+    } else {
+      deactivateKeepAwake("publishing");
+    }
+    return () => deactivateKeepAwake("publishing");
+  }, [isPosting, isUploading]);
 
   const hasTwitterSelected = selectedPlatforms.some((p) => p.split(":")[0] === "Twitter");
 

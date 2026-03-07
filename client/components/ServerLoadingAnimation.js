@@ -18,15 +18,16 @@ const ORBIT_DURATION = 4000;
 
 export default function ServerLoadingAnimation() {
   const logoOpacity = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.3)).current;
+  const logoPulse = useRef(new Animated.Value(1)).current;
   const rotation = useRef(new Animated.Value(0)).current;
   const ringScale = useRef(new Animated.Value(0.8)).current;
   const ringOpacity = useRef(new Animated.Value(0)).current;
   const platformOpacity = useRef(new Animated.Value(0)).current;
-  const combinedLogoScale = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.spring(combinedLogoScale, {
+      Animated.spring(logoScale, {
         toValue: 1,
         friction: 5,
         tension: 80,
@@ -88,13 +89,13 @@ export default function ServerLoadingAnimation() {
 
     Animated.loop(
       Animated.sequence([
-        Animated.timing(combinedLogoScale, {
+        Animated.timing(logoPulse, {
           toValue: 1.08,
           duration: 800,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
-        Animated.timing(combinedLogoScale, {
+        Animated.timing(logoPulse, {
           toValue: 1,
           duration: 800,
           easing: Easing.inOut(Easing.ease),
@@ -170,7 +171,7 @@ export default function ServerLoadingAnimation() {
         style={{
           position: "absolute",
           opacity: logoOpacity,
-          transform: [{ scale: combinedLogoScale }],
+          transform: [{ scale: logoScale }, { scale: logoPulse }],
         }}
       >
         <View className="w-20 h-20 rounded-3xl bg-green-500 items-center justify-center shadow-lg">
