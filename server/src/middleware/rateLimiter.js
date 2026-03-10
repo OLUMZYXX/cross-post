@@ -1,6 +1,6 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
-const userKeyGenerator = (req) => req.user?.id || req.ip || "anonymous";
+const userKeyGenerator = (req) => req.user?.id || ipKeyGenerator(req) || "anonymous";
 
 export const publishLimiter = rateLimit({
   windowMs: 10 * 1000,

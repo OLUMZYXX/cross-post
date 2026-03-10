@@ -37,11 +37,48 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
   });
 
   useEffect(() => {
-    if (googleResponse?.type === "success") {
+    if (!googleResponse) return;
+
+    if (googleResponse.type === "success") {
       const accessToken = googleResponse.authentication?.accessToken;
-      if (accessToken) handleGoogleToken(accessToken);
+      if (accessToken) {
+        handleGoogleToken(accessToken);
+        return;
+      }
+
+      showToast({
+        type: "error",
+        title: "Google sign-up failed",
+        message: "No access token returned from Google.",
+      });
+      return;
     }
-  }, [googleResponse]);
+
+    if (googleResponse.type === "error") {
+      const message =
+        googleResponse.error?.message ||
+        googleResponse.params?.error_description ||
+        googleResponse.params?.error ||
+        "Google authorization failed.";
+      showToast({
+        type: "error",
+        title: "Google sign-up blocked",
+        message,
+      });
+    }
+  }, [googleResponse, showToast]);
+
+  const handleGoogleSignUp = async () => {
+    try {
+      await promptGoogleAsync({ showInRecents: true });
+    } catch (err) {
+      showToast({
+        type: "error",
+        title: "Google sign-up failed",
+        message: err?.message || "Could not open Google sign-in.",
+      });
+    }
+  };
 
   const handleGoogleToken = async (accessToken) => {
     setLoading(true);
@@ -168,7 +205,7 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
                   <Text className="text-gray-500 mx-4 text-sm">or</Text>
                   <View className="flex-1 h-px bg-gray-700" />
                 </View>
-                <TouchableOpacity onPress={() => promptGoogleAsync()} disabled={loading} className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center mb-3">
+                <TouchableOpacity onPress={handleGoogleSignUp} disabled={loading} className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center mb-3">
                   <Ionicons name="logo-google" size={20} color="#fff" style={{ marginRight: 12 }} />
                   <Text className="text-white text-base font-medium">Continue with Google</Text>
                 </TouchableOpacity>

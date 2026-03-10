@@ -37,11 +37,48 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
   });
 
   useEffect(() => {
-    if (googleResponse?.type === "success") {
+    if (!googleResponse) return;
+
+    if (googleResponse.type === "success") {
       const accessToken = googleResponse.authentication?.accessToken;
-      if (accessToken) handleGoogleToken(accessToken);
+      if (accessToken) {
+        handleGoogleToken(accessToken);
+        return;
+      }
+
+      showToast({
+        type: "error",
+        title: "Google sign-in failed",
+        message: "No access token returned from Google.",
+      });
+      return;
     }
-  }, [googleResponse]);
+
+    if (googleResponse.type === "error") {
+      const message =
+        googleResponse.error?.message ||
+        googleResponse.params?.error_description ||
+        googleResponse.params?.error ||
+        "Google authorization failed.";
+      showToast({
+        type: "error",
+        title: "Google sign-in blocked",
+        message,
+      });
+    }
+  }, [googleResponse, showToast]);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await promptGoogleAsync({ showInRecents: true });
+    } catch (err) {
+      showToast({
+        type: "error",
+        title: "Google sign-in failed",
+        message: err?.message || "Could not open Google sign-in.",
+      });
+    }
+  };
 
   const handleGoogleToken = async (accessToken) => {
     setLoading(true);
@@ -344,7 +381,7 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
                   <View className="flex-1 h-px bg-gray-700" />
                 </View>
                 <TouchableOpacity
-                  onPress={() => promptGoogleAsync()}
+                  onPress={handleGoogleSignIn}
                   disabled={loading}
                   className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center mb-3"
                 >
