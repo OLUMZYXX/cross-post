@@ -1,17 +1,21 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
-  FlatList,
+  SectionList,
   RefreshControl,
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { notificationAPI } from "../services/api";
 import { useToast } from "./Toast";
 import NotificationItem from "./NotificationItem";
+import {
+  groupNotifications,
+  InboxHeader,
+  EmptyState,
+  SectionHeader,
+} from "./NotificationHelpers";
 
 export default function NotificationsInbox({ onBack, onUnreadCountChange }) {
   const [notifications, setNotifications] = useState([]);
@@ -75,30 +79,27 @@ export default function NotificationsInbox({ onBack, onUnreadCountChange }) {
   };
 
   const handleClearAll = () => {
-    Alert.alert(
-      "Clear All",
-      "Delete all notifications? This cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Clear All",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await notificationAPI.clearAll();
-              setNotifications([]);
-              onUnreadCountChange?.(0);
-              showToast({ type: "success", title: "Cleared", duration: 1500 });
-            } catch {
-              showToast({ type: "error", title: "Failed to clear", duration: 2000 });
-            }
-          },
+    Alert.alert("Clear All", "Delete all notifications? This cannot be undone.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Clear All",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await notificationAPI.clearAll();
+            setNotifications([]);
+            onUnreadCountChange?.(0);
+            showToast({ type: "success", title: "Cleared", duration: 1500 });
+          } catch {
+            showToast({ type: "error", title: "Failed to clear", duration: 2000 });
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const sections = useMemo(() => groupNotifications(notifications), [notifications]);
 
   if (loading) {
     return (
@@ -108,64 +109,29 @@ export default function NotificationsInbox({ onBack, onUnreadCountChange }) {
     );
   }
 
-  const renderItem = ({ item }) => (
-    <NotificationItem notif={item} onPress={handlePress} onDelete={handleDelete} />
-  );
-
   return (
     <View className="flex-1 bg-gray-950 px-5 pt-14">
-      <View className="flex-row items-center justify-between mb-5">
-        <View className="flex-row items-center">
-          <TouchableOpacity
-            onPress={onBack}
-            className="w-10 h-10 rounded-xl bg-gray-900 items-center justify-center mr-3 border border-gray-800/60"
-          >
-            <Ionicons name="arrow-back" size={18} color="#fff" />
-          </TouchableOpacity>
-          <View>
-            <Text className="text-white text-xl font-bold">Notifications</Text>
-            {unreadCount > 0 && (
-              <Text className="text-green-400 text-[10px] font-medium">{unreadCount} unread</Text>
-            )}
-          </View>
-        </View>
-        {notifications.length > 0 && (
-          <View className="flex-row items-center">
-            {unreadCount > 0 && (
-              <TouchableOpacity
-                onPress={handleMarkAllRead}
-                className="mr-2 px-3 py-2 bg-green-500/10 rounded-xl border border-green-500/20"
-              >
-                <Text className="text-green-400 text-[11px] font-semibold">Read All</Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity
-              onPress={handleClearAll}
-              className="px-3 py-2 bg-red-500/10 rounded-xl border border-red-500/20"
-            >
-              <Text className="text-red-400 text-[11px] font-semibold">Clear</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
+      <InboxHeader
+        unreadCount={unreadCount}
+        total={notifications.length}
+        onBack={onBack}
+        onMarkAllRead={handleMarkAllRead}
+        onClearAll={handleClearAll}
+      />
 
       {notifications.length === 0 ? (
-        <View className="flex-1 items-center justify-center" style={{ marginTop: -60 }}>
-          <View className="w-16 h-16 rounded-2xl bg-gray-800 items-center justify-center mb-4">
-            <Ionicons name="notifications-off-outline" size={28} color="#6b7280" />
-          </View>
-          <Text className="text-white text-base font-medium mb-1">No notifications</Text>
-          <Text className="text-gray-500 text-xs text-center px-8">
-            You'll be notified when posts publish, fail, or go live
-          </Text>
-        </View>
+        <EmptyState />
       ) : (
-        <FlatList
-          data={notifications}
-          renderItem={renderItem}
+        <SectionList
+          sections={sections}
+          renderItem={({ item }) => (
+            <NotificationItem notif={item} onPress={handlePress} onDelete={handleDelete} />
+          )}
+          renderSectionHeader={({ section: { title } }) => <SectionHeader title={title} />}
           keyExtractor={(item) => item._id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
+          stickySectionHeadersEnabled={false}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

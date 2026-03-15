@@ -1,14 +1,43 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 const TYPE_CONFIG = {
-  post_published: { icon: "checkmark-circle", color: "#4ade80", bg: "bg-green-500/15" },
-  post_failed: { icon: "close-circle", color: "#f87171", bg: "bg-red-500/15" },
-  post_partial: { icon: "alert-circle", color: "#f59e0b", bg: "bg-yellow-500/15" },
-  post_scheduled: { icon: "time", color: "#3b82f6", bg: "bg-blue-500/15" },
-  schedule_reminder: { icon: "alarm", color: "#a855f7", bg: "bg-purple-500/15" },
-  platform_connected: { icon: "link", color: "#22c55e", bg: "bg-green-500/15" },
-  platform_disconnected: { icon: "unlink", color: "#ef4444", bg: "bg-red-500/15" },
+  post_published: {
+    icon: "checkmark-circle",
+    color: "#4ade80",
+    label: "Published",
+  },
+  post_failed: {
+    icon: "close-circle",
+    color: "#f87171",
+    label: "Failed",
+  },
+  post_partial: {
+    icon: "alert-circle",
+    color: "#f59e0b",
+    label: "Partial",
+  },
+  post_scheduled: {
+    icon: "time",
+    color: "#3b82f6",
+    label: "Scheduled",
+  },
+  schedule_reminder: {
+    icon: "alarm",
+    color: "#a855f7",
+    label: "Reminder",
+  },
+  platform_connected: {
+    icon: "link",
+    color: "#22c55e",
+    label: "Connected",
+  },
+  platform_disconnected: {
+    icon: "unlink",
+    color: "#ef4444",
+    label: "Disconnected",
+  },
 };
 
 function getTimeAgo(dateString) {
@@ -31,43 +60,87 @@ export { TYPE_CONFIG, getTimeAgo };
 
 export default function NotificationItem({ notif, onPress, onDelete }) {
   const config = TYPE_CONFIG[notif.type] || TYPE_CONFIG.post_published;
+  const isUnread = !notif.read;
 
   return (
     <TouchableOpacity
       onPress={() => onPress(notif)}
       onLongPress={() => onDelete(notif._id)}
-      className={`flex-row items-start p-3.5 rounded-2xl mb-2 ${
-        notif.read
-          ? "bg-gray-900/40 border border-gray-800/40"
-          : "bg-gray-900 border border-gray-800/80"
-      }`}
       activeOpacity={0.7}
+      className="mb-2.5"
     >
-      <View className={`w-10 h-10 rounded-xl ${config.bg} items-center justify-center mr-3`}>
-        <Ionicons name={config.icon} size={18} color={config.color} />
-      </View>
-      <View className="flex-1">
-        <View className="flex-row items-center justify-between mb-0.5">
-          <Text
-            className={`text-sm font-semibold flex-1 mr-2 ${notif.read ? "text-gray-400" : "text-white"}`}
-            numberOfLines={1}
-          >
-            {notif.title}
-          </Text>
-          <View className="flex-row items-center">
-            <Text className="text-gray-600 text-[10px]">{getTimeAgo(notif.createdAt)}</Text>
-            {!notif.read && (
-              <View className="w-2 h-2 rounded-full bg-green-400 ml-2" />
-            )}
+      <LinearGradient
+        colors={
+          isUnread
+            ? [`${config.color}25`, `${config.color}08`, "transparent"]
+            : ["transparent", "transparent"]
+        }
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="rounded-2xl p-[1px]"
+      >
+        <View
+          className={`rounded-2xl p-4 ${
+            isUnread ? "bg-gray-950" : "bg-gray-900/30"
+          }`}
+        >
+          <View className="flex-row items-start">
+            <View
+              className="w-11 h-11 rounded-xl items-center justify-center mr-3"
+              style={{ backgroundColor: `${config.color}15` }}
+            >
+              <Ionicons name={config.icon} size={20} color={config.color} />
+            </View>
+
+            <View className="flex-1">
+              <View className="flex-row items-center justify-between mb-1">
+                <View className="flex-row items-center flex-1 mr-2">
+                  <Text
+                    className={`text-sm font-bold flex-shrink ${
+                      isUnread ? "text-white" : "text-gray-400"
+                    }`}
+                    numberOfLines={1}
+                  >
+                    {notif.title}
+                  </Text>
+                  {isUnread && (
+                    <View
+                      className="w-2 h-2 rounded-full ml-2 flex-shrink-0"
+                      style={{ backgroundColor: config.color }}
+                    />
+                  )}
+                </View>
+                <Text className="text-gray-600 text-[10px] font-medium flex-shrink-0">
+                  {getTimeAgo(notif.createdAt)}
+                </Text>
+              </View>
+
+              <Text
+                className={`text-[12px] leading-[18px] mb-2 ${
+                  isUnread ? "text-gray-400" : "text-gray-600"
+                }`}
+                numberOfLines={2}
+              >
+                {notif.message}
+              </Text>
+
+              <View className="flex-row items-center">
+                <View
+                  className="rounded-lg px-2 py-0.5"
+                  style={{ backgroundColor: `${config.color}12` }}
+                >
+                  <Text
+                    className="text-[9px] font-semibold uppercase tracking-wider"
+                    style={{ color: config.color }}
+                  >
+                    {config.label}
+                  </Text>
+                </View>
+              </View>
+            </View>
           </View>
         </View>
-        <Text
-          className={`text-xs leading-4 ${notif.read ? "text-gray-600" : "text-gray-400"}`}
-          numberOfLines={2}
-        >
-          {notif.message}
-        </Text>
-      </View>
+      </LinearGradient>
     </TouchableOpacity>
   );
 }
