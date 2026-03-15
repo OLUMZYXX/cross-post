@@ -104,14 +104,17 @@ export default function HomeScreen({
           />
 
           <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-white text-base font-bold">Platforms</Text>
+            <View className="flex-row items-center">
+              <View className="w-1 h-4 bg-blue-500 rounded-full mr-2" />
+              <Text className="text-white text-base font-bold">Platforms</Text>
+            </View>
             <TouchableOpacity
               onPress={onAddPlatform}
-              className="flex-row items-center bg-green-500/10 rounded-lg px-3 py-1.5"
+              className="flex-row items-center bg-green-500/10 rounded-xl px-3 py-1.5"
               activeOpacity={0.7}
             >
-              <Ionicons name="add-circle" size={16} color="#4ade80" />
-              <Text className="text-green-400 text-xs font-semibold ml-1.5">Add New</Text>
+              <Ionicons name="add-circle" size={14} color="#4ade80" />
+              <Text className="text-green-400 text-[11px] font-semibold ml-1.5">Add New</Text>
             </TouchableOpacity>
           </View>
 
