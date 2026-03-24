@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Text,
   View,
@@ -7,28 +8,39 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import VideoPlayerModal from "./VideoPlayerModal";
 
 function VideoPreview({ media, isUploading, onRemove, disabled }) {
+  const [showPlayer, setShowPlayer] = useState(false);
+  const videoUri = media.cloudinaryUrl || media.uri;
+
   return (
     <View className="rounded-2xl overflow-hidden bg-gray-800/60">
-      {media.thumbnail ? (
-        <View className="w-full h-48">
-          <Image source={{ uri: media.thumbnail }} className="w-full h-full" resizeMode="cover" />
-          <View className="absolute inset-0 items-center justify-center">
-            <View className="w-14 h-14 rounded-full bg-black/50 items-center justify-center">
+      <TouchableOpacity activeOpacity={0.8} onPress={() => setShowPlayer(true)}>
+        {media.thumbnail ? (
+          <View className="w-full h-48">
+            <Image source={{ uri: media.thumbnail }} className="w-full h-full" resizeMode="cover" />
+            <View className="absolute inset-0 items-center justify-center">
+              <View className="w-14 h-14 rounded-full bg-black/50 items-center justify-center">
+                <Ionicons name="play" size={28} color="#fff" />
+              </View>
+            </View>
+          </View>
+        ) : (
+          <View className="w-full h-48 bg-gray-800 items-center justify-center">
+            <View className="w-14 h-14 rounded-full bg-gray-700 items-center justify-center">
               <Ionicons name="play" size={28} color="#fff" />
             </View>
           </View>
-        </View>
-      ) : (
-        <View className="w-full h-48 bg-gray-800 items-center justify-center">
-          <View className="w-14 h-14 rounded-full bg-gray-700 items-center justify-center">
-            <Ionicons name="play" size={28} color="#fff" />
-          </View>
-        </View>
-      )}
+        )}
+      </TouchableOpacity>
       {isUploading && <UploadingOverlay />}
       <RemoveButton onPress={() => onRemove(0)} disabled={disabled} />
+      <VideoPlayerModal
+        visible={showPlayer}
+        videoUri={videoUri}
+        onClose={() => setShowPlayer(false)}
+      />
     </View>
   );
 }

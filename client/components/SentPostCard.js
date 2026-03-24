@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +9,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import MediaCarousel from "./MediaCarousel";
 import FailedResults from "./FailedResults";
+import VideoPlayerModal from "./VideoPlayerModal";
+import { isVideoUrl, getCloudinaryThumbnail } from "../utils/videoHelpers";
 import {
   PLATFORM_STYLES,
   formatDate,
@@ -44,6 +47,37 @@ function PlatformChips({ results }) {
   );
 }
 
+function VideoThumbnail({ uri }) {
+  const [showPlayer, setShowPlayer] = useState(false);
+  const thumbnailUrl = getCloudinaryThumbnail(uri);
+
+  return (
+    <TouchableOpacity activeOpacity={0.8} onPress={() => setShowPlayer(true)}>
+      <View className="w-full h-44 rounded-t-2xl overflow-hidden bg-gray-800">
+        {thumbnailUrl ? (
+          <Image
+            source={{ uri: thumbnailUrl }}
+            className="w-full h-full"
+            resizeMode="cover"
+          />
+        ) : (
+          <View className="w-full h-full items-center justify-center" />
+        )}
+        <View className="absolute inset-0 items-center justify-center">
+          <View className="w-12 h-12 rounded-full bg-black/50 items-center justify-center">
+            <Ionicons name="play" size={24} color="#fff" />
+          </View>
+        </View>
+      </View>
+      <VideoPlayerModal
+        visible={showPlayer}
+        videoUri={uri}
+        onClose={() => setShowPlayer(false)}
+      />
+    </TouchableOpacity>
+  );
+}
+
 function PostMedia({ media }) {
   if (!media || media.length === 0) {
     return (
@@ -51,6 +85,9 @@ function PostMedia({ media }) {
         <Ionicons name="document-text-outline" size={24} color="#4b5563" />
       </View>
     );
+  }
+  if (media.length === 1 && isVideoUrl(media[0])) {
+    return <VideoThumbnail uri={media[0]} />;
   }
   if (media.length === 1) {
     return (

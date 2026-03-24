@@ -1,7 +1,57 @@
 import { useState } from "react";
-import { View, ScrollView, Image, Dimensions } from "react-native";
+import {
+  View,
+  ScrollView,
+  Image,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { isVideoUrl, getCloudinaryThumbnail } from "../utils/videoHelpers";
+import VideoPlayerModal from "./VideoPlayerModal";
 
 const screenWidth = Dimensions.get("window").width;
+
+function CarouselItem({ uri, width }) {
+  const [showPlayer, setShowPlayer] = useState(false);
+  const isVideo = isVideoUrl(uri);
+  const thumbnailUrl = isVideo ? getCloudinaryThumbnail(uri) : null;
+  const displayUri = thumbnailUrl || uri;
+
+  if (isVideo) {
+    return (
+      <TouchableOpacity activeOpacity={0.8} onPress={() => setShowPlayer(true)}>
+        <View style={{ width, height: 192 }} className="bg-gray-800">
+          {displayUri && (
+            <Image
+              source={{ uri: displayUri }}
+              style={{ width, height: 192 }}
+              resizeMode="cover"
+            />
+          )}
+          <View className="absolute inset-0 items-center justify-center">
+            <View className="w-12 h-12 rounded-full bg-black/50 items-center justify-center">
+              <Ionicons name="play" size={24} color="#fff" />
+            </View>
+          </View>
+        </View>
+        <VideoPlayerModal
+          visible={showPlayer}
+          videoUri={uri}
+          onClose={() => setShowPlayer(false)}
+        />
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <Image
+      source={{ uri }}
+      style={{ width, height: 192 }}
+      resizeMode="cover"
+    />
+  );
+}
 
 export default function MediaCarousel({ media }) {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -24,12 +74,7 @@ export default function MediaCarousel({ media }) {
         snapToAlignment="start"
       >
         {media.map((uri, idx) => (
-          <Image
-            key={idx}
-            source={{ uri }}
-            style={{ width: cardWidth, height: 192 }}
-            resizeMode="cover"
-          />
+          <CarouselItem key={idx} uri={uri} width={cardWidth} />
         ))}
       </ScrollView>
       {media.length > 1 && (
