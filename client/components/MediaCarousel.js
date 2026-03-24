@@ -14,20 +14,25 @@ const screenWidth = Dimensions.get("window").width;
 
 function CarouselItem({ uri, width }) {
   const [showPlayer, setShowPlayer] = useState(false);
+  const [thumbError, setThumbError] = useState(false);
   const isVideo = isVideoUrl(uri);
   const thumbnailUrl = isVideo ? getCloudinaryThumbnail(uri) : null;
-  const displayUri = thumbnailUrl || uri;
 
   if (isVideo) {
     return (
       <TouchableOpacity activeOpacity={0.8} onPress={() => setShowPlayer(true)}>
         <View style={{ width, height: 192 }} className="bg-gray-800">
-          {displayUri && (
+          {thumbnailUrl && !thumbError ? (
             <Image
-              source={{ uri: displayUri }}
+              source={{ uri: thumbnailUrl }}
               style={{ width, height: 192 }}
               resizeMode="cover"
+              onError={() => setThumbError(true)}
             />
+          ) : (
+            <View style={{ width, height: 192 }} className="items-center justify-center">
+              <Ionicons name="videocam-outline" size={36} color="#6b7280" />
+            </View>
           )}
           <View className="absolute inset-0 items-center justify-center">
             <View className="w-12 h-12 rounded-full bg-black/50 items-center justify-center">

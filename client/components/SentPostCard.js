@@ -49,19 +49,23 @@ function PlatformChips({ results }) {
 
 function VideoThumbnail({ uri }) {
   const [showPlayer, setShowPlayer] = useState(false);
+  const [thumbError, setThumbError] = useState(false);
   const thumbnailUrl = getCloudinaryThumbnail(uri);
 
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={() => setShowPlayer(true)}>
       <View className="w-full h-44 rounded-t-2xl overflow-hidden bg-gray-800">
-        {thumbnailUrl ? (
+        {thumbnailUrl && !thumbError ? (
           <Image
             source={{ uri: thumbnailUrl }}
             className="w-full h-full"
             resizeMode="cover"
+            onError={() => setThumbError(true)}
           />
         ) : (
-          <View className="w-full h-full items-center justify-center" />
+          <View className="w-full h-full items-center justify-center">
+            <Ionicons name="videocam-outline" size={36} color="#6b7280" />
+          </View>
         )}
         <View className="absolute inset-0 items-center justify-center">
           <View className="w-12 h-12 rounded-full bg-black/50 items-center justify-center">
