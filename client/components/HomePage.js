@@ -62,13 +62,15 @@ export default function HomePage({
       const expandedObjects = [];
       const expandedNames = [];
 
+      const activePlatforms = data.platforms.filter((p) => p.active !== false);
+
       const grouped = {};
-      for (const p of data.platforms) {
+      for (const p of activePlatforms) {
         if (!grouped[p.name]) grouped[p.name] = [];
         grouped[p.name].push(p);
       }
 
-      for (const p of data.platforms) {
+      for (const p of activePlatforms) {
         if (
           p.name === "Facebook" &&
           p.pages &&

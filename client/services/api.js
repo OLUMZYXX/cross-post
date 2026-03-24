@@ -285,6 +285,9 @@ export const platformAPI = {
 
   disconnect: (id) => api.delete(`/platforms/${id}`),
 
+  toggleActive: (id, active) =>
+    api.patch(`/platforms/${id}/toggle-active`, { active }),
+
   initiateFacebookAuth: () => api.get("/platforms/auth/facebook"),
 
   listFacebookPages: () => api.get("/platforms/auth/facebook/pages"),

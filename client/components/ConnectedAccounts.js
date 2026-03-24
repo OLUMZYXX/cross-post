@@ -30,6 +30,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
   const [fbPages, setFbPages] = useState([]);
   const [loadingPages, setLoadingPages] = useState(false);
   const [togglingPageId, setTogglingPageId] = useState(null);
+  const [togglingActiveId, setTogglingActiveId] = useState(null);
   const { showToast } = useToast();
 
   const fetchPlatforms = useCallback(async () => {
@@ -89,6 +90,34 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
       showToast({ type: "success", title: `${platform.name} disconnected` });
     } catch (err) {
       showToast({ type: "error", title: "Failed", message: err.message });
+    }
+  };
+
+  const handleToggleActive = async (platform) => {
+    const realId = platform._parentId || platform._id;
+    const newActive = platform.active === false;
+    setTogglingActiveId(realId);
+    try {
+      await platformAPI.toggleActive(realId, newActive);
+      setPlatforms((prev) =>
+        prev.map((p) => {
+          const pRealId = p._parentId || p._id;
+          if (pRealId === realId) return { ...p, active: newActive };
+          return p;
+        }),
+      );
+      const label = platform.platformUsername || platform.name;
+      showToast({
+        type: "success",
+        title: newActive ? "Account activated" : "Account deactivated",
+        message: newActive
+          ? `${label} will be included when posting`
+          : `${label} will not be included when posting`,
+      });
+    } catch (err) {
+      showToast({ type: "error", title: "Failed", message: err.message });
+    } finally {
+      setTogglingActiveId(null);
     }
   };
 
@@ -188,7 +217,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                   </View>
                   <View className="flex-1">
                     <Text
-                      className="text-white font-bold text-sm"
+                      className={`font-bold text-sm ${platform.active === false ? "text-gray-500" : "text-white"}`}
                       numberOfLines={1}
                     >
                       {platform.platformUsername || platform.name}
@@ -196,8 +225,24 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                     <Text className="text-gray-500 text-xs">
                       {platform.name}
                       {pageInfo ? ` · ${pageInfo}` : ""}
+                      {platform.active === false ? " · Inactive" : ""}
                     </Text>
                   </View>
+                  <TouchableOpacity
+                    onPress={() => handleToggleActive(platform)}
+                    disabled={togglingActiveId === (platform._parentId || platform._id)}
+                    className="mr-3"
+                  >
+                    {togglingActiveId === (platform._parentId || platform._id) ? (
+                      <ActivityIndicator size="small" color="#4ade80" />
+                    ) : (
+                      <Ionicons
+                        name={platform.active !== false ? "checkbox" : "square-outline"}
+                        size={24}
+                        color={platform.active !== false ? "#4ade80" : "#6b7280"}
+                      />
+                    )}
+                  </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => handleDisconnect(platform)}
                     className="bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20"

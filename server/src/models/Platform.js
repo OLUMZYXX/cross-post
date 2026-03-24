@@ -14,6 +14,10 @@ const platformSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  active: {
+    type: Boolean,
+    default: true,
+  },
   connectedAt: {
     type: Date,
     default: Date.now,

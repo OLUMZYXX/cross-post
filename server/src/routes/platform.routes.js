@@ -5,6 +5,7 @@ import {
   listPlatforms,
   connectPlatform,
   disconnectPlatform,
+  togglePlatformActive,
   initiateFacebookAuth,
   handleFacebookCallback,
   listFacebookPages,
@@ -55,6 +56,7 @@ router.use(authenticate);
 router.get("/", asyncHandler(listPlatforms));
 router.post("/connect", asyncHandler(connectPlatform));
 router.delete("/:id", asyncHandler(disconnectPlatform));
+router.patch("/:id/toggle-active", asyncHandler(togglePlatformActive));
 
 router.get("/auth/facebook", asyncHandler(initiateFacebookAuth));
 router.get("/auth/facebook/pages", asyncHandler(listFacebookPages));

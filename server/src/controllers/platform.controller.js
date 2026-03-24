@@ -72,6 +72,27 @@ export async function disconnectPlatform(req, res) {
   res.json({ success: true, data: null });
 }
 
+export async function togglePlatformActive(req, res) {
+  const { active } = req.body;
+
+  const platform = await Platform.findOne({
+    _id: req.params.id,
+    userId: req.user.id,
+  });
+
+  if (!platform) {
+    throw Errors.notFound("Platform connection not found");
+  }
+
+  platform.active = active !== false;
+  await platform.save();
+
+  res.json({
+    success: true,
+    data: { _id: platform._id, active: platform.active },
+  });
+}
+
 // Facebook OAuth functions
 export async function initiateFacebookAuth(req, res) {
   const stateId = await createState({ userId: req.user.id });
