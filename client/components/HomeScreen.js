@@ -31,6 +31,13 @@ export default function HomeScreen({
 }) {
   const scheduledCount = allPosts.filter((p) => p.status === "scheduled").length;
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning \u2600\uFE0F";
+    if (hour < 18) return "Good afternoon \uD83C\uDF24\uFE0F";
+    return "Good evening \uD83C\uDF19";
+  };
+
   return (
     <View className="flex-1 bg-gray-950">
       <StatusBar style="light" />
@@ -43,7 +50,9 @@ export default function HomeScreen({
       <View className="flex-1 px-5 pt-14">
         <View className="flex-row items-center justify-between mb-5">
           <View className="flex-1">
-            <Text className="text-gray-500 text-xs tracking-wider uppercase">Welcome back</Text>
+            <Text className="text-gray-500 text-xs tracking-wider uppercase">
+              {getGreeting()}
+            </Text>
             <Text className="text-white text-2xl font-bold mt-0.5">
               {user?.name?.split(" ")[0] || "User"}
             </Text>
@@ -65,14 +74,14 @@ export default function HomeScreen({
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 110 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
               tintColor="#4ade80"
               colors={["#4ade80"]}
-              progressBackgroundColor="#111827"
+              progressBackgroundColor="#030712"
             />
           }
         >
@@ -141,10 +150,10 @@ export default function HomeScreen({
               </View>
             )}
           </View>
-
           <ActivityFeed activities={recentActivities} />
         </ScrollView>
       </View>
     </View>
   );
 }
+

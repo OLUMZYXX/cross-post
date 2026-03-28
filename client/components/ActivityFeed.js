@@ -19,23 +19,26 @@ function ActivityRow({ activity, isLast }) {
   const isPost = activity.type === "post";
   const iconName = isPost ? "paper-plane" : "link";
   const iconColor = isPost ? "#4ade80" : "#60a5fa";
-  const iconBg = isPost ? "bg-green-500/15" : "bg-blue-500/15";
   const badgeText = isPost ? "Published" : "Connected";
-  const badgeBg = isPost ? "bg-green-500/10" : "bg-blue-500/10";
-  const badgeTextColor = isPost ? "text-green-400" : "text-blue-400";
 
   return (
-    <View className={`flex-row items-center py-3.5 ${!isLast ? "border-b border-gray-800/50" : ""}`}>
-      <View className={`w-10 h-10 rounded-xl ${iconBg} items-center justify-center mr-3`}>
-        <Ionicons name={iconName} size={18} color={iconColor} />
+    <View
+      className="flex-row items-center py-3.5"
+      style={!isLast ? { borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.04)" } : {}}
+    >
+      <View
+        className="w-9 h-9 rounded-xl items-center justify-center mr-3"
+        style={{ backgroundColor: `${iconColor}15` }}
+      >
+        <Ionicons name={iconName} size={16} color={iconColor} />
       </View>
       <View className="flex-1 mr-2">
-        <Text className="text-white text-sm font-medium" numberOfLines={1}>
+        <Text className="text-white text-[13px] font-semibold" numberOfLines={1}>
           {activity.title}
         </Text>
-        <View className="flex-row items-center mt-1.5">
-          <View className={`${badgeBg} rounded-full px-2 py-0.5 mr-2`}>
-            <Text className={`${badgeTextColor} text-[10px] font-medium`}>{badgeText}</Text>
+        <View className="flex-row items-center mt-1">
+          <View className="rounded-full px-2 py-0.5 mr-2" style={{ backgroundColor: `${iconColor}12` }}>
+            <Text className="text-[9px] font-bold" style={{ color: iconColor }}>{badgeText}</Text>
           </View>
           {activity.platforms > 0 && (
             <Text className="text-gray-600 text-[10px]">
@@ -44,7 +47,9 @@ function ActivityRow({ activity, isLast }) {
           )}
         </View>
       </View>
-      <Text className="text-gray-600 text-[10px]">{getRelativeTime(activity.timestamp)}</Text>
+      <Text className="text-gray-600 text-[10px] font-medium">
+        {getRelativeTime(activity.timestamp)}
+      </Text>
     </View>
   );
 }
@@ -52,11 +57,21 @@ function ActivityRow({ activity, isLast }) {
 export default function ActivityFeed({ activities }) {
   if (!activities.length) {
     return (
-      <View className="bg-gray-900 rounded-2xl p-6 border border-gray-800/60 items-center">
-        <View className="w-12 h-12 rounded-2xl bg-gray-800 items-center justify-center mb-3">
+      <View
+        className="rounded-2xl p-6 items-center"
+        style={{
+          backgroundColor: "rgba(255,255,255,0.03)",
+          borderWidth: 1,
+          borderColor: "rgba(255,255,255,0.06)",
+        }}
+      >
+        <View
+          className="w-12 h-12 rounded-2xl items-center justify-center mb-3"
+          style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
+        >
           <Ionicons name="pulse-outline" size={22} color="#6b7280" />
         </View>
-        <Text className="text-gray-300 text-sm font-medium mb-1">No activity yet</Text>
+        <Text className="text-gray-300 text-sm font-semibold mb-1">No activity yet</Text>
         <Text className="text-gray-600 text-xs text-center">
           Your posts and connections will show up here
         </Text>
@@ -65,7 +80,14 @@ export default function ActivityFeed({ activities }) {
   }
 
   return (
-    <View className="bg-gray-900 rounded-2xl px-4 border border-gray-800/60">
+    <View
+      className="rounded-2xl px-4"
+      style={{
+        backgroundColor: "rgba(255,255,255,0.03)",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.06)",
+      }}
+    >
       {activities.map((activity, index) => (
         <ActivityRow
           key={activity.id}

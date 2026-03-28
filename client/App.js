@@ -12,6 +12,7 @@ import HomePage from "./components/HomePage";
 import Onboarding from "./components/Onboarding";
 import BiometricLock from "./components/BiometricLock";
 import ServerLoadingAnimation from "./components/ServerLoadingAnimation";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ToastProvider } from "./components/Toast";
 import { authAPI, notificationAPI, platformAPI, getToken, clearToken, wakeUpServer } from "./services/api";
 
@@ -297,11 +298,13 @@ export default function App() {
   };
 
   return (
-    <ToastProvider>
-      {renderScreen()}
-      {biometricLocked && (
-        <BiometricLock onUnlock={() => setBiometricLocked(false)} />
-      )}
-    </ToastProvider>
+    <SafeAreaProvider>
+      <ToastProvider>
+        {renderScreen()}
+        {biometricLocked && (
+          <BiometricLock onUnlock={() => setBiometricLocked(false)} />
+        )}
+      </ToastProvider>
+    </SafeAreaProvider>
   );
 }

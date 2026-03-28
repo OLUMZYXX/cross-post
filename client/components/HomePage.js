@@ -23,6 +23,7 @@ import NotificationsInbox from "./NotificationsInbox";
 import PrivacySecurity from "./PrivacySecurity";
 import HelpSupport from "./HelpSupport";
 import PageLoadingAnimation from "./PageLoadingAnimation";
+import ScreenTransition from "./ScreenTransition";
 import { useToast } from "./Toast";
 import { postAPI, platformAPI, notificationAPI, clearToken } from "../services/api";
 
@@ -545,48 +546,50 @@ export default function HomePage({
     const totalDrafts = drafts.length + serverDrafts.length + scheduledPosts.length;
     return (
       <View className="flex-1 bg-gray-950">
-        <View className="px-5 pt-14 pb-2">
-          <Text className="text-white text-2xl font-bold mb-4">Posts</Text>
-          <View className="flex-row bg-gray-900 rounded-xl p-1 border border-gray-800/60">
-            <TouchableOpacity
-              onPress={() => setSentSubTab("published")}
-              className={`flex-1 py-2 rounded-lg ${sentSubTab === "published" ? "bg-green-500" : ""}`}
-            >
-              <Text className={`text-center text-xs font-bold ${sentSubTab === "published" ? "text-gray-950" : "text-gray-500"}`}>
-                Published ({sentPosts.length})
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setSentSubTab("drafts")}
-              className={`flex-1 py-2 rounded-lg ${sentSubTab === "drafts" ? "bg-green-500" : ""}`}
-            >
-              <Text className={`text-center text-xs font-bold ${sentSubTab === "drafts" ? "text-gray-950" : "text-gray-500"}`}>
-                Drafts ({totalDrafts})
-              </Text>
-            </TouchableOpacity>
+        <ScreenTransition activeKey="sent">
+          <View className="px-5 pt-14 pb-2">
+            <Text className="text-white text-2xl font-bold mb-4">Posts</Text>
+            <View className="flex-row bg-gray-900 rounded-xl p-1 border border-gray-800/60">
+              <TouchableOpacity
+                onPress={() => setSentSubTab("published")}
+                className={`flex-1 py-2 rounded-lg ${sentSubTab === "published" ? "bg-green-500" : ""}`}
+              >
+                <Text className={`text-center text-xs font-bold ${sentSubTab === "published" ? "text-gray-950" : "text-gray-500"}`}>
+                  Published ({sentPosts.length})
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setSentSubTab("drafts")}
+                className={`flex-1 py-2 rounded-lg ${sentSubTab === "drafts" ? "bg-green-500" : ""}`}
+              >
+                <Text className={`text-center text-xs font-bold ${sentSubTab === "drafts" ? "text-gray-950" : "text-gray-500"}`}>
+                  Drafts ({totalDrafts})
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-        {sentSubTab === "published" ? (
-          <SentPosts
-            posts={sentPosts}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            onDeletePost={handleDeletePost}
-          />
-        ) : (
-          <DraftsScreen
-            localDrafts={drafts}
-            serverDrafts={serverDrafts}
-            scheduledPosts={scheduledPosts}
-            onOpenDraft={openDraft}
-            onOpenServerPost={openServerPost}
-            onDeleteLocalDraft={handleDeleteDraft}
-            onDeleteServerPost={handleDeleteServerPost}
-            onClearAllDrafts={handleClearAllDrafts}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
-        )}
+          {sentSubTab === "published" ? (
+            <SentPosts
+              posts={sentPosts}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              onDeletePost={handleDeletePost}
+            />
+          ) : (
+            <DraftsScreen
+              localDrafts={drafts}
+              serverDrafts={serverDrafts}
+              scheduledPosts={scheduledPosts}
+              onOpenDraft={openDraft}
+              onOpenServerPost={openServerPost}
+              onDeleteLocalDraft={handleDeleteDraft}
+              onDeleteServerPost={handleDeleteServerPost}
+              onClearAllDrafts={handleClearAllDrafts}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          )}
+        </ScreenTransition>
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       </View>
     );
@@ -594,15 +597,17 @@ export default function HomePage({
 
   if (activeTab === "analytics") {
     return (
-      <AnalyticsScreen
-        sentPosts={sentPosts}
-        allPosts={allPosts}
-        connectedPlatforms={connectedPlatforms}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-      />
+      <ScreenTransition activeKey="analytics">
+        <AnalyticsScreen
+          sentPosts={sentPosts}
+          allPosts={allPosts}
+          connectedPlatforms={connectedPlatforms}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+        />
+      </ScreenTransition>
     );
   }
 
@@ -642,18 +647,20 @@ export default function HomePage({
 
     return (
       <View className="flex-1 bg-gray-950">
-        <SettingsScreen
-          user={user}
-          connectedPlatformsCount={connectedPlatforms.length}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          onEditProfile={() => setSettingsScreen("editProfile")}
-          onConnectedAccounts={() => setSettingsScreen("connectedAccounts")}
-          onNotifications={() => setSettingsScreen("notifications")}
-          onPrivacy={() => setSettingsScreen("privacy")}
-          onHelp={() => setSettingsScreen("help")}
-          onLogout={handleLogout}
-        />
+        <ScreenTransition activeKey="settings">
+          <SettingsScreen
+            user={user}
+            connectedPlatformsCount={connectedPlatforms.length}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            onEditProfile={() => setSettingsScreen("editProfile")}
+            onConnectedAccounts={() => setSettingsScreen("connectedAccounts")}
+            onNotifications={() => setSettingsScreen("notifications")}
+            onPrivacy={() => setSettingsScreen("privacy")}
+            onHelp={() => setSettingsScreen("help")}
+            onLogout={handleLogout}
+          />
+        </ScreenTransition>
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       </View>
     );
@@ -667,23 +674,25 @@ export default function HomePage({
         />
       )}
 
-      <HomeScreen
-        user={user}
-        sentPosts={sentPosts}
-        allPosts={allPosts}
-        connectedPlatforms={connectedPlatforms}
-        connectedPlatformObjects={connectedPlatformObjects}
-        loadingPlatforms={loadingPlatforms}
-        recentActivities={recentActivities}
-        unreadNotifications={unreadNotifications}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        onCreatePost={() => setShowCreatePost(true)}
-        onNotifications={() => setShowNotifications(true)}
-        onAddPlatform={() => setModalVisible(true)}
-        getPlatformStyle={getPlatformStyle}
-        getPlatformUsername={getPlatformUsername}
-      />
+      <ScreenTransition activeKey="home">
+        <HomeScreen
+          user={user}
+          sentPosts={sentPosts}
+          allPosts={allPosts}
+          connectedPlatforms={connectedPlatforms}
+          connectedPlatformObjects={connectedPlatformObjects}
+          loadingPlatforms={loadingPlatforms}
+          recentActivities={recentActivities}
+          unreadNotifications={unreadNotifications}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          onCreatePost={() => setShowCreatePost(true)}
+          onNotifications={() => setShowNotifications(true)}
+          onAddPlatform={() => setModalVisible(true)}
+          getPlatformStyle={getPlatformStyle}
+          getPlatformUsername={getPlatformUsername}
+        />
+      </ScreenTransition>
 
       <Modal
         animationType="slide"

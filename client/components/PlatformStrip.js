@@ -8,6 +8,8 @@ const PLATFORM_COLORS = {
   linkedin: "#0A66C2",
   tiktok: "#ff0050",
   youtube: "#FF0000",
+  reddit: "#FF4500",
+  telegram: "#0088cc",
   threads: "#ffffff",
   bluesky: "#0085ff",
 };
@@ -22,7 +24,7 @@ function PlatformChip({ name, username, style }) {
   const color = getPlatformColor(name);
 
   return (
-    <View className="mr-3" style={{ width: 130 }}>
+    <View className="mr-3" style={{ width: 125 }}>
       <View
         className="rounded-2xl p-3.5"
         style={{
@@ -33,14 +35,10 @@ function PlatformChip({ name, username, style }) {
       >
         <View className="flex-row items-center justify-between mb-3">
           <View
-            className="w-10 h-10 rounded-xl items-center justify-center"
+            className="w-9 h-9 rounded-xl items-center justify-center"
             style={{ backgroundColor: `${color}15` }}
           >
-            <Ionicons
-              name={style.icon || "globe-outline"}
-              size={18}
-              color={color}
-            />
+            <Ionicons name={style.icon || "globe-outline"} size={17} color={color} />
           </View>
           <View
             className="flex-row items-center rounded-full px-2 py-0.5"
@@ -53,10 +51,7 @@ function PlatformChip({ name, username, style }) {
         <Text className="text-white text-[13px] font-bold" numberOfLines={1}>
           {username || baseName}
         </Text>
-        <Text
-          className="text-[10px] font-semibold mt-0.5"
-          style={{ color: `${color}80` }}
-        >
+        <Text className="text-[10px] font-semibold mt-0.5" style={{ color: `${color}99` }}>
           {baseName}
         </Text>
       </View>
@@ -66,11 +61,7 @@ function PlatformChip({ name, username, style }) {
 
 function EmptyState({ onAddPlatform }) {
   return (
-    <TouchableOpacity
-      onPress={onAddPlatform}
-      activeOpacity={0.7}
-      className="mb-2"
-    >
+    <TouchableOpacity onPress={onAddPlatform} activeOpacity={0.7} className="mb-2">
       <View
         className="rounded-2xl p-6 items-center"
         style={{
@@ -86,12 +77,8 @@ function EmptyState({ onAddPlatform }) {
         >
           <Ionicons name="add" size={28} color="#4ade80" />
         </View>
-        <Text className="text-white text-sm font-bold">
-          Connect your first platform
-        </Text>
-        <Text className="text-gray-500 text-xs mt-1">
-          Get started by linking a social account
-        </Text>
+        <Text className="text-white text-sm font-bold">Connect your first platform</Text>
+        <Text className="text-gray-500 text-xs mt-1">Get started by linking a social account</Text>
       </View>
     </TouchableOpacity>
   );
@@ -103,7 +90,7 @@ function AddButton({ onAddPlatform }) {
       <View
         className="rounded-2xl p-3.5 items-center justify-center"
         style={{
-          width: 80,
+          width: 75,
           backgroundColor: "rgba(255,255,255,0.02)",
           borderWidth: 1,
           borderColor: "rgba(255,255,255,0.08)",
@@ -111,10 +98,10 @@ function AddButton({ onAddPlatform }) {
         }}
       >
         <View
-          className="w-10 h-10 rounded-xl items-center justify-center mb-2"
+          className="w-9 h-9 rounded-xl items-center justify-center mb-2"
           style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
         >
-          <Ionicons name="add" size={20} color="#4ade80" />
+          <Ionicons name="add" size={18} color="#4ade80" />
         </View>
         <Text className="text-gray-500 text-[10px] font-semibold">Add</Text>
       </View>
