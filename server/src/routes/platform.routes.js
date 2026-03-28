@@ -41,7 +41,6 @@ import { connectTelegram } from "../controllers/telegram.controller.js";
 
 const router = express.Router();
 
-// Callback routes (no auth required — user arrives here from the OAuth provider)
 router.get("/auth/facebook/callback", asyncHandler(handleFacebookCallback));
 router.get("/auth/twitter/callback", asyncHandler(handleTwitterCallback));
 router.get("/auth/instagram/callback", asyncHandler(handleInstagramCallback));
@@ -50,7 +49,6 @@ router.get("/auth/linkedin/callback", asyncHandler(handleLinkedInCallback));
 router.get("/auth/youtube/callback", asyncHandler(handleYouTubeCallback));
 router.get("/auth/reddit/callback", asyncHandler(handleRedditCallback));
 
-// Protected routes (require authentication)
 router.use(authenticate);
 
 router.get("/", asyncHandler(listPlatforms));

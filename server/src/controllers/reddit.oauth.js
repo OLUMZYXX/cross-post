@@ -72,7 +72,6 @@ export async function handleRedditCallback(req, res) {
       return res.send(buildRedirectHtml("Reddit Connection Failed", appUrl));
     }
 
-    // Fetch Reddit user profile
     const profileResponse = await fetch(
       "https://oauth.reddit.com/api/v1/me",
       {
@@ -117,7 +116,6 @@ export async function handleRedditCallback(req, res) {
     const appUrl = `crosspost://oauth/reddit/callback?success=true&name=${encodeURIComponent(username)}`;
     res.send(buildRedirectHtml("Reddit Connected", appUrl));
   } catch (err) {
-    // console.error("Reddit OAuth error:", err);
     const appUrl = `crosspost://oauth/reddit/callback?error=server_error`;
     res.send(buildRedirectHtml("Reddit Connection Failed", appUrl));
   }

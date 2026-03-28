@@ -25,7 +25,6 @@ export default function PageLoadingAnimation({ onFinish }) {
   const fadeOut = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Phase 1: Logo appears with spring
     Animated.parallel([
       Animated.spring(logoScale, {
         toValue: 1,
@@ -40,7 +39,6 @@ export default function PageLoadingAnimation({ onFinish }) {
       }),
     ]).start();
 
-    // Phase 2: Ring pulse
     setTimeout(() => {
       Animated.parallel([
         Animated.timing(ringScale, {
@@ -64,7 +62,6 @@ export default function PageLoadingAnimation({ onFinish }) {
       ]).start();
     }, 300);
 
-    // Phase 3: Platform icons pop in with stagger
     setTimeout(() => {
       Animated.stagger(
         80,
@@ -86,7 +83,6 @@ export default function PageLoadingAnimation({ onFinish }) {
       ).start();
     }, 400);
 
-    // Phase 4: Fade out everything
     setTimeout(() => {
       Animated.timing(fadeOut, {
         toValue: 0,
@@ -113,11 +109,9 @@ export default function PageLoadingAnimation({ onFinish }) {
       style={{ opacity: fadeOut }}
       className="absolute inset-0 z-50 bg-gray-950 items-center justify-center"
     >
-      {/* Background glow */}
       <View className="absolute w-64 h-64 rounded-full bg-green-500/5" />
       <View className="absolute w-40 h-40 rounded-full bg-green-500/10" />
 
-      {/* Expanding ring */}
       <Animated.View
         style={{
           position: "absolute",
@@ -131,7 +125,6 @@ export default function PageLoadingAnimation({ onFinish }) {
         }}
       />
 
-      {/* Platform icons orbiting — centered around the logo */}
       {PLATFORMS.map((platform, i) => (
         <Animated.View
           key={platform.icon}
@@ -154,7 +147,6 @@ export default function PageLoadingAnimation({ onFinish }) {
         </Animated.View>
       ))}
 
-      {/* Center logo */}
       <Animated.View
         style={{
           opacity: logoOpacity,

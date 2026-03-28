@@ -73,7 +73,6 @@ export async function handleYouTubeCallback(req, res) {
       return res.send(buildRedirectHtml("YouTube Connection Failed", appUrl));
     }
 
-    // Fetch YouTube channel info
     const channelResponse = await fetch(
       "https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true",
       { headers: { Authorization: `Bearer ${tokenData.access_token}` } },
@@ -119,7 +118,6 @@ export async function handleYouTubeCallback(req, res) {
     const appUrl = `crosspost://oauth/youtube/callback?success=true&name=${encodeURIComponent(channelName)}`;
     res.send(buildRedirectHtml("YouTube Connected", appUrl));
   } catch (err) {
-    // console.error("YouTube OAuth error:", err);
     const appUrl = `crosspost://oauth/youtube/callback?error=server_error`;
     res.send(buildRedirectHtml("YouTube Connection Failed", appUrl));
   }

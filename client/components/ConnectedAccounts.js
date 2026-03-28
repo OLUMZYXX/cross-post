@@ -37,7 +37,6 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
     try {
       const { data } = await platformAPI.list();
 
-      // Expand Facebook pages into individual entries
       const expanded = [];
       for (const p of data.platforms) {
         if (
@@ -78,7 +77,6 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
 
   const handleDisconnect = async (platform) => {
     try {
-      // For expanded Facebook pages, if it has a page ID we toggle it off instead of disconnecting
       if (platform._pageId) {
         await platformAPI.toggleFacebookPage(platform._pageId, false);
         setPlatforms((prev) => prev.filter((p) => p._id !== platform._id));
@@ -141,7 +139,6 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
       const newSelected = !currentlySelected;
       await platformAPI.toggleFacebookPage(pageId, newSelected);
 
-      // Update local state
       setFbPages((prev) =>
         prev.map((p) =>
           p.id === pageId ? { ...p, isSelected: newSelected } : p,
@@ -165,7 +162,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
 
   const handleClosePagePicker = () => {
     setPagePickerVisible(false);
-    fetchPlatforms(); // Refresh to update displayed username
+    fetchPlatforms();
   };
 
   const getFbSelectedCount = (platform) => {

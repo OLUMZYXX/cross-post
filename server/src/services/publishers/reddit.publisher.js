@@ -1,16 +1,7 @@
-/**
- * Reddit Publisher — submits a post to a subreddit
- * Docs: https://www.reddit.com/dev/api/#POST_api_submit
- *
- * NOTE: Reddit requires a subreddit to post to. By default this posts
- * to the user's profile (u/username). For subreddit posting, the post
- * should include a target subreddit.
- */
 export async function publishToReddit(platform, post) {
   const { accessToken, platformUsername } = platform;
   const { caption } = post;
 
-  // Post to user's profile by default
   const subreddit = `u_${platformUsername}`;
 
   const response = await fetch("https://oauth.reddit.com/api/submit", {

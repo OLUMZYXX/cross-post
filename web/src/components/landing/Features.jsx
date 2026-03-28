@@ -35,30 +35,32 @@ const FEATURES = [
 
 export default function Features() {
   return (
-    <section id="features" className="py-20 px-6">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="text-center mb-14">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+    <section id="features" className="py-24 px-6 relative">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(34,197,94,0.04)_0%,_transparent_70%)]" />
+
+      <div className="max-w-5xl mx-auto relative">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
             Everything you need
           </h2>
-          <p className="text-neutral-400 text-sm max-w-md mx-auto">
+          <p className="text-neutral-400 text-base max-w-md mx-auto">
             Powerful features to streamline your social media workflow
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map((feature) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {FEATURES.map((feature, i) => (
             <div
               key={feature.title}
-              className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-5 hover:border-neutral-700/60 transition-colors"
+              className={`group glass rounded-2xl p-6 hover:bg-white/[0.04] transition-all duration-300 animate-fade-in-up delay-${(i + 1) * 100}`}
             >
-              <div className="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center mb-3">
-                <feature.icon size={18} className="text-neutral-300" />
+              <div className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center mb-4 group-hover:bg-green-500/10 transition-colors duration-300">
+                <feature.icon size={18} className="text-neutral-400 group-hover:text-green-400 transition-colors duration-300" />
               </div>
-              <h3 className="text-white font-medium text-sm mb-1.5">
+              <h3 className="text-white font-semibold text-[15px] mb-2">
                 {feature.title}
               </h3>
-              <p className="text-neutral-500 text-[13px] leading-relaxed">
+              <p className="text-neutral-500 text-sm leading-relaxed">
                 {feature.description}
               </p>
             </div>

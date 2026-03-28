@@ -120,7 +120,6 @@ export async function handleTwitterCallback(req, res) {
     const appUrl = `crosspost://oauth/twitter/callback?success=true&name=${encodeURIComponent(profile.username)}`;
     res.send(buildRedirectHtml("Twitter Connected", appUrl));
   } catch (err) {
-    console.error("Twitter OAuth error:", err);
     const appUrl = `crosspost://oauth/twitter/callback?error=server_error`;
     res.send(buildRedirectHtml("Twitter Connection Failed", appUrl));
   }

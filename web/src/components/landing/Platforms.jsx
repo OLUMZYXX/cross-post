@@ -13,12 +13,12 @@ const PLATFORMS = [
 
 export default function Platforms() {
   return (
-    <section id="platforms" className="py-20 px-6">
-      <div className="max-w-[1400px] mx-auto text-center">
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+    <section id="platforms" className="py-24 px-6">
+      <div className="max-w-4xl mx-auto text-center">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
           All your platforms
         </h2>
-        <p className="text-neutral-400 text-sm max-w-md mx-auto mb-12">
+        <p className="text-neutral-400 text-base max-w-md mx-auto mb-14">
           Connect once and publish to every platform simultaneously
         </p>
 
@@ -26,10 +26,12 @@ export default function Platforms() {
           {PLATFORMS.map((p) => (
             <div
               key={p.name}
-              className="flex items-center gap-2.5 bg-neutral-900/50 border border-neutral-800/50 rounded-lg px-4 py-2.5 hover:border-neutral-700/60 transition-colors"
+              className="group flex items-center gap-3 glass rounded-xl px-5 py-3 hover:bg-white/[0.04] transition-all duration-300 cursor-default"
             >
-              <p.icon size={18} style={{ color: p.color }} />
-              <span className="text-neutral-300 text-sm">{p.name}</span>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: `${p.color}15` }}>
+                <p.icon size={16} style={{ color: p.color }} />
+              </div>
+              <span className="text-neutral-300 group-hover:text-white text-sm font-medium transition-colors duration-200">{p.name}</span>
             </div>
           ))}
         </div>

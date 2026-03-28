@@ -15,7 +15,6 @@ import ServerLoadingAnimation from "./components/ServerLoadingAnimation";
 import { ToastProvider } from "./components/Toast";
 import { authAPI, notificationAPI, platformAPI, getToken, clearToken, wakeUpServer } from "./services/api";
 
-// Configure how notifications appear when app is in foreground
 try {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -25,7 +24,6 @@ try {
     }),
   });
 } catch {
-  // May fail in Expo Go — push notifications require a development build
 }
 
 const ONBOARDING_KEY = "@crosspost_onboarded";
@@ -53,13 +51,10 @@ export default function App() {
     }
   }, [hasShareIntent, shareIntent]);
 
-  // Register for push notifications and send token to server
-  // Note: Remote push notifications require a development build, not Expo Go (SDK 53+)
   const registerForPushNotifications = useCallback(async () => {
     try {
       if (!Device.isDevice) return;
 
-      // Android needs a notification channel (works in Expo Go for local notifications)
       if (Platform.OS === "android") {
         await Notifications.setNotificationChannelAsync("default", {
           name: "Default",
@@ -69,7 +64,6 @@ export default function App() {
         }).catch(() => {});
       }
 
-      // Check/request permissions
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
 
@@ -80,16 +74,13 @@ export default function App() {
 
       if (finalStatus !== "granted") return;
 
-      // Get the Expo push token — this may fail in Expo Go
       const projectId = Constants.expoConfig?.extra?.eas?.projectId;
       const tokenData = await Notifications.getExpoPushTokenAsync({
         ...(projectId && { projectId }),
       });
 
-      // Send token to server
       await notificationAPI.registerPushToken(tokenData.data).catch(() => {});
     } catch {
-      // Push registration may fail in Expo Go — that's expected
     }
   }, []);
 
@@ -104,7 +95,6 @@ export default function App() {
       const params = urlObj.searchParams;
       const displayName = platform.charAt(0).toUpperCase() + platform.slice(1);
 
-      // If Facebook returned code+state directly to the app, POST to server to complete the exchange
       if (
         platform === "facebook" &&
         params.get("code") &&
@@ -135,7 +125,6 @@ export default function App() {
 
       if (params.get("success") === "true") {
         alert(`${displayName} connected successfully!`);
-        // Trigger a refresh so HomePage re-fetches platforms
         setOauthRefreshKey((prev) => prev + 1);
       } else {
         alert(`${displayName} connection failed: ${params.get("error")}`);
@@ -153,10 +142,6 @@ export default function App() {
     return () => subscription?.remove();
   }, []);
 
-  // Check biometric lock when app comes to foreground from background.
-  // Only trigger if the app was in the background for more than 3 seconds,
-  // so that brief system dialogs (image picker, share sheet, etc.) don't
-  // cause a false lock.
   const backgroundAtRef = useRef(null);
 
   useEffect(() => {
@@ -167,7 +152,6 @@ export default function App() {
 
       if (appState.current === "background" && nextState === "active") {
         const elapsed = Date.now() - (backgroundAtRef.current || 0);
-        // Only lock if the app was in the background for at least 3 seconds
         if (elapsed >= 3000) {
           const enabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
           const token = await getToken();
@@ -182,24 +166,18 @@ export default function App() {
     return () => subscription?.remove();
   }, []);
 
-  // Set up notification listeners
   useEffect(() => {
     try {
-      // Listener for notifications received while app is foregrounded
       notificationListener.current = Notifications.addNotificationReceivedListener(() => {
-        // Trigger a refresh of notification count in HomePage
         setOauthRefreshKey((prev) => prev + 1);
       });
 
-      // Listener for when user taps on a notification
       responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {
-        // Navigate to home if not already there
         if (currentScreen !== "home") {
           setCurrentScreen("home");
         }
       });
     } catch {
-      // Notification listeners may not work in Expo Go — that's OK
     }
 
     return () => {
@@ -207,13 +185,11 @@ export default function App() {
         notificationListener.current?.remove();
         responseListener.current?.remove();
       } catch {
-        // Cleanup may fail in Expo Go — safe to ignore
       }
     };
   }, [currentScreen]);
 
   useEffect(() => {
-    // Pre-warm the server (Render free tier sleeps after inactivity)
     wakeUpServer();
 
     (async () => {
@@ -231,10 +207,8 @@ export default function App() {
           setUser(data.user);
           setCurrentScreen("home");
 
-          // Register for push notifications after successful auth
           registerForPushNotifications();
 
-          // Check if biometric lock should show on initial load
           const biometricEnabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
           if (biometricEnabled === "true") {
             setBiometricLocked(true);
@@ -250,15 +224,12 @@ export default function App() {
     })();
   }, []);
 
-  // Handle Android back button/gesture for auth screens
   useEffect(() => {
     const handler = () => {
-      // From signup, go back to signin
       if (currentScreen === "signup") {
         setCurrentScreen("signin");
         return true;
       }
-      // On signin/home/onboarding, let default behavior
       return false;
     };
 

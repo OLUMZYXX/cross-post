@@ -1,20 +1,8 @@
-/**
- * LinkedIn Publisher — posts to LinkedIn profile via API
- * Supports text-only and image posts (single and multi-image)
- * Docs: https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/share-on-linkedin
- * Images: https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/images-api
- */
-
 const isVideoUrl = (url) =>
   url.match(/\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i) ||
   url.includes("/video/upload/");
 
-/**
- * Register and upload an image to LinkedIn.
- * Returns the asset URN for use in posts.
- */
 async function uploadImageToLinkedIn(accessToken, personUrn, imageUrl) {
-  // Step 1: Register the upload
   const registerRes = await fetch(
     "https://api.linkedin.com/v2/assets?action=registerUpload",
     {
@@ -53,14 +41,12 @@ async function uploadImageToLinkedIn(accessToken, personUrn, imageUrl) {
     throw new Error("LinkedIn did not return upload URL or asset");
   }
 
-  // Step 2: Download the image
   const imageRes = await fetch(imageUrl);
   if (!imageRes.ok) {
     throw new Error(`Failed to download image from ${imageUrl}`);
   }
   const imageBuffer = await imageRes.arrayBuffer();
 
-  // Step 3: Upload the image binary to LinkedIn
   const uploadRes = await fetch(uploadUrl, {
     method: "PUT",
     headers: {
@@ -89,7 +75,6 @@ export async function publishToLinkedIn(platform, post) {
 
   const personUrn = `urn:li:person:${platformUserId}`;
 
-  // Get image URLs (skip videos — LinkedIn UGC API doesn't support video via URL)
   const imageUrls =
     media
       ?.map((m) => (typeof m === "string" ? m : m?.uri))
@@ -98,7 +83,6 @@ export async function publishToLinkedIn(platform, post) {
   let postBody;
 
   if (imageUrls.length > 0) {
-    // Upload images to LinkedIn
     const assets = [];
     for (const url of imageUrls) {
       try {
@@ -110,7 +94,6 @@ export async function publishToLinkedIn(platform, post) {
     }
 
     if (assets.length > 0) {
-      // Post with images
       postBody = {
         author: personUrn,
         lifecycleState: "PUBLISHED",
@@ -131,7 +114,6 @@ export async function publishToLinkedIn(platform, post) {
         },
       };
     } else {
-      // All image uploads failed — fall back to text-only
       postBody = {
         author: personUrn,
         lifecycleState: "PUBLISHED",
@@ -149,7 +131,6 @@ export async function publishToLinkedIn(platform, post) {
       };
     }
   } else {
-    // Text-only post
     postBody = {
       author: personUrn,
       lifecycleState: "PUBLISHED",

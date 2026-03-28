@@ -11,7 +11,6 @@ function generateToken(user) {
   });
 }
 
-/** Short-lived token used only for 2FA login step */
 function generateTempToken(user) {
   return jwt.sign({ id: user._id, twoFactor: true }, JWT_SECRET, {
     expiresIn: "5m",
@@ -62,7 +61,6 @@ export async function signin(req, res) {
     throw Errors.unauthorized("The password is incorrect");
   }
 
-  // If 2FA is enabled, return a temp token instead of full access
   if (user.twoFactorEnabled) {
     const tempToken = generateTempToken(user);
     return res.json({
@@ -82,7 +80,6 @@ export async function signin(req, res) {
   });
 }
 
-/** Verify 2FA code during login and issue full token */
 export async function login2FA(req, res) {
   const { tempToken, code } = req.body;
 
@@ -158,9 +155,6 @@ export async function updateProfile(req, res) {
   res.json({ success: true, data: { user: sanitiseUser(user) } });
 }
 
-// ── 2FA Management (authenticated) ─────────────────────────
-
-/** Generate TOTP secret + QR code for setup */
 export async function setup2FA(req, res) {
   const user = await User.findById(req.user.id);
   if (!user) throw Errors.notFound("User not found");
@@ -174,7 +168,6 @@ export async function setup2FA(req, res) {
     issuer: "CrossPost",
   });
 
-  // Store the secret temporarily (not yet enabled until verified)
   user.twoFactorSecret = secret.base32;
   await user.save();
 
@@ -189,7 +182,6 @@ export async function setup2FA(req, res) {
   });
 }
 
-/** Verify OTP code to confirm 2FA setup */
 export async function verify2FA(req, res) {
   const { code } = req.body;
   if (!code) throw Errors.badRequest("Verification code is required");
@@ -215,7 +207,6 @@ export async function verify2FA(req, res) {
   res.json({ success: true, data: { twoFactorEnabled: true } });
 }
 
-/** Disable 2FA (requires current OTP code) */
 export async function disable2FA(req, res) {
   const { code } = req.body;
   if (!code) throw Errors.badRequest("Verification code is required");

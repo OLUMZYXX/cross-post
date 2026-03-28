@@ -18,7 +18,6 @@ export async function getState(stateId) {
   return doc.data;
 }
 
-// Read state without consuming it (for preview endpoints)
 export async function peekState(stateId) {
   const doc = await OAuthState.findOne({ stateId });
   if (!doc) return null;

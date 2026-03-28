@@ -1,12 +1,3 @@
-/**
- * YouTube Publisher — creates community posts or uploads videos
- * Docs: https://developers.google.com/youtube/v3/docs
- *
- * NOTE: YouTube API v3 is primarily for video uploads.
- * Community posts are not available via the API.
- * This publisher handles video uploads when media is provided.
- * For text-only content, it creates a video with the caption as description (requires a video file).
- */
 export async function publishToYouTube(platform, post) {
   const { accessToken } = platform;
   const { caption, media } = post;
@@ -25,7 +16,6 @@ export async function publishToYouTube(platform, post) {
     );
   }
 
-  // Download the video first, then upload to YouTube
   const videoResponse = await fetch(mediaUrl);
   if (!videoResponse.ok) {
     throw new Error("Failed to fetch video for YouTube upload");
@@ -33,7 +23,6 @@ export async function publishToYouTube(platform, post) {
 
   const videoBuffer = await videoResponse.arrayBuffer();
 
-  // Step 1: Initialize resumable upload
   const initRes = await fetch(
     "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
     {
@@ -50,7 +39,7 @@ export async function publishToYouTube(platform, post) {
           description: caption || "",
         },
         status: {
-          privacyStatus: "private", // Start as private for safety
+          privacyStatus: "private",
         },
       }),
     },
@@ -68,7 +57,6 @@ export async function publishToYouTube(platform, post) {
     throw new Error("YouTube did not return an upload URL");
   }
 
-  // Step 2: Upload the video data
   const uploadRes = await fetch(uploadUrl, {
     method: "PUT",
     headers: {

@@ -11,7 +11,6 @@ const api = axios.create({
   timeout: 120000,
 });
 
-// Direct fetch helper for routes that have multer middleware (avoids axios XHR issues on Android)
 async function fetchJSON(path, { method = "POST", body, timeout = 120000 } = {}) {
   const token = await AsyncStorage.getItem(TOKEN_KEY);
   const url = `${BASE_URL}${path}`;
@@ -41,7 +40,7 @@ async function fetchJSON(path, { method = "POST", body, timeout = 120000 } = {})
     return data;
   } catch (err) {
     clearTimeout(timer);
-    if (err.code) throw err; // Re-throw server errors
+    if (err.code) throw err;
     return Promise.reject({
       message: "Unable to reach the server. Check your connection.",
       code: "NETWORK_ERROR",
@@ -56,7 +55,6 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    // Only set Content-Type for non-FormData requests (axios sets it automatically for FormData)
     if (!(config.data instanceof FormData)) {
       config.headers["Content-Type"] = "application/json";
     }
@@ -65,13 +63,11 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Retry logic for network errors (handles Render cold starts)
 api.interceptors.response.use(
   (response) => response.data,
   async (error) => {
     const config = error.config;
 
-    // Retry up to 3 times on network errors (no response received)
     if (!error.response && config) {
       if (!config._retryCount) config._retryCount = 0;
       if (config._retryCount < 3) {
@@ -102,12 +98,10 @@ api.interceptors.response.use(
   },
 );
 
-// Wake up Render server (free tier sleeps after inactivity)
 export function wakeUpServer() {
   fetch(API_BASE_URL.replace(/\/api$/, "/health")).catch(() => {});
 }
 
-// Wait for the server to be awake before making critical requests
 export async function ensureServerAwake() {
   const healthUrl = API_BASE_URL.replace(/\/api$/, "/health");
   for (let attempt = 1; attempt <= 5; attempt++) {
@@ -115,7 +109,6 @@ export async function ensureServerAwake() {
       const res = await fetch(healthUrl, { method: "GET" });
       if (res.ok) return true;
     } catch {}
-    // Wait longer between attempts to give Render time to cold-start
     await new Promise((r) => setTimeout(r, attempt * 3000));
   }
   return false;
@@ -164,7 +157,6 @@ export const postAPI = {
   get: (id) => api.get(`/posts/${id}`),
 
   create: async ({ caption, media, platforms, status }) => {
-    // Use direct fetch (bypasses axios XHR which fails on Android for multer routes)
     const hasRawFiles =
       media && media.length > 0 && !media.every((m) => m.cloudinaryUrl);
 
@@ -181,7 +173,6 @@ export const postAPI = {
       });
     }
 
-    // Fallback: upload raw files via FormData using fetch (axios XHR fails on Android)
     const formData = new FormData();
     if (caption) formData.append("caption", caption);
     if (status) formData.append("status", status);

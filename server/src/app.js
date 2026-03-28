@@ -35,7 +35,6 @@ app.get("/tiktoksjU2flTW2wY5Cz8uW8PYxfs5y79JZxlL.txt", (_req, res) =>
     ),
 );
 
-// Serve media files from MongoDB GridFS
 app.get("/media/:fileId", async (req, res) => {
   try {
     const file = await findFileById(req.params.fileId);
@@ -57,7 +56,6 @@ app.get("/media/:fileId", async (req, res) => {
   }
 });
 
-// Upload a single image to GridFS
 const uploadSingle = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 },
@@ -83,7 +81,6 @@ app.post(
   },
 );
 
-// Upload media to Cloudinary (signed upload via server)
 const uploadCloudinary = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 500 * 1024 * 1024 },
@@ -114,7 +111,6 @@ app.post(
     const timestamp = Math.floor(Date.now() / 1000);
     const folder = "cross-post";
 
-    // Generate signature
     const paramsToSign = `folder=${folder}&timestamp=${timestamp}${CLOUDINARY_API_SECRET}`;
     const signature = crypto
       .createHash("sha1")

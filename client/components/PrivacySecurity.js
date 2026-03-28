@@ -27,7 +27,6 @@ export default function PrivacySecurity({ onBack, user }) {
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
 
-  // 2FA state
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(
     user?.twoFactorEnabled || false,
   );
@@ -41,7 +40,6 @@ export default function PrivacySecurity({ onBack, user }) {
   const [disableCode, setDisableCode] = useState("");
   const [disabling2FA, setDisabling2FA] = useState(false);
 
-  // Biometric state
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricType, setBiometricType] = useState(null);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
@@ -243,7 +241,6 @@ export default function PrivacySecurity({ onBack, user }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* Change Password */}
         <Text className="text-gray-400 text-xs mb-3 ml-1">
           CHANGE PASSWORD
         </Text>
@@ -295,7 +292,6 @@ export default function PrivacySecurity({ onBack, user }) {
           </TouchableOpacity>
         </View>
 
-        {/* Two-Factor Authentication */}
         <Text className="text-gray-400 text-xs mb-3 ml-1">
           TWO-FACTOR AUTHENTICATION
         </Text>
@@ -349,7 +345,6 @@ export default function PrivacySecurity({ onBack, user }) {
           )}
         </View>
 
-        {/* Biometric Authentication */}
         <Text className="text-gray-400 text-xs mb-3 ml-1">APP LOCK</Text>
         <View className="bg-gray-900/80 rounded-2xl border border-gray-800 p-4 mb-6">
           <View className="flex-row items-center">
@@ -386,7 +381,6 @@ export default function PrivacySecurity({ onBack, user }) {
           </View>
         </View>
 
-        {/* Account */}
         <Text className="text-gray-400 text-xs mb-3 ml-1">ACCOUNT</Text>
         <View className="bg-gray-900/80 rounded-2xl border border-gray-800">
           <View className="flex-row items-center p-4">
@@ -399,7 +393,6 @@ export default function PrivacySecurity({ onBack, user }) {
         </View>
       </ScrollView>
 
-      {/* 2FA Setup Modal (QR Code) */}
       <Modal
         visible={qrModalVisible}
         transparent
@@ -485,7 +478,6 @@ export default function PrivacySecurity({ onBack, user }) {
         </View>
       </Modal>
 
-      {/* Disable 2FA Modal */}
       <Modal
         visible={disableModalVisible}
         transparent

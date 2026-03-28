@@ -6,13 +6,8 @@ import {
 } from "../config/env.js";
 import { createState, getState, peekState } from "../utils/oauthState.js";
 
-/**
- * Return pending Instagram account info for the confirm screen
- * Does NOT consume the state — it stays valid for the actual confirm call
- */
 export async function getInstagramPendingInfo(req, res) {
   const { stateId } = req.query;
-  // console.log("Instagram pending info request, stateId:", stateId);
   if (!stateId) {
     return res
       .status(400)
@@ -20,7 +15,6 @@ export async function getInstagramPendingInfo(req, res) {
   }
 
   const data = await peekState(stateId);
-  // console.log("Instagram pending data found:", !!data);
   if (!data) {
     return res.status(400).json({
       success: false,
@@ -28,7 +22,6 @@ export async function getInstagramPendingInfo(req, res) {
     });
   }
 
-  // console.log("Instagram pending - state userId:", data.userId, "req userId:", req.user.id);
   if (data.userId !== req.user.id) {
     return res
       .status(403)
@@ -46,13 +39,8 @@ export async function getInstagramPendingInfo(req, res) {
   });
 }
 
-/**
- * Confirm Instagram connection — called from the app after user reviews their account
- */
 export async function confirmInstagramConnection(req, res) {
   const { stateId } = req.body;
-  // console.log("Instagram confirm request, stateId:", stateId);
-
   if (!stateId) {
     return res
       .status(400)
@@ -60,7 +48,6 @@ export async function confirmInstagramConnection(req, res) {
   }
 
   const pendingData = await getState(stateId);
-  // console.log("Instagram confirm data found:", !!pendingData);
   if (!pendingData) {
     return res.status(400).json({
       success: false,
@@ -68,8 +55,6 @@ export async function confirmInstagramConnection(req, res) {
     });
   }
 
-  // Verify the logged-in user matches the one who started the OAuth flow
-  // console.log("Instagram confirm - state userId:", pendingData.userId, "req userId:", req.user.id);
   if (pendingData.userId !== req.user.id) {
     return res
       .status(403)
@@ -101,7 +86,6 @@ export async function confirmInstagramConnection(req, res) {
     }).save();
   }
 
-  // console.log("Instagram platform saved successfully for user:", pendingData.userId, "username:", platformUsername);
   res.json({
     success: true,
     data: { platformUsername, platformUserId },
@@ -112,10 +96,6 @@ function buildRedirectHtml(title, url) {
   return `<!DOCTYPE html><html><head><title>${title}</title><script>window.location.href="${url}";</script></head><body><p>${title}</p><p><a href="${url}">Click here if not redirected</a></p></body></html>`;
 }
 
-/**
- * Instagram Login flow — uses instagram.com login page directly
- * Docs: https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login
- */
 export async function initiateInstagramAuth(req, res) {
   const stateId = await createState({ userId: req.user.id });
   const redirectUri = `${CLIENT_URL}/api/platforms/auth/instagram/callback`;
@@ -150,7 +130,6 @@ export async function handleInstagramCallback(req, res) {
   try {
     const redirectUri = `${CLIENT_URL}/api/platforms/auth/instagram/callback`;
 
-    // Exchange code for short-lived token via Instagram API
     const tokenBody = new URLSearchParams({
       client_id: INSTAGRAM_APP_ID,
       client_secret: INSTAGRAM_APP_SECRET,
@@ -177,7 +156,6 @@ export async function handleInstagramCallback(req, res) {
 
     const shortToken = tokenData.access_token;
 
-    // Exchange short-lived token for long-lived token (60 days)
     const longTokenRes = await fetch(
       `https://graph.instagram.com/access_token?` +
         `grant_type=ig_exchange_token&` +
@@ -187,23 +165,19 @@ export async function handleInstagramCallback(req, res) {
     const longTokenData = await longTokenRes.json();
 
     const accessToken = longTokenData.access_token || shortToken;
-    const expiresIn = longTokenData.expires_in; // seconds
-
-    // Get user profile (username, account type)
+    const expiresIn = longTokenData.expires_in;
     const profileRes = await fetch(
       `https://graph.instagram.com/v21.0/me?fields=user_id,username,account_type,profile_picture_url&access_token=${accessToken}`,
     );
     const profile = await profileRes.json();
 
     const igUsername = profile.username || "Instagram User";
-    // Use profile.id (string) — NOT tokenData.user_id (number loses precision)
     const igUserId = profile.id;
 
     const tokenExpiresAt = expiresIn
       ? new Date(Date.now() + expiresIn * 1000)
       : null;
 
-    // Save the connection directly (same as other platforms)
     const existing = await Platform.findOne({
       userId: stateData.userId,
       name: "Instagram",

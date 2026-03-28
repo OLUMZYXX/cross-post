@@ -9,16 +9,11 @@ import {
   REDDIT_CLIENT_SECRET,
 } from "../config/env.js";
 
-/**
- * Check if a platform's token is expired and refresh it if possible.
- * Mutates the platform document and saves it if refreshed.
- */
 export async function ensureValidToken(platform) {
   if (platform.tokenExpiresAt && new Date(platform.tokenExpiresAt) > new Date()) return;
 
   if (!platform.tokenExpiresAt && !platform.refreshToken) return;
 
-  // Token is expired — try to refresh
   if (!platform.refreshToken) {
     throw new Error(
       `${platform.name} access token has expired and no refresh token is available. Please reconnect.`,

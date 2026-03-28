@@ -41,7 +41,6 @@ router.put(
   asyncHandler(updateProfile),
 );
 
-// 2FA routes
 router.post("/2fa/setup", authenticate, asyncHandler(setup2FA));
 router.post("/2fa/verify", authenticate, asyncHandler(verify2FA));
 router.post("/2fa/disable", authenticate, asyncHandler(disable2FA));

@@ -58,8 +58,6 @@ export async function handleTikTokCallback(req, res) {
     );
 
     const tokenData = await tokenResponse.json();
-    // console.log("TikTok token response:", JSON.stringify(tokenData, null, 2));
-
     if (tokenData.error || !tokenData.data?.access_token) {
       const msg =
         tokenData.error?.message ||
@@ -77,7 +75,6 @@ export async function handleTikTokCallback(req, res) {
     );
 
     const profileData = await profileResponse.json();
-    // console.log("TikTok profile response:", JSON.stringify(profileData, null, 2));
     const displayName = profileData.data?.user?.display_name || "TikTok User";
 
     const existing = await Platform.findOne({
@@ -102,12 +99,9 @@ export async function handleTikTokCallback(req, res) {
       }).save();
     }
 
-    // console.log("TikTok connected for user:", stateData.userId, "username:", displayName);
-
     const appUrl = `crosspost://oauth/tiktok/callback?success=true&name=${encodeURIComponent(displayName)}`;
     res.send(buildRedirectHtml("TikTok Connected", appUrl));
   } catch (err) {
-    // console.error("TikTok OAuth error:", err);
     const appUrl = `crosspost://oauth/tiktok/callback?error=server_error`;
     res.send(buildRedirectHtml("TikTok Connection Failed", appUrl));
   }

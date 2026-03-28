@@ -18,13 +18,11 @@ import {
 
 const router = express.Router();
 
-// Use memory storage — files are buffered and then saved to MongoDB GridFS
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 500 * 1024 * 1024 },
 });
 
-// Only run multer for multipart/form-data requests (JSON posts skip file processing)
 function optionalUpload(req, res, next) {
   if (req.is("multipart/form-data")) {
     return upload.array("media")(req, res, next);

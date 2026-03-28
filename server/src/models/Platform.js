@@ -22,7 +22,6 @@ const platformSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  // OAuth fields
   accessToken: {
     type: String,
     default: null,
@@ -43,7 +42,6 @@ const platformSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  // Facebook/Instagram Page fields
   pageId: {
     type: String,
     default: null,
@@ -52,7 +50,6 @@ const platformSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  // Multiple Facebook Pages support
   pages: [
     {
       pageId: String,

@@ -87,10 +87,6 @@ const deleters = {
   Telegram: deleteFromTelegram,
 };
 
-/**
- * Publish a post to all selected platforms.
- * Returns an array of per-platform results.
- */
 function parseIdentifier(identifier) {
   const parts = identifier.split(":");
   const baseName = parts[0];
@@ -173,15 +169,11 @@ export async function publishToAllPlatforms(userId, post) {
   return results;
 }
 
-/**
- * Delete published posts from external platforms using stored publishResults
- */
 export async function deleteFromAllPlatforms(userId, post) {
   const results = [];
 
   if (!post.publishResults || post.publishResults.length === 0) return results;
 
-  // Fetch connected platforms to get tokens and details
   const connectedPlatforms = await Platform.find({ userId });
 
   for (const pr of post.publishResults) {

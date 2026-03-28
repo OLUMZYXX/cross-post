@@ -29,7 +29,6 @@ export async function getPost(req, res) {
 export async function createPost(req, res) {
   const { caption, platforms, status, mediaUrls: cloudinaryUrls } = req.body;
 
-  // Use Cloudinary URLs if provided, otherwise upload files to GridFS
   const mediaUrls = [];
   if (cloudinaryUrls && cloudinaryUrls.length > 0) {
     mediaUrls.push(...cloudinaryUrls);
@@ -44,7 +43,6 @@ export async function createPost(req, res) {
     }
   }
 
-  // platforms may come as a single string or array from FormData
   const platformList = Array.isArray(platforms)
     ? platforms
     : platforms
@@ -97,15 +95,10 @@ export async function deletePost(req, res) {
     throw Errors.notFound("Post not found");
   }
 
-  // Attempt to remove published posts from external platforms
   try {
     await deleteFromAllPlatforms(req.user.id, post);
-  } catch (err) {
-    // console.error("Error deleting remote posts:", err.message || err);
-    // Continue to delete local record even if remote deletions fail
-  }
+  } catch (err) {}
 
-  // Clean up media files from GridFS
   for (const url of post.media || []) {
     const match = url.match(/\/media\/([a-f0-9]{24})$/);
     if (match) {
@@ -131,7 +124,6 @@ export async function publishPost(req, res) {
     throw Errors.badRequest("Select at least one platform to publish");
   }
 
-  // Publish to all selected platforms via their APIs
   const results = await publishToAllPlatforms(req.user.id, post);
 
   const anySuccess = results.some((r) => r.success);
@@ -142,7 +134,6 @@ export async function publishPost(req, res) {
 
   await post.save();
 
-  // Send notifications about publish results
   await notifyPublishResults(req.user.id, post, results).catch(() => {});
 
   res.json({ success: true, data: { post, publishResults: results } });
@@ -160,16 +151,13 @@ export async function retryPublish(req, res) {
     throw Errors.badRequest("Specify which platforms to retry");
   }
 
-  // Temporarily override post.platforms to only retry the failed ones
   const originalPlatforms = post.platforms;
   post.platforms = retryPlatforms;
 
   const retryResults = await publishToAllPlatforms(req.user.id, post);
 
-  // Restore original platforms
   post.platforms = originalPlatforms;
 
-  // Merge retry results into existing publishResults
   const existing = post.publishResults || [];
   for (const retryResult of retryResults) {
     const idx = existing.findIndex((r) => r.platform === retryResult.platform);
@@ -186,7 +174,6 @@ export async function retryPublish(req, res) {
 
   await post.save();
 
-  // Send notifications about retry results
   await notifyPublishResults(req.user.id, post, retryResults).catch(() => {});
 
   res.json({ success: true, data: { post, publishResults: existing } });
@@ -214,7 +201,6 @@ export async function schedulePost(req, res) {
 
   await post.save();
 
-  // Notify about scheduled post
   const scheduleLabel = scheduledDate.toLocaleString("en-US", {
     month: "short",
     day: "numeric",
@@ -341,7 +327,6 @@ export async function copyrightCheck(req, res) {
   let brandHashtags = [];
   let safeVersion = "";
 
-  // --- TEXT ANALYSIS (GPT-4o-mini) ---
   if (caption && caption.trim()) {
     const textResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -428,7 +413,6 @@ Be thorough but avoid false positives for common everyday phrases.`,
     }
   }
 
-  // --- IMAGE ANALYSIS (GPT-4o vision, parallel, max 4 images) ---
   if (imageUrls && imageUrls.length > 0) {
     const imagesToCheck = imageUrls.slice(0, 4);
 
@@ -518,7 +502,6 @@ Only flag clear issues. Do not flag generic objects, common symbols, or incident
     }
   }
 
-  // Determine overall risk level
   let riskLevel = "none";
   if (issues.some((i) => i.severity === "high")) {
     riskLevel = "high";

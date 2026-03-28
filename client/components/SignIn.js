@@ -149,7 +149,6 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
     try {
       const { data } = await authAPI.signin(email.trim(), password);
 
-      // If 2FA is enabled, show OTP input instead of navigating
       if (data.requiresTwoFactor) {
         setTempToken(data.tempToken);
         setOtpCode("");

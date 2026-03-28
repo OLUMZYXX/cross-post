@@ -12,10 +12,6 @@ export function getGridFSBucket() {
   return bucket;
 }
 
-/**
- * Upload a file buffer to GridFS.
- * Returns the stored file's ObjectId and a URL path to retrieve it.
- */
 export function uploadToGridFS(buffer, filename, contentType) {
   return new Promise((resolve, reject) => {
     const b = getGridFSBucket();
@@ -36,9 +32,6 @@ export function uploadToGridFS(buffer, filename, contentType) {
   });
 }
 
-/**
- * Stream a file from GridFS by its ObjectId.
- */
 export function downloadFromGridFS(fileId) {
   const b = getGridFSBucket();
   const objectId =
@@ -48,9 +41,6 @@ export function downloadFromGridFS(fileId) {
   return b.openDownloadStream(objectId);
 }
 
-/**
- * Find file metadata by ObjectId.
- */
 export async function findFileById(fileId) {
   const b = getGridFSBucket();
   const objectId =
@@ -61,9 +51,6 @@ export async function findFileById(fileId) {
   return files[0] || null;
 }
 
-/**
- * Delete a file from GridFS by its ObjectId.
- */
 export async function deleteFromGridFS(fileId) {
   const b = getGridFSBucket();
   const objectId =

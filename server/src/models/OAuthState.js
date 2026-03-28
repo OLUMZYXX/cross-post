@@ -6,7 +6,6 @@ const oauthStateSchema = new mongoose.Schema({
   expiresAt: { type: Date, required: true },
 }, { timestamps: true });
 
-// Auto-delete expired documents
 oauthStateSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export default mongoose.model("OAuthState", oauthStateSchema);

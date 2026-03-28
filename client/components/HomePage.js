@@ -134,17 +134,14 @@ export default function HomePage({
 
   const fetchRecentActivities = useCallback(async () => {
     try {
-      // Fetch published posts
       const { data: postsData } = await postAPI.list();
       const publishedPosts = postsData.posts.filter(
         (p) => p.status === "published",
       );
 
-      // Fetch connected platforms
       const { data: platformsData } = await platformAPI.list();
       const platforms = platformsData.platforms;
 
-      // Combine and sort activities
       const activities = [
         ...publishedPosts.map((post) => ({
           id: `post-${post._id || post.id}`,
@@ -164,7 +161,7 @@ export default function HomePage({
         })),
       ].sort((a, b) => b.timestamp - a.timestamp);
 
-      setRecentActivities(activities.slice(0, 5)); // Show latest 5 activities
+      setRecentActivities(activities.slice(0, 5));
     } catch (error) {
       console.error("Error fetching activities:", error);
     }
@@ -177,7 +174,6 @@ export default function HomePage({
     fetchUnreadCount();
   }, [fetchPlatforms, fetchPosts, fetchRecentActivities, fetchUnreadCount]);
 
-  // Re-fetch platforms when OAuth completes (deep link callback) or notification arrives
   useEffect(() => {
     if (oauthRefreshKey > 0) {
       fetchPlatforms();
@@ -194,41 +190,34 @@ export default function HomePage({
     }
   }, [sharedContent]);
 
-  // Real-time updates every 2 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       fetchRecentActivities();
       fetchUnreadCount();
-    }, 120000); // 2 minutes
+    }, 120000);
 
     return () => clearInterval(interval);
   }, [fetchRecentActivities, fetchUnreadCount]);
 
-  // Handle Android back button/gesture
   useEffect(() => {
     const handler = () => {
-      // If notifications inbox is open, close it
       if (showNotifications) {
         setShowNotifications(false);
         return true;
       }
-      // If create post is open, close it
       if (showCreatePost) {
         setShowCreatePost(false);
         return true;
       }
-      // If in a settings sub-screen, go back to settings list
       if (activeTab === "settings" && settingsScreen) {
         setSettingsScreen(null);
         return true;
       }
-      // If on a non-home tab, go back to home
       if (activeTab !== "home") {
         prevTabRef.current = "home";
         setActiveTab("home");
         return true;
       }
-      // On home tab, let default behavior (exit app)
       return false;
     };
 
@@ -302,16 +291,13 @@ export default function HomePage({
     },
   };
 
-  // Helper: resolve style for any platform identifier (e.g. "Facebook:abc123" -> Facebook style)
   const getPlatformStyle = (identifier) => {
     const baseName = identifier.split(":")[0];
     return allPlatforms[baseName] || allPlatforms[identifier] || {};
   };
 
-  // Exclude platforms that should not be offered in the "Add Social Media" modal
   const EXCLUDED_FROM_ADD = ["LinkedIn", "Reddit"];
 
-  // Check if Facebook is connected (any Facebook:xxx entry)
   const hasFacebook = connectedPlatforms.some((p) => p.startsWith("Facebook"));
 
   const availablePlatforms = Object.keys(allPlatforms).filter((p) => {
@@ -352,7 +338,6 @@ export default function HomePage({
       if (oauthMethods[platformName]) {
         const { data } = await oauthMethods[platformName]();
 
-        // Use ephemeral auth session — no cached cookies, user can pick a different account each time
         const result = await WebBrowser.openAuthSessionAsync(
           data.authUrl,
           "crosspost://",
@@ -366,7 +351,6 @@ export default function HomePage({
           const urlObj = new URL(url.replace("crosspost://", "http://dummy.com/"));
           const params = urlObj.searchParams;
 
-          // Facebook with code+state needs server-side exchange
           if (
             platformName === "Facebook" &&
             params.get("code") &&

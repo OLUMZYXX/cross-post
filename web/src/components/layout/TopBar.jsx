@@ -11,22 +11,22 @@ export default function TopBar({ unreadCount = 0 }) {
     : "U";
 
   return (
-    <header className="h-16 border-b border-neutral-800/50 bg-[#0a0a0a]/80 backdrop-blur-xl sticky top-0 z-40 px-8 flex items-center justify-between">
+    <header className="h-16 border-b border-white/[0.04] bg-[#0a0a0a]/80 backdrop-blur-2xl sticky top-0 z-40 px-8 flex items-center justify-between">
       <div className="flex items-center flex-1">
         <div className="relative max-w-md w-full">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-600" />
           <input
             type="text"
             placeholder="Search posts..."
-            className="w-full bg-neutral-900 border border-neutral-800/50 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-neutral-600 outline-none focus:border-neutral-700 transition-colors"
+            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-neutral-600 outline-none focus:border-white/[0.12] focus:bg-white/[0.04] transition-all duration-200"
           />
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <Link
           href="/notifications"
-          className="relative w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800/50 flex items-center justify-center hover:border-neutral-700 transition-all"
+          className="relative w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-200"
         >
           <Bell size={16} className="text-neutral-400" />
           {unreadCount > 0 && (
@@ -35,7 +35,7 @@ export default function TopBar({ unreadCount = 0 }) {
             </span>
           )}
         </Link>
-        <div className="h-8 w-px bg-neutral-800" />
+        <div className="h-8 w-px bg-white/[0.06]" />
         <div className="flex items-center gap-3">
           <div className="text-right hidden lg:block">
             <span className="block text-sm font-semibold text-white leading-none">{user?.name?.split(" ")[0] || "User"}</span>
@@ -43,7 +43,7 @@ export default function TopBar({ unreadCount = 0 }) {
           </div>
           <Link
             href="/settings/profile"
-            className="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center text-neutral-300 text-xs font-semibold hover:bg-neutral-700 transition-colors border-2 border-neutral-900 ring-2 ring-neutral-800"
+            className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center text-neutral-300 text-xs font-semibold hover:bg-white/[0.1] transition-all duration-200 border border-white/[0.06]"
           >
             {initials}
           </Link>
