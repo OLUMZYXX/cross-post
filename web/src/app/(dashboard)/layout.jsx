@@ -44,9 +44,9 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0">
         <TopBar unreadCount={unreadCount} />
-        <main className="flex-1 w-full max-w-[1400px] mx-auto p-6 lg:p-8 pb-20 lg:pb-8">
+        <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 py-4 sm:p-6 lg:p-8 pb-20 lg:pb-8 overflow-x-hidden">
           {children}
         </main>
       </div>

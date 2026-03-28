@@ -22,18 +22,23 @@ body {
   scrollbar-width: thin;
   scrollbar-color: #262626 transparent;
 }
-
 *::-webkit-scrollbar {
   width: 5px;
 }
-
 *::-webkit-scrollbar-track {
   background: transparent;
 }
-
 *::-webkit-scrollbar-thumb {
   background: #262626;
   border-radius: 3px;
+}
+
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 
 .calendar-grid {

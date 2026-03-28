@@ -8,6 +8,12 @@ export const metadata = {
     "Create once, publish everywhere. Manage all your social media platforms from a single, powerful dashboard.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
