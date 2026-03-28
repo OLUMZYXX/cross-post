@@ -63,7 +63,7 @@ export default function SecurityPage() {
         <h1 className="text-xl font-extrabold tracking-tight text-white font-headline">Privacy & Security</h1>
       </div>
 
-      <div className="bg-neutral-900 border border-neutral-800/50 rounded-2xl p-5 mb-4">
+      <div className="glass rounded-2xl p-5 mb-4">
         <div className="flex items-center gap-3 mb-3">
           {user?.twoFactorEnabled ? (
             <Shield size={18} className="text-green-400" />

@@ -24,8 +24,8 @@ export default function DailyReview({ selectedDate, posts }) {
   const dayLabel = formatDayLabel(selectedDate);
 
   return (
-    <div className="bg-neutral-900 border border-neutral-800/50 rounded-2xl flex flex-col h-full overflow-hidden">
-      <div className="p-5 border-b border-neutral-800/30 flex items-center justify-between">
+    <div className="glass rounded-2xl flex flex-col h-full overflow-hidden">
+      <div className="p-5 border-b border-white/[0.04] flex items-center justify-between">
         <div>
           <h3 className="text-base font-extrabold text-white font-headline">Daily Review</h3>
           <p className="text-xs font-bold text-green-400 uppercase tracking-widest mt-0.5">{dayLabel}</p>
@@ -48,7 +48,7 @@ export default function DailyReview({ selectedDate, posts }) {
             const statusStyle = STATUS_STYLES[post.status] || STATUS_STYLES.draft;
 
             return (
-              <div key={post._id} className="bg-neutral-800/30 hover:bg-neutral-800/60 p-4 rounded-xl transition-all group">
+              <div key={post._id} className="bg-white/[0.03] hover:bg-white/[0.05] p-4 rounded-xl transition-all duration-200 group">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-500">{time}</span>
                   <div className="flex gap-1">
@@ -80,7 +80,7 @@ export default function DailyReview({ selectedDate, posts }) {
                   </div>
                 </div>
 
-                <div className="mt-3 pt-2 border-t border-neutral-800/50 flex items-center justify-between">
+                <div className="mt-3 pt-2 border-t border-white/[0.04] flex items-center justify-between">
                   <span className={`px-2 py-0.5 text-[9px] font-bold rounded uppercase ${statusStyle}`}>
                     {post.status || "draft"}
                   </span>
@@ -95,7 +95,7 @@ export default function DailyReview({ selectedDate, posts }) {
 
         <Link
           href="/create"
-          className="w-full py-4 border-2 border-dashed border-neutral-800 rounded-xl text-neutral-500 hover:text-green-400 hover:border-green-500/30 hover:bg-green-500/5 transition-all flex flex-col items-center justify-center gap-1 group"
+          className="w-full py-4 border-2 border-dashed border-white/[0.06] rounded-xl text-neutral-500 hover:text-green-400 hover:border-green-500/30 hover:bg-green-500/5 transition-all duration-200 flex flex-col items-center justify-center gap-1 group"
         >
           <Plus size={20} className="group-hover:scale-110 transition-transform" />
           <span className="text-[10px] font-bold uppercase tracking-widest">Schedule New Slot</span>

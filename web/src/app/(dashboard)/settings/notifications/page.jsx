@@ -50,12 +50,12 @@ export default function NotificationSettingsPage() {
         <h1 className="text-xl font-extrabold tracking-tight text-white font-headline">Notifications</h1>
       </div>
 
-      <div className="bg-neutral-900 border border-neutral-800/50 rounded-2xl overflow-hidden">
+      <div className="glass rounded-2xl overflow-hidden">
         {PREFS.map((pref, i) => (
           <div
             key={pref.key}
             className={`flex items-center justify-between px-4 py-3.5 ${
-              i < PREFS.length - 1 ? "border-b border-neutral-800/30" : ""
+              i < PREFS.length - 1 ? "border-b border-white/[0.04]" : ""
             }`}
           >
             <div>

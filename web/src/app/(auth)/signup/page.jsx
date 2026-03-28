@@ -56,7 +56,7 @@ export default function SignUpPage() {
           Home
         </Link>
 
-        <h1 className="text-xl font-semibold text-white mb-1">Create account</h1>
+        <h1 className="text-2xl font-extrabold text-white mb-1 font-headline">Create account</h1>
         <p className="text-neutral-500 text-sm mb-6">Get started with Cross-Post</p>
 
         <form onSubmit={handleSubmit} className="space-y-3">

@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, CalendarDays, PenSquare, Send, BarChart3 } from "lucide-react";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  PenSquare,
+  Send,
+  BarChart3,
+} from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/dashboard", icon: LayoutDashboard },
@@ -35,7 +41,9 @@ export default function MobileNav() {
               }`}
             >
               <item.icon size={18} />
-              {!isCreate && <span className="text-[9px] font-medium">{item.label}</span>}
+              {!isCreate && (
+                <span className="text-[9px] font-medium">{item.label}</span>
+              )}
             </Link>
           );
         })}

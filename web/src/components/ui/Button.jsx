@@ -1,11 +1,14 @@
 import { Loader2 } from "lucide-react";
 
 const VARIANTS = {
-  primary: "bg-white text-black hover:bg-neutral-200",
-  secondary: "bg-neutral-800 text-neutral-300 hover:bg-neutral-700",
-  danger: "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20",
-  ghost: "text-neutral-400 hover:text-white hover:bg-neutral-800",
-  green: "bg-green-500 text-black hover:bg-green-600",
+  primary: "bg-white text-black hover:bg-neutral-200 shadow-lg shadow-white/5",
+  secondary:
+    "bg-white/[0.06] text-neutral-300 hover:bg-white/[0.1] hover:text-white",
+  danger:
+    "bg-red-500/10 text-red-400 hover:bg-red-500/15 border border-red-500/20",
+  ghost: "text-neutral-400 hover:text-white hover:bg-white/[0.04]",
+  green:
+    "bg-gradient-to-r from-green-500 to-emerald-600 text-black hover:shadow-lg hover:shadow-green-500/20",
 };
 
 const SIZES = {
@@ -14,11 +17,19 @@ const SIZES = {
   lg: "px-6 py-3 text-sm",
 };
 
-export default function Button({ children, variant = "primary", size = "md", loading = false, disabled = false, className = "", ...props }) {
+export default function Button({
+  children,
+  variant = "primary",
+  size = "md",
+  loading = false,
+  disabled = false,
+  className = "",
+  ...props
+}) {
   return (
     <button
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       {...props}
     >
       {loading && <Loader2 size={14} className="animate-spin" />}

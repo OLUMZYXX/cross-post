@@ -32,7 +32,10 @@ export default function Hero() {
             className="group flex items-center gap-2.5 bg-white text-black font-semibold px-7 py-3 rounded-xl hover:bg-neutral-100 transition-all duration-200 text-sm shadow-lg shadow-white/10 hover:shadow-white/20"
           >
             Start for free
-            <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight
+              size={15}
+              className="group-hover:translate-x-0.5 transition-transform"
+            />
           </Link>
           <a
             href="#features"

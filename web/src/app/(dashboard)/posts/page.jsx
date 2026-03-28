@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Send, FileText, Clock, Trash2, RotateCcw, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Send,
+  FileText,
+  Clock,
+  Trash2,
+  RotateCcw,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import usePostsData from "@/hooks/usePostsData";
 import { postAPI } from "@/services/postService";
 import { useToast } from "@/context/ToastContext";
@@ -16,22 +24,37 @@ const TABS = [
 
 export default function PostsPage() {
   const [tab, setTab] = useState("published");
-  const { sentPosts, draftPosts, scheduledPosts, loading, refresh, deletePost } = usePostsData();
+  const {
+    sentPosts,
+    draftPosts,
+    scheduledPosts,
+    loading,
+    refresh,
+    deletePost,
+  } = usePostsData();
   const { showToast } = useToast();
   const [retrying, setRetrying] = useState(null);
   const [deleting, setDeleting] = useState(null);
 
   if (loading) return <Spinner className="py-20" />;
 
-  const posts = tab === "published" ? sentPosts : tab === "drafts" ? draftPosts : scheduledPosts;
+  const posts =
+    tab === "published"
+      ? sentPosts
+      : tab === "drafts"
+        ? draftPosts
+        : scheduledPosts;
 
   const handleDelete = async (id) => {
     setDeleting(id);
     try {
       await deletePost(id);
       showToast({ type: "success", title: "Post deleted" });
-    } catch { showToast({ type: "error", title: "Delete failed" }); }
-    finally { setDeleting(null); }
+    } catch {
+      showToast({ type: "error", title: "Delete failed" });
+    } finally {
+      setDeleting(null);
+    }
   };
 
   const handleRetry = async (id, failedPlatforms) => {
@@ -40,23 +63,35 @@ export default function PostsPage() {
       await postAPI.retry(id, failedPlatforms);
       showToast({ type: "success", title: "Retry sent" });
       refresh();
-    } catch (err) { showToast({ type: "error", title: err.message || "Retry failed" }); }
-    finally { setRetrying(null); }
+    } catch (err) {
+      showToast({ type: "error", title: err.message || "Retry failed" });
+    } finally {
+      setRetrying(null);
+    }
   };
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-3xl font-extrabold tracking-tight text-white font-headline mb-4">Posts</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight text-white font-headline mb-4">
+        Posts
+      </h1>
 
-      <div className="flex items-center gap-1 mb-5 border-b border-neutral-800/50">
+      <div className="flex items-center gap-1 mb-5 border-b border-white/[0.04]">
         {TABS.map((t) => {
-          const count = t.key === "published" ? sentPosts.length : t.key === "drafts" ? draftPosts.length : scheduledPosts.length;
+          const count =
+            t.key === "published"
+              ? sentPosts.length
+              : t.key === "drafts"
+                ? draftPosts.length
+                : scheduledPosts.length;
           return (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-colors ${
-                tab === t.key ? "border-white text-white" : "border-transparent text-neutral-500 hover:text-neutral-300"
+              className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-all duration-200 ${
+                tab === t.key
+                  ? "border-white text-white"
+                  : "border-transparent text-neutral-500 hover:text-neutral-300"
               }`}
             >
               <t.icon size={13} />
@@ -78,14 +113,22 @@ export default function PostsPage() {
             const succeeded = results.filter((r) => r.success);
             const failed = results.filter((r) => !r.success);
             const schedDate = post.scheduledAt
-              ? new Date(post.scheduledAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true })
+              ? new Date(post.scheduledAt).toLocaleString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                })
               : null;
 
             return (
-              <div key={post._id} className="bg-neutral-900 border border-neutral-800/50 rounded-2xl p-4">
+              <div key={post._id} className="glass rounded-2xl p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm mb-1.5 leading-relaxed">{post.caption || "No caption"}</p>
+                    <p className="text-white text-sm mb-1.5 leading-relaxed">
+                      {post.caption || "No caption"}
+                    </p>
                     <div className="flex flex-wrap items-center gap-2">
                       {succeeded.length > 0 && (
                         <span className="flex items-center gap-1 text-green-400 text-[11px]">
@@ -97,10 +140,16 @@ export default function PostsPage() {
                           <AlertCircle size={11} /> {failed.length} failed
                         </span>
                       )}
-                      {schedDate && <span className="text-blue-400 text-[11px]">{schedDate}</span>}
+                      {schedDate && (
+                        <span className="text-blue-400 text-[11px]">
+                          {schedDate}
+                        </span>
+                      )}
                       {post.platforms?.length > 0 && (
                         <span className="text-neutral-600 text-[11px]">
-                          {post.platforms.map((p) => p.split(":")[0]).join(", ")}
+                          {post.platforms
+                            .map((p) => p.split(":")[0])
+                            .join(", ")}
                         </span>
                       )}
                       {post.publishedAt && (
@@ -116,7 +165,12 @@ export default function PostsPage() {
                         variant="ghost"
                         size="sm"
                         loading={retrying === post._id}
-                        onClick={() => handleRetry(post._id, failed.map((r) => r.platform))}
+                        onClick={() =>
+                          handleRetry(
+                            post._id,
+                            failed.map((r) => r.platform),
+                          )
+                        }
                       >
                         <RotateCcw size={12} /> Retry
                       </Button>
@@ -135,12 +189,19 @@ export default function PostsPage() {
                 {post.media?.length > 0 && (
                   <div className="flex gap-2 mt-3">
                     {post.media.slice(0, 4).map((url, i) => (
-                      <div key={i} className="w-14 h-14 rounded-lg overflow-hidden bg-neutral-800">
-                        <img src={url} alt="" className="w-full h-full object-cover" />
+                      <div
+                        key={i}
+                        className="w-14 h-14 rounded-lg overflow-hidden bg-white/[0.04]"
+                      >
+                        <img
+                          src={url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     ))}
                     {post.media.length > 4 && (
-                      <div className="w-14 h-14 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-500 text-xs">
+                      <div className="w-14 h-14 rounded-lg bg-white/[0.04] flex items-center justify-center text-neutral-500 text-xs">
                         +{post.media.length - 4}
                       </div>
                     )}

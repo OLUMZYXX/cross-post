@@ -68,7 +68,7 @@ export default function SignInPage() {
           Home
         </Link>
 
-        <h1 className="text-xl font-semibold text-white mb-1">Sign in</h1>
+        <h1 className="text-2xl font-extrabold text-white mb-1 font-headline">Sign in</h1>
         <p className="text-neutral-500 text-sm mb-6">
           Welcome back to Cross-Post
         </p>

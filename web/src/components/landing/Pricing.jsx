@@ -66,10 +66,14 @@ export default function Pricing() {
               )}
               <h3 className="text-white text-lg font-bold">{plan.name}</h3>
               <div className="flex items-baseline gap-1 mt-1 mb-1">
-                <span className="text-4xl font-extrabold text-white tracking-tight">{plan.price}</span>
+                <span className="text-4xl font-extrabold text-white tracking-tight">
+                  {plan.price}
+                </span>
                 <span className="text-neutral-500 text-sm">{plan.period}</span>
               </div>
-              <p className="text-neutral-500 text-sm mb-6">{plan.description}</p>
+              <p className="text-neutral-500 text-sm mb-6">
+                {plan.description}
+              </p>
 
               <ul className="space-y-3 mb-7">
                 {plan.features.map((f) => (

@@ -24,7 +24,7 @@ export default function AccountSidebar({ platforms, sentPosts }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-neutral-900 border border-neutral-800/50 rounded-2xl p-6">
+      <div className="glass rounded-2xl p-6">
         <h3 className="text-base font-bold text-white mb-5 flex items-center gap-2 font-headline">
           <Bell size={18} className="text-green-400" />
           Hub Alerts
@@ -35,7 +35,7 @@ export default function AccountSidebar({ platforms, sentPosts }) {
           <ToggleRow label="Platform News" desc="Alert settings for platform news." />
         </div>
 
-        <div className="mt-6 pt-5 border-t border-neutral-800/30">
+        <div className="mt-6 pt-5 border-t border-white/[0.04]">
           <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-3">Notification Channel</p>
           <div className="flex gap-2">
             <ChannelPill label="EMAIL" active />
@@ -45,7 +45,7 @@ export default function AccountSidebar({ platforms, sentPosts }) {
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 rounded-2xl p-6 border border-neutral-800/50 overflow-hidden relative group">
+      <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] rounded-2xl p-6 border border-white/[0.06] overflow-hidden relative group">
         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
           <span className="text-6xl">📊</span>
         </div>
@@ -81,7 +81,7 @@ function ToggleRow({ label, desc, defaultOn = false }) {
       <button
         onClick={() => setOn(!on)}
         className={`w-10 h-5 rounded-full relative flex items-center px-0.5 cursor-pointer transition-colors ${
-          on ? "bg-green-500" : "bg-neutral-700 hover:bg-neutral-600"
+          on ? "bg-green-500" : "bg-white/[0.1] hover:bg-white/[0.15]"
         }`}
       >
         <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${on ? "translate-x-5" : "translate-x-0"}`} />
@@ -95,7 +95,7 @@ function ChannelPill({ label, active = false }) {
     <span className={`px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition-colors ${
       active
         ? "bg-green-500/10 text-green-400 border border-green-500/20"
-        : "bg-neutral-800 text-neutral-500 hover:bg-neutral-700"
+        : "bg-white/[0.04] text-neutral-500 hover:bg-white/[0.06]"
     }`}>
       {label}
     </span>

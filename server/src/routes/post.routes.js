@@ -2,7 +2,11 @@ import express from "express";
 import multer from "multer";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { authenticate } from "../middleware/auth.js";
-import { publishLimiter, createLimiter, rephraseLimiter } from "../middleware/rateLimiter.js";
+import {
+  publishLimiter,
+  createLimiter,
+  rephraseLimiter,
+} from "../middleware/rateLimiter.js";
 import {
   listPosts,
   getPost,

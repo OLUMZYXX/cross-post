@@ -113,8 +113,8 @@ export default function NotificationsPage() {
               <div
                 key={n._id}
                 onClick={() => handlePress(n)}
-                className={`flex items-start gap-3 p-3 rounded-2xl cursor-pointer transition-colors group ${
-                  n.read ? "bg-neutral-900/30" : "bg-neutral-900 border border-neutral-800/50"
+                className={`flex items-start gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-200 group ${
+                  n.read ? "bg-white/[0.02]" : "glass"
                 }`}
               >
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ backgroundColor: `${config.color}12` }}>

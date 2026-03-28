@@ -3,8 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, PenSquare, Send, CalendarDays, BarChart3,
-  Bell, Settings, LogOut, Plus, Zap,
+  LayoutDashboard,
+  PenSquare,
+  Send,
+  CalendarDays,
+  BarChart3,
+  Bell,
+  Settings,
+  LogOut,
+  Plus,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -26,7 +34,8 @@ export default function Sidebar() {
   const { logout } = useAuth();
 
   const renderLink = (item) => {
-    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+    const isActive =
+      pathname === item.href || pathname.startsWith(item.href + "/");
     return (
       <Link
         key={item.href}
@@ -51,15 +60,17 @@ export default function Sidebar() {
             <Zap size={16} className="text-black" />
           </div>
           <div>
-            <span className="text-base font-bold tracking-tight text-white">Cross-Post</span>
-            <p className="text-[10px] font-medium uppercase tracking-widest text-neutral-600">Publish Everywhere</p>
+            <span className="text-base font-bold tracking-tight text-white">
+              Cross-Post
+            </span>
+            <p className="text-[10px] font-medium uppercase tracking-widest text-neutral-600">
+              Publish Everywhere
+            </p>
           </div>
         </Link>
       </div>
 
-      <nav className="flex-1 px-3 space-y-0.5">
-        {MAIN_NAV.map(renderLink)}
-      </nav>
+      <nav className="flex-1 px-3 space-y-0.5">{MAIN_NAV.map(renderLink)}</nav>
 
       <div className="px-3 mt-auto space-y-0.5">
         <Link

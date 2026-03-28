@@ -18,7 +18,7 @@ export default function CalendarGrid({ currentYear, currentMonth, posts, selecte
 
   return (
     <div>
-      <div className="calendar-grid border-b border-neutral-800/30 pb-2 mb-1">
+      <div className="calendar-grid border-b border-white/[0.04] pb-2 mb-1">
         {DAY_HEADERS.map((d, i) => (
           <div
             key={d}
@@ -31,7 +31,7 @@ export default function CalendarGrid({ currentYear, currentMonth, posts, selecte
         ))}
       </div>
 
-      <div className="calendar-grid gap-px bg-neutral-800/30 rounded-2xl overflow-hidden border border-neutral-800/30">
+      <div className="calendar-grid gap-px bg-white/[0.02] rounded-2xl overflow-hidden border border-white/[0.06]">
         {days.map((day, idx) => {
           const dayPosts = getPostsForDate(filteredPosts, day.date);
           const isSelected = selectedDate && isSameDay(day.date, selectedDate);
@@ -41,10 +41,10 @@ export default function CalendarGrid({ currentYear, currentMonth, posts, selecte
             <div
               key={idx}
               onClick={() => onSelectDate(day.date)}
-              className={`p-2.5 min-h-[100px] cursor-pointer transition-all ${
+              className={`p-2.5 min-h-[100px] cursor-pointer transition-all duration-200 ${
                 isSelected
-                  ? "bg-green-500/5 border-2 border-green-500/50 ring-2 ring-inset ring-neutral-900 z-10 shadow-sm"
-                  : "bg-neutral-900/50 hover:bg-neutral-800/50"
+                  ? "bg-green-500/5 border-2 border-green-500/50 ring-2 ring-inset ring-[#0a0a0a] z-10 shadow-sm"
+                  : "bg-white/[0.01] hover:bg-white/[0.03]"
               } ${!day.isCurrentMonth ? "opacity-30" : ""}`}
             >
               <span
@@ -85,7 +85,7 @@ export default function CalendarGrid({ currentYear, currentMonth, posts, selecte
               )}
 
               {dayPosts.length === 0 && day.isCurrentMonth && isSelected && (
-                <div className="mt-2 h-10 bg-neutral-800/50 rounded-lg flex items-center justify-center border border-dashed border-neutral-700">
+                <div className="mt-2 h-10 bg-white/[0.03] rounded-lg flex items-center justify-center border border-dashed border-white/[0.06]">
                   <span className="text-neutral-600 text-[10px]">No posts</span>
                 </div>
               )}

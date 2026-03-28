@@ -1,4 +1,13 @@
-import { Facebook, Instagram, Twitter, Linkedin, Youtube, MessageCircle, Send, Music2 } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Linkedin,
+  Youtube,
+  MessageCircle,
+  Send,
+  Music2,
+} from "lucide-react";
 
 const PLATFORMS = [
   { name: "Facebook", icon: Facebook, color: "#1877F2" },
@@ -28,10 +37,15 @@ export default function Platforms() {
               key={p.name}
               className="group flex items-center gap-3 glass rounded-xl px-5 py-3 hover:bg-white/[0.04] transition-all duration-300 cursor-default"
             >
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: `${p.color}15` }}>
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                style={{ backgroundColor: `${p.color}15` }}
+              >
                 <p.icon size={16} style={{ color: p.color }} />
               </div>
-              <span className="text-neutral-300 group-hover:text-white text-sm font-medium transition-colors duration-200">{p.name}</span>
+              <span className="text-neutral-300 group-hover:text-white text-sm font-medium transition-colors duration-200">
+                {p.name}
+              </span>
             </div>
           ))}
         </div>

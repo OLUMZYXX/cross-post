@@ -7,14 +7,22 @@ import { useAuth } from "@/context/AuthContext";
 export default function TopBar({ unreadCount = 0 }) {
   const { user } = useAuth();
   const initials = user?.name
-    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
     : "U";
 
   return (
     <header className="h-16 border-b border-white/[0.04] bg-[#0a0a0a]/80 backdrop-blur-2xl sticky top-0 z-40 px-8 flex items-center justify-between">
       <div className="flex items-center flex-1">
         <div className="relative max-w-md w-full">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-600" />
+          <Search
+            size={16}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-600"
+          />
           <input
             type="text"
             placeholder="Search posts..."
@@ -38,8 +46,12 @@ export default function TopBar({ unreadCount = 0 }) {
         <div className="h-8 w-px bg-white/[0.06]" />
         <div className="flex items-center gap-3">
           <div className="text-right hidden lg:block">
-            <span className="block text-sm font-semibold text-white leading-none">{user?.name?.split(" ")[0] || "User"}</span>
-            <span className="text-[10px] text-neutral-500 font-medium">Creator</span>
+            <span className="block text-sm font-semibold text-white leading-none">
+              {user?.name?.split(" ")[0] || "User"}
+            </span>
+            <span className="text-[10px] text-neutral-500 font-medium">
+              Creator
+            </span>
           </div>
           <Link
             href="/settings/profile"

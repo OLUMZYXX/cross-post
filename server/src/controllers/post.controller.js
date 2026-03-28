@@ -4,7 +4,10 @@ import {
   publishToAllPlatforms,
   deleteFromAllPlatforms,
 } from "../services/publishPost.js";
-import { notifyPublishResults, createNotification } from "../services/notificationService.js";
+import {
+  notifyPublishResults,
+  createNotification,
+} from "../services/notificationService.js";
 import { SERVER_URL, OPENAI_API_KEY } from "../config/env.js";
 import { uploadToGridFS, deleteFromGridFS } from "../utils/gridfs.js";
 
@@ -147,7 +150,11 @@ export async function retryPublish(req, res) {
   }
 
   const { platforms: retryPlatforms } = req.body;
-  if (!retryPlatforms || !Array.isArray(retryPlatforms) || retryPlatforms.length === 0) {
+  if (
+    !retryPlatforms ||
+    !Array.isArray(retryPlatforms) ||
+    retryPlatforms.length === 0
+  ) {
     throw Errors.badRequest("Specify which platforms to retry");
   }
 
@@ -240,18 +247,15 @@ export async function rephraseCaption(req, res) {
       "Rewrite in a warm, friendly and approachable tone. Add welcoming emojis throughout.",
     witty:
       "Rewrite in a witty, clever tone with humor. Add playful emojis that match the wit.",
-    bold:
-      "Rewrite in a bold, confident, attention-grabbing tone. Add strong impactful emojis.",
+    bold: "Rewrite in a bold, confident, attention-grabbing tone. Add strong impactful emojis.",
     inspirational:
       "Rewrite in an inspirational, motivating tone. Add uplifting emojis throughout.",
-    genz:
-      "Rewrite in a Gen Z internet slang style — use 'no cap', 'lowkey', 'slay', 'it's giving', 'fr fr', 'based'. Keep it short, punchy, and trendy with relevant emojis.",
+    genz: "Rewrite in a Gen Z internet slang style — use 'no cap', 'lowkey', 'slay', 'it's giving', 'fr fr', 'based'. Keep it short, punchy, and trendy with relevant emojis.",
     sports:
       "Rewrite like an excited sports commentator — use action words, hype energy, competitive spirit. Add sports-related emojis throughout.",
     music:
       "Rewrite with musical vibes — use rhythm, flow, and melody references. Make it sound like lyrics or a music lover's caption with music emojis.",
-    hype:
-      "Rewrite with maximum hype and excitement — ALL CAPS for emphasis, lots of energy, exclamation marks, fire emojis. Make it feel like an epic announcement.",
+    hype: "Rewrite with maximum hype and excitement — ALL CAPS for emphasis, lots of energy, exclamation marks, fire emojis. Make it feel like an epic announcement.",
     storyteller:
       "Rewrite as a short, captivating story or narrative — draw the reader in with vivid language, a hook, and emotional depth. Add subtle emojis.",
     sarcastic:
@@ -263,7 +267,8 @@ export async function rephraseCaption(req, res) {
     "Rewrite this social media post to sound better while keeping the same meaning.";
 
   const charLimit = maxLength && maxLength > 0 ? maxLength : 500;
-  const isShortenMode = maxLength && maxLength > 0 && caption.length > maxLength;
+  const isShortenMode =
+    maxLength && maxLength > 0 && caption.length > maxLength;
   const limitNote = isShortenMode
     ? `CRITICAL: The text is currently ${caption.length} characters and MUST be shortened to UNDER ${charLimit} characters. Cut aggressively — remove filler words, shorten sentences, use abbreviations. The final result MUST be ${charLimit} characters or fewer. Count every character including emojis and spaces.`
     : `You MUST keep the result strictly under ${charLimit} characters (including emojis and spaces). Count carefully.`;
@@ -279,8 +284,7 @@ export async function rephraseCaption(req, res) {
       messages: [
         {
           role: "system",
-          content:
-            `You are a social media copywriter. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. ${limitNote}`,
+          content: `You are a social media copywriter. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. ${limitNote}`,
         },
         {
           role: "user",
@@ -294,9 +298,7 @@ export async function rephraseCaption(req, res) {
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw Errors.badRequest(
-      err?.error?.message || "AI service request failed",
-    );
+    throw Errors.badRequest(err?.error?.message || "AI service request failed");
   }
 
   const data = await response.json();
@@ -328,18 +330,20 @@ export async function copyrightCheck(req, res) {
   let safeVersion = "";
 
   if (caption && caption.trim()) {
-    const textResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `You are a copyright and intellectual property analysis assistant. Analyze the given social media post text for potential copyright issues.
+    const textResponse = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `You are a copyright and intellectual property analysis assistant. Analyze the given social media post text for potential copyright issues.
 
 Check for:
 1. Song lyrics (even partial lines from known songs)
@@ -374,17 +378,18 @@ IMPORTANT for suggestions:
 
 If no issues are found, return {"hasIssues": false, "issues": [], "suggestions": [], "brandHashtags": [], "safeVersion": ""}.
 Be thorough but avoid false positives for common everyday phrases.`,
-          },
-          {
-            role: "user",
-            content: `Analyze this social media post for copyright concerns:\n\n${caption}`,
-          },
-        ],
-        max_tokens: 500,
-        temperature: 0.2,
-        response_format: { type: "json_object" },
-      }),
-    });
+            },
+            {
+              role: "user",
+              content: `Analyze this social media post for copyright concerns:\n\n${caption}`,
+            },
+          ],
+          max_tokens: 500,
+          temperature: 0.2,
+          response_format: { type: "json_object" },
+        }),
+      },
+    );
 
     if (!textResponse.ok) {
       const err = await textResponse.json().catch(() => ({}));
@@ -418,18 +423,20 @@ Be thorough but avoid false positives for common everyday phrases.`,
 
     const imagePromises = imagesToCheck.map(async (url) => {
       try {
-        const imgResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-4o",
-            messages: [
-              {
-                role: "system",
-                content: `You are a visual copyright analysis assistant. Analyze images for potential copyright issues on social media platforms.
+        const imgResponse = await fetch(
+          "https://api.openai.com/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${OPENAI_API_KEY}`,
+            },
+            body: JSON.stringify({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "system",
+                  content: `You are a visual copyright analysis assistant. Analyze images for potential copyright issues on social media platforms.
 
 Check for:
 1. Visible watermarks (stock photo sites like Getty, Shutterstock, Adobe Stock, iStock, etc.)
@@ -459,20 +466,24 @@ Respond ONLY with valid JSON:
 IMPORTANT: If brand logos are detected, include them as hashtags in brandHashtags (e.g. #Nike, #Apple). Suggest mentioning the brand with a hashtag in the caption instead of showing copyrighted logos.
 If no issues found, return {"hasIssues": false, "issues": [], "suggestions": [], "brandHashtags": []}.
 Only flag clear issues. Do not flag generic objects, common symbols, or incidental branding.`,
-              },
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: "Analyze this image for copyright concerns:" },
-                  { type: "image_url", image_url: { url, detail: "low" } },
-                ],
-              },
-            ],
-            max_tokens: 400,
-            temperature: 0.2,
-            response_format: { type: "json_object" },
-          }),
-        });
+                },
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Analyze this image for copyright concerns:",
+                    },
+                    { type: "image_url", image_url: { url, detail: "low" } },
+                  ],
+                },
+              ],
+              max_tokens: 400,
+              temperature: 0.2,
+              response_format: { type: "json_object" },
+            }),
+          },
+        );
 
         if (!imgResponse.ok) return null;
 

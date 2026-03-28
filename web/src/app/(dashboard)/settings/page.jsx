@@ -35,8 +35,8 @@ export default function SettingsPage() {
     <div className="animate-fade-in max-w-2xl">
       <h1 className="text-3xl font-extrabold tracking-tight text-white font-headline mb-5">Settings</h1>
 
-      <Link href="/settings/profile" className="flex items-center gap-3 bg-neutral-900 border border-neutral-800/50 rounded-2xl p-4 mb-5 hover:border-neutral-700 transition-colors">
-        <div className="w-12 h-12 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-300 text-sm font-medium">
+      <Link href="/settings/profile" className="flex items-center gap-3 glass rounded-2xl p-4 mb-5 hover:border-white/[0.1] transition-all duration-200">
+        <div className="w-12 h-12 rounded-lg bg-white/[0.06] flex items-center justify-center text-neutral-300 text-sm font-medium">
           {initials}
         </div>
         <div className="flex-1">
@@ -49,16 +49,16 @@ export default function SettingsPage() {
       {SECTIONS.map((section) => (
         <div key={section.label} className="mb-4">
           <p className="text-neutral-600 text-[10px] uppercase tracking-wider mb-2 ml-1">{section.label}</p>
-          <div className="bg-neutral-900 border border-neutral-800/50 rounded-2xl overflow-hidden">
+          <div className="glass rounded-2xl overflow-hidden">
             {section.items.map((item, i) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 hover:bg-neutral-800/50 transition-colors ${
-                  i < section.items.length - 1 ? "border-b border-neutral-800/30" : ""
+                className={`flex items-center gap-3 px-4 py-3 hover:bg-white/[0.03] transition-all duration-200 ${
+                  i < section.items.length - 1 ? "border-b border-white/[0.04]" : ""
                 }`}
               >
-                <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center">
                   <item.icon size={15} className="text-neutral-400" />
                 </div>
                 <div className="flex-1">
@@ -66,7 +66,7 @@ export default function SettingsPage() {
                   <p className="text-neutral-600 text-[11px]">{item.desc}</p>
                 </div>
                 {item.showCount && (
-                  <span className="text-neutral-500 text-[11px] bg-neutral-800 rounded-full px-2 py-0.5 mr-1">
+                  <span className="text-neutral-500 text-[11px] bg-white/[0.06] rounded-full px-2 py-0.5 mr-1">
                     {platforms.length}
                   </span>
                 )}
@@ -79,7 +79,7 @@ export default function SettingsPage() {
 
       <button
         onClick={logout}
-        className="flex items-center justify-center gap-2 w-full bg-neutral-900 border border-neutral-800/50 rounded-2xl py-3 text-red-400 text-sm hover:bg-neutral-800/50 transition-colors"
+        className="flex items-center justify-center gap-2 w-full glass rounded-2xl py-3 text-red-400 text-sm hover:bg-red-500/5 hover:border-red-500/20 transition-all duration-200"
       >
         <LogOut size={15} />
         Sign Out

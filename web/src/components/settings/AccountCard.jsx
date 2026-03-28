@@ -9,7 +9,7 @@ export default function AccountCard({ platform, onDisconnect }) {
   const gradTo = config.gradientTo || config.color || "#888";
 
   return (
-    <div className="bg-neutral-900 rounded-2xl border border-neutral-800/50 overflow-hidden group hover:border-neutral-700/50 transition-all">
+    <div className="glass rounded-2xl overflow-hidden group hover:border-white/[0.1] transition-all duration-200">
       <div
         className="relative p-5 pb-4"
         style={{ background: `linear-gradient(135deg, ${gradFrom} 0%, ${gradTo} 100%)` }}
@@ -36,7 +36,7 @@ export default function AccountCard({ platform, onDisconnect }) {
           <span className="text-[10px] font-bold uppercase tracking-wider">Last Sync: Active</span>
         </div>
         <div className="flex items-center gap-1">
-          <button className="px-3 py-1.5 rounded-lg text-neutral-400 text-xs font-semibold hover:bg-neutral-800 hover:text-white transition-colors">
+          <button className="px-3 py-1.5 rounded-lg text-neutral-400 text-xs font-semibold hover:bg-white/[0.06] hover:text-white transition-all duration-200">
             Settings
           </button>
           <button

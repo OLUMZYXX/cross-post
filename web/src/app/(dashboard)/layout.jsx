@@ -46,7 +46,7 @@ export default function DashboardLayout({ children }) {
       <Sidebar />
       <div className="flex-1 flex flex-col min-h-screen">
         <TopBar unreadCount={unreadCount} />
-        <main className="flex-1 w-full max-w-[1600px] mx-auto p-8 pb-20 lg:pb-8">
+        <main className="flex-1 w-full max-w-[1400px] mx-auto p-6 lg:p-8 pb-20 lg:pb-8">
           {children}
         </main>
       </div>

@@ -124,9 +124,9 @@ export default function AccountsPage() {
                   key={key}
                   onClick={() => handleConnect(name)}
                   disabled={connecting === name}
-                  className="bg-neutral-900/30 rounded-2xl p-6 border-2 border-dashed border-neutral-800 flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-neutral-900 hover:border-green-500/30 transition-all min-h-[180px]"
+                  className="bg-white/[0.02] rounded-2xl p-6 border-2 border-dashed border-white/[0.06] flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white/[0.04] hover:border-green-500/30 transition-all duration-200 min-h-[180px]"
                 >
-                  <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ color: config.color }}>
+                  <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ color: config.color }}>
                     <span className="text-lg font-bold">{name[0]}</span>
                   </div>
                   <p className="font-bold text-white text-sm">Connect {config.label}</p>
@@ -159,10 +159,10 @@ function ConnectionLogs({ platforms }) {
   return (
     <section>
       <h3 className="text-lg font-bold text-white mb-4 font-headline">Recent Connection Logs</h3>
-      <div className="bg-neutral-900 rounded-2xl border border-neutral-800/50 p-2">
-        <div className="divide-y divide-neutral-800/30">
+      <div className="glass rounded-2xl p-2">
+        <div className="divide-y divide-white/[0.04]">
           {logs.map((log, i) => (
-            <div key={i} className="flex items-center gap-4 p-4 hover:bg-neutral-800/30 transition-colors rounded-xl">
+              <div key={i} className="flex items-center gap-4 p-4 hover:bg-white/[0.03] transition-all duration-200 rounded-xl">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                 log.success ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"
               }`}>
