@@ -12,7 +12,7 @@ import {
   Settings,
   LogOut,
   Plus,
-  Zap,
+  Share2,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -57,7 +57,7 @@ export default function Sidebar() {
       <div className="px-6 py-6 mb-2">
         <Link href="/dashboard" className="flex items-center gap-3">
           <div className="w-9 h-9 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/15">
-            <Zap size={16} className="text-black" />
+            <Share2 size={16} className="text-black" />
           </div>
           <div>
             <span className="text-base font-bold tracking-tight text-white">

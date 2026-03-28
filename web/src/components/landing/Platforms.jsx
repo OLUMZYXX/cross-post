@@ -41,8 +41,8 @@ export default function Platforms() {
                 className="w-6 h-6 md:w-8 md:h-8 rounded-md md:rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
                 style={{ backgroundColor: `${p.color}15` }}
               >
-                <p.icon size={13} className="md:hidden" style={{ color: p.color }} />
-                <p.icon size={16} className="hidden md:block" style={{ color: p.color }} />
+                <span className="md:hidden"><p.icon size={13} style={{ color: p.color }} /></span>
+                <span className="hidden md:inline-flex"><p.icon size={16} style={{ color: p.color }} /></span>
               </div>
               <span className="text-neutral-300 group-hover:text-white text-xs md:text-sm font-medium transition-colors duration-200">
                 {p.name}

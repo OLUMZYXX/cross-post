@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, Zap } from "lucide-react";
+import { Menu, X, Share2 } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -18,8 +18,8 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20">
-            <Zap size={13} className="text-black md:hidden" />
-            <Zap size={15} className="text-black hidden md:block" />
+            <span className="md:hidden"><Share2 size={13} className="text-black" /></span>
+            <span className="hidden md:inline-flex"><Share2 size={15} className="text-black" /></span>
           </div>
           <span className="text-white font-bold text-[13px] md:text-[15px] tracking-tight">
             Cross-Post

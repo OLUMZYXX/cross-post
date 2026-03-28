@@ -1,4 +1,4 @@
-import { Zap } from "lucide-react";
+import { Share2 } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -6,8 +6,8 @@ export default function Footer() {
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 md:w-7 md:h-7 rounded-lg bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center">
-            <Zap size={10} className="text-black md:hidden" />
-            <Zap size={12} className="text-black hidden md:block" />
+            <span className="md:hidden"><Share2 size={10} className="text-black" /></span>
+            <span className="hidden md:inline-flex"><Share2 size={12} className="text-black" /></span>
           </div>
           <span className="text-neutral-500 text-xs md:text-sm font-medium">
             Cross-Post

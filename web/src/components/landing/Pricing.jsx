@@ -79,8 +79,8 @@ export default function Pricing() {
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-center gap-2">
                     <div className="w-4 h-4 md:w-5 md:h-5 rounded-md bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                      <Check size={10} className="text-green-400 md:hidden" />
-                      <Check size={12} className="text-green-400 hidden md:block" />
+                      <span className="md:hidden"><Check size={10} className="text-green-400" /></span>
+                      <span className="hidden md:inline-flex"><Check size={12} className="text-green-400" /></span>
                     </div>
                     <span className="text-neutral-300 text-xs md:text-sm">{f}</span>
                   </li>

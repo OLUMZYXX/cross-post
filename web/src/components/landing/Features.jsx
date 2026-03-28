@@ -68,14 +68,8 @@ export default function Features() {
               className={`group glass rounded-xl md:rounded-2xl p-4 md:p-6 hover:bg-white/[0.04] transition-all duration-300 animate-fade-in-up delay-${(i + 1) * 100}`}
             >
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-white/[0.06] flex items-center justify-center mb-3 md:mb-4 group-hover:bg-green-500/10 transition-colors duration-300">
-                <feature.icon
-                  size={15}
-                  className="text-neutral-400 group-hover:text-green-400 transition-colors duration-300 md:hidden"
-                />
-                <feature.icon
-                  size={18}
-                  className="text-neutral-400 group-hover:text-green-400 transition-colors duration-300 hidden md:block"
-                />
+                <span className="md:hidden"><feature.icon size={15} className="text-neutral-400 group-hover:text-green-400 transition-colors duration-300" /></span>
+                <span className="hidden md:inline-flex"><feature.icon size={18} className="text-neutral-400 group-hover:text-green-400 transition-colors duration-300" /></span>
               </div>
               <h3 className="text-white font-semibold text-xs md:text-[15px] mb-1 md:mb-2">
                 {feature.title}
