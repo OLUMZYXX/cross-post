@@ -12,11 +12,15 @@ export default function AccountCard({ platform, onDisconnect }) {
     <div className="glass rounded-2xl overflow-hidden group hover:border-white/[0.1] transition-all duration-200">
       <div
         className="relative p-5 pb-4"
-        style={{ background: `linear-gradient(135deg, ${gradFrom} 0%, ${gradTo} 100%)` }}
+        style={{
+          background: `linear-gradient(135deg, ${gradFrom} 0%, ${gradTo} 100%)`,
+        }}
       >
         <div className="flex justify-between items-start mb-8">
           <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-            <span className="text-white text-lg font-bold">{platform.name[0]}</span>
+            <span className="text-white text-lg font-bold">
+              {platform.name[0]}
+            </span>
           </div>
           <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-[10px] font-bold tracking-wider flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-green-300 animate-pulse-dot" />
@@ -24,7 +28,9 @@ export default function AccountCard({ platform, onDisconnect }) {
           </span>
         </div>
 
-        <h3 className="text-xl font-bold text-white font-headline">{config.label || platform.name}</h3>
+        <h3 className="text-xl font-bold text-white font-headline">
+          {config.label || platform.name}
+        </h3>
         <p className="text-white/70 font-medium text-sm mt-0.5">
           @{platform.platformUsername || "connected"}
         </p>
@@ -33,7 +39,9 @@ export default function AccountCard({ platform, onDisconnect }) {
       <div className="px-5 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-neutral-500">
           <Clock size={12} />
-          <span className="text-[10px] font-bold uppercase tracking-wider">Last Sync: Active</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">
+            Last Sync: Active
+          </span>
         </div>
         <div className="flex items-center gap-1">
           <button className="px-3 py-1.5 rounded-lg text-neutral-400 text-xs font-semibold hover:bg-white/[0.06] hover:text-white transition-all duration-200">

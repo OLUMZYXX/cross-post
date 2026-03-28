@@ -57,10 +57,15 @@ export default function SecurityPage() {
   return (
     <div className="animate-fade-in max-w-lg">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/settings" className="text-neutral-500 hover:text-white transition-colors">
+        <Link
+          href="/settings"
+          className="text-neutral-500 hover:text-white transition-colors"
+        >
           <ArrowLeft size={18} />
         </Link>
-        <h1 className="text-xl font-extrabold tracking-tight text-white font-headline">Privacy & Security</h1>
+        <h1 className="text-xl font-extrabold tracking-tight text-white font-headline">
+          Privacy & Security
+        </h1>
       </div>
 
       <div className="glass rounded-2xl p-5 mb-4">
@@ -71,38 +76,72 @@ export default function SecurityPage() {
             <ShieldOff size={18} className="text-neutral-500" />
           )}
           <div>
-            <p className="text-white text-sm font-medium">Two-Factor Authentication</p>
+            <p className="text-white text-sm font-medium">
+              Two-Factor Authentication
+            </p>
             <p className="text-neutral-500 text-[11px]">
-              {user?.twoFactorEnabled ? "Enabled — your account is protected" : "Not enabled"}
+              {user?.twoFactorEnabled
+                ? "Enabled — your account is protected"
+                : "Not enabled"}
             </p>
           </div>
         </div>
 
         {!user?.twoFactorEnabled && !qrUri && (
-          <Button variant="secondary" size="sm" loading={setupLoading} onClick={handle2FASetup}>
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={setupLoading}
+            onClick={handle2FASetup}
+          >
             Enable 2FA
           </Button>
         )}
 
         {qrUri && (
           <div className="space-y-3 mt-3">
-            <p className="text-neutral-400 text-xs">Scan the QR code with your authenticator app, then enter the 6-digit code.</p>
+            <p className="text-neutral-400 text-xs">
+              Scan the QR code with your authenticator app, then enter the
+              6-digit code.
+            </p>
             <div className="bg-white p-3 rounded-lg inline-block">
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrUri)}`} alt="QR" className="w-44 h-44" />
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrUri)}`}
+                alt="QR"
+                className="w-44 h-44"
+              />
             </div>
             <div className="flex gap-2">
-              <Input placeholder="000000" value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} maxLength={6} className="flex-1" />
-              <Button size="md" onClick={handleVerify}>Verify</Button>
+              <Input
+                placeholder="000000"
+                value={verifyCode}
+                onChange={(e) => setVerifyCode(e.target.value)}
+                maxLength={6}
+                className="flex-1"
+              />
+              <Button size="md" onClick={handleVerify}>
+                Verify
+              </Button>
             </div>
           </div>
         )}
 
         {user?.twoFactorEnabled && (
           <div className="mt-3 space-y-2">
-            <p className="text-neutral-500 text-xs">Enter your 2FA code to disable.</p>
+            <p className="text-neutral-500 text-xs">
+              Enter your 2FA code to disable.
+            </p>
             <div className="flex gap-2">
-              <Input placeholder="000000" value={disableCode} onChange={(e) => setDisableCode(e.target.value)} maxLength={6} className="flex-1" />
-              <Button variant="danger" size="md" onClick={handleDisable}>Disable</Button>
+              <Input
+                placeholder="000000"
+                value={disableCode}
+                onChange={(e) => setDisableCode(e.target.value)}
+                maxLength={6}
+                className="flex-1"
+              />
+              <Button variant="danger" size="md" onClick={handleDisable}>
+                Disable
+              </Button>
             </div>
           </div>
         )}

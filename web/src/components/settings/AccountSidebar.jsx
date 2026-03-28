@@ -5,7 +5,8 @@ import { Bell } from "lucide-react";
 
 export default function AccountSidebar({ platforms, sentPosts }) {
   const stats = useMemo(() => {
-    if (!sentPosts || sentPosts.length === 0) return { reliability: 0, bars: [0, 0, 0, 0, 0, 0, 0] };
+    if (!sentPosts || sentPosts.length === 0)
+      return { reliability: 0, bars: [0, 0, 0, 0, 0, 0, 0] };
     const results = sentPosts.flatMap((p) => p.publishResults || []);
     const total = results.length;
     const succeeded = results.filter((r) => r.success).length;
@@ -14,7 +15,7 @@ export default function AccountSidebar({ platforms, sentPosts }) {
       const dayPosts = sentPosts.filter((p) => {
         const d = new Date(p.publishedAt);
         const daysAgo = Math.floor((Date.now() - d.getTime()) / 86400000);
-        return daysAgo === (6 - i);
+        return daysAgo === 6 - i;
       });
       return dayPosts.length;
     });
@@ -30,13 +31,26 @@ export default function AccountSidebar({ platforms, sentPosts }) {
           Hub Alerts
         </h3>
         <div className="space-y-5">
-          <ToggleRow label="Post Success" desc="Alert settings for post success." defaultOn />
-          <ToggleRow label="Post Failures" desc="Alert settings for post failures." defaultOn />
-          <ToggleRow label="Platform News" desc="Alert settings for platform news." />
+          <ToggleRow
+            label="Post Success"
+            desc="Alert settings for post success."
+            defaultOn
+          />
+          <ToggleRow
+            label="Post Failures"
+            desc="Alert settings for post failures."
+            defaultOn
+          />
+          <ToggleRow
+            label="Platform News"
+            desc="Alert settings for platform news."
+          />
         </div>
 
         <div className="mt-6 pt-5 border-t border-white/[0.04]">
-          <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-3">Notification Channel</p>
+          <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-3">
+            Notification Channel
+          </p>
           <div className="flex gap-2">
             <ChannelPill label="EMAIL" active />
             <ChannelPill label="BROWSER" />
@@ -49,21 +63,28 @@ export default function AccountSidebar({ platforms, sentPosts }) {
         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
           <span className="text-6xl">📊</span>
         </div>
-        <p className="text-green-400 text-[10px] font-bold uppercase tracking-widest mb-1">Hub Health</p>
-        <h4 className="text-2xl font-bold text-white mb-5 font-headline">{stats.reliability}% Reliable</h4>
+        <p className="text-green-400 text-[10px] font-bold uppercase tracking-widest mb-1">
+          Hub Health
+        </p>
+        <h4 className="text-2xl font-bold text-white mb-5 font-headline">
+          {stats.reliability}% Reliable
+        </h4>
         <div className="flex items-end gap-1.5 h-16 mb-5">
           {stats.bars.map((h, i) => (
             <div
               key={i}
               className={`flex-1 rounded-t transition-colors ${
-                i === stats.bars.length - 1 ? "bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.4)]" : "bg-white/10 hover:bg-white/20"
+                i === stats.bars.length - 1
+                  ? "bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.4)]"
+                  : "bg-white/10 hover:bg-white/20"
               }`}
               style={{ height: `${Math.max(h, 5)}%` }}
             />
           ))}
         </div>
         <p className="text-xs text-neutral-500 leading-relaxed">
-          Your account connections have been stable. {platforms.length} platform{platforms.length !== 1 ? "s" : ""} connected and active.
+          Your account connections have been stable. {platforms.length} platform
+          {platforms.length !== 1 ? "s" : ""} connected and active.
         </p>
       </div>
     </div>
@@ -84,7 +105,9 @@ function ToggleRow({ label, desc, defaultOn = false }) {
           on ? "bg-green-500" : "bg-white/[0.1] hover:bg-white/[0.15]"
         }`}
       >
-        <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${on ? "translate-x-5" : "translate-x-0"}`} />
+        <div
+          className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${on ? "translate-x-5" : "translate-x-0"}`}
+        />
       </button>
     </div>
   );
@@ -92,11 +115,13 @@ function ToggleRow({ label, desc, defaultOn = false }) {
 
 function ChannelPill({ label, active = false }) {
   return (
-    <span className={`px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition-colors ${
-      active
-        ? "bg-green-500/10 text-green-400 border border-green-500/20"
-        : "bg-white/[0.04] text-neutral-500 hover:bg-white/[0.06]"
-    }`}>
+    <span
+      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition-colors ${
+        active
+          ? "bg-green-500/10 text-green-400 border border-green-500/20"
+          : "bg-white/[0.04] text-neutral-500 hover:bg-white/[0.06]"
+      }`}
+    >
       {label}
     </span>
   );

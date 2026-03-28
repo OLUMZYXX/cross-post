@@ -8,10 +8,26 @@ import { useToast } from "@/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
 
 const PREFS = [
-  { key: "pushEnabled", label: "Push Notifications", desc: "Receive push alerts on your device" },
-  { key: "emailEnabled", label: "Email Notifications", desc: "Get email updates" },
-  { key: "postAlerts", label: "Post Alerts", desc: "When posts publish, fail, or go live" },
-  { key: "scheduleReminders", label: "Schedule Reminders", desc: "Before scheduled posts go out" },
+  {
+    key: "pushEnabled",
+    label: "Push Notifications",
+    desc: "Receive push alerts on your device",
+  },
+  {
+    key: "emailEnabled",
+    label: "Email Notifications",
+    desc: "Get email updates",
+  },
+  {
+    key: "postAlerts",
+    label: "Post Alerts",
+    desc: "When posts publish, fail, or go live",
+  },
+  {
+    key: "scheduleReminders",
+    label: "Schedule Reminders",
+    desc: "Before scheduled posts go out",
+  },
 ];
 
 export default function NotificationSettingsPage() {
@@ -24,7 +40,10 @@ export default function NotificationSettingsPage() {
       try {
         const { data } = await notificationAPI.getPreferences();
         setPrefs(data.preferences || data);
-      } catch {} finally { setLoading(false); }
+      } catch {
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -44,10 +63,15 @@ export default function NotificationSettingsPage() {
   return (
     <div className="animate-fade-in max-w-lg">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/settings" className="text-neutral-500 hover:text-white transition-colors">
+        <Link
+          href="/settings"
+          className="text-neutral-500 hover:text-white transition-colors"
+        >
           <ArrowLeft size={18} />
         </Link>
-        <h1 className="text-xl font-extrabold tracking-tight text-white font-headline">Notifications</h1>
+        <h1 className="text-xl font-extrabold tracking-tight text-white font-headline">
+          Notifications
+        </h1>
       </div>
 
       <div className="glass rounded-2xl overflow-hidden">

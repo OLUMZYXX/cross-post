@@ -34,28 +34,51 @@ export default function AccountsPage() {
       const raw = data.platforms || [];
       const expanded = [];
       for (const p of raw) {
-        if (p.name === "Facebook" && p.pages?.length > 0 && p.selectedPageIds?.length > 0) {
-          for (const page of p.pages.filter((pg) => p.selectedPageIds.includes(pg.pageId))) {
-            expanded.push({ ...p, _id: `${p._id}_page_${page.pageId}`, platformUsername: page.pageName, _pageId: page.pageId });
+        if (
+          p.name === "Facebook" &&
+          p.pages?.length > 0 &&
+          p.selectedPageIds?.length > 0
+        ) {
+          for (const page of p.pages.filter((pg) =>
+            p.selectedPageIds.includes(pg.pageId),
+          )) {
+            expanded.push({
+              ...p,
+              _id: `${p._id}_page_${page.pageId}`,
+              platformUsername: page.pageName,
+              _pageId: page.pageId,
+            });
           }
         } else {
           expanded.push(p);
         }
       }
       setPlatforms(expanded);
-    } catch {} finally { setLoading(false); }
+    } catch {
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => { fetchPlatforms(); }, [fetchPlatforms]);
+  useEffect(() => {
+    fetchPlatforms();
+  }, [fetchPlatforms]);
 
   const handleDisconnect = async (platform) => {
     try {
-      if (platform._pageId) await platformAPI.toggleFacebookPage(platform._pageId, false);
+      if (platform._pageId)
+        await platformAPI.toggleFacebookPage(platform._pageId, false);
       else await platformAPI.disconnect(platform._id);
       setPlatforms((prev) => prev.filter((p) => p._id !== platform._id));
-      showToast({ type: "success", title: `${platform.platformUsername || platform.name} disconnected` });
+      showToast({
+        type: "success",
+        title: `${platform.platformUsername || platform.name} disconnected`,
+      });
     } catch (err) {
-      showToast({ type: "error", title: err.message || "Failed to disconnect" });
+      showToast({
+        type: "error",
+        title: err.message || "Failed to disconnect",
+      });
     }
   };
 
@@ -67,9 +90,17 @@ export default function AccountsPage() {
       const { data } = await method();
       const authUrl = data.authUrl || data.url;
       if (authUrl) {
-        const popup = window.open(authUrl, `connect_${name}`, "width=600,height=700");
+        const popup = window.open(
+          authUrl,
+          `connect_${name}`,
+          "width=600,height=700",
+        );
         const timer = setInterval(() => {
-          if (popup?.closed) { clearInterval(timer); setConnecting(null); fetchPlatforms(); }
+          if (popup?.closed) {
+            clearInterval(timer);
+            setConnecting(null);
+            fetchPlatforms();
+          }
         }, 1000);
       }
     } catch (err) {
@@ -82,7 +113,7 @@ export default function AccountsPage() {
 
   const connectedNames = new Set(platforms.map((p) => p.name));
   const available = Object.keys(PLATFORM_CONFIG).filter(
-    (key) => !connectedNames.has(key.charAt(0).toUpperCase() + key.slice(1))
+    (key) => !connectedNames.has(key.charAt(0).toUpperCase() + key.slice(1)),
   );
 
   return (
@@ -90,17 +121,26 @@ export default function AccountsPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Link href="/settings" className="text-neutral-500 hover:text-white transition-colors">
+            <Link
+              href="/settings"
+              className="text-neutral-500 hover:text-white transition-colors"
+            >
               <ArrowLeft size={18} />
             </Link>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white font-headline">Connected Accounts</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-white font-headline">
+              Connected Accounts
+            </h1>
           </div>
-          <p className="text-neutral-500 max-w-lg">Manage your digital footprint across platforms. Add, remove, or re-authenticate your social profiles from a single hub.</p>
+          <p className="text-neutral-500 max-w-lg">
+            Manage your digital footprint across platforms. Add, remove, or
+            re-authenticate your social profiles from a single hub.
+          </p>
         </div>
         <button
           onClick={() => {
             const first = available[0];
-            if (first) handleConnect(first.charAt(0).toUpperCase() + first.slice(1));
+            if (first)
+              handleConnect(first.charAt(0).toUpperCase() + first.slice(1));
           }}
           disabled={available.length === 0}
           className="bg-gradient-to-br from-green-500 to-emerald-600 text-black px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all text-sm flex-shrink-0 disabled:opacity-50"
@@ -114,7 +154,11 @@ export default function AccountsPage() {
         <div className="col-span-12 lg:col-span-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {platforms.map((p) => (
-              <AccountCard key={p._id} platform={p} onDisconnect={handleDisconnect} />
+              <AccountCard
+                key={p._id}
+                platform={p}
+                onDisconnect={handleDisconnect}
+              />
             ))}
             {available.map((key) => {
               const config = PLATFORM_CONFIG[key];
@@ -126,12 +170,21 @@ export default function AccountsPage() {
                   disabled={connecting === name}
                   className="bg-white/[0.02] rounded-2xl p-6 border-2 border-dashed border-white/[0.06] flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white/[0.04] hover:border-green-500/30 transition-all duration-200 min-h-[180px]"
                 >
-                  <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ color: config.color }}>
+                  <div
+                    className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"
+                    style={{ color: config.color }}
+                  >
                     <span className="text-lg font-bold">{name[0]}</span>
                   </div>
-                  <p className="font-bold text-white text-sm">Connect {config.label}</p>
-                  <p className="text-xs text-neutral-500 mt-1">Unlock cross-posting</p>
-                  {connecting === name && <Spinner size={14} className="mt-2" />}
+                  <p className="font-bold text-white text-sm">
+                    Connect {config.label}
+                  </p>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Unlock cross-posting
+                  </p>
+                  {connecting === name && (
+                    <Spinner size={14} className="mt-2" />
+                  )}
                 </button>
               );
             })}
@@ -158,21 +211,40 @@ function ConnectionLogs({ platforms }) {
 
   return (
     <section>
-      <h3 className="text-lg font-bold text-white mb-4 font-headline">Recent Connection Logs</h3>
+      <h3 className="text-lg font-bold text-white mb-4 font-headline">
+        Recent Connection Logs
+      </h3>
       <div className="glass rounded-2xl p-2">
         <div className="divide-y divide-white/[0.04]">
           {logs.map((log, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 hover:bg-white/[0.03] transition-all duration-200 rounded-xl">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                log.success ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"
-              }`}>
-                {log.success ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+            <div
+              key={i}
+              className="flex items-center gap-4 p-4 hover:bg-white/[0.03] transition-all duration-200 rounded-xl"
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  log.success
+                    ? "bg-green-500/10 text-green-400"
+                    : "bg-red-500/10 text-red-400"
+                }`}
+              >
+                {log.success ? (
+                  <CheckCircle size={18} />
+                ) : (
+                  <AlertCircle size={18} />
+                )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white">{log.name} successfully synchronized</p>
-                <p className="text-xs text-neutral-500">{log.name} successfully synchronized at {log.username}.</p>
+                <p className="text-sm font-semibold text-white">
+                  {log.name} successfully synchronized
+                </p>
+                <p className="text-xs text-neutral-500">
+                  {log.name} successfully synchronized at {log.username}.
+                </p>
               </div>
-              <span className="text-[10px] font-bold text-neutral-600 uppercase flex-shrink-0">Recently</span>
+              <span className="text-[10px] font-bold text-neutral-600 uppercase flex-shrink-0">
+                Recently
+              </span>
             </div>
           ))}
         </div>

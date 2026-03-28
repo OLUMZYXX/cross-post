@@ -26,7 +26,8 @@ export default function SignUpPage() {
     if (!email.trim()) e.email = "Email is required";
     if (!password) e.password = "Password is required";
     else if (password.length < 6) e.password = "Min 6 characters";
-    if (password !== confirmPassword) e.confirmPassword = "Passwords don't match";
+    if (password !== confirmPassword)
+      e.confirmPassword = "Passwords don't match";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -56,20 +57,64 @@ export default function SignUpPage() {
           Home
         </Link>
 
-        <h1 className="text-2xl font-extrabold text-white mb-1 font-headline">Create account</h1>
-        <p className="text-neutral-500 text-sm mb-6">Get started with Cross-Post</p>
+        <h1 className="text-2xl font-extrabold text-white mb-1 font-headline">
+          Create account
+        </h1>
+        <p className="text-neutral-500 text-sm mb-6">
+          Get started with Cross-Post
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          <Input label="Name" icon={User} placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} />
-          <Input label="Email" type="email" icon={Mail} placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
-          <Input label="Password" type="password" icon={Lock} placeholder="Min 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} />
-          <Input label="Confirm Password" type="password" icon={Lock} placeholder="Re-enter password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} error={errors.confirmPassword} />
-          <Button type="submit" loading={loading} className="w-full mt-1" size="md">Create Account</Button>
+          <Input
+            label="Name"
+            icon={User}
+            placeholder="John Doe"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            error={errors.name}
+          />
+          <Input
+            label="Email"
+            type="email"
+            icon={Mail}
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={errors.email}
+          />
+          <Input
+            label="Password"
+            type="password"
+            icon={Lock}
+            placeholder="Min 6 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={errors.password}
+          />
+          <Input
+            label="Confirm Password"
+            type="password"
+            icon={Lock}
+            placeholder="Re-enter password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            error={errors.confirmPassword}
+          />
+          <Button
+            type="submit"
+            loading={loading}
+            className="w-full mt-1"
+            size="md"
+          >
+            Create Account
+          </Button>
         </form>
 
         <p className="text-neutral-500 text-sm text-center mt-6">
           Have an account?{" "}
-          <Link href="/signin" className="text-white hover:underline">Sign in</Link>
+          <Link href="/signin" className="text-white hover:underline">
+            Sign in
+          </Link>
         </p>
       </div>
     </div>

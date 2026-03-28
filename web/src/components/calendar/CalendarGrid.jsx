@@ -1,18 +1,34 @@
 "use client";
 
 import { useMemo } from "react";
-import { getMonthDays, getPostsForDate, isSameDay } from "@/utils/calendarHelpers";
+import {
+  getMonthDays,
+  getPostsForDate,
+  isSameDay,
+} from "@/utils/calendarHelpers";
 import { PLATFORM_CONFIG } from "@/config/platforms";
 
 const DAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-export default function CalendarGrid({ currentYear, currentMonth, posts, selectedDate, onSelectDate, platformFilter }) {
-  const days = useMemo(() => getMonthDays(currentYear, currentMonth), [currentYear, currentMonth]);
+export default function CalendarGrid({
+  currentYear,
+  currentMonth,
+  posts,
+  selectedDate,
+  onSelectDate,
+  platformFilter,
+}) {
+  const days = useMemo(
+    () => getMonthDays(currentYear, currentMonth),
+    [currentYear, currentMonth],
+  );
 
   const filteredPosts = useMemo(() => {
     if (!platformFilter || platformFilter === "all") return posts;
     return posts.filter((p) =>
-      (p.platforms || []).some((plat) => plat.toLowerCase().includes(platformFilter.toLowerCase()))
+      (p.platforms || []).some((plat) =>
+        plat.toLowerCase().includes(platformFilter.toLowerCase()),
+      ),
     );
   }, [posts, platformFilter]);
 
@@ -64,22 +80,32 @@ export default function CalendarGrid({ currentYear, currentMonth, posts, selecte
               {dayPosts.length > 0 && (
                 <div className="mt-1.5 space-y-1">
                   {dayPosts.slice(0, 3).map((post) => {
-                    const platformName = (post.platforms?.[0] || "").split(":")[0].toLowerCase();
+                    const platformName = (post.platforms?.[0] || "")
+                      .split(":")[0]
+                      .toLowerCase();
                     const config = PLATFORM_CONFIG[platformName] || {};
                     return (
                       <div
                         key={post._id}
                         className="flex items-center gap-1 rounded-sm p-0.5 text-[9px]"
-                        style={{ backgroundColor: `${config.color || "#666"}15`, borderLeft: `2px solid ${config.color || "#666"}` }}
+                        style={{
+                          backgroundColor: `${config.color || "#666"}15`,
+                          borderLeft: `2px solid ${config.color || "#666"}`,
+                        }}
                       >
-                        <span className="truncate font-bold" style={{ color: config.color || "#999" }}>
+                        <span
+                          className="truncate font-bold"
+                          style={{ color: config.color || "#999" }}
+                        >
                           {post.caption?.slice(0, 16) || "Post"}
                         </span>
                       </div>
                     );
                   })}
                   {dayPosts.length > 3 && (
-                    <span className="text-[9px] text-neutral-500 font-medium">+{dayPosts.length - 3} more</span>
+                    <span className="text-[9px] text-neutral-500 font-medium">
+                      +{dayPosts.length - 3} more
+                    </span>
                   )}
                 </div>
               )}
