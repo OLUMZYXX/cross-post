@@ -15,12 +15,13 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-white/[0.04]">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20">
-            <Zap size={15} className="text-black" />
+      <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20">
+            <Zap size={13} className="text-black md:hidden" />
+            <Zap size={15} className="text-black hidden md:block" />
           </div>
-          <span className="text-white font-bold text-[15px] tracking-tight">
+          <span className="text-white font-bold text-[13px] md:text-[15px] tracking-tight">
             Cross-Post
           </span>
         </Link>
@@ -61,27 +62,27 @@ export default function Navbar() {
       </div>
 
       {menuOpen && (
-        <div className="md:hidden bg-[#0a0a0a]/95 backdrop-blur-2xl border-t border-white/[0.04] px-6 py-4 animate-fade-in">
+        <div className="md:hidden bg-[#0a0a0a]/95 backdrop-blur-2xl border-t border-white/[0.04] px-4 py-3 animate-fade-in">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              className="block text-neutral-400 hover:text-white text-sm py-3 transition-colors"
+              className="block text-neutral-400 hover:text-white text-xs py-2.5 transition-colors"
             >
               {link.label}
             </a>
           ))}
-          <div className="flex gap-3 mt-4 pt-4 border-t border-white/[0.04]">
+          <div className="flex gap-2.5 mt-3 pt-3 border-t border-white/[0.04]">
             <Link
               href="/signin"
-              className="flex-1 text-center text-neutral-400 text-sm py-2.5 rounded-xl border border-neutral-800 hover:border-neutral-700 transition-colors"
+              className="flex-1 text-center text-neutral-400 text-xs py-2 rounded-lg border border-neutral-800 hover:border-neutral-700 transition-colors"
             >
               Sign In
             </Link>
             <Link
               href="/signup"
-              className="flex-1 text-center bg-white text-black text-sm font-semibold py-2.5 rounded-xl"
+              className="flex-1 text-center bg-white text-black text-xs font-semibold py-2 rounded-lg"
             >
               Get Started
             </Link>

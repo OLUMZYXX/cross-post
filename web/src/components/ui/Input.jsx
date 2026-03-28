@@ -18,22 +18,28 @@ export default function Input({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-neutral-400 text-xs font-medium mb-1.5">
+        <label className="block text-neutral-400 text-[11px] md:text-xs font-medium mb-1 md:mb-1.5">
           {label}
         </label>
       )}
       <div className="relative">
         {Icon && (
           <Icon
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 md:hidden"
+          />
+        )}
+        {Icon && (
+          <Icon
             size={16}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-600"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-600 hidden md:block"
           />
         )}
         <input
           type={inputType}
-          className={`w-full bg-white/[0.03] border rounded-xl px-3.5 py-2.5 text-white text-sm placeholder-neutral-600 outline-none transition-all duration-200 ${
-            Icon ? "pl-10" : ""
-          } ${isPassword ? "pr-10" : ""} ${
+          className={`w-full bg-white/[0.03] border rounded-lg md:rounded-xl px-3 md:px-3.5 py-2 md:py-2.5 text-white text-xs md:text-sm placeholder-neutral-600 outline-none transition-all duration-200 ${
+            Icon ? "pl-9 md:pl-10" : ""
+          } ${isPassword ? "pr-9 md:pr-10" : ""} ${
             error
               ? "border-red-500/50 focus:border-red-500"
               : "border-white/[0.06] focus:border-white/[0.15] focus:bg-white/[0.04]"
@@ -50,7 +56,7 @@ export default function Input({
           </button>
         )}
       </div>
-      {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+      {error && <p className="text-red-400 text-[10px] md:text-xs mt-1">{error}</p>}
     </div>
   );
 }

@@ -47,20 +47,20 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 md:px-6">
       <div className="w-full max-w-sm">
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-neutral-500 hover:text-neutral-300 text-xs mb-8 transition-colors"
+          className="inline-flex items-center gap-1 text-neutral-500 hover:text-neutral-300 text-[11px] md:text-xs mb-6 md:mb-8 transition-colors"
         >
-          <ArrowLeft size={14} />
+          <ArrowLeft size={12} />
           Home
         </Link>
 
-        <h1 className="text-2xl font-extrabold text-white mb-1 font-headline">
+        <h1 className="text-xl md:text-2xl font-extrabold text-white mb-1 font-headline">
           Create account
         </h1>
-        <p className="text-neutral-500 text-sm mb-6">
+        <p className="text-neutral-500 text-xs md:text-sm mb-5 md:mb-6">
           Get started with Cross-Post
         </p>
 
@@ -110,7 +110,7 @@ export default function SignUpPage() {
           </Button>
         </form>
 
-        <p className="text-neutral-500 text-sm text-center mt-6">
+        <p className="text-neutral-500 text-xs md:text-sm text-center mt-5 md:mt-6">
           Have an account?{" "}
           <Link href="/signin" className="text-white hover:underline">
             Sign in
