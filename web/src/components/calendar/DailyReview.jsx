@@ -32,29 +32,29 @@ export default function DailyReview({ selectedDate, posts }) {
   const dayLabel = formatDayLabel(selectedDate);
 
   return (
-    <div className="glass rounded-2xl flex flex-col h-full overflow-hidden">
-      <div className="p-5 border-b border-white/[0.04] flex items-center justify-between">
+    <div className="glass rounded-xl sm:rounded-2xl flex flex-col h-full overflow-hidden">
+      <div className="p-3.5 sm:p-5 border-b border-white/[0.04] flex items-center justify-between">
         <div>
-          <h3 className="text-base font-extrabold text-white font-headline">
+          <h3 className="text-sm sm:text-base font-extrabold text-white font-headline">
             Daily Review
           </h3>
-          <p className="text-xs font-bold text-green-400 uppercase tracking-widest mt-0.5">
+          <p className="text-[10px] sm:text-xs font-bold text-green-400 uppercase tracking-widest mt-0.5">
             {dayLabel}
           </p>
         </div>
-        <span className="text-neutral-600 text-xs font-semibold">
+        <span className="text-neutral-600 text-[10px] sm:text-xs font-semibold">
           {posts.length} posts
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-3 sm:space-y-4">
         {posts.length === 0 ? (
-          <div className="text-center py-10">
-            <CalendarDays size={28} className="mx-auto text-neutral-700 mb-3" />
-            <p className="text-neutral-500 text-sm font-medium">
+          <div className="text-center py-6 sm:py-10">
+            <CalendarDays size={24} className="mx-auto text-neutral-700 mb-2 sm:mb-3" />
+            <p className="text-neutral-500 text-xs sm:text-sm font-medium">
               No posts scheduled
             </p>
-            <p className="text-neutral-600 text-xs mt-1">
+            <p className="text-neutral-600 text-[10px] sm:text-xs mt-1">
               Select a day with posts or schedule a new one
             </p>
           </div>
@@ -71,10 +71,10 @@ export default function DailyReview({ selectedDate, posts }) {
             return (
               <div
                 key={post._id}
-                className="bg-white/[0.03] hover:bg-white/[0.05] p-4 rounded-xl transition-all duration-200 group"
+                className="bg-white/[0.03] hover:bg-white/[0.05] p-3 sm:p-4 rounded-lg sm:rounded-xl transition-all duration-200 group"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-500">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-neutral-500">
                     {time}
                   </span>
                   <div className="flex gap-1">
@@ -94,19 +94,19 @@ export default function DailyReview({ selectedDate, posts }) {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3">
                   {post.media?.[0] && (
                     <img
                       src={post.media[0]}
                       alt=""
-                      className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                      className="w-10 h-10 sm:w-14 sm:h-14 rounded-md sm:rounded-lg object-cover flex-shrink-0"
                     />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-white line-clamp-1 mb-1">
+                    <p className="text-[11px] sm:text-xs font-bold text-white line-clamp-1 mb-0.5 sm:mb-1">
                       {post.caption || "No caption"}
                     </p>
-                    <p className="text-[10px] text-neutral-500 leading-relaxed line-clamp-2">
+                    <p className="text-[9px] sm:text-[10px] text-neutral-500 leading-relaxed line-clamp-2">
                       {post.caption?.slice(0, 100) || ""}
                     </p>
                   </div>

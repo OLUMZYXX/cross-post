@@ -1,8 +1,12 @@
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
+import HowItWorks from "@/components/landing/HowItWorks";
 import Platforms from "@/components/landing/Platforms";
 import Pricing from "@/components/landing/Pricing";
+import Testimonials from "@/components/landing/Testimonials";
+import Faq from "@/components/landing/Faq";
+import CtaBanner from "@/components/landing/CtaBanner";
 import Footer from "@/components/landing/Footer";
 
 export default function LandingPage() {
@@ -11,8 +15,12 @@ export default function LandingPage() {
       <Navbar />
       <Hero />
       <Features />
+      <HowItWorks />
       <Platforms />
       <Pricing />
+      <Testimonials />
+      <Faq />
+      <CtaBanner />
       <Footer />
     </div>
   );

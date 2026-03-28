@@ -52,22 +52,22 @@ export default function CalendarPage() {
 
   return (
     <div className="animate-fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white font-headline">
+          <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-white font-headline">
             Content Calendar
           </h1>
-          <p className="text-neutral-500 font-medium mt-1">
+          <p className="text-neutral-500 text-xs sm:text-base font-medium mt-0.5 sm:mt-1">
             Scheduling across {connectedNames.length} active channel
             {connectedNames.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <div className="flex items-center gap-1 glass p-1 rounded-xl">
+        <div className="flex items-center gap-0.5 sm:gap-1 glass p-0.5 sm:p-1 rounded-lg sm:rounded-xl">
           {VIEWS.map((v) => (
             <button
               key={v}
               onClick={() => setViewMode(v)}
-              className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+              className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-[10px] sm:text-sm font-bold transition-all ${
                 viewMode === v
                   ? "bg-green-500 text-black shadow-sm"
                   : "text-neutral-500 hover:text-neutral-300"
@@ -79,28 +79,30 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex items-center gap-2 mr-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <div className="flex items-center gap-1.5 sm:gap-2 mr-2 sm:mr-4">
           <button
             onClick={prevMonth}
-            className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-neutral-400 hover:text-white transition-all duration-200"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-neutral-400 hover:text-white transition-all duration-200"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={14} className="sm:hidden" />
+            <ChevronLeft size={16} className="hidden sm:block" />
           </button>
-          <span className="text-white font-bold text-sm min-w-[140px] text-center font-headline">
+          <span className="text-white font-bold text-xs sm:text-sm min-w-[110px] sm:min-w-[140px] text-center font-headline">
             {formatMonthYear(currentYear, currentMonth)}
           </span>
           <button
             onClick={nextMonth}
-            className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-neutral-400 hover:text-white transition-all duration-200"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-neutral-400 hover:text-white transition-all duration-200"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={14} className="sm:hidden" />
+            <ChevronRight size={16} className="hidden sm:block" />
           </button>
         </div>
 
         <button
           onClick={() => setPlatformFilter("all")}
-          className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
+          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
             platformFilter === "all"
               ? "bg-green-500/15 text-green-400 border-green-500/30"
               : "bg-white/[0.03] text-neutral-500 border-white/[0.06] hover:border-white/[0.1]"
@@ -117,7 +119,7 @@ export default function CalendarPage() {
               onClick={() =>
                 setPlatformFilter(active ? "all" : name.toLowerCase())
               }
-              className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
                 active
                   ? "bg-green-500/15 text-green-400 border-green-500/30"
                   : "bg-white/[0.03] text-neutral-500 border-white/[0.06] hover:border-white/[0.1]"
@@ -130,7 +132,7 @@ export default function CalendarPage() {
       </div>
 
       {viewMode === "Month" ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           <div className="lg:col-span-8">
             <CalendarGrid
               currentYear={currentYear}
@@ -146,8 +148,8 @@ export default function CalendarPage() {
           </div>
         </div>
       ) : (
-        <div className="glass rounded-2xl p-8 text-center">
-          <p className="text-neutral-500 text-sm">
+        <div className="glass rounded-xl sm:rounded-2xl p-5 sm:p-8 text-center">
+          <p className="text-neutral-500 text-xs sm:text-sm">
             {viewMode} view coming soon
           </p>
         </div>
