@@ -1,6 +1,5 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 
 export function groupNotifications(notifications) {
   const now = new Date();
@@ -31,7 +30,12 @@ export function InboxHeader({ unreadCount, total, onBack, onMarkAllRead, onClear
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={onBack}
-            className="w-10 h-10 rounded-xl bg-gray-900 items-center justify-center mr-3 border border-gray-800/60"
+            className="w-10 h-10 rounded-xl items-center justify-center mr-3"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.04)",
+              borderWidth: 1,
+              borderColor: "rgba(255,255,255,0.06)",
+            }}
           >
             <Ionicons name="arrow-back" size={18} color="#fff" />
           </TouchableOpacity>
@@ -39,53 +43,52 @@ export function InboxHeader({ unreadCount, total, onBack, onMarkAllRead, onClear
             <Text className="text-white text-xl font-bold">Notifications</Text>
             {unreadCount > 0 && (
               <Text className="text-green-400 text-[10px] font-medium mt-0.5">
-                {unreadCount} new
+                {unreadCount} unread
               </Text>
             )}
           </View>
         </View>
         {unreadCount > 0 && (
-          <View className="bg-green-500/10 rounded-full px-3 py-1.5 border border-green-500/20">
+          <View
+            className="rounded-full px-3 py-1.5"
+            style={{ backgroundColor: "rgba(34,197,94,0.1)" }}
+          >
             <Text className="text-green-400 text-xs font-bold">{unreadCount}</Text>
           </View>
         )}
       </View>
 
       {total > 0 && (
-        <View className="flex-row items-center">
+        <View className="flex-row items-center gap-2">
           {unreadCount > 0 && (
             <TouchableOpacity
               onPress={onMarkAllRead}
-              className="flex-1 mr-2"
+              className="flex-1 flex-row items-center justify-center py-2.5 rounded-xl"
+              style={{
+                backgroundColor: "rgba(34,197,94,0.08)",
+                borderWidth: 1,
+                borderColor: "rgba(34,197,94,0.15)",
+              }}
               activeOpacity={0.7}
             >
-              <LinearGradient
-                colors={["#4ade8020", "#4ade8008"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                className="rounded-xl p-[1px]"
-              >
-                <View className="bg-gray-950 rounded-xl py-2.5 items-center flex-row justify-center">
-                  <Ionicons name="checkmark-done" size={14} color="#4ade80" />
-                  <Text className="text-green-400 text-[11px] font-semibold ml-1.5">
-                    Mark All Read
-                  </Text>
-                </View>
-              </LinearGradient>
+              <Ionicons name="checkmark-done" size={14} color="#4ade80" />
+              <Text className="text-green-400 text-[11px] font-semibold ml-1.5">
+                Mark All Read
+              </Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity onPress={onClearAll} className="flex-1" activeOpacity={0.7}>
-            <LinearGradient
-              colors={["#f8717120", "#f8717108"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              className="rounded-xl p-[1px]"
-            >
-              <View className="bg-gray-950 rounded-xl py-2.5 items-center flex-row justify-center">
-                <Ionicons name="trash-outline" size={14} color="#f87171" />
-                <Text className="text-red-400 text-[11px] font-semibold ml-1.5">Clear All</Text>
-              </View>
-            </LinearGradient>
+          <TouchableOpacity
+            onPress={onClearAll}
+            className="flex-1 flex-row items-center justify-center py-2.5 rounded-xl"
+            style={{
+              backgroundColor: "rgba(248,113,113,0.08)",
+              borderWidth: 1,
+              borderColor: "rgba(248,113,113,0.15)",
+            }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="trash-outline" size={14} color="#f87171" />
+            <Text className="text-red-400 text-[11px] font-semibold ml-1.5">Clear All</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -96,16 +99,16 @@ export function InboxHeader({ unreadCount, total, onBack, onMarkAllRead, onClear
 export function EmptyState() {
   return (
     <View className="flex-1 items-center justify-center" style={{ marginTop: -80 }}>
-      <LinearGradient
-        colors={["#6b728020", "#6b728008", "transparent"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="rounded-3xl p-[1px] mb-5"
+      <View
+        className="w-20 h-20 rounded-3xl items-center justify-center mb-5"
+        style={{
+          backgroundColor: "rgba(255,255,255,0.03)",
+          borderWidth: 1,
+          borderColor: "rgba(255,255,255,0.06)",
+        }}
       >
-        <View className="bg-gray-950 rounded-3xl w-20 h-20 items-center justify-center">
-          <Ionicons name="notifications-off-outline" size={32} color="#4b5563" />
-        </View>
-      </LinearGradient>
+        <Ionicons name="notifications-off-outline" size={32} color="#4b5563" />
+      </View>
       <Text className="text-white text-lg font-bold mb-1.5">All caught up</Text>
       <Text className="text-gray-500 text-xs text-center px-12 leading-5">
         You'll be notified when posts publish, fail, or platforms change status
@@ -116,9 +119,9 @@ export function EmptyState() {
 
 export function SectionHeader({ title }) {
   return (
-    <View className="flex-row items-center mb-2.5 mt-3">
+    <View className="flex-row items-center mb-2 mt-4">
       <View className="w-1 h-3.5 bg-green-500 rounded-full mr-2" />
-      <Text className="text-gray-400 text-xs font-bold uppercase tracking-wider">
+      <Text className="text-gray-400 text-[11px] font-bold uppercase tracking-wider">
         {title}
       </Text>
     </View>
