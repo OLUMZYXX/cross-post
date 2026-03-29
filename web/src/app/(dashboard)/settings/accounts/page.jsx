@@ -254,5 +254,3 @@ function ConnectionLogs({ platforms }) {
     </section>
   );
 }
-  );
-}
