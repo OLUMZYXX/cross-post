@@ -45,11 +45,3 @@ export default function AccountCard({ platform, onDisconnect }) {
     </div>
   );
 }
-          >
-            Disconnect
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
