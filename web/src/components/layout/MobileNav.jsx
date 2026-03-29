@@ -8,6 +8,7 @@ import {
   PenSquare,
   Send,
   BarChart3,
+  Settings,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
   { label: "Create", href: "/create", icon: PenSquare },
   { label: "Posts", href: "/posts", icon: Send },
   { label: "Analytics", href: "/analytics", icon: BarChart3 },
+  { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 export default function MobileNav() {

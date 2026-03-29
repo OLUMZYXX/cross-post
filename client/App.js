@@ -1,6 +1,13 @@
 import "./global.css";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { View, Linking, AppState, BackHandler, Platform } from "react-native";
+import {
+  useFonts,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from "@expo-google-fonts/plus-jakarta-sans";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
@@ -31,6 +38,13 @@ const ONBOARDING_KEY = "@crosspost_onboarded";
 const BIOMETRIC_KEY = "@crosspost_biometric_enabled";
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
+  });
+
   const [currentScreen, setCurrentScreen] = useState(null);
   const [user, setUser] = useState(null);
   const [oauthRefreshKey, setOauthRefreshKey] = useState(0);
@@ -243,7 +257,7 @@ export default function App() {
     setCurrentScreen("signup");
   };
 
-  if (!currentScreen) {
+  if (!currentScreen || !fontsLoaded) {
     return <ServerLoadingAnimation />;
   }
 

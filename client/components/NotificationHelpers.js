@@ -40,7 +40,7 @@ export function InboxHeader({ unreadCount, total, onBack, onMarkAllRead, onClear
             <Ionicons name="arrow-back" size={18} color="#fff" />
           </TouchableOpacity>
           <View>
-            <Text className="text-white text-xl font-bold">Notifications</Text>
+            <Text className="text-white text-xl font-jakarta-bold">Notifications</Text>
             {unreadCount > 0 && (
               <Text className="text-green-400 text-[10px] font-medium mt-0.5">
                 {unreadCount} unread
@@ -109,7 +109,7 @@ export function EmptyState() {
       >
         <Ionicons name="notifications-off-outline" size={32} color="#4b5563" />
       </View>
-      <Text className="text-white text-lg font-bold mb-1.5">All caught up</Text>
+      <Text className="text-white text-lg font-jakarta-bold mb-1.5">All caught up</Text>
       <Text className="text-gray-500 text-xs text-center px-12 leading-5">
         You'll be notified when posts publish, fail, or platforms change status
       </Text>

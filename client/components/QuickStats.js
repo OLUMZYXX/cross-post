@@ -24,7 +24,7 @@ function StatCard({ icon, iconColor, value, label }) {
             style={{ backgroundColor: iconColor, opacity: 0.5 }}
           />
         </View>
-        <Text className="text-white text-2xl font-bold tracking-tight">
+        <Text className="text-white text-2xl font-jakarta-bold tracking-tight">
           {value}
         </Text>
         <Text className="text-gray-500 text-[10px] font-semibold mt-0.5 tracking-widest uppercase">

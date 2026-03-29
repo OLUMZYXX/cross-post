@@ -53,7 +53,7 @@ export default function HomeScreen({
             <Text className="text-gray-500 text-xs tracking-wider uppercase">
               {getGreeting()}
             </Text>
-            <Text className="text-white text-2xl font-bold mt-0.5">
+            <Text className="text-white text-2xl font-jakarta-bold mt-0.5">
               {user?.name?.split(" ")[0] || "User"}
             </Text>
           </View>
@@ -96,7 +96,7 @@ export default function HomeScreen({
                   <Ionicons name="add" size={26} color="#030712" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white text-base font-bold">Create New Post</Text>
+                  <Text className="text-white text-base font-jakarta-bold">Create New Post</Text>
                   <Text className="text-gray-400 text-[11px] mt-0.5">
                     Publish to {connectedPlatforms.length} platform{connectedPlatforms.length !== 1 ? "s" : ""} at once
                   </Text>
@@ -115,7 +115,7 @@ export default function HomeScreen({
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center">
               <View className="w-1 h-4 bg-blue-500 rounded-full mr-2" />
-              <Text className="text-white text-base font-bold">Platforms</Text>
+              <Text className="text-white text-base font-jakarta-bold">Platforms</Text>
             </View>
             <TouchableOpacity
               onPress={onAddPlatform}
@@ -141,7 +141,7 @@ export default function HomeScreen({
           )}
 
           <View className="flex-row items-center justify-between mb-3 mt-5">
-            <Text className="text-white text-base font-bold">Recent Activity</Text>
+            <Text className="text-white text-base font-jakarta-bold">Recent Activity</Text>
             {recentActivities.length > 0 && (
               <View className="bg-gray-900 rounded-full px-2.5 py-1">
                 <Text className="text-gray-500 text-[10px] font-medium">
