@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Plus, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { platformAPI } from "@/services/platformService";
 import { useToast } from "@/context/ToastContext";
 import { PLATFORM_CONFIG } from "@/config/platforms";
@@ -118,80 +118,79 @@ export default function AccountsPage() {
 
   return (
     <div className="animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 mb-5 sm:mb-8">
-        <div>
-          <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-            <Link
-              href="/settings"
-              className="text-neutral-500 hover:text-white transition-colors"
-            >
-              <ArrowLeft size={16} className="sm:hidden" />
-              <ArrowLeft size={18} className="hidden sm:block" />
-            </Link>
-            <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-white font-headline">
+      <div className="flex items-center justify-between gap-3 mb-5 sm:mb-8">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href="/settings"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-neutral-500 hover:text-white hover:bg-white/[0.08] transition-all"
+          >
+            <ArrowLeft size={14} className="sm:hidden" />
+            <ArrowLeft size={16} className="hidden sm:block" />
+          </Link>
+          <div>
+            <h1 className="text-lg sm:text-2xl font-extrabold tracking-tight text-white font-headline">
               Connected Accounts
             </h1>
+            <p className="text-neutral-500 text-[10px] sm:text-xs mt-0.5">
+              {platforms.length} connected &middot; {available.length} available
+            </p>
           </div>
-          <p className="text-neutral-500 text-xs sm:text-sm max-w-lg">
-            Manage your social profiles from a single hub.
-          </p>
         </div>
-        <button
-          onClick={() => {
-            const first = available[0];
-            if (first)
-              handleConnect(first.charAt(0).toUpperCase() + first.slice(1));
-          }}
-          disabled={available.length === 0}
-          className="bg-gradient-to-br from-green-500 to-emerald-600 text-black px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all text-xs sm:text-sm flex-shrink-0 disabled:opacity-50"
-        >
-          <Plus size={14} className="sm:hidden" />
-          <Plus size={16} className="hidden sm:block" />
-          Add Account
-        </button>
       </div>
 
       <div className="grid grid-cols-12 gap-4 sm:gap-6">
         <div className="col-span-12 lg:col-span-8 space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-            {platforms.map((p) => (
-              <AccountCard
-                key={p._id}
-                platform={p}
-                onDisconnect={handleDisconnect}
-              />
-            ))}
-            {available.map((key) => {
-              const config = PLATFORM_CONFIG[key];
-              const name = key.charAt(0).toUpperCase() + key.slice(1);
-              return (
-                <button
-                  key={key}
-                  onClick={() => handleConnect(name)}
-                  disabled={connecting === name}
-                  className="bg-white/[0.02] rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-dashed border-white/[0.06] flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white/[0.04] hover:border-green-500/30 transition-all duration-200 min-h-[140px] sm:min-h-[180px]"
-                >
-                  <div
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition-transform"
-                    style={{ color: config.color }}
-                  >
-                    <span className="text-base sm:text-lg font-bold">
-                      {name[0]}
-                    </span>
-                  </div>
-                  <p className="font-bold text-white text-xs sm:text-sm">
-                    Connect {config.label}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-neutral-500 mt-0.5 sm:mt-1">
-                    Unlock cross-posting
-                  </p>
-                  {connecting === name && (
-                    <Spinner size={14} className="mt-2" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          {platforms.length > 0 && (
+            <section>
+              <p className="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2 sm:mb-3">
+                Active
+              </p>
+              <div className="space-y-2 sm:space-y-2.5">
+                {platforms.map((p) => (
+                  <AccountCard
+                    key={p._id}
+                    platform={p}
+                    onDisconnect={handleDisconnect}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {available.length > 0 && (
+            <section>
+              <p className="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2 sm:mb-3">
+                Available
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
+                {available.map((key) => {
+                  const config = PLATFORM_CONFIG[key];
+                  const name = key.charAt(0).toUpperCase() + key.slice(1);
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => handleConnect(name)}
+                      disabled={connecting === name}
+                      className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 sm:p-4 flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-200"
+                    >
+                      <div
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform"
+                        style={{ backgroundColor: `${config.color}15`, color: config.color }}
+                      >
+                        <span className="text-sm sm:text-base font-bold">{name[0]}</span>
+                      </div>
+                      <p className="text-[10px] sm:text-xs font-semibold text-neutral-300">
+                        {config.label}
+                      </p>
+                      {connecting === name && (
+                        <Spinner size={12} className="mt-0.5" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           <ConnectionLogs platforms={platforms} />
         </div>
@@ -214,49 +213,46 @@ function ConnectionLogs({ platforms }) {
 
   return (
     <section>
-      <h3 className="text-sm sm:text-lg font-bold text-white mb-3 sm:mb-4 font-headline">
-        Recent Connection Logs
-      </h3>
-      <div className="glass rounded-xl sm:rounded-2xl p-1.5 sm:p-2">
-        <div className="divide-y divide-white/[0.04]">
-          {logs.map((log, i) => (
+      <p className="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2 sm:mb-3">
+        Recent Activity
+      </p>
+      <div className="space-y-1.5 sm:space-y-2">
+        {logs.map((log, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-2.5 sm:gap-3 bg-white/[0.02] border border-white/[0.06] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2.5 sm:py-3"
+          >
             <div
-              key={i}
-              className="flex items-center gap-2.5 sm:gap-4 p-2.5 sm:p-4 hover:bg-white/[0.03] transition-all duration-200 rounded-lg sm:rounded-xl"
+              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+                log.success
+                  ? "bg-green-500/10 text-green-400"
+                  : "bg-red-500/10 text-red-400"
+              }`}
             >
-              <div
-                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  log.success
-                    ? "bg-green-500/10 text-green-400"
-                    : "bg-red-500/10 text-red-400"
-                }`}
-              >
-                {log.success ? (
-                  <CheckCircle size={14} className="sm:hidden" />
-                ) : (
-                  <AlertCircle size={14} className="sm:hidden" />
-                )}
-                {log.success ? (
-                  <CheckCircle size={18} className="hidden sm:block" />
-                ) : (
-                  <AlertCircle size={18} className="hidden sm:block" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-semibold text-white truncate">
-                  {log.name} synchronized
-                </p>
-                <p className="text-[10px] sm:text-xs text-neutral-500 truncate">
-                  Synced at @{log.username}
-                </p>
-              </div>
-              <span className="text-[9px] sm:text-[10px] font-bold text-neutral-600 uppercase flex-shrink-0 hidden sm:block">
-                Recently
-              </span>
+              {log.success ? (
+                <CheckCircle size={12} className="sm:hidden" />
+              ) : (
+                <AlertCircle size={12} className="sm:hidden" />
+              )}
+              {log.success ? (
+                <CheckCircle size={14} className="hidden sm:block" />
+              ) : (
+                <AlertCircle size={14} className="hidden sm:block" />
+              )}
             </div>
-          ))}
-        </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] sm:text-xs font-medium text-white truncate">
+                {log.name} &middot; @{log.username}
+              </p>
+            </div>
+            <span className="text-[9px] sm:text-[10px] text-green-400/70 font-medium flex-shrink-0">
+              Synced
+            </span>
+          </div>
+        ))}
       </div>
     </section>
+  );
+}
   );
 }

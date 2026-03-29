@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Bell } from "lucide-react";
+import { useMemo } from "react";
+import { Zap, TrendingUp, Activity } from "lucide-react";
+import { PLATFORM_CONFIG } from "@/config/platforms";
 
 export default function AccountSidebar({ platforms, sentPosts }) {
   const stats = useMemo(() => {
     if (!sentPosts || sentPosts.length === 0)
-      return { reliability: 0, bars: [0, 0, 0, 0, 0, 0, 0] };
+      return { reliability: 0, totalPosts: 0, bars: [0, 0, 0, 0, 0, 0, 0] };
     const results = sentPosts.flatMap((p) => p.publishResults || []);
     const total = results.length;
     const succeeded = results.filter((r) => r.success).length;
@@ -20,110 +21,122 @@ export default function AccountSidebar({ platforms, sentPosts }) {
       return dayPosts.length;
     });
     const maxBar = Math.max(...bars, 1);
-    return { reliability, bars: bars.map((b) => (b / maxBar) * 100) };
+    return {
+      reliability,
+      totalPosts: sentPosts.length,
+      bars: bars.map((b) => (b / maxBar) * 100),
+    };
   }, [sentPosts]);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="glass rounded-xl sm:rounded-2xl p-4 sm:p-6">
-        <h3 className="text-sm sm:text-base font-bold text-white mb-3 sm:mb-5 flex items-center gap-2 font-headline">
-          <Bell size={16} className="text-green-400 sm:hidden" />
-          <Bell size={18} className="text-green-400 hidden sm:block" />
-          Hub Alerts
-        </h3>
-        <div className="space-y-3 sm:space-y-5">
-          <ToggleRow
-            label="Post Success"
-            desc="Alert settings for post success."
-            defaultOn
-          />
-          <ToggleRow
-            label="Post Failures"
-            desc="Alert settings for post failures."
-            defaultOn
-          />
-          <ToggleRow
-            label="Platform News"
-            desc="Alert settings for platform news."
-          />
-        </div>
-
-        <div className="mt-4 sm:mt-6 pt-4 sm:pt-5 border-t border-white/[0.04]">
-          <p className="text-[9px] sm:text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2 sm:mb-3">
-            Notification Channel
-          </p>
-          <div className="flex gap-1.5 sm:gap-2">
-            <ChannelPill label="EMAIL" active />
-            <ChannelPill label="BROWSER" />
-            <ChannelPill label="MOBILE" />
-          </div>
-        </div>
+    <div className="space-y-3 sm:space-y-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <StatBox
+          icon={Zap}
+          value={platforms.length}
+          label="Linked"
+          color="green"
+        />
+        <StatBox
+          icon={TrendingUp}
+          value={stats.totalPosts}
+          label="Posts"
+          color="blue"
+        />
+        <StatBox
+          icon={Activity}
+          value={`${stats.reliability}%`}
+          label="Uptime"
+          color="emerald"
+        />
       </div>
 
-      <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/[0.06] overflow-hidden relative group">
-        <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
-          <span className="text-4xl sm:text-6xl">📊</span>
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl sm:rounded-2xl p-3 sm:p-5">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <p className="text-[10px] sm:text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+            7-Day Activity
+          </p>
+          <p className="text-[10px] sm:text-xs text-green-400 font-semibold">
+            {stats.reliability}%
+          </p>
         </div>
-        <p className="text-green-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest mb-0.5 sm:mb-1">
-          Hub Health
-        </p>
-        <h4 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-5 font-headline">
-          {stats.reliability}% Reliable
-        </h4>
-        <div className="flex items-end gap-1 sm:gap-1.5 h-12 sm:h-16 mb-3 sm:mb-5">
+        <div className="flex items-end gap-1 sm:gap-1.5 h-14 sm:h-20">
           {stats.bars.map((h, i) => (
-            <div
-              key={i}
-              className={`flex-1 rounded-t transition-colors ${
-                i === stats.bars.length - 1
-                  ? "bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.4)]"
-                  : "bg-white/10 hover:bg-white/20"
-              }`}
-              style={{ height: `${Math.max(h, 5)}%` }}
-            />
+            <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                className={`w-full rounded transition-all duration-300 ${
+                  i === stats.bars.length - 1
+                    ? "bg-green-500"
+                    : "bg-white/[0.08] group-hover:bg-white/[0.12]"
+                }`}
+                style={{ height: `${Math.max(h, 8)}%` }}
+              />
+            </div>
           ))}
         </div>
-        <p className="text-[10px] sm:text-xs text-neutral-500 leading-relaxed">
-          {platforms.length} platform{platforms.length !== 1 ? "s" : ""}{" "}
-          connected and active.
+        <div className="flex justify-between mt-1.5 sm:mt-2">
+          {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+            <span
+              key={i}
+              className="text-[8px] sm:text-[9px] text-neutral-600 flex-1 text-center"
+            >
+              {d}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl sm:rounded-2xl p-3 sm:p-4">
+        <p className="text-[10px] sm:text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2 sm:mb-3">
+          Platforms
         </p>
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          {platforms.map((p) => {
+            const cfg = PLATFORM_CONFIG[p.name.toLowerCase()] || {};
+            return (
+              <span
+                key={p._id}
+                className="px-2 sm:px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-bold border border-white/[0.06]"
+                style={{
+                  color: cfg.color,
+                  backgroundColor: `${cfg.color}10`,
+                }}
+              >
+                {cfg.label || p.name}
+              </span>
+            );
+          })}
+          {platforms.length === 0 && (
+            <p className="text-[10px] sm:text-xs text-neutral-600">
+              No platforms connected yet
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-function ToggleRow({ label, desc, defaultOn = false }) {
-  const [on, setOn] = useState(defaultOn);
+function StatBox({ icon: Icon, value, label, color }) {
+  const colorMap = {
+    green: "text-green-400 bg-green-500/10",
+    blue: "text-blue-400 bg-blue-500/10",
+    emerald: "text-emerald-400 bg-emerald-500/10",
+  };
+  const classes = colorMap[color] || colorMap.green;
+
   return (
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-xs sm:text-sm font-bold text-white">{label}</p>
-        <p className="text-[10px] sm:text-xs text-neutral-500">{desc}</p>
-      </div>
-      <button
-        onClick={() => setOn(!on)}
-        className={`w-10 h-5 rounded-full relative flex items-center px-0.5 cursor-pointer transition-colors ${
-          on ? "bg-green-500" : "bg-white/[0.1] hover:bg-white/[0.15]"
-        }`}
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 sm:p-3.5 text-center">
+      <div
+        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg ${classes} flex items-center justify-center mx-auto mb-1.5 sm:mb-2`}
       >
-        <div
-          className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${on ? "translate-x-5" : "translate-x-0"}`}
-        />
-      </button>
+        <Icon size={13} className="sm:hidden" />
+        <Icon size={15} className="hidden sm:block" />
+      </div>
+      <p className="text-sm sm:text-lg font-bold text-white">{value}</p>
+      <p className="text-[9px] sm:text-[10px] text-neutral-500 font-medium">
+        {label}
+      </p>
     </div>
-  );
-}
-
-function ChannelPill({ label, active = false }) {
-  return (
-    <span
-      className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-bold cursor-pointer transition-colors ${
-        active
-          ? "bg-green-500/10 text-green-400 border border-green-500/20"
-          : "bg-white/[0.04] text-neutral-500 hover:bg-white/[0.06]"
-      }`}
-    >
-      {label}
-    </span>
   );
 }
