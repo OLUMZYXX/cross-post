@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Settings } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function TopBar({ unreadCount = 0 }) {
@@ -32,6 +32,13 @@ export default function TopBar({ unreadCount = 0 }) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        <Link
+          href="/settings"
+          className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-200 lg:hidden"
+        >
+          <Settings size={14} className="text-neutral-400 sm:hidden" />
+          <Settings size={16} className="text-neutral-400 hidden sm:block" />
+        </Link>
         <Link
           href="/notifications"
           className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-200"

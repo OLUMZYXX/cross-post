@@ -72,29 +72,31 @@ export default function SettingsPage() {
 
   return (
     <div className="animate-fade-in max-w-2xl">
-      <h1 className="text-3xl font-extrabold tracking-tight text-white font-headline mb-5">
+      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-headline mb-4 sm:mb-5">
         Settings
       </h1>
 
       <Link
         href="/settings/profile"
-        className="flex items-center gap-3 glass rounded-2xl p-4 mb-5 hover:border-white/[0.1] transition-all duration-200"
+        className="flex items-center gap-3 glass rounded-2xl p-3 sm:p-4 mb-4 sm:mb-5 hover:border-white/[0.1] transition-all duration-200"
       >
-        <div className="w-12 h-12 rounded-lg bg-white/[0.06] flex items-center justify-center text-neutral-300 text-sm font-medium">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/[0.06] flex items-center justify-center text-neutral-300 text-xs sm:text-sm font-medium">
           {initials}
         </div>
         <div className="flex-1">
-          <p className="text-white text-sm font-medium">
+          <p className="text-white text-xs sm:text-sm font-medium">
             {user?.name || "User"}
           </p>
-          <p className="text-neutral-500 text-xs">{user?.email || ""}</p>
+          <p className="text-neutral-500 text-[10px] sm:text-xs">
+            {user?.email || ""}
+          </p>
         </div>
         <ChevronRight size={16} className="text-neutral-600" />
       </Link>
 
       {SECTIONS.map((section) => (
-        <div key={section.label} className="mb-4">
-          <p className="text-neutral-600 text-[10px] uppercase tracking-wider mb-2 ml-1">
+        <div key={section.label} className="mb-3 sm:mb-4">
+          <p className="text-neutral-600 text-[9px] sm:text-[10px] uppercase tracking-wider mb-1.5 sm:mb-2 ml-1">
             {section.label}
           </p>
           <div className="glass rounded-2xl overflow-hidden">
@@ -108,12 +110,18 @@ export default function SettingsPage() {
                     : ""
                 }`}
               >
-                <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center">
-                  <item.icon size={15} className="text-neutral-400" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/[0.06] flex items-center justify-center">
+                  <item.icon size={14} className="text-neutral-400 sm:hidden" />
+                  <item.icon
+                    size={15}
+                    className="text-neutral-400 hidden sm:block"
+                  />
                 </div>
                 <div className="flex-1">
-                  <p className="text-white text-sm">{item.label}</p>
-                  <p className="text-neutral-600 text-[11px]">{item.desc}</p>
+                  <p className="text-white text-xs sm:text-sm">{item.label}</p>
+                  <p className="text-neutral-600 text-[10px] sm:text-[11px]">
+                    {item.desc}
+                  </p>
                 </div>
                 {item.showCount && (
                   <span className="text-neutral-500 text-[11px] bg-white/[0.06] rounded-full px-2 py-0.5 mr-1">
@@ -129,7 +137,7 @@ export default function SettingsPage() {
 
       <button
         onClick={logout}
-        className="flex items-center justify-center gap-2 w-full glass rounded-2xl py-3 text-red-400 text-sm hover:bg-red-500/5 hover:border-red-500/20 transition-all duration-200"
+        className="flex items-center justify-center gap-2 w-full glass rounded-2xl py-2.5 sm:py-3 text-red-400 text-xs sm:text-sm hover:bg-red-500/5 hover:border-red-500/20 transition-all duration-200"
       >
         <LogOut size={15} />
         Sign Out

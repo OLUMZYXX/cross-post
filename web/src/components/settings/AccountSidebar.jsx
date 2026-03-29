@@ -24,13 +24,14 @@ export default function AccountSidebar({ platforms, sentPosts }) {
   }, [sentPosts]);
 
   return (
-    <div className="space-y-6">
-      <div className="glass rounded-2xl p-6">
-        <h3 className="text-base font-bold text-white mb-5 flex items-center gap-2 font-headline">
-          <Bell size={18} className="text-green-400" />
+    <div className="space-y-4 sm:space-y-6">
+      <div className="glass rounded-xl sm:rounded-2xl p-4 sm:p-6">
+        <h3 className="text-sm sm:text-base font-bold text-white mb-3 sm:mb-5 flex items-center gap-2 font-headline">
+          <Bell size={16} className="text-green-400 sm:hidden" />
+          <Bell size={18} className="text-green-400 hidden sm:block" />
           Hub Alerts
         </h3>
-        <div className="space-y-5">
+        <div className="space-y-3 sm:space-y-5">
           <ToggleRow
             label="Post Success"
             desc="Alert settings for post success."
@@ -47,11 +48,11 @@ export default function AccountSidebar({ platforms, sentPosts }) {
           />
         </div>
 
-        <div className="mt-6 pt-5 border-t border-white/[0.04]">
-          <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-3">
+        <div className="mt-4 sm:mt-6 pt-4 sm:pt-5 border-t border-white/[0.04]">
+          <p className="text-[9px] sm:text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2 sm:mb-3">
             Notification Channel
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5 sm:gap-2">
             <ChannelPill label="EMAIL" active />
             <ChannelPill label="BROWSER" />
             <ChannelPill label="MOBILE" />
@@ -59,17 +60,17 @@ export default function AccountSidebar({ platforms, sentPosts }) {
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] rounded-2xl p-6 border border-white/[0.06] overflow-hidden relative group">
-        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
-          <span className="text-6xl">📊</span>
+      <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/[0.06] overflow-hidden relative group">
+        <div className="absolute top-0 right-0 p-3 sm:p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
+          <span className="text-4xl sm:text-6xl">📊</span>
         </div>
-        <p className="text-green-400 text-[10px] font-bold uppercase tracking-widest mb-1">
+        <p className="text-green-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest mb-0.5 sm:mb-1">
           Hub Health
         </p>
-        <h4 className="text-2xl font-bold text-white mb-5 font-headline">
+        <h4 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-5 font-headline">
           {stats.reliability}% Reliable
         </h4>
-        <div className="flex items-end gap-1.5 h-16 mb-5">
+        <div className="flex items-end gap-1 sm:gap-1.5 h-12 sm:h-16 mb-3 sm:mb-5">
           {stats.bars.map((h, i) => (
             <div
               key={i}
@@ -82,9 +83,9 @@ export default function AccountSidebar({ platforms, sentPosts }) {
             />
           ))}
         </div>
-        <p className="text-xs text-neutral-500 leading-relaxed">
-          Your account connections have been stable. {platforms.length} platform
-          {platforms.length !== 1 ? "s" : ""} connected and active.
+        <p className="text-[10px] sm:text-xs text-neutral-500 leading-relaxed">
+          {platforms.length} platform{platforms.length !== 1 ? "s" : ""}{" "}
+          connected and active.
         </p>
       </div>
     </div>
@@ -96,8 +97,8 @@ function ToggleRow({ label, desc, defaultOn = false }) {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-sm font-bold text-white">{label}</p>
-        <p className="text-xs text-neutral-500">{desc}</p>
+        <p className="text-xs sm:text-sm font-bold text-white">{label}</p>
+        <p className="text-[10px] sm:text-xs text-neutral-500">{desc}</p>
       </div>
       <button
         onClick={() => setOn(!on)}
@@ -116,7 +117,7 @@ function ToggleRow({ label, desc, defaultOn = false }) {
 function ChannelPill({ label, active = false }) {
   return (
     <span
-      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition-colors ${
+      className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-bold cursor-pointer transition-colors ${
         active
           ? "bg-green-500/10 text-green-400 border border-green-500/20"
           : "bg-white/[0.04] text-neutral-500 hover:bg-white/[0.06]"
