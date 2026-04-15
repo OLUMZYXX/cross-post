@@ -29,14 +29,9 @@ export default function HomeScreen({
   getPlatformStyle,
   getPlatformUsername,
 }) {
-  const scheduledCount = allPosts.filter((p) => p.status === "scheduled").length;
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning \u2600\uFE0F";
-    if (hour < 18) return "Good afternoon \uD83C\uDF24\uFE0F";
-    return "Good evening \uD83C\uDF19";
-  };
+  const scheduledCount = allPosts.filter(
+    (p) => p.status === "scheduled",
+  ).length;
 
   return (
     <View className="flex-1 bg-gray-950">
@@ -51,9 +46,9 @@ export default function HomeScreen({
         <View className="flex-row items-center justify-between mb-5">
           <View className="flex-1">
             <Text className="text-gray-500 text-xs tracking-wider uppercase">
-              {getGreeting()}
+              Welcome back
             </Text>
-            <Text className="text-white text-2xl font-jakarta-bold mt-0.5">
+            <Text className="text-white text-2xl font-bold mt-0.5">
               {user?.name?.split(" ")[0] || "User"}
             </Text>
           </View>
@@ -74,14 +69,14 @@ export default function HomeScreen({
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 110 }}
+          contentContainerStyle={{ paddingBottom: 100 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
               tintColor="#4ade80"
               colors={["#4ade80"]}
-              progressBackgroundColor="#030712"
+              progressBackgroundColor="#111827"
             />
           }
         >
@@ -96,9 +91,12 @@ export default function HomeScreen({
                   <Ionicons name="add" size={26} color="#030712" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white text-base font-jakarta-bold">Create New Post</Text>
+                  <Text className="text-white text-base font-bold">
+                    Create New Post
+                  </Text>
                   <Text className="text-gray-400 text-[11px] mt-0.5">
-                    Publish to {connectedPlatforms.length} platform{connectedPlatforms.length !== 1 ? "s" : ""} at once
+                    Publish to {connectedPlatforms.length} platform
+                    {connectedPlatforms.length !== 1 ? "s" : ""} at once
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color="#4ade80" />
@@ -115,7 +113,7 @@ export default function HomeScreen({
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center">
               <View className="w-1 h-4 bg-blue-500 rounded-full mr-2" />
-              <Text className="text-white text-base font-jakarta-bold">Platforms</Text>
+              <Text className="text-white text-base font-bold">Platforms</Text>
             </View>
             <TouchableOpacity
               onPress={onAddPlatform}
@@ -123,7 +121,9 @@ export default function HomeScreen({
               activeOpacity={0.7}
             >
               <Ionicons name="add-circle" size={14} color="#4ade80" />
-              <Text className="text-green-400 text-[11px] font-semibold ml-1.5">Add New</Text>
+              <Text className="text-green-400 text-[11px] font-semibold ml-1.5">
+                Add New
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -141,7 +141,9 @@ export default function HomeScreen({
           )}
 
           <View className="flex-row items-center justify-between mb-3 mt-5">
-            <Text className="text-white text-base font-jakarta-bold">Recent Activity</Text>
+            <Text className="text-white text-base font-bold">
+              Recent Activity
+            </Text>
             {recentActivities.length > 0 && (
               <View className="bg-gray-900 rounded-full px-2.5 py-1">
                 <Text className="text-gray-500 text-[10px] font-medium">
@@ -150,10 +152,10 @@ export default function HomeScreen({
               </View>
             )}
           </View>
+
           <ActivityFeed activities={recentActivities} />
         </ScrollView>
       </View>
     </View>
   );
 }
-
