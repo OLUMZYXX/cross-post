@@ -1,22 +1,12 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import MediaCarousel from "./MediaCarousel";
 import FailedResults from "./FailedResults";
 import VideoPlayerModal from "./VideoPlayerModal";
+import SentPostFooter from "./SentPostFooter";
 import { isVideoUrl, getCloudinaryThumbnail } from "../utils/videoHelpers";
-import {
-  PLATFORM_STYLES,
-  formatDate,
-  formatTime,
-  getTimeAgo,
-} from "./sentPostUtils";
+import { PLATFORM_STYLES } from "./sentPostUtils";
 
 function PlatformChips({ results }) {
   return (
@@ -105,47 +95,6 @@ function PostMedia({ media }) {
   return <MediaCarousel media={media} />;
 }
 
-function StatusFooter({ post, hasFailures, succeededCount, onDelete, isDeleting }) {
-  const allFailed = hasFailures && succeededCount === 0;
-  return (
-    <View className="flex-row items-center justify-between pt-3 border-t border-gray-800/50">
-      <View className="flex-row items-center flex-1">
-        <View className={`w-5 h-5 rounded-full ${allFailed ? "bg-red-500/15" : "bg-green-500/15"} items-center justify-center mr-1.5`}>
-          <Ionicons
-            name={allFailed ? "close" : "checkmark"}
-            size={10}
-            color={allFailed ? "#f87171" : "#4ade80"}
-          />
-        </View>
-        <Text className="text-gray-500 text-[10px]">
-          {allFailed
-            ? "Failed"
-            : hasFailures
-              ? "Partial"
-              : getTimeAgo(post.publishedAt)}
-        </Text>
-        <Text className="text-gray-700 text-[10px] mx-1.5">·</Text>
-        <Text className="text-gray-600 text-[10px]">
-          {formatDate(post.publishedAt)} {formatTime(post.publishedAt)}
-        </Text>
-      </View>
-      {onDelete && (
-        <TouchableOpacity
-          onPress={() => onDelete(post)}
-          disabled={isDeleting}
-          className="w-7 h-7 rounded-lg bg-gray-800/60 items-center justify-center"
-        >
-          {isDeleting ? (
-            <ActivityIndicator size="small" color="#ef4444" />
-          ) : (
-            <Ionicons name="trash-outline" size={13} color="#6b7280" />
-          )}
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-}
-
 export default function SentPostCard({
   post,
   deletingId,
@@ -188,7 +137,7 @@ export default function SentPostCard({
           />
         )}
 
-        <StatusFooter
+        <SentPostFooter
           post={post}
           hasFailures={hasFailures}
           succeededCount={succeededResults.length}
