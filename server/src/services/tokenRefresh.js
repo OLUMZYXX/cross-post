@@ -9,10 +9,34 @@ import {
   REDDIT_CLIENT_SECRET,
 } from "../config/env.js";
 
-export async function ensureValidToken(platform) {
-  if (platform.tokenExpiresAt && new Date(platform.tokenExpiresAt) > new Date()) return;
+const REFRESH_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
-  if (!platform.tokenExpiresAt && !platform.refreshToken) return;
+export async function ensureValidToken(platform) {
+  const expiresAt = platform.tokenExpiresAt
+    ? new Date(platform.tokenExpiresAt).getTime()
+    : null;
+  const now = Date.now();
+
+  if (expiresAt && expiresAt - now > REFRESH_WINDOW_MS) return;
+  if (!expiresAt && !platform.refreshToken && platform.name !== "Instagram") return;
+
+  if (platform.name === "Instagram") {
+    if (expiresAt && expiresAt <= now) {
+      throw new Error(
+        "Instagram access token has expired. Please reconnect your Instagram account.",
+      );
+    }
+    if (!platform.accessToken) {
+      throw new Error("Instagram access token missing. Please reconnect.");
+    }
+    const newTokens = await refreshInstagramToken(platform.accessToken);
+    platform.accessToken = newTokens.access_token;
+    if (newTokens.expires_in) {
+      platform.tokenExpiresAt = new Date(now + newTokens.expires_in * 1000);
+    }
+    await platform.save();
+    return;
+  }
 
   if (!platform.refreshToken) {
     throw new Error(
@@ -41,12 +65,26 @@ export async function ensureValidToken(platform) {
     platform.refreshToken = newTokens.refresh_token;
   }
   if (newTokens.expires_in) {
-    platform.tokenExpiresAt = new Date(
-      Date.now() + newTokens.expires_in * 1000,
-    );
+    platform.tokenExpiresAt = new Date(now + newTokens.expires_in * 1000);
   }
 
   await platform.save();
+}
+
+async function refreshInstagramToken(accessToken) {
+  const url =
+    `https://graph.instagram.com/refresh_access_token` +
+    `?grant_type=ig_refresh_token` +
+    `&access_token=${encodeURIComponent(accessToken)}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.error || !data.access_token) {
+    throw new Error(
+      data.error?.message || "Instagram token refresh failed. Please reconnect.",
+    );
+  }
+  return data;
 }
 
 async function refreshTwitterToken(refreshToken) {
