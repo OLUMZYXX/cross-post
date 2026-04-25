@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Text, View, TouchableOpacity, ScrollView, TextInput } from "react-native";
 import * as Clipboard from "expo-clipboard";
@@ -10,6 +11,8 @@ import MediaPreview from "./MediaPreview";
 import ScheduleModal from "./ScheduleModal";
 import RephraseModal from "./RephraseModal";
 import CopyrightModal from "./CopyrightModal";
+import CaptionToolbar from "./CaptionToolbar";
+import FontPicker from "./FontPicker";
 
 export default function CreatePost({
   connectedPlatforms,
@@ -39,6 +42,7 @@ export default function CreatePost({
   });
 
   const { showToast } = useToast();
+  const [showFontPicker, setShowFontPicker] = useState(false);
   const isOverLimit = hasTwitterSelected && caption.length > 280;
 
   const handleCopy = async () => {
@@ -117,42 +121,23 @@ export default function CreatePost({
             disabled={isPosting}
           />
 
-          <View className="flex-row items-center px-3 py-2.5 border-t border-gray-800/30">
-            <ToolbarButton
-              icon="image-outline"
-              label="Media"
-              color="#4ade80"
-              bgClass="bg-green-500/10"
-              onPress={handleMediaSelect}
-              disabled={isPosting}
+          <CaptionToolbar
+            onMedia={handleMediaSelect}
+            onFont={() => setShowFontPicker((v) => !v)}
+            onRephrase={openRephraseModal}
+            onCopy={handleCopy}
+            onDraft={handleSaveDraft}
+            captionLength={caption.length}
+            disabled={isPosting}
+          />
+
+          {showFontPicker && (
+            <FontPicker
+              caption={caption}
+              onChange={setCaption}
+              onClose={() => setShowFontPicker(false)}
             />
-            <ToolbarButton
-              icon="sparkles"
-              label="AI Rephrase"
-              color="#a855f7"
-              bgClass="bg-purple-500/10"
-              onPress={openRephraseModal}
-              disabled={isPosting}
-            />
-            <ToolbarButton
-              icon="copy-outline"
-              label="Copy"
-              color="#f59e0b"
-              bgClass="bg-amber-500/10"
-              onPress={handleCopy}
-              disabled={isPosting}
-            />
-            <ToolbarButton
-              icon="bookmark-outline"
-              label="Draft"
-              color="#60a5fa"
-              bgClass="bg-blue-500/10"
-              onPress={handleSaveDraft}
-              disabled={isPosting}
-            />
-            <View className="flex-1" />
-            <Text className="text-gray-700 text-[10px]">{caption.length}</Text>
-          </View>
+          )}
         </View>
 
         <PlatformSelector
@@ -207,15 +192,3 @@ export default function CreatePost({
   );
 }
 
-function ToolbarButton({ icon, label, color, bgClass, onPress, disabled }) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      className={`flex-row items-center ${bgClass} rounded-full px-3 py-2 mr-2`}
-    >
-      <Ionicons name={icon} size={14} color={color} />
-      <Text style={{ color }} className="text-[10px] font-semibold ml-1.5">{label}</Text>
-    </TouchableOpacity>
-  );
-}
