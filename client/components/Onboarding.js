@@ -1,4 +1,4 @@
-import { StatusBar } from "expo-status-bar";
+﻿import { StatusBar } from "expo-status-bar";
 import {
   Text,
   View,
@@ -140,7 +140,7 @@ function WelcomeScene() {
     >
       <View style={styles.centerDevice}>
         <View style={styles.deviceScreen}>
-          <Ionicons name="grid" size={24} color="#4ade80" />
+          <Ionicons name="grid" size={24} color="#B14026" />
           <View style={styles.deviceLines}>
             <View style={[styles.deviceLine, { width: 40 }]} />
             <View style={[styles.deviceLine, { width: 28 }]} />
@@ -175,7 +175,7 @@ function WelcomeScene() {
       <FloatingIcon
         name="logo-youtube"
         size={26}
-        color="#f87171"
+        color="#B14026"
         style={{ position: "absolute", bottom: 25, right: width * 0.12 }}
         delay={400}
         floatRange={7}
@@ -202,10 +202,10 @@ function WelcomeScene() {
       <View style={[styles.connectionLine, { bottom: 60, left: width * 0.2, width: 25, transform: [{ rotate: "25deg" }] }]} />
       <View style={[styles.connectionLine, { bottom: 55, right: width * 0.22, width: 30, transform: [{ rotate: "-10deg" }] }]} />
 
-      <GlowDot size={6} color="#4ade80" style={{ position: "absolute", top: 5, left: width * 0.25 }} delay={200} />
+      <GlowDot size={6} color="#B14026" style={{ position: "absolute", top: 5, left: width * 0.25 }} delay={200} />
       <GlowDot size={4} color="#22d3ee" style={{ position: "absolute", top: 90, right: width * 0.06 }} delay={500} />
       <GlowDot size={5} color="#a78bfa" style={{ position: "absolute", bottom: 15, left: width * 0.3 }} delay={800} />
-      <GlowDot size={4} color="#fbbf24" style={{ position: "absolute", bottom: 70, right: width * 0.28 }} delay={400} />
+      <GlowDot size={4} color="#8E311B" style={{ position: "absolute", bottom: 70, right: width * 0.28 }} delay={400} />
     </Animated.View>
   );
 }
@@ -245,7 +245,7 @@ function ConnectScene() {
     { icon: "logo-twitter", color: "#60a5fa", angle: 0 },
     { icon: "logo-instagram", color: "#f472b6", angle: 60 },
     { icon: "logo-linkedin", color: "#38bdf8", angle: 120 },
-    { icon: "logo-youtube", color: "#f87171", angle: 180 },
+    { icon: "logo-youtube", color: "#B14026", angle: 180 },
     { icon: "logo-tiktok", color: "#e2e8f0", angle: 240 },
     { icon: "logo-facebook", color: "#818cf8", angle: 300 },
   ];
@@ -258,7 +258,7 @@ function ConnectScene() {
     >
       <View style={styles.hubCenter}>
         <View style={styles.hubInner}>
-          <Ionicons name="link" size={28} color="#4ade80" />
+          <Ionicons name="link" size={28} color="#B14026" />
         </View>
       </View>
 
@@ -294,10 +294,10 @@ function ConnectScene() {
         })}
       </Animated.View>
 
-      <GlowDot size={8} color="#4ade80" style={{ position: "absolute", top: 0, left: width * 0.2 }} delay={100} />
+      <GlowDot size={8} color="#B14026" style={{ position: "absolute", top: 0, left: width * 0.2 }} delay={100} />
       <GlowDot size={5} color="#f472b6" style={{ position: "absolute", top: 20, right: width * 0.08 }} delay={300} />
       <GlowDot size={6} color="#60a5fa" style={{ position: "absolute", bottom: 10, left: width * 0.15 }} delay={600} />
-      <GlowDot size={4} color="#fbbf24" style={{ position: "absolute", bottom: 30, right: width * 0.15 }} delay={400} />
+      <GlowDot size={4} color="#8E311B" style={{ position: "absolute", bottom: 30, right: width * 0.15 }} delay={400} />
     </Animated.View>
   );
 }
@@ -346,14 +346,14 @@ function PublishScene() {
         ]}
       >
         <View style={styles.rocketBody}>
-          <Ionicons name="rocket" size={44} color="#4ade80" />
+          <Ionicons name="rocket" size={44} color="#B14026" />
         </View>
       </Animated.View>
 
       <FloatingIcon
         name="sparkles"
         size={16}
-        color="#fbbf24"
+        color="#8E311B"
         style={{ position: "absolute", bottom: 55, left: width * 0.15 }}
         delay={100}
         floatRange={4}
@@ -369,7 +369,7 @@ function PublishScene() {
       <FloatingIcon
         name="star"
         size={14}
-        color="#fbbf24"
+        color="#8E311B"
         style={{ position: "absolute", bottom: 40, left: width * 0.08 }}
         delay={500}
         floatRange={5}
@@ -395,7 +395,7 @@ function PublishScene() {
       <FloatingIcon
         name="trending-up"
         size={24}
-        color="#4ade80"
+        color="#B14026"
         style={{ position: "absolute", bottom: 30, right: width * 0.08 }}
         delay={350}
         floatRange={8}
@@ -426,8 +426,8 @@ function PublishScene() {
         floatRange={4}
       />
 
-      <GlowDot size={6} color="#4ade80" style={{ position: "absolute", top: 5, right: width * 0.25 }} delay={200} />
-      <GlowDot size={5} color="#fbbf24" style={{ position: "absolute", bottom: 60, right: width * 0.2 }} delay={500} />
+      <GlowDot size={6} color="#B14026" style={{ position: "absolute", top: 5, right: width * 0.25 }} delay={200} />
+      <GlowDot size={5} color="#8E311B" style={{ position: "absolute", bottom: 60, right: width * 0.2 }} delay={500} />
       <GlowDot size={4} color="#f472b6" style={{ position: "absolute", top: 85, left: width * 0.28 }} delay={700} />
     </Animated.View>
   );
@@ -596,7 +596,7 @@ export default function Onboarding({ onComplete }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
 
       <View style={styles.backgroundContainer}>
         <View style={[styles.bgGlow, styles.bgGlow1]} />
@@ -611,8 +611,8 @@ export default function Onboarding({ onComplete }) {
         <View style={styles.content}>
           <View style={styles.header}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <View style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: "#22c55e", alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name="share-social" size={16} color="#030712" />
+              <View style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: "#B14026", alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="share-social" size={16} color="#E3DAC4" />
               </View>
               <View style={styles.stepPill}>
                 <View style={styles.stepDot} />
@@ -623,7 +623,7 @@ export default function Onboarding({ onComplete }) {
             </View>
             <TouchableOpacity onPress={onComplete} style={styles.skipButton}>
               <Text style={styles.skipText}>Skip</Text>
-              <Ionicons name="arrow-forward" size={14} color="#6b7280" />
+              <Ionicons name="arrow-forward" size={14} color="#564B3F" />
             </TouchableOpacity>
           </View>
 
@@ -683,7 +683,7 @@ export default function Onboarding({ onComplete }) {
             <TouchableOpacity onPress={onComplete} style={styles.getStartedButton}>
               <Text style={styles.getStartedText}>Get Started</Text>
               <View style={styles.getStartedIcon}>
-                <Ionicons name="arrow-forward" size={20} color="#030712" />
+                <Ionicons name="arrow-forward" size={20} color="#E3DAC4" />
               </View>
             </TouchableOpacity>
           ) : (
@@ -693,12 +693,12 @@ export default function Onboarding({ onComplete }) {
                 style={[styles.backButton, currentIndex === 0 && styles.hidden]}
                 disabled={currentIndex === 0}
               >
-                <Ionicons name="arrow-back" size={16} color="#6b7280" />
+                <Ionicons name="arrow-back" size={16} color="#564B3F" />
                 <Text style={styles.backText}>Back</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={goToNext} style={styles.continueButton}>
                 <Text style={styles.continueText}>Continue</Text>
-                <Ionicons name="arrow-forward" size={16} color="#030712" />
+                <Ionicons name="arrow-forward" size={16} color="#E3DAC4" />
               </TouchableOpacity>
             </View>
           )}
@@ -711,7 +711,7 @@ export default function Onboarding({ onComplete }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#030712",
+    backgroundColor: "#E3DAC4",
   },
   backgroundContainer: {
     position: "absolute",
@@ -770,11 +770,11 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#4ade80",
+    backgroundColor: "#B14026",
     marginRight: 8,
   },
   stepText: {
-    color: "#4ade80",
+    color: "#B14026",
     fontSize: 12,
     fontWeight: "600",
     letterSpacing: 0.5,
@@ -787,7 +787,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   skipText: {
-    color: "#6b7280",
+    color: "#564B3F",
     fontSize: 14,
     fontWeight: "500",
   },
@@ -800,7 +800,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 3,
-    backgroundColor: "#4ade80",
+    backgroundColor: "#B14026",
     borderRadius: 9999,
   },
   sceneWrapper: {
@@ -826,7 +826,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(74, 222, 128, 0.3)",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#4ade80",
+    shadowColor: "#B14026",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 20,
@@ -861,7 +861,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
-    shadowColor: "#4ade80",
+    shadowColor: "#B14026",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 16,
@@ -916,7 +916,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(74, 222, 128, 0.3)",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#4ade80",
+    shadowColor: "#B14026",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.25,
     shadowRadius: 20,
@@ -939,7 +939,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(74, 222, 128, 0.3)",
   },
   subtitle: {
-    color: "#4ade80",
+    color: "#B14026",
     fontSize: 11,
     letterSpacing: 3,
     fontWeight: "700",
@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   description: {
-    color: "#9ca3af",
+    color: "#564B3F",
     fontSize: 15,
     lineHeight: 24,
     textAlign: "center",
@@ -975,13 +975,13 @@ const styles = StyleSheet.create({
   dotActive: {
     width: 28,
     height: 8,
-    backgroundColor: "#4ade80",
+    backgroundColor: "#B14026",
     borderRadius: 4,
   },
   dotInactive: {
     width: 8,
     height: 8,
-    backgroundColor: "#1f2937",
+    backgroundColor: "#CFC4AB",
   },
 
   footer: {
@@ -989,7 +989,7 @@ const styles = StyleSheet.create({
     paddingBottom: 44,
   },
   getStartedButton: {
-    backgroundColor: "#22c55e",
+    backgroundColor: "#B14026",
     paddingVertical: 18,
     paddingHorizontal: 32,
     borderRadius: 16,
@@ -997,14 +997,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 12,
-    shadowColor: "#22c55e",
+    shadowColor: "#B14026",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 8,
   },
   getStartedText: {
-    color: "#030712",
+    color: "#E3DAC4",
     fontSize: 17,
     fontWeight: "700",
     letterSpacing: 0.5,
@@ -1033,12 +1033,12 @@ const styles = StyleSheet.create({
     opacity: 0,
   },
   backText: {
-    color: "#6b7280",
+    color: "#564B3F",
     fontSize: 15,
     fontWeight: "500",
   },
   continueButton: {
-    backgroundColor: "#22c55e",
+    backgroundColor: "#B14026",
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 14,
@@ -1046,14 +1046,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    shadowColor: "#22c55e",
+    shadowColor: "#B14026",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 6,
   },
   continueText: {
-    color: "#030712",
+    color: "#E3DAC4",
     fontSize: 15,
     fontWeight: "700",
   },

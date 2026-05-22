@@ -1,4 +1,4 @@
-import {
+﻿import {
   View,
   Text,
   TouchableOpacity,
@@ -41,33 +41,33 @@ export default function InstagramConfirm({ accountData, onConfirm, onCancel }) {
   };
 
   return (
-    <View className="flex-1 bg-gray-950 items-center justify-center px-6">
-      <View className="bg-gray-900 rounded-3xl p-8 w-full max-w-sm border border-gray-800 items-center">
-        <View className="w-16 h-16 rounded-full bg-pink-500/20 items-center justify-center mb-4">
-          <Ionicons name="logo-instagram" size={32} color="#ec4899" />
+    <View className="flex-1 bg-paper items-center justify-center px-6">
+      <View className="bg-paper-light rounded-3xl p-8 w-full max-w-sm border border-rule items-center">
+        <View className="w-16 h-16 rounded-full bg-paper-deep items-center justify-center mb-4">
+          <Ionicons name="logo-instagram" size={32} color="#B14026" />
         </View>
 
-        <Text className="text-white text-xl font-bold mb-2">
+        <Text className="text-ink text-xl font-serif-bold mb-2">
           Connect Instagram
         </Text>
-        <Text className="text-gray-400 text-sm text-center mb-6">
+        <Text className="text-ink-muted text-sm text-center mb-6">
           Connect this account to CrossPost?
         </Text>
 
         {fetching ? (
           <View className="py-8">
-            <ActivityIndicator color="#ec4899" />
+            <ActivityIndicator color="#B14026" />
           </View>
         ) : fetchError ? (
           <View className="py-4">
-            <Text className="text-red-400 text-sm text-center mb-4">
+            <Text className="text-terracotta text-sm text-center mb-4">
               {fetchError}
             </Text>
             <TouchableOpacity
               onPress={onCancel}
-              className="bg-gray-800 w-full py-3.5 rounded-xl"
+              className="bg-paper-deep w-full py-3.5 rounded-xl"
             >
-              <Text className="text-gray-300 text-center font-medium">
+              <Text className="text-ink text-center font-sans-medium">
                 Go Back
               </Text>
             </TouchableOpacity>
@@ -80,17 +80,17 @@ export default function InstagramConfirm({ accountData, onConfirm, onCancel }) {
                 className="w-20 h-20 rounded-full mb-4"
               />
             ) : (
-              <View className="w-20 h-20 rounded-full bg-gray-700 items-center justify-center mb-4">
-                <Ionicons name="person" size={36} color="#9ca3af" />
+              <View className="w-20 h-20 rounded-full bg-paper-deep items-center justify-center mb-4">
+                <Ionicons name="person" size={36} color="#564B3F" />
               </View>
             )}
 
-            <Text className="text-white text-lg font-bold mb-1">
+            <Text className="text-ink text-lg font-serif-bold mb-1">
               @{info?.username}
             </Text>
 
             {info?.accountType ? (
-              <Text className="text-gray-400 text-xs mb-6 capitalize">
+              <Text className="text-ink-muted text-xs mb-6 capitalize">
                 {info.accountType.toLowerCase().replace("_", " ")} account
               </Text>
             ) : (
@@ -100,12 +100,12 @@ export default function InstagramConfirm({ accountData, onConfirm, onCancel }) {
             <TouchableOpacity
               onPress={handleConfirm}
               disabled={loading}
-              className="bg-pink-500 w-full py-3.5 rounded-xl mb-3"
+              className="bg-terracotta w-full py-3.5 rounded-xl mb-3"
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text className="text-white text-center font-bold">
+                <Text className="text-ink text-center font-sans-bold">
                   Connect This Account
                 </Text>
               )}
@@ -114,9 +114,9 @@ export default function InstagramConfirm({ accountData, onConfirm, onCancel }) {
             <TouchableOpacity
               onPress={onCancel}
               disabled={loading}
-              className="bg-gray-800 w-full py-3.5 rounded-xl"
+              className="bg-paper-deep w-full py-3.5 rounded-xl"
             >
-              <Text className="text-gray-300 text-center font-medium">
+              <Text className="text-ink text-center font-sans-medium">
                 Cancel
               </Text>
             </TouchableOpacity>

@@ -1,14 +1,14 @@
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef } from "react";
 import { View, Animated, Easing } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const PLATFORMS = [
-  { icon: "logo-twitter", color: "#3b82f6" },
-  { icon: "logo-instagram", color: "#ec4899" },
-  { icon: "logo-facebook", color: "#2563eb" },
+  { icon: "logo-twitter", color: "#4F573A" },
+  { icon: "logo-instagram", color: "#B14026" },
+  { icon: "logo-facebook", color: "#4F573A" },
   { icon: "logo-tiktok", color: "#e5e7eb" },
-  { icon: "logo-youtube", color: "#ef4444" },
-  { icon: "logo-linkedin", color: "#2563eb" },
+  { icon: "logo-youtube", color: "#B14026" },
+  { icon: "logo-linkedin", color: "#4F573A" },
 ];
 
 const RADIUS = 70;
@@ -116,9 +116,9 @@ export default function ServerLoadingAnimation() {
   });
 
   return (
-    <View className="flex-1 bg-gray-950 items-center justify-center">
-      <View className="absolute w-64 h-64 rounded-full bg-green-500/5" />
-      <View className="absolute w-40 h-40 rounded-full bg-green-500/10" />
+    <View className="flex-1 bg-paper items-center justify-center">
+      <View className="absolute w-64 h-64 rounded-full bg-terracotta/5" />
+      <View className="absolute w-40 h-40 rounded-full bg-terracotta-soft/30" />
 
       <Animated.View
         style={{
@@ -127,7 +127,7 @@ export default function ServerLoadingAnimation() {
           height: 120,
           borderRadius: 60,
           borderWidth: 2,
-          borderColor: "#4ade80",
+          borderColor: "#B14026",
           opacity: ringOpacity,
           transform: [{ scale: ringScale }],
         }}
@@ -174,8 +174,8 @@ export default function ServerLoadingAnimation() {
           transform: [{ scale: logoScale }, { scale: logoPulse }],
         }}
       >
-        <View className="w-20 h-20 rounded-3xl bg-green-500 items-center justify-center shadow-lg">
-          <Ionicons name="share-social" size={36} color="#030712" />
+        <View className="w-20 h-20 rounded-3xl bg-terracotta items-center justify-center shadow-lg">
+          <Ionicons name="share-social" size={36} color="#E3DAC4" />
         </View>
       </Animated.View>
     </View>

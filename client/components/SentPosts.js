@@ -1,4 +1,4 @@
-import {
+﻿import {
   Text,
   View,
   FlatList,
@@ -55,10 +55,10 @@ export default function SentPosts({
       <View className="items-center py-4 mb-24">
         <TouchableOpacity
           onPress={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-          className="bg-gray-800/60 rounded-xl px-5 py-2.5 flex-row items-center"
+          className="bg-paper-deep rounded-xl px-5 py-2.5 flex-row items-center"
         >
-          <Ionicons name="chevron-down" size={14} color="#4ade80" />
-          <Text className="text-green-400 text-xs font-semibold ml-1.5">
+          <Ionicons name="chevron-down" size={14} color="#B14026" />
+          <Text className="text-terracotta text-xs font-sans-semibold ml-1.5">
             Load More
           </Text>
         </TouchableOpacity>
@@ -69,11 +69,11 @@ export default function SentPosts({
   if (!posts || posts.length === 0) {
     return (
       <View className="flex-1 items-center justify-center px-8" style={{ marginTop: -40 }}>
-        <View className="w-16 h-16 rounded-2xl bg-gray-800 items-center justify-center mb-4">
-          <Ionicons name="paper-plane-outline" size={28} color="#6b7280" />
+        <View className="w-16 h-16 rounded-2xl bg-paper-deep items-center justify-center mb-4">
+          <Ionicons name="paper-plane-outline" size={28} color="#564B3F" />
         </View>
-        <Text className="text-white text-base font-medium mb-1">No posts yet</Text>
-        <Text className="text-gray-500 text-xs text-center">
+        <Text className="text-ink text-base font-sans-medium mb-1">No posts yet</Text>
+        <Text className="text-ink-muted text-xs text-center">
           Published posts will appear here
         </Text>
       </View>
@@ -92,9 +92,9 @@ export default function SentPosts({
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor="#4ade80"
-          colors={["#4ade80"]}
-          progressBackgroundColor="#111827"
+          tintColor={"#B14026"}
+          colors={["#B14026"]}
+          progressBackgroundColor="#E3DAC4"
         />
       }
     />

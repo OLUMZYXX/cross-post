@@ -1,4 +1,4 @@
-import {
+﻿import {
   Text,
   View,
   TouchableOpacity,
@@ -9,7 +9,6 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import TelegramConnectModal from "./TelegramConnectModal";
-import CreatePost from "./CreatePost";
 import SentPosts from "./SentPosts";
 import DraftsScreen from "./DraftsScreen";
 import AnalyticsScreen from "./AnalyticsScreen";
@@ -36,7 +35,6 @@ export default function HomePage({
   onSharedContentHandled,
 }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [showCreatePost, setShowCreatePost] = useState(false);
   const [editingDraft, setEditingDraft] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [sentPosts, setSentPosts] = useState([]);
@@ -54,7 +52,20 @@ export default function HomePage({
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [telegramModalVisible, setTelegramModalVisible] = useState(false);
   const [sentSubTab, setSentSubTab] = useState("published");
+  const [composerEpoch, setComposerEpoch] = useState(0);
   const prevTabRef = useRef(activeTab);
+
+  const focusComposer = useCallback((draft) => {
+    setEditingDraft(draft || null);
+    setComposerEpoch((e) => e + 1);
+    prevTabRef.current = "home";
+    setActiveTab("home");
+  }, []);
+
+  const resetComposer = useCallback(() => {
+    setEditingDraft(null);
+    setComposerEpoch((e) => e + 1);
+  }, []);
 
   const fetchPlatforms = useCallback(async () => {
     try {
@@ -185,8 +196,7 @@ export default function HomePage({
 
   useEffect(() => {
     if (sharedContent?.text) {
-      setEditingDraft({ caption: sharedContent.text, platforms: [...connectedPlatforms] });
-      setShowCreatePost(true);
+      focusComposer({ caption: sharedContent.text, platforms: [...connectedPlatforms] });
       onSharedContentHandled?.();
     }
   }, [sharedContent]);
@@ -206,10 +216,6 @@ export default function HomePage({
         setShowNotifications(false);
         return true;
       }
-      if (showCreatePost) {
-        setShowCreatePost(false);
-        return true;
-      }
       if (activeTab === "settings" && settingsScreen) {
         setSettingsScreen(null);
         return true;
@@ -219,12 +225,16 @@ export default function HomePage({
         setActiveTab("home");
         return true;
       }
+      if (editingDraft) {
+        setEditingDraft(null);
+        return true;
+      }
       return false;
     };
 
     const subscription = BackHandler.addEventListener("hardwareBackPress", handler);
     return () => subscription.remove();
-  }, [showCreatePost, showNotifications, activeTab, settingsScreen]);
+  }, [showNotifications, activeTab, settingsScreen, editingDraft]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -253,42 +263,38 @@ export default function HomePage({
   }, [fetchPlatforms, fetchPosts, fetchRecentActivities, showToast]);
 
   const handleTabChange = (tabId) => {
-    if (tabId === "create") {
-      setShowCreatePost(true);
-    } else {
-      prevTabRef.current = tabId;
-      setActiveTab(tabId);
-    }
+    prevTabRef.current = tabId;
+    setActiveTab(tabId);
   };
 
   const allPlatforms = {
-    Twitter: { icon: "logo-twitter", color: "blue-500", bg: "bg-blue-500/20" },
+    Twitter: { icon: "logo-twitter", color: "blue-500", bg: "bg-paper-deep" },
     Instagram: {
       icon: "logo-instagram",
       color: "pink-500",
-      bg: "bg-pink-500/20",
+      bg: "bg-paper-deep",
     },
     LinkedIn: {
       icon: "logo-linkedin",
       color: "blue-600",
-      bg: "bg-blue-600/20",
+      bg: "bg-paper-deep",
     },
     Facebook: {
       icon: "logo-facebook",
       color: "blue-700",
-      bg: "bg-blue-700/20",
+      bg: "bg-paper-deep",
     },
-    TikTok: { icon: "logo-tiktok", color: "black", bg: "bg-gray-800" },
-    YouTube: { icon: "logo-youtube", color: "red-500", bg: "bg-red-500/20" },
+    TikTok: { icon: "logo-tiktok", color: "black", bg: "bg-paper-deep" },
+    YouTube: { icon: "logo-youtube", color: "red-500", bg: "bg-terracotta/20" },
     Reddit: {
       icon: "logo-reddit",
       color: "orange-500",
-      bg: "bg-orange-500/20",
+      bg: "bg-paper-deep",
     },
     Telegram: {
       icon: "paper-plane",
       color: "sky-500",
-      bg: "bg-sky-500/20",
+      bg: "bg-paper-deep",
     },
   };
 
@@ -449,12 +455,11 @@ export default function HomePage({
   };
 
   const openDraft = (draft) => {
-    setEditingDraft(draft);
-    setShowCreatePost(true);
+    focusComposer(draft);
   };
 
   const openServerPost = (post) => {
-    setEditingDraft({
+    focusComposer({
       serverId: post._id,
       caption: post.caption || "",
       platforms: post.platforms || [],
@@ -462,7 +467,6 @@ export default function HomePage({
       status: post.status,
       scheduledAt: post.scheduledAt,
     });
-    setShowCreatePost(true);
   };
 
   const handleDeleteServerPost = async (postId) => {
@@ -481,6 +485,7 @@ export default function HomePage({
     setSentPosts((prev) => [post, ...prev]);
     setServerDrafts((prev) => prev.filter((p) => p._id !== (post._id || post.id)));
     setScheduledPosts((prev) => prev.filter((p) => p._id !== (post._id || post.id)));
+    resetComposer();
     fetchRecentActivities();
   };
 
@@ -511,26 +516,9 @@ export default function HomePage({
     onLogout();
   };
 
-  if (showCreatePost) {
-    return (
-      <CreatePost
-        connectedPlatforms={connectedPlatforms}
-        connectedPlatformObjects={connectedPlatformObjects}
-        allPlatforms={allPlatforms}
-        onClose={() => {
-          setShowCreatePost(false);
-          setEditingDraft(null);
-        }}
-        onSaveDraft={handleSaveDraft}
-        onPostPublished={handlePostPublished}
-        initialDraft={editingDraft}
-      />
-    );
-  }
-
   if (showNotifications) {
     return (
-      <View className="flex-1 bg-gray-950">
+      <View className="flex-1 bg-paper">
         <NotificationsInbox
           onBack={() => {
             setShowNotifications(false);
@@ -545,24 +533,24 @@ export default function HomePage({
   if (activeTab === "sent") {
     const totalDrafts = drafts.length + serverDrafts.length + scheduledPosts.length;
     return (
-      <View className="flex-1 bg-gray-950">
+      <View className="flex-1 bg-paper">
         <ScreenTransition activeKey="sent">
           <View className="px-5 pt-14 pb-2">
-            <Text className="text-white text-2xl font-bold mb-4">Posts</Text>
-            <View className="flex-row bg-gray-900 rounded-xl p-1 border border-gray-800/60">
+            <Text className="text-ink text-2xl font-serif-bold mb-4">Posts</Text>
+            <View className="flex-row bg-paper-light rounded-xl p-1 border border-rule">
               <TouchableOpacity
                 onPress={() => setSentSubTab("published")}
-                className={`flex-1 py-2 rounded-lg ${sentSubTab === "published" ? "bg-green-500" : ""}`}
+                className={`flex-1 py-2 rounded-lg ${sentSubTab === "published" ? "bg-terracotta" : ""}`}
               >
-                <Text className={`text-center text-xs font-bold ${sentSubTab === "published" ? "text-gray-950" : "text-gray-500"}`}>
+                <Text className={`text-center text-xs font-sans-bold ${sentSubTab === "published" ? "text-paper-light" : "text-ink-muted"}`}>
                   Published ({sentPosts.length})
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setSentSubTab("drafts")}
-                className={`flex-1 py-2 rounded-lg ${sentSubTab === "drafts" ? "bg-green-500" : ""}`}
+                className={`flex-1 py-2 rounded-lg ${sentSubTab === "drafts" ? "bg-terracotta" : ""}`}
               >
-                <Text className={`text-center text-xs font-bold ${sentSubTab === "drafts" ? "text-gray-950" : "text-gray-500"}`}>
+                <Text className={`text-center text-xs font-sans-bold ${sentSubTab === "drafts" ? "text-paper-light" : "text-ink-muted"}`}>
                   Drafts ({totalDrafts})
                 </Text>
               </TouchableOpacity>
@@ -646,7 +634,7 @@ export default function HomePage({
     }
 
     return (
-      <View className="flex-1 bg-gray-950">
+      <View className="flex-1 bg-paper">
         <ScreenTransition activeKey="settings">
           <SettingsScreen
             user={user}
@@ -667,7 +655,7 @@ export default function HomePage({
   }
 
   return (
-    <View className="flex-1 bg-gray-950">
+    <View className="flex-1 bg-paper">
       {showLoadingAnimation && (
         <PageLoadingAnimation
           onFinish={() => setShowLoadingAnimation(false)}
@@ -676,21 +664,23 @@ export default function HomePage({
 
       <ScreenTransition activeKey="home">
         <HomeScreen
+          key={`compose-${composerEpoch}`}
           user={user}
           sentPosts={sentPosts}
           allPosts={allPosts}
           connectedPlatforms={connectedPlatforms}
           connectedPlatformObjects={connectedPlatformObjects}
+          allPlatforms={allPlatforms}
           loadingPlatforms={loadingPlatforms}
           recentActivities={recentActivities}
           unreadNotifications={unreadNotifications}
           refreshing={refreshing}
           onRefresh={onRefresh}
-          onCreatePost={() => setShowCreatePost(true)}
           onNotifications={() => setShowNotifications(true)}
-          onAddPlatform={() => setModalVisible(true)}
-          getPlatformStyle={getPlatformStyle}
-          getPlatformUsername={getPlatformUsername}
+          initialDraft={editingDraft}
+          onSaveDraft={handleSaveDraft}
+          onPostPublished={handlePostPublished}
+          onResetDraft={resetComposer}
         />
       </ScreenTransition>
 
@@ -700,37 +690,39 @@ export default function HomePage({
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-gray-900 rounded-3xl p-6 w-80">
-            <Text className="text-white text-lg font-bold mb-4">
-              Add Social Media
+        <View className="flex-1 justify-center items-center bg-ink/60 px-6">
+          <View className="bg-paper-light rounded-3xl border border-rule p-6 w-full max-w-sm">
+            <Text className="text-terracotta text-[10px] font-sans-bold tracking-[2px] mb-1">
+              CONNECT
+            </Text>
+            <Text className="text-ink text-2xl font-serif-bold mb-5">
+              Add a platform
             </Text>
             {availablePlatforms.map((platform) => (
               <TouchableOpacity
                 key={platform}
                 onPress={() => handleConnectPlatform(platform)}
-                className="flex-row items-center mb-3"
+                className="flex-row items-center mb-2 bg-paper border border-rule rounded-2xl p-3"
+                activeOpacity={0.75}
               >
-                <View
-                  className={`w-10 h-10 rounded-full ${allPlatforms[platform].bg} items-center justify-center mr-3`}
-                >
+                <View className="w-10 h-10 rounded-xl bg-paper-deep items-center justify-center mr-3">
                   <Ionicons
                     name={allPlatforms[platform].icon}
-                    size={20}
-                    color="#fff"
+                    size={18}
+                    color="#1B1711"
                   />
                 </View>
-                <Text className="text-white font-medium flex-1">
+                <Text className="text-ink font-sans-semibold flex-1">
                   {platform}
                 </Text>
-                <Ionicons name="add" size={20} color="#22c55e" />
+                <Ionicons name="arrow-forward" size={16} color="#B14026" />
               </TouchableOpacity>
             ))}
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
-              className="bg-gray-800 py-3 rounded-xl mt-4"
+              className="py-3 rounded-2xl mt-3 border border-rule"
             >
-              <Text className="text-white text-center">Close</Text>
+              <Text className="text-ink-muted text-center font-sans-semibold">Close</Text>
             </TouchableOpacity>
           </View>
         </View>

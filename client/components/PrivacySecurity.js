@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -227,12 +227,12 @@ export default function PrivacySecurity({ onBack, user }) {
   };
 
   return (
-    <View className="flex-1 bg-gray-950 px-6 pt-16">
+    <View className="flex-1 bg-paper px-6 pt-16">
       <View className="flex-row items-center mb-8">
         <TouchableOpacity onPress={onBack} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#1B1711" />
         </TouchableOpacity>
-        <Text className="text-white text-xl font-bold">
+        <Text className="text-ink text-xl font-serif-bold">
           Privacy & Security
         </Text>
       </View>
@@ -241,74 +241,74 @@ export default function PrivacySecurity({ onBack, user }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <Text className="text-gray-400 text-xs mb-3 ml-1">
+        <Text className="text-ink-muted text-xs mb-3 ml-1">
           CHANGE PASSWORD
         </Text>
-        <View className="bg-gray-900/80 rounded-2xl border border-gray-800 p-4 mb-6">
+        <View className="bg-paper-light rounded-2xl border border-rule p-4 mb-6">
           <TextInput
             value={currentPassword}
             onChangeText={setCurrentPassword}
             placeholder="Current password"
-            placeholderTextColor="#6b7280"
+            placeholderTextColor="#564B3F"
             secureTextEntry={!showPassword}
-            className="bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white mb-3"
+            className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink mb-3"
           />
           <TextInput
             value={newPassword}
             onChangeText={setNewPassword}
             placeholder="New password"
-            placeholderTextColor="#6b7280"
+            placeholderTextColor="#564B3F"
             secureTextEntry={!showPassword}
-            className="bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white mb-3"
+            className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink mb-3"
           />
           <TextInput
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             placeholder="Confirm new password"
-            placeholderTextColor="#6b7280"
+            placeholderTextColor="#564B3F"
             secureTextEntry={!showPassword}
-            className="bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white mb-3"
+            className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink mb-3"
           />
           <TouchableOpacity
             onPress={() => setShowPassword(!showPassword)}
             className="mb-4"
           >
-            <Text className="text-green-400 text-xs">
+            <Text className="text-terracotta text-xs">
               {showPassword ? "Hide passwords" : "Show passwords"}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleChangePassword}
             disabled={saving}
-            className={`py-3 rounded-xl ${saving ? "bg-green-500/50" : "bg-green-500"}`}
+            className={`py-3 rounded-xl ${saving ? "bg-terracotta/50" : "bg-terracotta"}`}
           >
             {saving ? (
-              <ActivityIndicator color="#030712" />
+              <ActivityIndicator color="#E3DAC4" />
             ) : (
-              <Text className="text-gray-950 text-center font-bold text-sm">
+              <Text className="text-paper-light text-center font-sans-bold text-sm">
                 Update Password
               </Text>
             )}
           </TouchableOpacity>
         </View>
 
-        <Text className="text-gray-400 text-xs mb-3 ml-1">
+        <Text className="text-ink-muted text-xs mb-3 ml-1">
           TWO-FACTOR AUTHENTICATION
         </Text>
-        <View className="bg-gray-900/80 rounded-2xl border border-gray-800 p-4 mb-6">
+        <View className="bg-paper-light rounded-2xl border border-rule p-4 mb-6">
           <View className="flex-row items-center mb-3">
-            <View className="w-10 h-10 rounded-full bg-green-500/20 items-center justify-center mr-3">
+            <View className="w-10 h-10 rounded-full bg-terracotta-soft/40 items-center justify-center mr-3">
               <Ionicons
                 name="shield-checkmark-outline"
                 size={20}
-                color="#4ade80"
+                color="#B14026"
               />
             </View>
             <View className="flex-1">
-              <Text className="text-white font-bold text-sm">
+              <Text className="text-ink font-sans-bold text-sm">
                 Authenticator App
               </Text>
-              <Text className="text-gray-500 text-xs mt-0.5">
+              <Text className="text-ink-muted text-xs mt-0.5">
                 {twoFactorEnabled
                   ? "Enabled — code required at login"
                   : "Add an extra layer of security"}
@@ -322,9 +322,9 @@ export default function PrivacySecurity({ onBack, user }) {
                 setDisableCode("");
                 setDisableModalVisible(true);
               }}
-              className="bg-red-500/10 py-3 rounded-xl border border-red-500/20"
+              className="bg-terracotta/15 py-3 rounded-xl border border-terracotta/30"
             >
-              <Text className="text-red-400 text-center font-bold text-sm">
+              <Text className="text-terracotta text-center font-sans-bold text-sm">
                 Disable 2FA
               </Text>
             </TouchableOpacity>
@@ -332,12 +332,12 @@ export default function PrivacySecurity({ onBack, user }) {
             <TouchableOpacity
               onPress={handleEnable2FA}
               disabled={setting2FA}
-              className={`py-3 rounded-xl ${setting2FA ? "bg-green-500/50" : "bg-green-500"}`}
+              className={`py-3 rounded-xl ${setting2FA ? "bg-terracotta/50" : "bg-terracotta"}`}
             >
               {setting2FA ? (
-                <ActivityIndicator color="#030712" />
+                <ActivityIndicator color="#E3DAC4" />
               ) : (
-                <Text className="text-gray-950 text-center font-bold text-sm">
+                <Text className="text-paper-light text-center font-sans-bold text-sm">
                   Enable 2FA
                 </Text>
               )}
@@ -345,10 +345,10 @@ export default function PrivacySecurity({ onBack, user }) {
           )}
         </View>
 
-        <Text className="text-gray-400 text-xs mb-3 ml-1">APP LOCK</Text>
-        <View className="bg-gray-900/80 rounded-2xl border border-gray-800 p-4 mb-6">
+        <Text className="text-ink-muted text-xs mb-3 ml-1">APP LOCK</Text>
+        <View className="bg-paper-light rounded-2xl border border-rule p-4 mb-6">
           <View className="flex-row items-center">
-            <View className="w-10 h-10 rounded-full bg-purple-500/20 items-center justify-center mr-3">
+            <View className="w-10 h-10 rounded-full bg-paper-deep items-center justify-center mr-3">
               <Ionicons
                 name={
                   biometricType === "Face ID" || biometricType === "Face Unlock"
@@ -356,14 +356,14 @@ export default function PrivacySecurity({ onBack, user }) {
                     : "finger-print-outline"
                 }
                 size={20}
-                color="#a855f7"
+                color="#4F573A"
               />
             </View>
             <View className="flex-1">
-              <Text className="text-white font-bold text-sm">
+              <Text className="text-ink font-sans-bold text-sm">
                 {biometricType || "Biometric Lock"}
               </Text>
-              <Text className="text-gray-500 text-xs mt-0.5">
+              <Text className="text-ink-muted text-xs mt-0.5">
                 {biometricAvailable
                   ? `Require ${biometricType || "biometric"} to open the app`
                   : Platform.OS === "ios"
@@ -375,20 +375,20 @@ export default function PrivacySecurity({ onBack, user }) {
               value={biometricEnabled}
               onValueChange={toggleBiometric}
               disabled={!biometricAvailable}
-              trackColor={{ false: "#374151", true: "#4ade80" }}
-              thumbColor={biometricEnabled ? "#fff" : "#9ca3af"}
+              trackColor={{ false: "#374151", true: "#B14026" }}
+              thumbColor={biometricEnabled ? "#fff" : "#564B3F"}
             />
           </View>
         </View>
 
-        <Text className="text-gray-400 text-xs mb-3 ml-1">ACCOUNT</Text>
-        <View className="bg-gray-900/80 rounded-2xl border border-gray-800">
+        <Text className="text-ink-muted text-xs mb-3 ml-1">ACCOUNT</Text>
+        <View className="bg-paper-light rounded-2xl border border-rule">
           <View className="flex-row items-center p-4">
-            <Ionicons name="eye-off-outline" size={18} color="#a855f7" />
-            <Text className="text-white text-sm ml-3 flex-1">
+            <Ionicons name="eye-off-outline" size={18} color="#4F573A" />
+            <Text className="text-ink text-sm ml-3 flex-1">
               Private Account
             </Text>
-            <Text className="text-yellow-400 text-xs">Coming soon</Text>
+            <Text className="text-terracotta-shadow text-xs">Coming soon</Text>
           </View>
         </View>
       </ScrollView>
@@ -399,12 +399,12 @@ export default function PrivacySecurity({ onBack, user }) {
         animationType="slide"
         onRequestClose={() => setQrModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/60 px-6">
-          <View className="bg-gray-900 rounded-3xl p-6 w-full max-w-sm">
-            <Text className="text-white text-lg font-bold mb-2">
+        <View className="flex-1 justify-center items-center bg-ink/60 px-6">
+          <View className="bg-paper-light rounded-3xl p-6 w-full max-w-sm">
+            <Text className="text-ink text-lg font-serif-bold mb-2">
               Set Up 2FA
             </Text>
-            <Text className="text-gray-400 text-xs mb-4">
+            <Text className="text-ink-muted text-xs mb-4">
               Scan this QR code with your authenticator app (Google
               Authenticator, Authy, etc.)
             </Text>
@@ -422,12 +422,12 @@ export default function PrivacySecurity({ onBack, user }) {
             )}
 
             {secret && (
-              <View className="bg-gray-800 rounded-xl p-3 mb-4">
-                <Text className="text-gray-400 text-xs mb-1">
+              <View className="bg-paper-deep rounded-xl p-3 mb-4">
+                <Text className="text-ink-muted text-xs mb-1">
                   Or enter this code manually:
                 </Text>
                 <Text
-                  className="text-green-400 text-sm font-bold"
+                  className="text-terracotta text-sm font-sans-bold"
                   selectable
                 >
                   {secret}
@@ -435,29 +435,29 @@ export default function PrivacySecurity({ onBack, user }) {
               </View>
             )}
 
-            <Text className="text-gray-400 text-xs mb-2">
+            <Text className="text-ink-muted text-xs mb-2">
               Enter the 6-digit code from your app:
             </Text>
             <TextInput
               value={otpCode}
               onChangeText={(t) => setOtpCode(t.replace(/[^0-9]/g, ""))}
               placeholder="000000"
-              placeholderTextColor="#6b7280"
+              placeholderTextColor="#564B3F"
               keyboardType="number-pad"
               maxLength={6}
-              className="bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-center text-xl mb-4"
+              className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink text-center text-xl mb-4"
               style={{ letterSpacing: 8 }}
             />
 
             <TouchableOpacity
               onPress={handleVerify2FA}
               disabled={verifying2FA}
-              className={`py-3 rounded-xl mb-3 ${verifying2FA ? "bg-green-500/50" : "bg-green-500"}`}
+              className={`py-3 rounded-xl mb-3 ${verifying2FA ? "bg-terracotta/50" : "bg-terracotta"}`}
             >
               {verifying2FA ? (
-                <ActivityIndicator color="#030712" />
+                <ActivityIndicator color="#E3DAC4" />
               ) : (
-                <Text className="text-gray-950 text-center font-bold text-sm">
+                <Text className="text-paper-light text-center font-sans-bold text-sm">
                   Verify & Enable
                 </Text>
               )}
@@ -470,9 +470,9 @@ export default function PrivacySecurity({ onBack, user }) {
                 setSecret(null);
                 setOtpCode("");
               }}
-              className="py-3 rounded-xl bg-gray-800"
+              className="py-3 rounded-xl bg-paper-deep"
             >
-              <Text className="text-white text-center text-sm">Cancel</Text>
+              <Text className="text-ink text-center text-sm">Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -484,12 +484,12 @@ export default function PrivacySecurity({ onBack, user }) {
         animationType="slide"
         onRequestClose={() => setDisableModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/60 px-6">
-          <View className="bg-gray-900 rounded-3xl p-6 w-full max-w-sm">
-            <Text className="text-white text-lg font-bold mb-2">
+        <View className="flex-1 justify-center items-center bg-ink/60 px-6">
+          <View className="bg-paper-light rounded-3xl p-6 w-full max-w-sm">
+            <Text className="text-ink text-lg font-serif-bold mb-2">
               Disable 2FA
             </Text>
-            <Text className="text-gray-400 text-xs mb-4">
+            <Text className="text-ink-muted text-xs mb-4">
               Enter the 6-digit code from your authenticator app to disable
               two-factor authentication.
             </Text>
@@ -498,22 +498,22 @@ export default function PrivacySecurity({ onBack, user }) {
               value={disableCode}
               onChangeText={(t) => setDisableCode(t.replace(/[^0-9]/g, ""))}
               placeholder="000000"
-              placeholderTextColor="#6b7280"
+              placeholderTextColor="#564B3F"
               keyboardType="number-pad"
               maxLength={6}
-              className="bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-center text-xl mb-4"
+              className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink text-center text-xl mb-4"
               style={{ letterSpacing: 8 }}
             />
 
             <TouchableOpacity
               onPress={handleDisable2FA}
               disabled={disabling2FA}
-              className={`py-3 rounded-xl mb-3 ${disabling2FA ? "bg-red-500/50" : "bg-red-500"}`}
+              className={`py-3 rounded-xl mb-3 ${disabling2FA ? "bg-terracotta/50" : "bg-terracotta"}`}
             >
               {disabling2FA ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text className="text-white text-center font-bold text-sm">
+                <Text className="text-ink text-center font-sans-bold text-sm">
                   Disable 2FA
                 </Text>
               )}
@@ -524,9 +524,9 @@ export default function PrivacySecurity({ onBack, user }) {
                 setDisableModalVisible(false);
                 setDisableCode("");
               }}
-              className="py-3 rounded-xl bg-gray-800"
+              className="py-3 rounded-xl bg-paper-deep"
             >
-              <Text className="text-white text-center text-sm">Cancel</Text>
+              <Text className="text-ink text-center text-sm">Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>

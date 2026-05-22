@@ -1,14 +1,14 @@
-import { View, Text, TouchableOpacity } from "react-native";
+﻿import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const TYPE_CONFIG = {
-  post_published: { icon: "checkmark-circle", color: "#4ade80", label: "Published" },
-  post_failed: { icon: "close-circle", color: "#f87171", label: "Failed" },
-  post_partial: { icon: "alert-circle", color: "#f59e0b", label: "Partial" },
-  post_scheduled: { icon: "time", color: "#3b82f6", label: "Scheduled" },
-  schedule_reminder: { icon: "alarm", color: "#a855f7", label: "Reminder" },
-  platform_connected: { icon: "link", color: "#22c55e", label: "Connected" },
-  platform_disconnected: { icon: "unlink", color: "#ef4444", label: "Disconnected" },
+  post_published: { icon: "checkmark-circle", color: "#4F573A", label: "Published" },
+  post_failed: { icon: "close-circle", color: "#B14026", label: "Failed" },
+  post_partial: { icon: "alert-circle", color: "#8E311B", label: "Partial" },
+  post_scheduled: { icon: "time", color: "#4F573A", label: "Scheduled" },
+  schedule_reminder: { icon: "alarm", color: "#4F573A", label: "Reminder" },
+  platform_connected: { icon: "link", color: "#4F573A", label: "Connected" },
+  platform_disconnected: { icon: "unlink", color: "#B14026", label: "Disconnected" },
 };
 
 function getTimeAgo(dateString) {
@@ -43,9 +43,9 @@ export default function NotificationItem({ notif, onPress, onDelete }) {
       <View
         className="rounded-2xl p-3.5"
         style={{
-          backgroundColor: isUnread ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
+          backgroundColor: isUnread ? "#E3DAC4" : "#DDD3BD",
           borderWidth: 1,
-          borderColor: isUnread ? `${config.color}20` : "rgba(255,255,255,0.04)",
+          borderColor: isUnread ? `${config.color}20` : "#E3DAC4",
         }}
       >
         <View className="flex-row items-start">
@@ -60,7 +60,7 @@ export default function NotificationItem({ notif, onPress, onDelete }) {
             <View className="flex-row items-center justify-between mb-0.5">
               <View className="flex-row items-center flex-1 mr-2">
                 <Text
-                  className={`text-[13px] font-bold flex-shrink ${isUnread ? "text-white" : "text-gray-400"}`}
+                  className={`text-[13px] font-sans-bold flex-shrink ${isUnread ? "text-ink" : "text-ink-muted"}`}
                   numberOfLines={1}
                 >
                   {notif.title}
@@ -72,13 +72,13 @@ export default function NotificationItem({ notif, onPress, onDelete }) {
                   />
                 )}
               </View>
-              <Text className="text-gray-600 text-[10px] font-medium flex-shrink-0">
+              <Text className="text-ink-soft text-[10px] font-sans-medium flex-shrink-0">
                 {getTimeAgo(notif.createdAt)}
               </Text>
             </View>
 
             <Text
-              className={`text-[11px] leading-[16px] mb-2 ${isUnread ? "text-gray-400" : "text-gray-600"}`}
+              className={`text-[11px] leading-[16px] mb-2 ${isUnread ? "text-ink-muted" : "text-ink-soft"}`}
               numberOfLines={2}
             >
               {notif.message}
@@ -89,7 +89,7 @@ export default function NotificationItem({ notif, onPress, onDelete }) {
               style={{ backgroundColor: `${config.color}12` }}
             >
               <Text
-                className="text-[8px] font-semibold uppercase tracking-wider"
+                className="text-[8px] font-sans-semibold uppercase tracking-wider"
                 style={{ color: config.color }}
               >
                 {config.label}

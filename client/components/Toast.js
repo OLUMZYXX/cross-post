@@ -1,4 +1,4 @@
-import React, {
+﻿import React, {
   createContext,
   useContext,
   useState,
@@ -13,31 +13,31 @@ const ToastContext = createContext(null);
 const TOAST_CONFIG = {
   success: {
     icon: "checkmark-circle",
-    iconColor: "#4ade80",
-    bg: "bg-gray-900",
-    border: "border-green-500/30",
-    titleColor: "text-green-400",
+    iconColor: "#B14026",
+    bg: "bg-paper-light",
+    border: "border-terracotta/40",
+    titleColor: "text-terracotta",
   },
   error: {
     icon: "close-circle",
-    iconColor: "#ef4444",
-    bg: "bg-gray-900",
-    border: "border-red-500/30",
-    titleColor: "text-red-400",
+    iconColor: "#B14026",
+    bg: "bg-paper-light",
+    border: "border-terracotta/40",
+    titleColor: "text-terracotta",
   },
   warning: {
     icon: "warning",
     iconColor: "#eab308",
-    bg: "bg-gray-900",
+    bg: "bg-paper-light",
     border: "border-yellow-500/30",
-    titleColor: "text-yellow-400",
+    titleColor: "text-terracotta-shadow",
   },
   info: {
     icon: "information-circle",
-    iconColor: "#3b82f6",
-    bg: "bg-gray-900",
-    border: "border-blue-500/30",
-    titleColor: "text-blue-400",
+    iconColor: "#4F573A",
+    bg: "bg-paper-light",
+    border: "border-rule",
+    titleColor: "text-olive",
   },
 };
 
@@ -134,17 +134,17 @@ function ToastItem({ toast, onDismiss }) {
           </View>
           <View className="flex-1">
             {toast.title && (
-              <Text className={`${config.titleColor} font-bold text-sm`}>
+              <Text className={`${config.titleColor} font-sans-bold text-sm`}>
                 {toast.title}
               </Text>
             )}
             {toast.message && (
-              <Text className="text-gray-400 text-xs mt-0.5">
+              <Text className="text-ink-muted text-xs mt-0.5">
                 {toast.message}
               </Text>
             )}
           </View>
-          <Ionicons name="close" size={16} color="#6b7280" />
+          <Ionicons name="close" size={16} color="#564B3F" />
         </View>
       </TouchableOpacity>
     </Animated.View>

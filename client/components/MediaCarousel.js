@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   View,
   ScrollView,
@@ -21,7 +21,7 @@ function CarouselItem({ uri, width }) {
   if (isVideo) {
     return (
       <TouchableOpacity activeOpacity={0.8} onPress={() => setShowPlayer(true)}>
-        <View style={{ width, height: 192 }} className="bg-gray-800">
+        <View style={{ width, height: 192 }} className="bg-paper-deep">
           {thumbnailUrl && !thumbError ? (
             <Image
               source={{ uri: thumbnailUrl }}
@@ -31,11 +31,11 @@ function CarouselItem({ uri, width }) {
             />
           ) : (
             <View style={{ width, height: 192 }} className="items-center justify-center">
-              <Ionicons name="videocam-outline" size={36} color="#6b7280" />
+              <Ionicons name="videocam-outline" size={36} color="#564B3F" />
             </View>
           )}
           <View className="absolute inset-0 items-center justify-center">
-            <View className="w-12 h-12 rounded-full bg-black/50 items-center justify-center">
+            <View className="w-12 h-12 rounded-full bg-ink/50 items-center justify-center">
               <Ionicons name="play" size={24} color="#fff" />
             </View>
           </View>

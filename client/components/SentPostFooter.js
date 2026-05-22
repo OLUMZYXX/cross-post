@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+﻿import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useToast } from "./Toast";
@@ -41,28 +41,28 @@ export default function SentPostFooter({
   };
 
   return (
-    <View className="flex-row items-center justify-between pt-3 border-t border-gray-800/50">
+    <View className="flex-row items-center justify-between pt-3 border-t border-rule">
       <View className="flex-row items-center flex-1">
         <View
           className={`w-5 h-5 rounded-full ${
-            allFailed ? "bg-red-500/15" : "bg-green-500/15"
+            allFailed ? "bg-terracotta/15" : "bg-terracotta-soft/30"
           } items-center justify-center mr-1.5`}
         >
           <Ionicons
             name={allFailed ? "close" : "checkmark"}
             size={10}
-            color={allFailed ? "#f87171" : "#4ade80"}
+            color={allFailed ? "#B14026" : "#B14026"}
           />
         </View>
-        <Text className="text-gray-500 text-[10px]">
+        <Text className="text-ink-muted text-[10px]">
           {allFailed
             ? "Failed"
             : hasFailures
               ? "Partial"
               : getTimeAgo(post.publishedAt)}
         </Text>
-        <Text className="text-gray-700 text-[10px] mx-1.5">·</Text>
-        <Text className="text-gray-600 text-[10px]">
+        <Text className="text-ink-soft text-[10px] mx-1.5">·</Text>
+        <Text className="text-ink-soft text-[10px]">
           {formatDate(post.publishedAt)} {formatTime(post.publishedAt)}
         </Text>
       </View>
@@ -70,22 +70,22 @@ export default function SentPostFooter({
       <View className="flex-row items-center">
         <TouchableOpacity
           onPress={handleCopy}
-          className="w-7 h-7 rounded-lg bg-gray-800/60 items-center justify-center mr-2"
+          className="w-7 h-7 rounded-lg bg-paper-deep items-center justify-center mr-2"
           activeOpacity={0.7}
         >
-          <Ionicons name="copy-outline" size={13} color="#9ca3af" />
+          <Ionicons name="copy-outline" size={13} color="#564B3F" />
         </TouchableOpacity>
 
         {onDelete && (
           <TouchableOpacity
             onPress={() => onDelete(post)}
             disabled={isDeleting}
-            className="w-7 h-7 rounded-lg bg-gray-800/60 items-center justify-center"
+            className="w-7 h-7 rounded-lg bg-paper-deep items-center justify-center"
           >
             {isDeleting ? (
-              <ActivityIndicator size="small" color="#ef4444" />
+              <ActivityIndicator size="small" color="#B14026" />
             ) : (
-              <Ionicons name="trash-outline" size={13} color="#6b7280" />
+              <Ionicons name="trash-outline" size={13} color="#564B3F" />
             )}
           </TouchableOpacity>
         )}

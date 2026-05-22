@@ -1,11 +1,11 @@
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert } from "react-native";
+﻿import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 function DraftCard({ post, iconName, iconColor, iconBg, subtitle, onPress, onDelete }) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="bg-gray-900 rounded-2xl p-4 border border-gray-800/60 mb-3"
+      className="bg-paper-light rounded-2xl p-4 border border-rule mb-3"
       activeOpacity={0.7}
     >
       <View className="flex-row items-center">
@@ -13,16 +13,16 @@ function DraftCard({ post, iconName, iconColor, iconBg, subtitle, onPress, onDel
           <Ionicons name={iconName} size={18} color={iconColor} />
         </View>
         <View className="flex-1">
-          <Text className="text-white text-sm font-medium" numberOfLines={1}>
+          <Text className="text-ink text-sm font-sans-medium" numberOfLines={1}>
             {post.caption || post.title || "No caption"}
           </Text>
-          <Text className="text-gray-500 text-[10px] mt-0.5">{subtitle}</Text>
+          <Text className="text-ink-muted text-[10px] mt-0.5">{subtitle}</Text>
         </View>
         <TouchableOpacity
           onPress={onDelete}
-          className="w-8 h-8 rounded-lg bg-gray-800/60 items-center justify-center ml-2"
+          className="w-8 h-8 rounded-lg bg-paper-deep items-center justify-center ml-2"
         >
-          <Ionicons name="trash-outline" size={13} color="#6b7280" />
+          <Ionicons name="trash-outline" size={13} color="#564B3F" />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -31,17 +31,17 @@ function DraftCard({ post, iconName, iconColor, iconBg, subtitle, onPress, onDel
 
 function SectionHeader({ title, count, color }) {
   const colorMap = {
-    yellow: { bg: "bg-yellow-500/15", text: "text-yellow-400" },
-    orange: { bg: "bg-orange-500/15", text: "text-orange-400" },
-    blue: { bg: "bg-blue-500/15", text: "text-blue-400" },
+    yellow: { bg: "bg-paper-deep", text: "text-terracotta-shadow" },
+    orange: { bg: "bg-terracotta/15", text: "text-terracotta-shadow" },
+    blue: { bg: "bg-paper-deep", text: "text-olive" },
   };
   const c = colorMap[color] || colorMap.yellow;
 
   return (
     <View className="flex-row items-center justify-between mb-3 mt-3">
-      <Text className="text-white text-sm font-bold">{title}</Text>
+      <Text className="text-ink text-sm font-sans-bold">{title}</Text>
       <View className={`${c.bg} rounded-full px-2 py-0.5`}>
-        <Text className={`${c.text} text-[10px] font-bold`}>{count}</Text>
+        <Text className={`${c.text} text-[10px] font-sans-bold`}>{count}</Text>
       </View>
     </View>
   );
@@ -82,20 +82,20 @@ export default function DraftsScreen({
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor="#4ade80"
-          colors={["#4ade80"]}
-          progressBackgroundColor="#111827"
+          tintColor={"#B14026"}
+          colors={["#B14026"]}
+          progressBackgroundColor="#E3DAC4"
         />
       }
     >
       {totalDrafts > 1 && (
         <TouchableOpacity
           onPress={confirmClearAll}
-          className="flex-row items-center justify-center bg-red-500/10 border border-red-500/20 rounded-xl py-2.5 mb-3"
+          className="flex-row items-center justify-center bg-terracotta/15 border border-terracotta/30 rounded-xl py-2.5 mb-3"
           activeOpacity={0.7}
         >
-          <Ionicons name="trash-outline" size={14} color="#f87171" />
-          <Text className="text-red-400 text-xs font-semibold ml-1.5">
+          <Ionicons name="trash-outline" size={14} color="#B14026" />
+          <Text className="text-terracotta text-xs font-sans-semibold ml-1.5">
             Clear All Drafts ({totalDrafts})
           </Text>
         </TouchableOpacity>
@@ -103,11 +103,11 @@ export default function DraftsScreen({
 
       {isEmpty && (
         <View className="items-center py-16">
-          <View className="w-16 h-16 rounded-2xl bg-gray-800 items-center justify-center mb-4">
-            <Ionicons name="document-text-outline" size={28} color="#6b7280" />
+          <View className="w-16 h-16 rounded-2xl bg-paper-deep items-center justify-center mb-4">
+            <Ionicons name="document-text-outline" size={28} color="#564B3F" />
           </View>
-          <Text className="text-white font-medium text-base mb-1">No drafts yet</Text>
-          <Text className="text-gray-500 text-xs text-center">
+          <Text className="text-ink font-sans-medium text-base mb-1">No drafts yet</Text>
+          <Text className="text-ink-muted text-xs text-center">
             Save posts as drafts or schedule them for later
           </Text>
         </View>
@@ -121,8 +121,8 @@ export default function DraftsScreen({
               key={draft.id}
               post={draft}
               iconName="bookmark"
-              iconColor="#f59e0b"
-              iconBg="bg-yellow-500/15"
+              iconColor="#8E311B"
+              iconBg="bg-paper-deep"
               subtitle={`${draft.savedAt} · ${draft.platforms?.length || 0} platforms${draft.media?.length > 0 ? " · has media" : ""}`}
               onPress={() => onOpenDraft(draft)}
               onDelete={() => onDeleteLocalDraft(draft.id)}
@@ -140,7 +140,7 @@ export default function DraftsScreen({
               post={post}
               iconName="document-text"
               iconColor="#f97316"
-              iconBg="bg-orange-500/15"
+              iconBg="bg-terracotta/15"
               subtitle={`${post.platforms?.length || 0} platforms${post.media?.length > 0 ? " · has media" : ""}`}
               onPress={() => onOpenServerPost(post)}
               onDelete={() => onDeleteServerPost(post._id)}
@@ -163,8 +163,8 @@ export default function DraftsScreen({
                 key={post._id}
                 post={post}
                 iconName="time"
-                iconColor="#3b82f6"
-                iconBg="bg-blue-500/15"
+                iconColor="#4F573A"
+                iconBg="bg-paper-deep"
                 subtitle={`${schedDate} · ${post.platforms?.length || 0} platforms`}
                 onPress={() => onOpenServerPost(post)}
                 onDelete={() => onDeleteServerPost(post._id)}

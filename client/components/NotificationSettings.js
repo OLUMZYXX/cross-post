@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ const TOGGLES = [
     desc: "Receive alerts on your device",
     key: "pushEnabled",
     icon: "notifications",
-    color: "#a855f7",
+    color: "#4F573A",
     section: "channels",
   },
   {
@@ -25,7 +25,7 @@ const TOGGLES = [
     desc: "Get updates via email",
     key: "emailEnabled",
     icon: "mail",
-    color: "#3b82f6",
+    color: "#4F573A",
     section: "channels",
   },
   {
@@ -33,7 +33,7 @@ const TOGGLES = [
     desc: "Notify when posts go live or fail",
     key: "postAlerts",
     icon: "paper-plane",
-    color: "#4ade80",
+    color: "#B14026",
     section: "alerts",
   },
   {
@@ -41,14 +41,14 @@ const TOGGLES = [
     desc: "Remind before scheduled posts",
     key: "scheduleReminders",
     icon: "time",
-    color: "#f59e0b",
+    color: "#8E311B",
     section: "alerts",
   },
 ];
 
 function ToggleRow({ item, onToggle, isLast }) {
   return (
-    <View className={`flex-row items-center p-4 ${!isLast ? "border-b border-gray-800/50" : ""}`}>
+    <View className={`flex-row items-center p-4 ${!isLast ? "border-b border-rule" : ""}`}>
       <View
         className="w-9 h-9 rounded-xl items-center justify-center mr-3"
         style={{ backgroundColor: item.color + "20" }}
@@ -56,14 +56,14 @@ function ToggleRow({ item, onToggle, isLast }) {
         <Ionicons name={item.icon} size={17} color={item.color} />
       </View>
       <View className="flex-1">
-        <Text className="text-white text-sm font-medium">{item.label}</Text>
-        <Text className="text-gray-500 text-[11px] mt-0.5">{item.desc}</Text>
+        <Text className="text-ink text-sm font-sans-medium">{item.label}</Text>
+        <Text className="text-ink-muted text-[11px] mt-0.5">{item.desc}</Text>
       </View>
       <Switch
         value={item.value}
         onValueChange={() => onToggle(item.key, item.value, item.label)}
         trackColor={{ false: "#374151", true: "#166534" }}
-        thumbColor={item.value ? "#4ade80" : "#9ca3af"}
+        thumbColor={item.value ? "#B14026" : "#564B3F"}
       />
     </View>
   );
@@ -111,8 +111,8 @@ export default function NotificationSettings({ onBack }) {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-gray-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#4ade80" />
+      <View className="flex-1 bg-paper items-center justify-center">
+        <ActivityIndicator size="large" color="#B14026" />
       </View>
     );
   }
@@ -121,42 +121,42 @@ export default function NotificationSettings({ onBack }) {
   const alerts = TOGGLES.filter((t) => t.section === "alerts").map((t) => ({ ...t, value: prefs[t.key] }));
 
   return (
-    <View className="flex-1 bg-gray-950 px-5 pt-14">
+    <View className="flex-1 bg-paper px-5 pt-14">
       <View className="flex-row items-center mb-6">
         <TouchableOpacity
           onPress={onBack}
-          className="w-10 h-10 rounded-xl bg-gray-900 items-center justify-center mr-3 border border-gray-800/60"
+          className="w-10 h-10 rounded-xl bg-paper-light items-center justify-center mr-3 border border-rule"
         >
-          <Ionicons name="arrow-back" size={18} color="#fff" />
+          <Ionicons name="arrow-back" size={18} color="#1B1711" />
         </TouchableOpacity>
-        <Text className="text-white text-xl font-bold">Notifications</Text>
+        <Text className="text-ink text-xl font-serif-bold">Notifications</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        <Text className="text-gray-500 text-[10px] tracking-wider uppercase mb-2 ml-1">
+        <Text className="text-ink-muted text-[10px] tracking-[2px] uppercase font-sans-semibold mb-2 ml-1">
           Channels
         </Text>
-        <View className="bg-gray-900 rounded-2xl border border-gray-800/60 mb-5">
+        <View className="bg-paper-light rounded-2xl border border-rule mb-5">
           {channels.map((item, i) => (
             <ToggleRow key={item.key} item={item} onToggle={handleToggle} isLast={i === channels.length - 1} />
           ))}
         </View>
 
-        <Text className="text-gray-500 text-[10px] tracking-wider uppercase mb-2 ml-1">
+        <Text className="text-ink-muted text-[10px] tracking-[2px] uppercase font-sans-semibold mb-2 ml-1">
           Alert Types
         </Text>
-        <View className="bg-gray-900 rounded-2xl border border-gray-800/60 mb-5">
+        <View className="bg-paper-light rounded-2xl border border-rule mb-5">
           {alerts.map((item, i) => (
             <ToggleRow key={item.key} item={item} onToggle={handleToggle} isLast={i === alerts.length - 1} />
           ))}
         </View>
 
-        <View className="bg-gray-900/50 rounded-2xl p-4 border border-gray-800/40">
+        <View className="bg-paper-light rounded-2xl p-4 border border-rule">
           <View className="flex-row items-center mb-2">
-            <Ionicons name="information-circle" size={15} color="#4b5563" />
-            <Text className="text-gray-500 text-[11px] font-medium ml-1.5">About</Text>
+            <Ionicons name="information-circle" size={15} color="#736857" />
+            <Text className="text-ink-muted text-[11px] font-sans-medium ml-1.5">About</Text>
           </View>
-          <Text className="text-gray-600 text-[11px] leading-4">
+          <Text className="text-ink-soft text-[11px] leading-4">
             Push notifications alert you when posts are published, fail, or go
             live from a schedule. Toggle specific categories above.
           </Text>

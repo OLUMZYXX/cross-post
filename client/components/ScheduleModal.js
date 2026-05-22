@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   Text,
   View,
@@ -78,29 +78,29 @@ export default function ScheduleModal({ visible, onClose, onPostNow, onSchedule 
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <TouchableOpacity activeOpacity={1} onPress={onClose} className="flex-1 bg-black/60 justify-end">
+      <TouchableOpacity activeOpacity={1} onPress={onClose} className="flex-1 bg-ink/60 justify-end">
         <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-          <View className="bg-gray-900 rounded-t-3xl px-6 pt-5 pb-10 border-t border-gray-800">
-            <View className="w-10 h-1 bg-gray-700 rounded-full self-center mb-6" />
-            <Text className="text-white text-lg font-bold mb-6">When do you want to post?</Text>
+          <View className="bg-paper-light rounded-t-3xl px-6 pt-5 pb-10 border-t border-rule">
+            <View className="w-10 h-1 bg-paper-deep rounded-full self-center mb-6" />
+            <Text className="text-ink text-lg font-serif-bold mb-6">When do you want to post?</Text>
 
-            <TouchableOpacity onPress={onPostNow} className="flex-row items-center bg-green-500 rounded-2xl p-4 mb-3">
-              <View className="w-10 h-10 rounded-full bg-green-600 items-center justify-center mr-4">
-                <Ionicons name="send" size={18} color="#fff" />
+            <TouchableOpacity onPress={onPostNow} className="flex-row items-center bg-terracotta rounded-2xl p-4 mb-3">
+              <View className="w-10 h-10 rounded-full bg-terracotta-shadow items-center justify-center mr-4">
+                <Ionicons name="send" size={18} color="#E3DAC4" />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-950 font-bold text-base">Post Now</Text>
-                <Text className="text-green-900 text-xs">Publish immediately to all platforms</Text>
+                <Text className="text-paper-light font-sans-bold text-base">Post Now</Text>
+                <Text className="text-paper-light text-xs opacity-80">Publish immediately to all platforms</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#14532d" />
+              <Ionicons name="chevron-forward" size={20} color="#E3DAC4" />
             </TouchableOpacity>
 
-            <View className="bg-gray-800 rounded-2xl p-4">
+            <View className="bg-paper rounded-2xl p-4 border border-rule">
               <View className="flex-row items-center mb-4">
-                <View className="w-10 h-10 rounded-full bg-blue-500/20 items-center justify-center mr-3">
-                  <Ionicons name="calendar-outline" size={18} color="#60a5fa" />
+                <View className="w-10 h-10 rounded-full bg-paper-deep items-center justify-center mr-3">
+                  <Ionicons name="calendar-outline" size={18} color="#1B1711" />
                 </View>
-                <Text className="text-white font-bold text-base">Schedule for Later</Text>
+                <Text className="text-ink font-sans-bold text-base">Schedule for Later</Text>
               </View>
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4" contentContainerStyle={{ paddingRight: 8 }}>
@@ -109,10 +109,10 @@ export default function ScheduleModal({ visible, onClose, onPostNow, onSchedule 
                     key={i}
                     onPress={() => setSelectedDateIdx(i)}
                     className={`mr-2 px-4 py-2 rounded-full border ${
-                      selectedDateIdx === i ? "bg-blue-500/20 border-blue-500" : "bg-gray-700 border-gray-600"
+                      selectedDateIdx === i ? "bg-ink border-ink" : "bg-paper-light border-rule"
                     }`}
                   >
-                    <Text className={`text-xs font-semibold ${selectedDateIdx === i ? "text-blue-400" : "text-gray-400"}`}>
+                    <Text className={`text-xs font-sans-semibold ${selectedDateIdx === i ? "text-paper-light" : "text-ink"}`}>
                       {chip.label}
                     </Text>
                   </TouchableOpacity>
@@ -121,16 +121,16 @@ export default function ScheduleModal({ visible, onClose, onPostNow, onSchedule 
 
               <View className="flex-row items-center justify-center mb-4">
                 <TimeColumn value={pad(hour)} onUp={() => adjustHour(1)} onDown={() => adjustHour(-1)} />
-                <Text className="text-white text-2xl font-bold mx-2">:</Text>
+                <Text className="text-ink text-2xl font-serif-bold mx-2">:</Text>
                 <TimeColumn value={pad(minute)} onUp={() => adjustMinute(5)} onDown={() => adjustMinute(-5)} />
-                <View className="ml-3 bg-gray-700 rounded-xl overflow-hidden">
+                <View className="ml-3 bg-paper-light rounded-xl overflow-hidden border border-rule">
                   {["AM", "PM"].map((period) => (
                     <TouchableOpacity
                       key={period}
                       onPress={() => setAmpm(period)}
-                      className={`px-4 py-3 ${ampm === period ? "bg-blue-500" : ""}`}
+                      className={`px-4 py-3 ${ampm === period ? "bg-ink" : ""}`}
                     >
-                      <Text className={`text-sm font-bold ${ampm === period ? "text-white" : "text-gray-400"}`}>
+                      <Text className={`text-sm font-sans-bold ${ampm === period ? "text-paper-light" : "text-ink-muted"}`}>
                         {period}
                       </Text>
                     </TouchableOpacity>
@@ -141,9 +141,9 @@ export default function ScheduleModal({ visible, onClose, onPostNow, onSchedule 
               <TouchableOpacity
                 onPress={handleConfirmSchedule}
                 disabled={isPast}
-                className={`py-3 rounded-xl items-center ${isPast ? "bg-gray-700" : "bg-blue-500"}`}
+                className={`py-3 rounded-xl items-center ${isPast ? "bg-paper-deep" : "bg-ink"}`}
               >
-                <Text className={`font-bold text-sm ${isPast ? "text-gray-500" : "text-white"}`}>
+                <Text className={`font-sans-bold text-sm ${isPast ? "text-ink-muted" : "text-paper-light"}`}>
                   {isPast
                     ? "Pick a future time"
                     : `Schedule · ${scheduledDate.toLocaleString("en-US", {
@@ -163,13 +163,13 @@ function TimeColumn({ value, onUp, onDown }) {
   return (
     <View className="items-center">
       <TouchableOpacity onPress={onUp} className="w-10 h-10 items-center justify-center">
-        <Ionicons name="chevron-up" size={20} color="#9ca3af" />
+        <Ionicons name="chevron-up" size={20} color="#564B3F" />
       </TouchableOpacity>
-      <View className="bg-gray-700 rounded-xl w-14 h-12 items-center justify-center">
-        <Text className="text-white text-xl font-bold">{value}</Text>
+      <View className="bg-paper-deep rounded-xl w-14 h-12 items-center justify-center">
+        <Text className="text-ink text-xl font-serif-bold">{value}</Text>
       </View>
       <TouchableOpacity onPress={onDown} className="w-10 h-10 items-center justify-center">
-        <Ionicons name="chevron-down" size={20} color="#9ca3af" />
+        <Ionicons name="chevron-down" size={20} color="#564B3F" />
       </TouchableOpacity>
     </View>
   );

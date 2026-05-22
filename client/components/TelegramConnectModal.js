@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   View,
   Text,
@@ -72,44 +72,44 @@ export default function TelegramConnectModal({ visible, onClose, onConnected }) 
       visible={visible}
       onRequestClose={handleClose}
     >
-      <View className="flex-1 justify-center items-center bg-black/50">
-        <View className="bg-gray-900 rounded-3xl p-6 w-80">
+      <View className="flex-1 justify-center items-center bg-ink/50">
+        <View className="bg-paper-light rounded-3xl p-6 w-80">
           <View className="flex-row items-center mb-4">
-            <View className="w-10 h-10 rounded-full bg-sky-500/20 items-center justify-center mr-3">
+            <View className="w-10 h-10 rounded-full bg-paper-deep items-center justify-center mr-3">
               <Ionicons name="paper-plane" size={20} color="#0ea5e9" />
             </View>
-            <Text className="text-white text-lg font-bold flex-1">
+            <Text className="text-ink text-lg font-serif-bold flex-1">
               Connect Telegram
             </Text>
           </View>
 
-          <Text className="text-gray-400 text-xs mb-4">
+          <Text className="text-ink-muted text-xs mb-4">
             Create a bot with @BotFather on Telegram, then add it as an admin to
             your channel.
           </Text>
 
-          <Text className="text-gray-300 text-xs font-medium mb-1.5">
+          <Text className="text-ink text-xs font-sans-medium mb-1.5">
             Bot Token
           </Text>
           <TextInput
             value={botToken}
             onChangeText={setBotToken}
             placeholder="123456:ABC-DEF..."
-            placeholderTextColor="#6b7280"
-            className="bg-gray-800 text-white rounded-xl px-4 py-3 mb-3 text-sm border border-gray-700"
+            placeholderTextColor="#564B3F"
+            className="bg-paper-deep text-ink rounded-xl px-4 py-3 mb-3 text-sm border border-rule"
             autoCapitalize="none"
             autoCorrect={false}
           />
 
-          <Text className="text-gray-300 text-xs font-medium mb-1.5">
+          <Text className="text-ink text-xs font-sans-medium mb-1.5">
             Channel Username
           </Text>
           <TextInput
             value={channelId}
             onChangeText={setChannelId}
             placeholder="@yourchannel"
-            placeholderTextColor="#6b7280"
-            className="bg-gray-800 text-white rounded-xl px-4 py-3 mb-4 text-sm border border-gray-700"
+            placeholderTextColor="#564B3F"
+            className="bg-paper-deep text-ink rounded-xl px-4 py-3 mb-4 text-sm border border-rule"
             autoCapitalize="none"
             autoCorrect={false}
           />
@@ -117,14 +117,14 @@ export default function TelegramConnectModal({ visible, onClose, onConnected }) 
           <TouchableOpacity
             onPress={handleConnect}
             disabled={connecting}
-            className="bg-sky-500 py-3 rounded-xl mb-3 flex-row items-center justify-center"
+            className="bg-olive py-3 rounded-xl mb-3 flex-row items-center justify-center"
           >
             {connecting ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
               <>
                 <Ionicons name="link" size={16} color="#fff" />
-                <Text className="text-white font-bold ml-2">Connect</Text>
+                <Text className="text-ink font-sans-bold ml-2">Connect</Text>
               </>
             )}
           </TouchableOpacity>
@@ -134,16 +134,16 @@ export default function TelegramConnectModal({ visible, onClose, onConnected }) 
             className="py-2 flex-row items-center justify-center mb-2"
           >
             <Ionicons name="open-outline" size={14} color="#0ea5e9" />
-            <Text className="text-sky-400 text-xs font-medium ml-1.5">
+            <Text className="text-sky-400 text-xs font-sans-medium ml-1.5">
               Open @BotFather
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={handleClose}
-            className="bg-gray-800 py-3 rounded-xl"
+            className="bg-paper-deep py-3 rounded-xl"
           >
-            <Text className="text-white text-center">Cancel</Text>
+            <Text className="text-ink text-center">Cancel</Text>
           </TouchableOpacity>
         </View>
       </View>

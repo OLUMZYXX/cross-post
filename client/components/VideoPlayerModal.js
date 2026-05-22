@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import {
   Modal,
   View,
@@ -46,7 +46,7 @@ export default function VideoPlayerModal({ visible, videoUri, onClose }) {
       <View className="flex-1 bg-black items-center justify-center">
         <TouchableOpacity
           onPress={handleClose}
-          className="absolute top-12 right-4 z-10 w-10 h-10 rounded-full bg-black/60 items-center justify-center"
+          className="absolute top-12 right-4 z-10 w-10 h-10 rounded-full bg-ink/60 items-center justify-center"
         >
           <Ionicons name="close" size={24} color="#fff" />
         </TouchableOpacity>
@@ -54,7 +54,7 @@ export default function VideoPlayerModal({ visible, videoUri, onClose }) {
         {isLoading && (
           <ActivityIndicator
             size="large"
-            color="#4ade80"
+            color="#B14026"
             className="absolute z-10"
           />
         )}

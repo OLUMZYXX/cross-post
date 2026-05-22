@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   View,
   Text,
@@ -43,49 +43,49 @@ export default function EditProfile({ user, onBack, onUpdateUser }) {
   };
 
   return (
-    <View className="flex-1 bg-gray-950 px-6 pt-16">
+    <View className="flex-1 bg-paper px-6 pt-16">
       <View className="flex-row items-center mb-8">
         <TouchableOpacity onPress={onBack} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#1B1711" />
         </TouchableOpacity>
-        <Text className="text-white text-xl font-bold">Edit Profile</Text>
+        <Text className="text-ink text-xl font-serif-bold">Edit Profile</Text>
       </View>
       <View className="items-center mb-8">
-        <View className="w-20 h-20 rounded-full bg-green-500/20 items-center justify-center mb-3">
-          <Ionicons name="person" size={36} color="#4ade80" />
+        <View className="w-20 h-20 rounded-full bg-terracotta-soft/40 items-center justify-center mb-3">
+          <Ionicons name="person" size={36} color="#B14026" />
         </View>
-        <Text className="text-gray-400 text-sm">{user?.email}</Text>
+        <Text className="text-ink-muted text-sm">{user?.email}</Text>
       </View>
 
-      <Text className="text-gray-400 text-xs mb-2 ml-1">FULL NAME</Text>
+      <Text className="text-ink-muted text-xs mb-2 ml-1">FULL NAME</Text>
       <TextInput
         value={name}
         onChangeText={setName}
         placeholder="Your name"
-        placeholderTextColor="#6b7280"
-        className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-3.5 text-white mb-5"
+        placeholderTextColor="#564B3F"
+        className="bg-paper-light border border-rule rounded-xl px-4 py-3.5 text-ink mb-5"
       />
 
-      <Text className="text-gray-400 text-xs mb-2 ml-1">EMAIL ADDRESS</Text>
+      <Text className="text-ink-muted text-xs mb-2 ml-1">EMAIL ADDRESS</Text>
       <TextInput
         value={email}
         onChangeText={setEmail}
         placeholder="Your email"
-        placeholderTextColor="#6b7280"
+        placeholderTextColor="#564B3F"
         keyboardType="email-address"
         autoCapitalize="none"
-        className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-3.5 text-white mb-8"
+        className="bg-paper-light border border-rule rounded-xl px-4 py-3.5 text-ink mb-8"
       />
 
       <TouchableOpacity
         onPress={handleSave}
         disabled={saving}
-        className={`py-4 rounded-xl ${saving ? "bg-green-500/50" : "bg-green-500"}`}
+        className={`py-4 rounded-xl ${saving ? "bg-terracotta/50" : "bg-terracotta"}`}
       >
         {saving ? (
-          <ActivityIndicator color="#030712" />
+          <ActivityIndicator color="#E3DAC4" />
         ) : (
-          <Text className="text-gray-950 text-center font-bold">
+          <Text className="text-paper-light text-center font-sans-bold">
             Save Changes
           </Text>
         )}

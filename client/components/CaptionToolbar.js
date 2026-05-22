@@ -1,15 +1,35 @@
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { COLORS } from "../constants/theme";
 
-function ToolbarButton({ icon, label, color, bgClass, onPress, disabled }) {
+function ToolbarButton({ icon, label, onPress, disabled }) {
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled}
-      className={`flex-row items-center ${bgClass} rounded-full px-3 py-2 mr-2`}
+      activeOpacity={0.7}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: COLORS.paper,
+        borderWidth: 1,
+        borderColor: COLORS.rule,
+        borderRadius: 999,
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+        marginRight: 8,
+      }}
     >
-      <Ionicons name={icon} size={14} color={color} />
-      <Text style={{ color }} className="text-[10px] font-semibold ml-1.5">
+      <Ionicons name={icon} size={13} color={COLORS.ink} />
+      <Text
+        style={{
+          color: COLORS.ink,
+          fontFamily: "HankenGrotesk_600SemiBold",
+          fontSize: 11,
+          marginLeft: 6,
+          letterSpacing: 0.2,
+        }}
+      >
         {label}
       </Text>
     </TouchableOpacity>
@@ -26,54 +46,31 @@ export default function CaptionToolbar({
   disabled,
 }) {
   return (
-    <View className="flex-row items-center px-3 py-2.5 border-t border-gray-800/30">
+    <View
+      className="flex-row items-center px-3 py-3 border-t border-rule"
+      style={{ backgroundColor: COLORS.paperLight }}
+    >
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         className="flex-1"
       >
-        <ToolbarButton
-          icon="image-outline"
-          label="Media"
-          color="#4ade80"
-          bgClass="bg-green-500/10"
-          onPress={onMedia}
-          disabled={disabled}
-        />
-        <ToolbarButton
-          icon="text"
-          label="Font"
-          color="#ec4899"
-          bgClass="bg-pink-500/10"
-          onPress={onFont}
-          disabled={disabled}
-        />
-        <ToolbarButton
-          icon="sparkles"
-          label="AI Rephrase"
-          color="#a855f7"
-          bgClass="bg-purple-500/10"
-          onPress={onRephrase}
-          disabled={disabled}
-        />
-        <ToolbarButton
-          icon="copy-outline"
-          label="Copy"
-          color="#f59e0b"
-          bgClass="bg-amber-500/10"
-          onPress={onCopy}
-          disabled={disabled}
-        />
-        <ToolbarButton
-          icon="bookmark-outline"
-          label="Draft"
-          color="#60a5fa"
-          bgClass="bg-blue-500/10"
-          onPress={onDraft}
-          disabled={disabled}
-        />
+        <ToolbarButton icon="image-outline" label="Media" onPress={onMedia} disabled={disabled} />
+        <ToolbarButton icon="text" label="Font" onPress={onFont} disabled={disabled} />
+        <ToolbarButton icon="sparkles-outline" label="Rephrase" onPress={onRephrase} disabled={disabled} />
+        <ToolbarButton icon="copy-outline" label="Copy" onPress={onCopy} disabled={disabled} />
+        <ToolbarButton icon="bookmark-outline" label="Draft" onPress={onDraft} disabled={disabled} />
       </ScrollView>
-      <Text className="text-gray-700 text-[10px] ml-2">{captionLength}</Text>
+      <Text
+        style={{
+          color: COLORS.inkMuted,
+          fontFamily: "HankenGrotesk_500Medium",
+          fontSize: 11,
+          marginLeft: 8,
+        }}
+      >
+        {captionLength}
+      </Text>
     </View>
   );
 }

@@ -13,6 +13,8 @@ import RephraseModal from "./RephraseModal";
 import CopyrightModal from "./CopyrightModal";
 import CaptionToolbar from "./CaptionToolbar";
 import FontPicker from "./FontPicker";
+import ChunkyButton from "./ChunkyButton";
+import { COLORS, FONTS } from "../constants/theme";
 
 export default function CreatePost({
   connectedPlatforms,
@@ -54,32 +56,18 @@ export default function CreatePost({
     showToast({ type: "success", title: "Copied!", message: "Text copied to clipboard." });
   };
 
+  const publishLabel = isPosting ? "Sending..." : isUploading ? "Wait..." : "Publish";
+
   return (
-    <View className="flex-1 bg-gray-950">
-      <StatusBar style="light" />
+    <View className="flex-1 bg-paper">
+      <StatusBar style="dark" />
 
-      <View className="px-5 pt-14 pb-3">
-        <View className="flex-row items-center justify-between">
-          <TouchableOpacity
-            onPress={onClose}
-            disabled={isPosting}
-            className="w-10 h-10 rounded-full bg-gray-900 border border-gray-800/50 items-center justify-center"
-          >
-            <Ionicons name="arrow-back" size={18} color="#9ca3af" />
-          </TouchableOpacity>
-
-          <Text className="text-white font-bold text-base">Create Post</Text>
-
-          <TouchableOpacity
-            onPress={handlePostPress}
-            disabled={isPosting || isUploading}
-            className={`px-5 py-2.5 rounded-full ${isPosting || isUploading ? "bg-green-500/40" : "bg-green-500"}`}
-          >
-            <Text className="text-gray-950 font-bold text-sm">
-              {isPosting ? "Posting..." : isUploading ? "Wait..." : "Publish"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+      <View className="px-5 pt-14 pb-3 flex-row items-center justify-between">
+        <TouchableOpacity onPress={onClose} disabled={isPosting} className="w-10 h-10 rounded-full bg-paper-light border border-rule items-center justify-center">
+          <Ionicons name="arrow-back" size={18} color={COLORS.ink} />
+        </TouchableOpacity>
+        <Text className="text-ink font-serif-bold text-[18px]">Compose</Text>
+        <ChunkyButton label={publishLabel} onPress={handlePostPress} variant="primary" disabled={isPosting || isUploading} />
       </View>
 
       <ScrollView
@@ -87,27 +75,36 @@ export default function CreatePost({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <View className="bg-gray-900/80 rounded-3xl border border-gray-800/40 mb-4 overflow-hidden">
+        <View className="bg-paper-light rounded-3xl border border-rule mb-4 overflow-hidden">
           <TextInput
             value={caption}
             onChangeText={setCaption}
-            placeholder="What's on your mind?"
-            placeholderTextColor="#4b5563"
+            placeholder="Say something worth crossing five timelines..."
+            placeholderTextColor={COLORS.inkSoft}
             multiline
-            className="text-white text-[15px] px-4 pt-4 pb-3 min-h-[140px]"
+            style={{
+              fontFamily: FONTS.sans,
+              fontSize: 16,
+              lineHeight: 24,
+              color: COLORS.ink,
+              paddingHorizontal: 16,
+              paddingTop: 16,
+              paddingBottom: 12,
+              minHeight: 140,
+            }}
             textAlignVertical="top"
             editable={!isPosting}
           />
 
           {hasTwitterSelected && (
             <View className="flex-row items-center px-4 pb-2">
-              <View className={`h-1 flex-1 rounded-full mr-3 ${isOverLimit ? "bg-red-500/30" : "bg-gray-800"}`}>
+              <View className="h-1 flex-1 rounded-full mr-3 bg-rule">
                 <View
-                  className={`h-full rounded-full ${isOverLimit ? "bg-red-500" : "bg-green-500"}`}
+                  className={`h-full rounded-full ${isOverLimit ? "bg-terracotta" : "bg-olive"}`}
                   style={{ width: `${Math.min((caption.length / 280) * 100, 100)}%` }}
                 />
               </View>
-              <Text className={`text-[10px] font-medium ${isOverLimit ? "text-red-400" : "text-gray-600"}`}>
+              <Text className={`text-[10px] font-sans-semibold ${isOverLimit ? "text-terracotta" : "text-ink-muted"}`}>
                 {caption.length}/280
               </Text>
             </View>
@@ -180,7 +177,7 @@ export default function CreatePost({
 
       <CopyrightModal
         visible={showCopyrightModal}
-        onClose={() => { setShowCopyrightModal(false); }}
+        onClose={() => setShowCopyrightModal(false)}
         isChecking={isCopyrightChecking}
         result={copyrightResult}
         onProceed={handleCopyrightProceed}
@@ -191,4 +188,3 @@ export default function CreatePost({
     </View>
   );
 }
-

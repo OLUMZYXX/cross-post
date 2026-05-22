@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, RefreshControl } from "react-native";
+﻿import { View, Text, ScrollView, RefreshControl } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useMemo } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -30,18 +30,18 @@ export default function AnalyticsScreen({
 
 
   return (
-    <View className="flex-1 bg-gray-950">
-      <StatusBar style="light" />
+    <View className="flex-1 bg-paper">
+      <StatusBar style="dark" />
       <View className="flex-1 px-6 pt-16">
         <View className="flex-row items-center justify-between mb-6">
           <View>
-            <Text className="text-gray-400 text-sm">Performance</Text>
-            <Text className="text-white text-2xl font-bold">Analytics</Text>
+            <Text className="text-ink-muted text-sm">Performance</Text>
+            <Text className="text-ink text-2xl font-serif-bold">Analytics</Text>
           </View>
           <View className="flex-row items-center">
-            <View className="bg-gray-900 rounded-lg px-3 py-1.5 flex-row items-center">
-              <Ionicons name="stats-chart" size={14} color="#4ade80" />
-              <Text className="text-green-400 text-xs font-medium ml-1">
+            <View className="bg-paper-light rounded-lg px-3 py-1.5 flex-row items-center">
+              <Ionicons name="stats-chart" size={14} color="#B14026" />
+              <Text className="text-terracotta text-xs font-sans-medium ml-1">
                 {sentPosts.length} posts
               </Text>
             </View>
@@ -55,25 +55,25 @@ export default function AnalyticsScreen({
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#4ade80"
-              colors={["#4ade80"]}
-              progressBackgroundColor="#111827"
+              tintColor={"#B14026"}
+              colors={["#B14026"]}
+              progressBackgroundColor="#E3DAC4"
             />
           }
         >
-          <View className="bg-gray-900/80 rounded-2xl p-5 border border-gray-800 mb-4">
+          <View className="bg-paper-light rounded-2xl p-5 border border-rule mb-4">
             <View className="flex-row items-center justify-between mb-1">
-              <Text className="text-gray-400 text-xs">TOTAL REACH</Text>
-              <View className={`px-2 py-0.5 rounded-full ${overview.growthPercent >= 0 ? "bg-green-500/10" : "bg-red-500/10"}`}>
-                <Text className={`text-xs font-bold ${overview.growthPercent >= 0 ? "text-green-400" : "text-red-400"}`}>
+              <Text className="text-ink-muted text-xs">TOTAL REACH</Text>
+              <View className={`px-2 py-0.5 rounded-full ${overview.growthPercent >= 0 ? "bg-terracotta-soft/30" : "bg-terracotta/15"}`}>
+                <Text className={`text-xs font-sans-bold ${overview.growthPercent >= 0 ? "text-terracotta" : "text-terracotta"}`}>
                   {overview.growthPercent >= 0 ? "+" : ""}{overview.growthPercent}%
                 </Text>
               </View>
             </View>
-            <Text className="text-white text-4xl font-bold">
+            <Text className="text-ink text-4xl font-sans-bold">
               {overview.totalReach.toLocaleString()}
             </Text>
-            <Text className="text-gray-500 text-xs mt-1">
+            <Text className="text-ink-muted text-xs mt-1">
               {overview.thisWeekCount} posts this week
             </Text>
           </View>
@@ -84,8 +84,8 @@ export default function AnalyticsScreen({
                 label="PUBLISHED"
                 value={sentPosts.length}
                 icon="checkmark-circle"
-                iconColor="#4ade80"
-                iconBg="bg-green-500/20"
+                iconColor="#B14026"
+                iconBg="bg-terracotta-soft/40"
               />
             </View>
             <View className="flex-1 ml-2">
@@ -94,7 +94,7 @@ export default function AnalyticsScreen({
                 value={overview.thisWeekCount}
                 icon="trending-up"
                 iconColor="#60a5fa"
-                iconBg="bg-blue-500/20"
+                iconBg="bg-paper-deep"
               />
             </View>
           </View>
@@ -106,7 +106,7 @@ export default function AnalyticsScreen({
                 value={overview.scheduledCount}
                 icon="time"
                 iconColor="#a78bfa"
-                iconBg="bg-purple-500/20"
+                iconBg="bg-paper-deep"
               />
             </View>
             <View className="flex-1 ml-2">
@@ -114,8 +114,8 @@ export default function AnalyticsScreen({
                 label="PLATFORMS"
                 value={connectedPlatforms.length}
                 icon="globe"
-                iconColor="#f59e0b"
-                iconBg="bg-yellow-500/20"
+                iconColor="#8E311B"
+                iconBg="bg-paper-deep"
               />
             </View>
           </View>

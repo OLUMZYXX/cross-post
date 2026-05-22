@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+﻿import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -103,14 +103,14 @@ export default function NotificationsInbox({ onBack, onUnreadCountChange }) {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-gray-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#4ade80" />
+      <View className="flex-1 bg-paper items-center justify-center">
+        <ActivityIndicator size="large" color="#B14026" />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-gray-950 px-5 pt-14">
+    <View className="flex-1 bg-paper px-5 pt-14">
       <InboxHeader
         unreadCount={unreadCount}
         total={notifications.length}
@@ -136,9 +136,9 @@ export default function NotificationsInbox({ onBack, onUnreadCountChange }) {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor="#4ade80"
-              colors={["#4ade80"]}
-              progressBackgroundColor="#111827"
+              tintColor={"#B14026"}
+              colors={["#B14026"]}
+              progressBackgroundColor="#E3DAC4"
             />
           }
         />

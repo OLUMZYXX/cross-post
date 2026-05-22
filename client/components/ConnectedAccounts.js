@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -13,14 +13,14 @@ import { useToast } from "./Toast";
 import { platformAPI } from "../services/api";
 
 const PLATFORM_STYLES = {
-  Twitter: { icon: "logo-twitter", bg: "bg-blue-500/20", color: "#3b82f6" },
-  Instagram: { icon: "logo-instagram", bg: "bg-pink-500/20", color: "#ec4899" },
-  LinkedIn: { icon: "logo-linkedin", bg: "bg-blue-600/20", color: "#2563eb" },
-  Facebook: { icon: "logo-facebook", bg: "bg-blue-700/20", color: "#1d4ed8" },
-  TikTok: { icon: "logo-tiktok", bg: "bg-gray-800", color: "#e5e7eb" },
-  YouTube: { icon: "logo-youtube", bg: "bg-red-500/20", color: "#ef4444" },
-  Reddit: { icon: "logo-reddit", bg: "bg-orange-500/20", color: "#f97316" },
-  Telegram: { icon: "paper-plane", bg: "bg-sky-500/20", color: "#0ea5e9" },
+  Twitter: { icon: "logo-twitter", bg: "bg-paper-deep", color: "#4F573A" },
+  Instagram: { icon: "logo-instagram", bg: "bg-paper-deep", color: "#B14026" },
+  LinkedIn: { icon: "logo-linkedin", bg: "bg-paper-deep", color: "#4F573A" },
+  Facebook: { icon: "logo-facebook", bg: "bg-paper-deep", color: "#1d4ed8" },
+  TikTok: { icon: "logo-tiktok", bg: "bg-paper-deep", color: "#e5e7eb" },
+  YouTube: { icon: "logo-youtube", bg: "bg-terracotta/20", color: "#B14026" },
+  Reddit: { icon: "logo-reddit", bg: "bg-paper-deep", color: "#f97316" },
+  Telegram: { icon: "paper-plane", bg: "bg-paper-deep", color: "#0ea5e9" },
 };
 
 export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
@@ -174,20 +174,20 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
   };
 
   return (
-    <View className="flex-1 bg-gray-950 px-6 pt-16">
+    <View className="flex-1 bg-paper px-6 pt-16">
       <View className="flex-row items-center mb-8">
         <TouchableOpacity onPress={onBack} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#1B1711" />
         </TouchableOpacity>
-        <Text className="text-white text-xl font-bold flex-1">
+        <Text className="text-ink text-xl font-serif-bold flex-1">
           Connected Accounts
         </Text>
-        <Text className="text-gray-500 text-sm">{platforms.length}</Text>
+        <Text className="text-ink-muted text-sm">{platforms.length}</Text>
       </View>
 
       {loading ? (
         <View className="items-center py-12">
-          <ActivityIndicator color="#4ade80" />
+          <ActivityIndicator color="#B14026" />
         </View>
       ) : (
         <ScrollView
@@ -200,11 +200,11 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
             return (
               <View
                 key={platform._id}
-                className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3"
+                className="bg-paper-light rounded-2xl p-4 border border-rule mb-3"
               >
                 <View className="flex-row items-center">
                   <View
-                    className={`w-11 h-11 rounded-full ${style.bg || "bg-gray-700"} items-center justify-center mr-3`}
+                    className={`w-11 h-11 rounded-full ${style.bg || "bg-paper-deep"} items-center justify-center mr-3`}
                   >
                     <Ionicons
                       name={style.icon || "globe-outline"}
@@ -214,12 +214,12 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                   </View>
                   <View className="flex-1">
                     <Text
-                      className={`font-bold text-sm ${platform.active === false ? "text-gray-500" : "text-white"}`}
+                      className={`font-sans-bold text-sm ${platform.active === false ? "text-ink-muted" : "text-ink"}`}
                       numberOfLines={1}
                     >
                       {platform.platformUsername || platform.name}
                     </Text>
-                    <Text className="text-gray-500 text-xs">
+                    <Text className="text-ink-muted text-xs">
                       {platform.name}
                       {pageInfo ? ` · ${pageInfo}` : ""}
                       {platform.active === false ? " · Inactive" : ""}
@@ -231,20 +231,20 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                     className="mr-3"
                   >
                     {togglingActiveId === (platform._parentId || platform._id) ? (
-                      <ActivityIndicator size="small" color="#4ade80" />
+                      <ActivityIndicator size="small" color="#B14026" />
                     ) : (
                       <Ionicons
                         name={platform.active !== false ? "checkbox" : "square-outline"}
                         size={24}
-                        color={platform.active !== false ? "#4ade80" : "#6b7280"}
+                        color={platform.active !== false ? "#B14026" : "#564B3F"}
                       />
                     )}
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => handleDisconnect(platform)}
-                    className="bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20"
+                    className="bg-terracotta/15 px-3 py-2 rounded-lg border border-terracotta/30"
                   >
-                    <Text className="text-red-400 text-xs font-medium">
+                    <Text className="text-terracotta text-xs font-sans-medium">
                       Disconnect
                     </Text>
                   </TouchableOpacity>
@@ -253,10 +253,10 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                 {platform.name === "Facebook" && !platform._pageId && (
                   <TouchableOpacity
                     onPress={handleOpenPagePicker}
-                    className="mt-3 bg-blue-500/10 py-2.5 rounded-lg border border-blue-500/20 flex-row items-center justify-center"
+                    className="mt-3 bg-paper-deep py-2.5 rounded-lg border border-rule flex-row items-center justify-center"
                   >
-                    <Ionicons name="list" size={16} color="#3b82f6" />
-                    <Text className="text-blue-400 text-xs font-medium ml-2">
+                    <Ionicons name="list" size={16} color="#4F573A" />
+                    <Text className="text-olive text-xs font-sans-medium ml-2">
                       Manage Pages
                     </Text>
                   </TouchableOpacity>
@@ -267,13 +267,13 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
 
           <TouchableOpacity
             onPress={onOpenConnectModal}
-            className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-3 flex-row items-center"
+            className="bg-paper-light rounded-2xl p-4 border border-rule mb-3 flex-row items-center"
             style={{ borderStyle: "dashed" }}
           >
-            <View className="w-11 h-11 rounded-full bg-green-500/20 items-center justify-center mr-3">
-              <Ionicons name="add" size={22} color="#4ade80" />
+            <View className="w-11 h-11 rounded-full bg-terracotta-soft/40 items-center justify-center mr-3">
+              <Ionicons name="add" size={22} color="#B14026" />
             </View>
-            <Text className="text-green-400 font-medium">Add New Account</Text>
+            <Text className="text-terracotta font-sans-medium">Add New Account</Text>
           </TouchableOpacity>
         </ScrollView>
       )}
@@ -284,22 +284,22 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
         visible={pagePickerVisible}
         onRequestClose={handleClosePagePicker}
       >
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-gray-900 rounded-3xl p-6 w-80 max-h-96">
-            <Text className="text-white text-lg font-bold mb-2">
+        <View className="flex-1 justify-center items-center bg-ink/50">
+          <View className="bg-paper-light rounded-3xl p-6 w-80 max-h-96">
+            <Text className="text-ink text-lg font-serif-bold mb-2">
               Facebook Pages
             </Text>
-            <Text className="text-gray-400 text-xs mb-4">
+            <Text className="text-ink-muted text-xs mb-4">
               Select which pages to post to when publishing
             </Text>
 
             {loadingPages ? (
               <View className="py-8 items-center">
-                <ActivityIndicator color="#3b82f6" />
+                <ActivityIndicator color="#4F573A" />
               </View>
             ) : fbPages.length === 0 ? (
               <View className="py-6 px-2 items-center">
-                <Text className="text-gray-400 text-sm text-center mb-4">
+                <Text className="text-ink-muted text-sm text-center mb-4">
                   No Facebook Pages found. Make sure you gave access to your
                   pages during Facebook login, or create a new Page.
                 </Text>
@@ -307,9 +307,9 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                   onPress={() =>
                     Linking.openURL("https://www.facebook.com/pages/create")
                   }
-                  className="bg-blue-500 py-2 px-3 rounded-xl"
+                  className="bg-ink py-2 px-3 rounded-xl"
                 >
-                  <Text className="text-white text-sm">
+                  <Text className="text-paper-light text-sm font-sans-semibold">
                     Create a Facebook Page
                   </Text>
                 </TouchableOpacity>
@@ -323,11 +323,11 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                     disabled={togglingPageId !== null}
                     className={`flex-row items-center p-3 rounded-xl mb-2 ${
                       page.isSelected
-                        ? "bg-blue-500/20 border border-blue-500/30"
-                        : "bg-gray-800/50"
+                        ? "bg-paper-deep border border-rule"
+                        : "bg-paper-deep"
                     }`}
                   >
-                    <View className="w-10 h-10 rounded-full bg-blue-700/20 items-center justify-center mr-3">
+                    <View className="w-10 h-10 rounded-full bg-paper-deep items-center justify-center mr-3">
                       <Ionicons
                         name="logo-facebook"
                         size={20}
@@ -336,19 +336,19 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                     </View>
                     <View className="flex-1">
                       <Text
-                        className="text-white font-medium text-sm"
+                        className="text-ink font-sans-medium text-sm"
                         numberOfLines={1}
                       >
                         {page.name}
                       </Text>
                       {page.category ? (
-                        <Text className="text-gray-500 text-xs">
+                        <Text className="text-ink-muted text-xs">
                           {page.category}
                         </Text>
                       ) : null}
                     </View>
                     {togglingPageId === page.id ? (
-                      <ActivityIndicator size="small" color="#3b82f6" />
+                      <ActivityIndicator size="small" color="#4F573A" />
                     ) : (
                       <Ionicons
                         name={
@@ -357,7 +357,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                             : "square-outline"
                         }
                         size={22}
-                        color={page.isSelected ? "#3b82f6" : "#6b7280"}
+                        color={page.isSelected ? "#4F573A" : "#564B3F"}
                       />
                     )}
                   </TouchableOpacity>
@@ -367,9 +367,9 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
 
             <TouchableOpacity
               onPress={handleClosePagePicker}
-              className="bg-gray-800 py-3 rounded-xl mt-4"
+              className="bg-paper-deep py-3 rounded-xl mt-4"
             >
-              <Text className="text-white text-center">Done</Text>
+              <Text className="text-ink text-center">Done</Text>
             </TouchableOpacity>
           </View>
         </View>

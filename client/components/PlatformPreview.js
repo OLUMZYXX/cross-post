@@ -1,55 +1,46 @@
 import { View, Text, Image, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getCaptionStatus, getMediaNote } from "./platformLimits";
+import SectionRule from "./SectionRule";
+import { COLORS } from "../constants/theme";
 
 function CharCounter({ platformName, captionLength }) {
-  const { limit, remaining, isOver, percent } = getCaptionStatus(
-    platformName,
-    captionLength,
-  );
+  const { limit, isOver, percent } = getCaptionStatus(platformName, captionLength);
   if (limit === 0) return null;
 
-  const color =
-    isOver ? "#f87171" : percent >= 80 ? "#fbbf24" : "#4ade80";
+  const color = isOver ? COLORS.terracotta : percent >= 80 ? "#B58F00" : COLORS.olive;
 
   return (
     <View className="flex-row items-center mt-1">
-      <View className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden mr-2">
-        <View
-          style={{ width: `${Math.min(percent, 100)}%`, backgroundColor: color }}
-          className="h-full rounded-full"
-        />
+      <View className="flex-1 h-1 rounded-full overflow-hidden mr-2" style={{ backgroundColor: COLORS.rule }}>
+        <View style={{ width: `${Math.min(percent, 100)}%`, backgroundColor: color, height: "100%" }} />
       </View>
-      <Text style={{ color }} className="text-[10px] font-bold">
+      <Text style={{ color, fontFamily: "HankenGrotesk_700Bold" }} className="text-[10px]">
         {captionLength}/{limit}
       </Text>
     </View>
   );
 }
 
-function MediaPreview({ selectedMedia, mediaType }) {
+function MiniMediaPreview({ selectedMedia, mediaType }) {
   if (selectedMedia.length === 0) return null;
 
   if (mediaType === "video") {
     return (
-      <View className="bg-gray-700 rounded-xl h-32 items-center justify-center overflow-hidden">
+      <View className="rounded-xl h-32 items-center justify-center overflow-hidden border border-rule" style={{ backgroundColor: COLORS.paper }}>
         {selectedMedia[0].thumbnail ? (
           <View className="w-full h-full">
-            <Image
-              source={{ uri: selectedMedia[0].thumbnail }}
-              className="w-full h-full"
-              resizeMode="cover"
-            />
+            <Image source={{ uri: selectedMedia[0].thumbnail }} className="w-full h-full" resizeMode="cover" />
             <View className="absolute inset-0 items-center justify-center">
-              <View className="w-10 h-10 rounded-full bg-black/50 items-center justify-center">
-                <Ionicons name="play" size={20} color="#fff" />
+              <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: COLORS.ink + "cc" }}>
+                <Ionicons name="play" size={20} color={COLORS.paperLight} />
               </View>
             </View>
           </View>
         ) : (
           <View className="items-center">
-            <Ionicons name="videocam" size={36} color="#9ca3af" />
-            <Text className="text-gray-400 text-xs mt-1">Video</Text>
+            <Ionicons name="videocam" size={36} color={COLORS.inkMuted} />
+            <Text className="text-ink-muted text-xs mt-1 font-sans-medium">Video</Text>
           </View>
         )}
       </View>
@@ -58,12 +49,8 @@ function MediaPreview({ selectedMedia, mediaType }) {
 
   if (selectedMedia.length === 1) {
     return (
-      <View className="bg-gray-700 rounded-xl h-32 overflow-hidden">
-        <Image
-          source={{ uri: selectedMedia[0].uri }}
-          className="w-full h-full"
-          resizeMode="cover"
-        />
+      <View className="rounded-xl h-32 overflow-hidden border border-rule" style={{ backgroundColor: COLORS.paper }}>
+        <Image source={{ uri: selectedMedia[0].uri }} className="w-full h-full" resizeMode="cover" />
       </View>
     );
   }
@@ -71,16 +58,8 @@ function MediaPreview({ selectedMedia, mediaType }) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       {selectedMedia.map((item, idx) => (
-        <View
-          key={idx}
-          className="bg-gray-700 rounded-xl overflow-hidden mr-1"
-          style={{ width: 80, height: 80 }}
-        >
-          <Image
-            source={{ uri: item.uri }}
-            className="w-full h-full"
-            resizeMode="cover"
-          />
+        <View key={idx} className="rounded-xl overflow-hidden mr-1 border border-rule" style={{ width: 80, height: 80, backgroundColor: COLORS.paper }}>
+          <Image source={{ uri: item.uri }} className="w-full h-full" resizeMode="cover" />
         </View>
       ))}
     </ScrollView>
@@ -95,46 +74,41 @@ export default function PlatformPreview({
   getPlatformStyle,
   getDisplayName,
 }) {
-  if (
-    selectedPlatforms.length === 0 ||
-    (caption.length === 0 && selectedMedia.length === 0)
-  ) {
+  if (selectedPlatforms.length === 0 || (caption.length === 0 && selectedMedia.length === 0)) {
     return null;
   }
 
   return (
-    <View className="bg-gray-900/80 rounded-2xl p-4 border border-gray-800 mb-4">
-      <Text className="text-white font-bold mb-3">Preview</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    <View className="rounded-3xl p-4 border border-rule mb-4" style={{ backgroundColor: COLORS.paperLight }}>
+      <SectionRule label="PREVIEW" />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-3">
         {selectedPlatforms.map((platform) => {
           const baseName = platform.split(":")[0];
           const style = getPlatformStyle(platform);
           const { isOver, limit } = getCaptionStatus(baseName, caption.length);
           const mediaNote = getMediaNote(baseName, mediaType, selectedMedia.length);
-          const displayCaption = isOver
-            ? caption.slice(0, limit - 3) + "..."
-            : caption;
+          const displayCaption = isOver ? caption.slice(0, limit - 3) + "..." : caption;
 
           return (
-            <View key={platform} className="bg-gray-800 rounded-2xl p-4 mr-3 w-72">
+            <View
+              key={platform}
+              className="rounded-2xl p-4 mr-3 w-72 border border-rule"
+              style={{ backgroundColor: COLORS.paper }}
+            >
               <View className="flex-row items-center mb-3">
-                <View className="w-10 h-10 rounded-full bg-gray-700 items-center justify-center mr-3">
-                  <Ionicons
-                    name={style.icon || "globe-outline"}
-                    size={20}
-                    color="#fff"
-                  />
+                <View className="w-10 h-10 rounded-full items-center justify-center mr-3" style={{ backgroundColor: COLORS.paperDeep }}>
+                  <Ionicons name={style.icon || "globe-outline"} size={18} color={COLORS.ink} />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-bold text-sm" numberOfLines={1}>
+                  <Text className="text-ink font-sans-bold text-sm" numberOfLines={1}>
                     {getDisplayName(platform)}
                   </Text>
-                  <Text className="text-gray-500 text-xs">{baseName}</Text>
+                  <Text className="text-ink-muted text-xs font-sans">{baseName}</Text>
                 </View>
               </View>
 
               {caption.length > 0 && (
-                <Text className="text-gray-300 text-sm mb-1" numberOfLines={3}>
+                <Text className="text-ink text-sm font-serif mb-1" numberOfLines={3} style={{ lineHeight: 20 }}>
                   {displayCaption}
                 </Text>
               )}
@@ -143,26 +117,21 @@ export default function PlatformPreview({
 
               {mediaNote && (
                 <View className="flex-row items-center mt-2">
-                  <Ionicons name="warning" size={12} color="#fbbf24" />
-                  <Text className="text-yellow-400 text-[10px] ml-1">
-                    {mediaNote}
-                  </Text>
+                  <Ionicons name="warning" size={12} color={COLORS.terracotta} />
+                  <Text className="text-terracotta text-[10px] ml-1 font-sans-medium">{mediaNote}</Text>
                 </View>
               )}
 
               {selectedMedia.length > 0 && (
                 <View className="mt-2">
-                  <MediaPreview
-                    selectedMedia={selectedMedia}
-                    mediaType={mediaType}
-                  />
+                  <MiniMediaPreview selectedMedia={selectedMedia} mediaType={mediaType} />
                 </View>
               )}
 
-              <View className="flex-row mt-3 pt-3 border-t border-gray-700">
-                <Text className="text-gray-500 text-xs mr-4">❤️ Like</Text>
-                <Text className="text-gray-500 text-xs mr-4">💬 Comment</Text>
-                <Text className="text-gray-500 text-xs">🔄 Share</Text>
+              <View className="flex-row mt-3 pt-3 border-t border-rule">
+                <Text className="text-ink-muted text-xs mr-4 font-sans">♡ Like</Text>
+                <Text className="text-ink-muted text-xs mr-4 font-sans">↺ Reply</Text>
+                <Text className="text-ink-muted text-xs font-sans">↗ Share</Text>
               </View>
             </View>
           );

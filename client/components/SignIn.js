@@ -1,4 +1,4 @@
-import { StatusBar } from "expo-status-bar";
+﻿import { StatusBar } from "expo-status-bar";
 import {
   Text,
   View,
@@ -210,11 +210,11 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
 
   if (show2FA) {
     return (
-      <View className="flex-1 bg-gray-950">
-        <StatusBar style="light" />
+      <View className="flex-1 bg-paper">
+        <StatusBar style="dark" />
         <View className="absolute top-0 left-0 right-0 bottom-0">
-          <View className="absolute top-20 -left-16 w-48 h-48 rounded-full bg-green-500/10" />
-          <View className="absolute top-80 -right-20 w-72 h-72 rounded-full bg-emerald-500/10" />
+          <View className="absolute top-20 -left-16 w-48 h-48 rounded-full bg-terracotta-soft/30" />
+          <View className="absolute top-80 -right-20 w-72 h-72 rounded-full bg-olive/10" />
         </View>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -222,26 +222,26 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
         >
           <View className="flex-1 px-6 pt-16 justify-center">
             <View className="items-center mb-8">
-              <View className="w-16 h-16 rounded-full bg-green-500/20 items-center justify-center mb-4">
-                <Ionicons name="shield-checkmark" size={32} color="#4ade80" />
+              <View className="w-16 h-16 rounded-full bg-terracotta-soft/40 items-center justify-center mb-4">
+                <Ionicons name="shield-checkmark" size={32} color="#B14026" />
               </View>
-              <Text className="text-white text-2xl font-bold mb-2">
+              <Text className="text-ink text-2xl font-serif-bold mb-2">
                 Two-Factor Authentication
               </Text>
-              <Text className="text-gray-400 text-sm text-center">
+              <Text className="text-ink-muted text-sm text-center">
                 Enter the 6-digit code from your authenticator app
               </Text>
             </View>
 
-            <View className="bg-gray-900/80 rounded-3xl p-6 border border-gray-800">
+            <View className="bg-paper-light rounded-3xl p-6 border border-rule">
               <TextInput
                 value={otpCode}
                 onChangeText={(t) => setOtpCode(t.replace(/[^0-9]/g, ""))}
                 placeholder="000000"
-                placeholderTextColor="#6b7280"
+                placeholderTextColor="#564B3F"
                 keyboardType="number-pad"
                 maxLength={6}
-                className="bg-gray-800 border border-gray-700 rounded-xl px-4 py-4 text-white text-center text-2xl mb-4"
+                className="bg-paper-deep border border-rule rounded-xl px-4 py-4 text-ink text-center text-2xl mb-4"
                 style={{ letterSpacing: 10 }}
                 autoFocus
                 editable={!loading}
@@ -250,12 +250,12 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
               <TouchableOpacity
                 onPress={handleVerify2FALogin}
                 disabled={loading}
-                className={`py-4 rounded-xl border border-green-400 mb-3 ${loading ? "bg-green-500/50" : "bg-green-500"}`}
+                className={`py-4 rounded-xl border border-terracotta-shadow mb-3 ${loading ? "bg-terracotta/50" : "bg-terracotta"}`}
               >
                 {loading ? (
-                  <ActivityIndicator color="#030712" />
+                  <ActivityIndicator color="#E3DAC4" />
                 ) : (
-                  <Text className="text-gray-950 text-center text-lg font-bold">
+                  <Text className="text-paper-light text-center text-lg font-serif-bold">
                     Verify
                   </Text>
                 )}
@@ -270,7 +270,7 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
                 disabled={loading}
                 className="py-3"
               >
-                <Text className="text-gray-400 text-center text-sm">
+                <Text className="text-ink-muted text-center text-sm">
                   Back to Sign In
                 </Text>
               </TouchableOpacity>
@@ -282,11 +282,11 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
   }
 
   return (
-    <View className="flex-1 bg-gray-950">
-      <StatusBar style="light" />
+    <View className="flex-1 bg-paper">
+      <StatusBar style="dark" />
       <View className="absolute top-0 left-0 right-0 bottom-0">
-        <View className="absolute top-20 -left-16 w-48 h-48 rounded-full bg-green-500/10" />
-        <View className="absolute top-80 -right-20 w-72 h-72 rounded-full bg-emerald-500/10" />
+        <View className="absolute top-20 -left-16 w-48 h-48 rounded-full bg-terracotta-soft/30" />
+        <View className="absolute top-80 -right-20 w-72 h-72 rounded-full bg-olive/10" />
         <View className="absolute -bottom-24 left-20 w-64 h-64 rounded-full bg-teal-500/10" />
       </View>
       <KeyboardAvoidingView
@@ -300,48 +300,48 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
         >
           <View className="flex-1 px-6 pt-16 pb-10">
             <View className="mb-10">
-              <View className="w-16 h-16 rounded-2xl bg-green-500 items-center justify-center mb-5">
-                <Ionicons name="share-social" size={30} color="#030712" />
+              <View className="w-16 h-16 rounded-2xl bg-terracotta items-center justify-center mb-5">
+                <Ionicons name="share-social" size={30} color="#E3DAC4" />
               </View>
-              <Text className="text-green-400 text-xs tracking-widest font-semibold mb-2">
+              <Text className="text-terracotta text-xs tracking-widest font-sans-semibold mb-2">
                 WELCOME BACK
               </Text>
-              <Text className="text-4xl font-bold text-white mb-2">
+              <Text className="text-4xl font-sans-bold text-ink mb-2">
                 Sign In to{"\n"}Cross-Post
               </Text>
-              <View className="w-16 h-1 bg-green-500 rounded-full" />
+              <View className="w-16 h-1 bg-terracotta rounded-full" />
             </View>
             <View className="flex-1 justify-center">
-              <View className="bg-gray-900/80 rounded-3xl p-6 border border-gray-800">
+              <View className="bg-paper-light rounded-3xl p-6 border border-rule">
                 <View className="mb-5">
-                  <Text className="text-gray-400 text-sm mb-2 font-medium">
+                  <Text className="text-ink-muted text-sm mb-2 font-sans-medium">
                     Email Address
                   </Text>
-                  <View className="bg-gray-800 rounded-xl border border-gray-700 px-4 py-4">
+                  <View className="bg-paper-deep rounded-xl border border-rule px-4 py-4">
                     <TextInput
                       value={email}
                       onChangeText={setEmail}
                       placeholder="Enter your email"
-                      placeholderTextColor="#6b7280"
+                      placeholderTextColor="#564B3F"
                       keyboardType="email-address"
                       autoCapitalize="none"
-                      className="text-white text-base"
+                      className="text-ink text-base"
                       editable={!loading}
                     />
                   </View>
                 </View>
                 <View className="mb-2">
-                  <Text className="text-gray-400 text-sm mb-2 font-medium">
+                  <Text className="text-ink-muted text-sm mb-2 font-sans-medium">
                     Password
                   </Text>
-                  <View className="bg-gray-800 rounded-xl border border-gray-700 px-4 py-4 flex-row items-center">
+                  <View className="bg-paper-deep rounded-xl border border-rule px-4 py-4 flex-row items-center">
                     <TextInput
                       value={password}
                       onChangeText={setPassword}
                       placeholder="Enter your password"
-                      placeholderTextColor="#6b7280"
+                      placeholderTextColor="#564B3F"
                       secureTextEntry={!showPassword}
-                      className="text-white text-base flex-1"
+                      className="text-ink text-base flex-1"
                       editable={!loading}
                     />
                     <TouchableOpacity
@@ -351,46 +351,46 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
                       <Ionicons
                         name={showPassword ? "eye-off" : "eye"}
                         size={20}
-                        color="#6b7280"
+                        color="#564B3F"
                       />
                     </TouchableOpacity>
                   </View>
                 </View>
                 <TouchableOpacity className="mb-6" disabled={loading}>
-                  <Text className="text-green-400 text-sm text-right font-medium">
+                  <Text className="text-terracotta text-sm text-right font-sans-medium">
                     Forgot Password?
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleSignIn}
                   disabled={loading}
-                  className={`py-4 rounded-xl border border-green-400 mb-4 ${loading ? "bg-green-500/50" : "bg-green-500"}`}
+                  className={`py-4 rounded-xl border border-terracotta-shadow mb-4 ${loading ? "bg-terracotta/50" : "bg-terracotta"}`}
                 >
                   {loading ? (
-                    <ActivityIndicator color="#030712" />
+                    <ActivityIndicator color="#E3DAC4" />
                   ) : (
-                    <Text className="text-gray-950 text-center text-lg font-bold">
+                    <Text className="text-paper-light text-center text-lg font-serif-bold">
                       Login
                     </Text>
                   )}
                 </TouchableOpacity>
                 <View className="flex-row items-center mb-4">
-                  <View className="flex-1 h-px bg-gray-700" />
-                  <Text className="text-gray-500 mx-4 text-sm">or</Text>
-                  <View className="flex-1 h-px bg-gray-700" />
+                  <View className="flex-1 h-px bg-paper-deep" />
+                  <Text className="text-ink-muted mx-4 text-sm">or</Text>
+                  <View className="flex-1 h-px bg-paper-deep" />
                 </View>
                 <TouchableOpacity
                   onPress={handleGoogleSignIn}
                   disabled={loading}
-                  className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center mb-3"
+                  className="bg-paper-deep py-4 rounded-xl border border-rule flex-row items-center justify-center mb-3"
                 >
                   <Ionicons
                     name="logo-google"
                     size={20}
-                    color="#fff"
+                    color="#1B1711"
                     style={{ marginRight: 12 }}
                   />
-                  <Text className="text-white text-base font-medium">
+                  <Text className="text-ink text-base font-sans-medium">
                     Continue with Google
                   </Text>
                 </TouchableOpacity>
@@ -398,15 +398,15 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
                   <TouchableOpacity
                     onPress={handleAppleSignIn}
                     disabled={loading}
-                    className="bg-gray-800 py-4 rounded-xl border border-gray-700 flex-row items-center justify-center"
+                    className="bg-paper-deep py-4 rounded-xl border border-rule flex-row items-center justify-center"
                   >
                     <Ionicons
                       name="logo-apple"
                       size={20}
-                      color="#fff"
+                      color="#1B1711"
                       style={{ marginRight: 12 }}
                     />
-                    <Text className="text-white text-base font-medium">
+                    <Text className="text-ink text-base font-sans-medium">
                       Continue with Apple
                     </Text>
                   </TouchableOpacity>
@@ -414,11 +414,11 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
               </View>
             </View>
             <View className="flex-row justify-center mt-6">
-              <Text className="text-gray-400 text-base">
+              <Text className="text-ink-muted text-base">
                 Don't have an account?{" "}
               </Text>
               <TouchableOpacity onPress={onNavigateToSignUp} disabled={loading}>
-                <Text className="text-green-400 text-base font-semibold">
+                <Text className="text-terracotta text-base font-sans-semibold">
                   Sign Up
                 </Text>
               </TouchableOpacity>

@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { FONT_OPTIONS, applyFont } from "../utils/unicodeFonts";
+import { COLORS } from "../constants/theme";
 
 export default function FontPicker({ caption, onChange, onClose }) {
   const handleSelect = (key) => {
@@ -8,13 +9,16 @@ export default function FontPicker({ caption, onChange, onClose }) {
   };
 
   return (
-    <View className="border-t border-gray-800/30 px-3 py-3">
+    <View
+      className="border-t border-rule px-3 py-3"
+      style={{ backgroundColor: COLORS.paperLight }}
+    >
       <View className="flex-row items-center justify-between mb-2 px-1">
-        <Text className="text-gray-400 text-[11px] font-semibold tracking-wider">
+        <Text className="text-ink-muted font-sans-bold text-[10px] tracking-[2px]">
           FONT STYLE
         </Text>
         <TouchableOpacity onPress={onClose}>
-          <Ionicons name="close" size={16} color="#6b7280" />
+          <Ionicons name="close" size={16} color={COLORS.inkMuted} />
         </TouchableOpacity>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -22,10 +26,30 @@ export default function FontPicker({ caption, onChange, onClose }) {
           <TouchableOpacity
             key={opt.key}
             onPress={() => handleSelect(opt.key)}
-            className="bg-gray-800/70 border border-gray-700/40 rounded-2xl px-4 py-2.5 mr-2 items-center"
+            activeOpacity={0.8}
+            style={{
+              backgroundColor: COLORS.paper,
+              borderWidth: 1,
+              borderColor: COLORS.rule,
+              borderRadius: 14,
+              paddingHorizontal: 16,
+              paddingVertical: 10,
+              marginRight: 8,
+              alignItems: "center",
+            }}
           >
-            <Text className="text-white text-[16px]">{opt.preview}</Text>
-            <Text className="text-gray-500 text-[9px] mt-0.5">{opt.label}</Text>
+            <Text style={{ color: COLORS.ink, fontSize: 16 }}>{opt.preview}</Text>
+            <Text
+              style={{
+                color: COLORS.inkMuted,
+                fontFamily: "HankenGrotesk_500Medium",
+                fontSize: 9,
+                marginTop: 2,
+                letterSpacing: 0.4,
+              }}
+            >
+              {opt.label}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+﻿import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const PLATFORM_COLORS = {
@@ -16,7 +16,7 @@ const PLATFORM_COLORS = {
 
 function getPlatformColor(name) {
   const baseName = name.split(":")[0].toLowerCase();
-  return PLATFORM_COLORS[baseName] || "#6b7280";
+  return PLATFORM_COLORS[baseName] || "#564B3F";
 }
 
 function PlatformChip({ name, username, style }) {
@@ -28,9 +28,9 @@ function PlatformChip({ name, username, style }) {
       <View
         className="rounded-2xl p-3.5"
         style={{
-          backgroundColor: "rgba(255,255,255,0.03)",
+          backgroundColor: "#E3DAC4",
           borderWidth: 1,
-          borderColor: "rgba(255,255,255,0.06)",
+          borderColor: "#BFB39B",
         }}
       >
         <View className="flex-row items-center justify-between mb-3">
@@ -45,13 +45,13 @@ function PlatformChip({ name, username, style }) {
             style={{ backgroundColor: "rgba(34,197,94,0.1)" }}
           >
             <View className="w-1.5 h-1.5 rounded-full bg-green-400 mr-1" />
-            <Text className="text-green-400 text-[8px] font-bold">LIVE</Text>
+            <Text className="text-terracotta text-[8px] font-sans-bold">LIVE</Text>
           </View>
         </View>
-        <Text className="text-white text-[13px] font-bold" numberOfLines={1}>
+        <Text className="text-ink text-[13px] font-sans-bold" numberOfLines={1}>
           {username || baseName}
         </Text>
-        <Text className="text-[10px] font-semibold mt-0.5" style={{ color: `${color}99` }}>
+        <Text className="text-[10px] font-sans-semibold mt-0.5" style={{ color: `${color}99` }}>
           {baseName}
         </Text>
       </View>
@@ -65,7 +65,7 @@ function EmptyState({ onAddPlatform }) {
       <View
         className="rounded-2xl p-6 items-center"
         style={{
-          backgroundColor: "rgba(255,255,255,0.02)",
+          backgroundColor: "#DDD3BD",
           borderWidth: 1,
           borderColor: "rgba(34,197,94,0.15)",
           borderStyle: "dashed",
@@ -75,10 +75,10 @@ function EmptyState({ onAddPlatform }) {
           className="w-14 h-14 rounded-2xl items-center justify-center mb-3"
           style={{ backgroundColor: "rgba(34,197,94,0.08)" }}
         >
-          <Ionicons name="add" size={28} color="#4ade80" />
+          <Ionicons name="add" size={28} color="#B14026" />
         </View>
-        <Text className="text-white text-sm font-bold">Connect your first platform</Text>
-        <Text className="text-gray-500 text-xs mt-1">Get started by linking a social account</Text>
+        <Text className="text-ink text-sm font-sans-bold">Connect your first platform</Text>
+        <Text className="text-ink-muted text-xs mt-1">Get started by linking a social account</Text>
       </View>
     </TouchableOpacity>
   );
@@ -91,19 +91,19 @@ function AddButton({ onAddPlatform }) {
         className="rounded-2xl p-3.5 items-center justify-center"
         style={{
           width: 75,
-          backgroundColor: "rgba(255,255,255,0.02)",
+          backgroundColor: "#DDD3BD",
           borderWidth: 1,
-          borderColor: "rgba(255,255,255,0.08)",
+          borderColor: "#CFC4AB",
           borderStyle: "dashed",
         }}
       >
         <View
           className="w-9 h-9 rounded-xl items-center justify-center mb-2"
-          style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
+          style={{ backgroundColor: "#E3DAC4" }}
         >
-          <Ionicons name="add" size={18} color="#4ade80" />
+          <Ionicons name="add" size={18} color="#B14026" />
         </View>
-        <Text className="text-gray-500 text-[10px] font-semibold">Add</Text>
+        <Text className="text-ink-muted text-[10px] font-sans-semibold">Add</Text>
       </View>
     </TouchableOpacity>
   );

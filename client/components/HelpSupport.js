@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -18,55 +18,55 @@ export default function HelpSupport({ onBack }) {
   };
 
   return (
-    <View className="flex-1 bg-gray-950 px-6 pt-16">
+    <View className="flex-1 bg-paper px-6 pt-16">
       <View className="flex-row items-center mb-8">
         <TouchableOpacity onPress={onBack} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#1B1711" />
         </TouchableOpacity>
-        <Text className="text-white text-xl font-bold">Help & Support</Text>
+        <Text className="text-ink text-xl font-serif-bold">Help & Support</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        <Text className="text-gray-400 text-xs mb-3 ml-1">FAQ</Text>
-        <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-6">
+        <Text className="text-ink-muted text-xs mb-3 ml-1">FAQ</Text>
+        <View className="bg-paper-light rounded-2xl border border-rule mb-6">
           {FAQ_ITEMS.map((item, i) => (
             <TouchableOpacity
               key={i}
               onPress={() => toggleFaq(i)}
-              className={i < FAQ_ITEMS.length - 1 ? "border-b border-gray-800" : ""}
+              className={i < FAQ_ITEMS.length - 1 ? "border-b border-rule" : ""}
             >
               <View className="flex-row items-center p-4">
-                <Ionicons name="help-circle-outline" size={18} color="#4ade80" />
-                <Text className="text-white text-sm ml-3 flex-1">{item.q}</Text>
+                <Ionicons name="help-circle-outline" size={18} color="#B14026" />
+                <Text className="text-ink text-sm ml-3 flex-1">{item.q}</Text>
                 <Ionicons
                   name={expandedIndex === i ? "chevron-up" : "chevron-down"}
                   size={16}
-                  color="#6b7280"
+                  color="#564B3F"
                 />
               </View>
               {expandedIndex === i && (
                 <View className="px-4 pb-4 pt-0">
-                  <Text className="text-gray-400 text-xs leading-5 ml-8">{item.a}</Text>
+                  <Text className="text-ink-muted text-xs leading-5 ml-8">{item.a}</Text>
                 </View>
               )}
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text className="text-gray-400 text-xs mb-3 ml-1">CONTACT US</Text>
-        <View className="bg-gray-900/80 rounded-2xl border border-gray-800 mb-6">
+        <Text className="text-ink-muted text-xs mb-3 ml-1">CONTACT US</Text>
+        <View className="bg-paper-light rounded-2xl border border-rule mb-6">
           <TouchableOpacity
             onPress={() => Linking.openURL("mailto:support@crosspost.app")}
-            className="flex-row items-center p-4 border-b border-gray-800"
+            className="flex-row items-center p-4 border-b border-rule"
           >
-            <Ionicons name="mail-outline" size={18} color="#3b82f6" />
-            <Text className="text-white text-sm ml-3 flex-1">Email Support</Text>
-            <Text className="text-gray-500 text-xs">support@crosspost.app</Text>
+            <Ionicons name="mail-outline" size={18} color="#4F573A" />
+            <Text className="text-ink text-sm ml-3 flex-1">Email Support</Text>
+            <Text className="text-ink-muted text-xs">support@crosspost.app</Text>
           </TouchableOpacity>
           <View className="flex-row items-center p-4">
-            <Ionicons name="information-circle-outline" size={18} color="#9ca3af" />
-            <Text className="text-white text-sm ml-3 flex-1">App Version</Text>
-            <Text className="text-gray-500 text-xs">1.0.0</Text>
+            <Ionicons name="information-circle-outline" size={18} color="#564B3F" />
+            <Text className="text-ink text-sm ml-3 flex-1">App Version</Text>
+            <Text className="text-ink-muted text-xs">1.0.0</Text>
           </View>
         </View>
       </ScrollView>
