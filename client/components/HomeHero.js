@@ -90,7 +90,7 @@ export default function HomeHero({ unreadNotifications, onNotifications }) {
 
   return (
     <Animated.View
-      className="px-5 pt-16 pb-1"
+      className="px-5 pt-4 pb-1"
       style={{ opacity: fade, transform: [{ translateY: lift }] }}
     >
       <View className="flex-row items-center justify-between">

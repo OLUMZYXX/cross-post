@@ -1,5 +1,6 @@
 import * as Clipboard from "expo-clipboard";
-import { View, ScrollView, RefreshControl } from "react-native";
+import { View, ScrollView, RefreshControl, Platform } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import HomeHero from "./HomeHero";
 import HomeCompose from "./HomeCompose";
@@ -32,6 +33,7 @@ export default function HomeScreen({
 }) {
   const { showToast } = useToast();
   const { colors, resolved } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const composer = useCreatePost({
     connectedPlatforms,
@@ -63,6 +65,7 @@ export default function HomeScreen({
     <View className="flex-1 bg-paper">
       <StatusBar style={resolved === "dark" ? "light" : "dark"} />
 
+      <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
@@ -73,6 +76,7 @@ export default function HomeScreen({
             tintColor={colors.terracotta}
             colors={[colors.terracotta]}
             progressBackgroundColor={colors.paperLight}
+            progressViewOffset={Platform.OS === "android" ? 16 : 0}
           />
         }
       >
@@ -115,6 +119,7 @@ export default function HomeScreen({
 
         <HomePreview recentActivities={recentActivities} stats={stats} />
       </ScrollView>
+      </SafeAreaView>
 
       <ScheduleModal
         visible={composer.showScheduleModal}
