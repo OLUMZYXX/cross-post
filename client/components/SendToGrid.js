@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SectionRule from "./SectionRule";
 import PlatformChip from "./PlatformChip";
-import { COLORS } from "../constants/theme";
+import { useTheme } from "../constants/theme";
 
 export default function SendToGrid({
   connectedPlatforms,
@@ -11,6 +11,7 @@ export default function SendToGrid({
   onAddPlatform,
   getPlatformUsername,
 }) {
+  const { colors } = useTheme();
   return (
     <View className="px-5 mt-7">
       <SectionRule label="SEND TO" />
@@ -39,7 +40,7 @@ export default function SendToGrid({
             paddingHorizontal: 14,
             borderRadius: 999,
             borderWidth: 1,
-            borderColor: COLORS.rule,
+            borderColor: colors.rule,
             borderStyle: "dashed",
             flexDirection: "row",
             alignItems: "center",
@@ -47,10 +48,10 @@ export default function SendToGrid({
             marginBottom: 8,
           }}
         >
-          <Ionicons name="add" size={14} color={COLORS.inkMuted} />
+          <Ionicons name="add" size={14} color={colors.inkMuted} />
           <Text
             style={{
-              color: COLORS.inkMuted,
+              color: colors.inkMuted,
               fontFamily: "HankenGrotesk_600SemiBold",
               fontSize: 13,
               marginLeft: 6,

@@ -1,4 +1,5 @@
 ﻿import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import { getColors } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useToast } from "./Toast";
@@ -51,7 +52,7 @@ export default function SentPostFooter({
           <Ionicons
             name={allFailed ? "close" : "checkmark"}
             size={10}
-            color={allFailed ? "#B14026" : "#B14026"}
+            color={allFailed ? getColors().terracotta : getColors().terracotta}
           />
         </View>
         <Text className="text-ink-muted text-[10px]">
@@ -73,7 +74,7 @@ export default function SentPostFooter({
           className="w-7 h-7 rounded-lg bg-paper-deep items-center justify-center mr-2"
           activeOpacity={0.7}
         >
-          <Ionicons name="copy-outline" size={13} color="#564B3F" />
+          <Ionicons name="copy-outline" size={13} color={getColors().inkMuted} />
         </TouchableOpacity>
 
         {onDelete && (
@@ -83,9 +84,9 @@ export default function SentPostFooter({
             className="w-7 h-7 rounded-lg bg-paper-deep items-center justify-center"
           >
             {isDeleting ? (
-              <ActivityIndicator size="small" color="#B14026" />
+              <ActivityIndicator size="small" color={getColors().terracotta} />
             ) : (
-              <Ionicons name="trash-outline" size={13} color="#564B3F" />
+              <Ionicons name="trash-outline" size={13} color={getColors().inkMuted} />
             )}
           </TouchableOpacity>
         )}

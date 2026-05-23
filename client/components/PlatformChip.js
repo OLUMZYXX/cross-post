@@ -1,6 +1,6 @@
 import { TouchableOpacity, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS } from "../constants/theme";
+import { useTheme } from "../constants/theme";
 
 const PLATFORM_ICONS = {
   Twitter: "logo-twitter",
@@ -15,13 +15,9 @@ const PLATFORM_ICONS = {
   Threads: "at-outline",
 };
 
-export default function PlatformChip({
-  name,
-  label,
-  selected,
-  onPress,
-}) {
-  const palette = getPalette(selected);
+export default function PlatformChip({ name, label, selected, onPress }) {
+  const { colors } = useTheme();
+  const palette = getPalette(selected, colors);
   const iconName = PLATFORM_ICONS[name?.split(":")[0]] || "ellipse-outline";
   const displayLabel = label || name?.split(":")[0] || name;
 
@@ -72,21 +68,21 @@ export default function PlatformChip({
   );
 }
 
-function getPalette(selected) {
+function getPalette(selected, colors) {
   if (selected) {
     return {
-      bg: COLORS.ink,
+      bg: colors.ink,
       shadowBg: "#000",
-      border: COLORS.ink,
-      text: COLORS.paperLight,
-      icon: COLORS.paperLight,
+      border: colors.ink,
+      text: colors.paperLight,
+      icon: colors.paperLight,
     };
   }
   return {
-    bg: COLORS.paperLight,
-    shadowBg: COLORS.paperLight,
-    border: COLORS.rule,
-    text: COLORS.ink,
-    icon: COLORS.ink,
+    bg: colors.paperLight,
+    shadowBg: colors.paperLight,
+    border: colors.rule,
+    text: colors.ink,
+    icon: colors.ink,
   };
 }

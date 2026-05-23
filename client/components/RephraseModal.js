@@ -7,20 +7,21 @@
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { getColors } from "../constants/theme";
 
 const TONE_OPTIONS = [
-  { key: "professional", label: "Professional", icon: "briefcase-outline", color: "#4F573A" },
-  { key: "casual", label: "Casual", icon: "cafe-outline", color: "#B14026" },
-  { key: "friendly", label: "Friendly", icon: "heart-outline", color: "#B14026" },
-  { key: "witty", label: "Witty", icon: "bulb-outline", color: "#4F573A" },
-  { key: "bold", label: "Bold", icon: "flash-outline", color: "#B14026" },
-  { key: "inspirational", label: "Inspirational", icon: "sparkles-outline", color: "#4F573A" },
-  { key: "genz", label: "Gen Z", icon: "logo-snapchat", color: "#B14026" },
-  { key: "sports", label: "Sports", icon: "football-outline", color: "#B14026" },
-  { key: "music", label: "Music", icon: "musical-notes-outline", color: "#4F573A" },
-  { key: "hype", label: "Hype", icon: "megaphone-outline", color: "#B14026" },
-  { key: "storyteller", label: "Storyteller", icon: "book-outline", color: "#4F573A" },
-  { key: "sarcastic", label: "Sarcastic", icon: "happy-outline", color: "#B14026" },
+  { key: "professional", label: "Professional", icon: "briefcase-outline", color: getColors().olive },
+  { key: "casual", label: "Casual", icon: "cafe-outline", color: getColors().terracotta },
+  { key: "friendly", label: "Friendly", icon: "heart-outline", color: getColors().terracotta },
+  { key: "witty", label: "Witty", icon: "bulb-outline", color: getColors().olive },
+  { key: "bold", label: "Bold", icon: "flash-outline", color: getColors().terracotta },
+  { key: "inspirational", label: "Inspirational", icon: "sparkles-outline", color: getColors().olive },
+  { key: "genz", label: "Gen Z", icon: "logo-snapchat", color: getColors().terracotta },
+  { key: "sports", label: "Sports", icon: "football-outline", color: getColors().terracotta },
+  { key: "music", label: "Music", icon: "musical-notes-outline", color: getColors().olive },
+  { key: "hype", label: "Hype", icon: "megaphone-outline", color: getColors().terracotta },
+  { key: "storyteller", label: "Storyteller", icon: "book-outline", color: getColors().olive },
+  { key: "sarcastic", label: "Sarcastic", icon: "happy-outline", color: getColors().terracotta },
 ];
 
 export default function RephraseModal({
@@ -42,7 +43,7 @@ export default function RephraseModal({
             <View className="w-10 h-1 bg-paper-deep rounded-full self-center mb-5" />
             <View className="flex-row items-center mb-5">
               <View className="w-9 h-9 rounded-xl bg-paper-deep items-center justify-center">
-                <Ionicons name="sparkles" size={18} color="#4F573A" />
+                <Ionicons name="sparkles" size={18} color={getColors().olive} />
               </View>
               <Text className="text-ink text-lg font-serif-bold ml-3">Rephrase with AI</Text>
             </View>
@@ -70,7 +71,7 @@ export default function RephraseModal({
                       className="w-9 h-9 rounded-xl items-center justify-center mb-1.5"
                       style={{ backgroundColor: isActive ? `${tone.color}25` : "#1f293720" }}
                     >
-                      <Ionicons name={tone.icon} size={16} color={isActive ? tone.color : "#564B3F"} />
+                      <Ionicons name={tone.icon} size={16} color={isActive ? tone.color : getColors().inkMuted} />
                     </View>
                     <Text className={`text-[10px] font-sans-semibold ${isActive ? "text-olive" : "text-ink-muted"}`}>
                       {tone.label}
@@ -82,7 +83,7 @@ export default function RephraseModal({
 
             {isRephrasing && (
               <View className="bg-paper-deep rounded-2xl p-6 items-center mb-4">
-                <ActivityIndicator color="#4F573A" />
+                <ActivityIndicator color={getColors().olive} />
                 <Text className="text-ink-muted text-xs mt-3">Rephrasing your post...</Text>
               </View>
             )}
@@ -128,7 +129,7 @@ export default function RephraseModal({
 
             {!rephrasedText && !isRephrasing && (
               <View className="bg-paper-deep rounded-2xl p-5 items-center">
-                <Ionicons name="sparkles-outline" size={24} color="#736857" />
+                <Ionicons name="sparkles-outline" size={24} color={getColors().inkSoft} />
                 <Text className="text-ink-soft text-xs mt-2 text-center">
                   Pick a tone above to rephrase your post
                 </Text>

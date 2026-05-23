@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect, useCallback, useMemo } from "react";
+import { getColors } from "../constants/theme";
 import {
   View,
   Text,
@@ -104,7 +105,7 @@ export default function NotificationsInbox({ onBack, onUnreadCountChange }) {
   if (loading) {
     return (
       <View className="flex-1 bg-paper items-center justify-center">
-        <ActivityIndicator size="large" color="#B14026" />
+        <ActivityIndicator size="large" color={getColors().terracotta} />
       </View>
     );
   }
@@ -136,9 +137,9 @@ export default function NotificationsInbox({ onBack, onUnreadCountChange }) {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor={"#B14026"}
-              colors={["#B14026"]}
-              progressBackgroundColor="#E3DAC4"
+              tintColor={getColors().terracotta}
+              colors={[getColors().terracotta]}
+              progressBackgroundColor={getColors().paperLight}
             />
           }
         />

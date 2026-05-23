@@ -1,8 +1,10 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { BRAND, COLORS } from "../constants/theme";
+import { BRAND, useTheme } from "../constants/theme";
 
 export default function HomeHero({ unreadNotifications, onNotifications }) {
+  const { colors } = useTheme();
+
   return (
     <View className="px-5 pt-16 pb-1">
       <View className="flex-row items-center justify-between">
@@ -30,11 +32,7 @@ export default function HomeHero({ unreadNotifications, onNotifications }) {
           onPress={onNotifications}
           className="w-11 h-11 rounded-full bg-paper-light border border-rule items-center justify-center"
         >
-          <Ionicons
-            name="notifications-outline"
-            size={20}
-            color={COLORS.ink}
-          />
+          <Ionicons name="notifications-outline" size={20} color={colors.ink} />
           {unreadNotifications > 0 && (
             <View className="absolute -top-1 -right-1 bg-terracotta rounded-full min-w-[18px] h-[18px] items-center justify-center px-1">
               <Text className="text-paper-light text-[10px] font-sans-bold">

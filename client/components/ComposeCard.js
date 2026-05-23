@@ -1,5 +1,5 @@
 import { View, Text, TextInput } from "react-native";
-import { COLORS, FONTS } from "../constants/theme";
+import { FONTS, useTheme } from "../constants/theme";
 
 export default function ComposeCard({
   caption,
@@ -7,6 +7,7 @@ export default function ComposeCard({
   editable = true,
   children,
 }) {
+  const { colors, resolved } = useTheme();
   const charCount = caption?.length || 0;
 
   return (
@@ -18,15 +19,16 @@ export default function ComposeCard({
         value={caption}
         onChangeText={onChangeCaption}
         placeholder="Say something worth crossing five timelines..."
-        placeholderTextColor={COLORS.inkSoft}
+        placeholderTextColor={colors.inkSoft}
         multiline
         textAlignVertical="top"
         editable={editable}
+        keyboardAppearance={resolved === "dark" ? "dark" : "light"}
         style={{
           fontFamily: FONTS.sans,
           fontSize: 16,
           lineHeight: 24,
-          color: COLORS.ink,
+          color: colors.ink,
           paddingHorizontal: 18,
           paddingTop: 18,
           paddingBottom: 14,
@@ -35,7 +37,7 @@ export default function ComposeCard({
       />
 
       <View className="px-4">
-        <DashedDivider />
+        <DashedDivider color={colors.rule} />
       </View>
 
       <View className="flex-row items-center justify-between px-4 py-2">
@@ -52,14 +54,14 @@ export default function ComposeCard({
   );
 }
 
-function DashedDivider() {
+function DashedDivider({ color }) {
   return (
     <View
       style={{
         height: 1,
         borderTopWidth: 1,
         borderStyle: "dashed",
-        borderColor: COLORS.rule,
+        borderColor: color,
         marginVertical: 2,
       }}
     />

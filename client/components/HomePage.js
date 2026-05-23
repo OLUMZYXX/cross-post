@@ -25,6 +25,7 @@ import PageLoadingAnimation from "./PageLoadingAnimation";
 import ScreenTransition from "./ScreenTransition";
 import { useToast } from "./Toast";
 import { postAPI, platformAPI, notificationAPI, clearToken } from "../services/api";
+import { getColors } from "../constants/theme";
 
 export default function HomePage({
   user,
@@ -709,13 +710,13 @@ export default function HomePage({
                   <Ionicons
                     name={allPlatforms[platform].icon}
                     size={18}
-                    color="#1B1711"
+                    color={getColors().ink}
                   />
                 </View>
                 <Text className="text-ink font-sans-semibold flex-1">
                   {platform}
                 </Text>
-                <Ionicons name="arrow-forward" size={16} color="#B14026" />
+                <Ionicons name="arrow-forward" size={16} color={getColors().terracotta} />
               </TouchableOpacity>
             ))}
             <TouchableOpacity

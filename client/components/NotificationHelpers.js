@@ -1,4 +1,5 @@
 ﻿import { View, Text, TouchableOpacity } from "react-native";
+import { getColors } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 
 export function groupNotifications(notifications) {
@@ -32,7 +33,7 @@ export function InboxHeader({ unreadCount, total, onBack, onMarkAllRead, onClear
             onPress={onBack}
             className="w-10 h-10 rounded-xl items-center justify-center mr-3 bg-paper-light border border-rule"
           >
-            <Ionicons name="arrow-back" size={18} color="#1B1711" />
+            <Ionicons name="arrow-back" size={18} color={getColors().ink} />
           </TouchableOpacity>
           <View>
             <Text className="text-ink text-xl font-jakarta-bold">Notifications</Text>
@@ -58,7 +59,7 @@ export function InboxHeader({ unreadCount, total, onBack, onMarkAllRead, onClear
               className="flex-1 flex-row items-center justify-center py-2.5 rounded-xl bg-paper-light border border-rule"
               activeOpacity={0.7}
             >
-              <Ionicons name="checkmark-done" size={14} color="#4F573A" />
+              <Ionicons name="checkmark-done" size={14} color={getColors().olive} />
               <Text className="text-olive text-[11px] font-sans-semibold ml-1.5">
                 Mark All Read
               </Text>
@@ -69,7 +70,7 @@ export function InboxHeader({ unreadCount, total, onBack, onMarkAllRead, onClear
             className="flex-1 flex-row items-center justify-center py-2.5 rounded-xl bg-paper-light border border-rule"
             activeOpacity={0.7}
           >
-            <Ionicons name="trash-outline" size={14} color="#B14026" />
+            <Ionicons name="trash-outline" size={14} color={getColors().terracotta} />
             <Text className="text-terracotta text-[11px] font-sans-semibold ml-1.5">Clear All</Text>
           </TouchableOpacity>
         </View>
@@ -84,12 +85,12 @@ export function EmptyState() {
       <View
         className="w-20 h-20 rounded-3xl items-center justify-center mb-5"
         style={{
-          backgroundColor: "#E3DAC4",
+          backgroundColor: getColors().paperLight,
           borderWidth: 1,
-          borderColor: "#BFB39B",
+          borderColor: getColors().rule,
         }}
       >
-        <Ionicons name="notifications-off-outline" size={32} color="#736857" />
+        <Ionicons name="notifications-off-outline" size={32} color={getColors().inkSoft} />
       </View>
       <Text className="text-ink text-lg font-jakarta-bold mb-1.5">All caught up</Text>
       <Text className="text-ink-muted text-xs text-center px-12 leading-5">

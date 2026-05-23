@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { getColors } from "../constants/theme";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import MediaCarousel from "./MediaCarousel";
@@ -27,7 +28,7 @@ function PlatformChips({ results }) {
             <Ionicons
               name="checkmark-circle"
               size={11}
-              color="#B14026"
+              color={getColors().terracotta}
               style={{ marginLeft: 4 }}
             />
           </View>
@@ -54,7 +55,7 @@ function VideoThumbnail({ uri }) {
           />
         ) : (
           <View className="w-full h-full items-center justify-center">
-            <Ionicons name="videocam-outline" size={36} color="#564B3F" />
+            <Ionicons name="videocam-outline" size={36} color={getColors().inkMuted} />
           </View>
         )}
         <View className="absolute inset-0 items-center justify-center">
@@ -76,7 +77,7 @@ function PostMedia({ media }) {
   if (!media || media.length === 0) {
     return (
       <View className="w-full h-16 bg-paper-deep items-center justify-center rounded-t-2xl">
-        <Ionicons name="document-text-outline" size={24} color="#736857" />
+        <Ionicons name="document-text-outline" size={24} color={getColors().inkSoft} />
       </View>
     );
   }

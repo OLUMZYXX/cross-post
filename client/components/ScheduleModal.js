@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { getColors } from "../constants/theme";
 import {
   Text,
   View,
@@ -86,19 +87,19 @@ export default function ScheduleModal({ visible, onClose, onPostNow, onSchedule 
 
             <TouchableOpacity onPress={onPostNow} className="flex-row items-center bg-terracotta rounded-2xl p-4 mb-3">
               <View className="w-10 h-10 rounded-full bg-terracotta-shadow items-center justify-center mr-4">
-                <Ionicons name="send" size={18} color="#E3DAC4" />
+                <Ionicons name="send" size={18} color={getColors().paperLight} />
               </View>
               <View className="flex-1">
                 <Text className="text-paper-light font-sans-bold text-base">Post Now</Text>
                 <Text className="text-paper-light text-xs opacity-80">Publish immediately to all platforms</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#E3DAC4" />
+              <Ionicons name="chevron-forward" size={20} color={getColors().paperLight} />
             </TouchableOpacity>
 
             <View className="bg-paper rounded-2xl p-4 border border-rule">
               <View className="flex-row items-center mb-4">
                 <View className="w-10 h-10 rounded-full bg-paper-deep items-center justify-center mr-3">
-                  <Ionicons name="calendar-outline" size={18} color="#1B1711" />
+                  <Ionicons name="calendar-outline" size={18} color={getColors().ink} />
                 </View>
                 <Text className="text-ink font-sans-bold text-base">Schedule for Later</Text>
               </View>
@@ -163,13 +164,13 @@ function TimeColumn({ value, onUp, onDown }) {
   return (
     <View className="items-center">
       <TouchableOpacity onPress={onUp} className="w-10 h-10 items-center justify-center">
-        <Ionicons name="chevron-up" size={20} color="#564B3F" />
+        <Ionicons name="chevron-up" size={20} color={getColors().inkMuted} />
       </TouchableOpacity>
       <View className="bg-paper-deep rounded-xl w-14 h-12 items-center justify-center">
         <Text className="text-ink text-xl font-serif-bold">{value}</Text>
       </View>
       <TouchableOpacity onPress={onDown} className="w-10 h-10 items-center justify-center">
-        <Ionicons name="chevron-down" size={20} color="#564B3F" />
+        <Ionicons name="chevron-down" size={20} color={getColors().inkMuted} />
       </TouchableOpacity>
     </View>
   );

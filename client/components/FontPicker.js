@@ -1,9 +1,10 @@
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { FONT_OPTIONS, applyFont } from "../utils/unicodeFonts";
-import { COLORS } from "../constants/theme";
+import { useTheme } from "../constants/theme";
 
 export default function FontPicker({ caption, onChange, onClose }) {
+  const { colors } = useTheme();
   const handleSelect = (key) => {
     onChange(applyFont(caption, key));
   };
@@ -11,14 +12,14 @@ export default function FontPicker({ caption, onChange, onClose }) {
   return (
     <View
       className="border-t border-rule px-3 py-3"
-      style={{ backgroundColor: COLORS.paperLight }}
+      style={{ backgroundColor: colors.paperLight }}
     >
       <View className="flex-row items-center justify-between mb-2 px-1">
         <Text className="text-ink-muted font-sans-bold text-[10px] tracking-[2px]">
           FONT STYLE
         </Text>
         <TouchableOpacity onPress={onClose}>
-          <Ionicons name="close" size={16} color={COLORS.inkMuted} />
+          <Ionicons name="close" size={16} color={colors.inkMuted} />
         </TouchableOpacity>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -28,9 +29,9 @@ export default function FontPicker({ caption, onChange, onClose }) {
             onPress={() => handleSelect(opt.key)}
             activeOpacity={0.8}
             style={{
-              backgroundColor: COLORS.paper,
+              backgroundColor: colors.paper,
               borderWidth: 1,
-              borderColor: COLORS.rule,
+              borderColor: colors.rule,
               borderRadius: 14,
               paddingHorizontal: 16,
               paddingVertical: 10,
@@ -38,10 +39,10 @@ export default function FontPicker({ caption, onChange, onClose }) {
               alignItems: "center",
             }}
           >
-            <Text style={{ color: COLORS.ink, fontSize: 16 }}>{opt.preview}</Text>
+            <Text style={{ color: colors.ink, fontSize: 16 }}>{opt.preview}</Text>
             <Text
               style={{
-                color: COLORS.inkMuted,
+                color: colors.inkMuted,
                 fontFamily: "HankenGrotesk_500Medium",
                 fontSize: 9,
                 marginTop: 2,

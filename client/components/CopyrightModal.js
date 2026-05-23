@@ -9,11 +9,12 @@
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { getColors } from "../constants/theme";
 
 const RISK_CONFIG = {
-  low: { color: "#4F573A", bg: "bg-paper-deep", border: "border-rule", icon: "information-circle", label: "Low Risk" },
-  medium: { color: "#8E311B", bg: "bg-paper-deep", border: "border-rule", icon: "warning", label: "Medium Risk" },
-  high: { color: "#B14026", bg: "bg-terracotta/20", border: "border-terracotta/40", icon: "alert-circle", label: "High Risk" },
+  low: { color: getColors().olive, bg: "bg-paper-deep", border: "border-rule", icon: "information-circle", label: "Low Risk" },
+  medium: { color: getColors().terracottaShadow, bg: "bg-paper-deep", border: "border-rule", icon: "warning", label: "Medium Risk" },
+  high: { color: getColors().terracotta, bg: "bg-terracotta/20", border: "border-terracotta/40", icon: "alert-circle", label: "High Risk" },
 };
 
 const ISSUE_TYPE_LABELS = {
@@ -50,7 +51,7 @@ export default function CopyrightModal({
         <View className="bg-paper-light rounded-t-3xl px-6 pt-5 pb-10 border-t border-rule">
           <View className="w-10 h-1 bg-paper-deep rounded-full self-center mb-5" />
           <View className="flex-row items-center mb-5">
-            <Ionicons name="shield-checkmark" size={22} color="#4F573A" />
+            <Ionicons name="shield-checkmark" size={22} color={getColors().olive} />
             <Text className="text-ink text-lg font-serif-bold ml-2">Copyright Check</Text>
           </View>
 
@@ -74,7 +75,7 @@ export default function CopyrightModal({
 function CheckingState() {
   return (
     <View className="bg-paper-deep rounded-2xl p-8 items-center">
-      <ActivityIndicator color="#4F573A" size="large" />
+      <ActivityIndicator color={getColors().olive} size="large" />
       <Text className="text-ink-muted text-sm mt-3">Analyzing your content...</Text>
       <Text className="text-ink-muted text-xs mt-1">Checking text and images for copyright issues</Text>
     </View>
@@ -85,7 +86,7 @@ function ClearState({ onProceed }) {
   return (
     <View>
       <View className="bg-terracotta-soft/30 rounded-2xl p-5 items-center border border-terracotta/30 mb-4">
-        <Ionicons name="checkmark-circle" size={48} color="#B14026" />
+        <Ionicons name="checkmark-circle" size={48} color={getColors().terracotta} />
         <Text className="text-terracotta font-sans-bold text-base mt-3">All Clear!</Text>
         <Text className="text-ink-muted text-xs mt-1 text-center">No copyright issues detected</Text>
       </View>
@@ -184,7 +185,7 @@ function SuggestionsSection({ suggestions }) {
       <View className="bg-paper-deep rounded-xl p-3.5 border border-rule">
         {suggestions.map((s, i) => (
           <View key={i} className="flex-row mb-1.5">
-            <Ionicons name="bulb-outline" size={14} color="#4F573A" style={{ marginTop: 1 }} />
+            <Ionicons name="bulb-outline" size={14} color={getColors().olive} style={{ marginTop: 1 }} />
             <Text className="text-ink text-xs ml-2 flex-1">{s}</Text>
           </View>
         ))}

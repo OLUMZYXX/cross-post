@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from "react";
+import { getColors } from "../constants/theme";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -29,7 +30,7 @@ export default function BiometricLock({ onUnlock }) {
     <View className="absolute inset-0 z-50 bg-paper items-center justify-center px-6">
       <View className="items-center">
         <View className="w-20 h-20 rounded-full bg-paper-deep items-center justify-center mb-6">
-          <Ionicons name="lock-closed" size={36} color="#4F573A" />
+          <Ionicons name="lock-closed" size={36} color={getColors().olive} />
         </View>
 
         <Text className="text-ink text-xl font-serif-bold mb-2">

@@ -1,14 +1,15 @@
 ﻿import { useEffect, useRef } from "react";
+import { getColors } from "../constants/theme";
 import { View, Animated, Easing } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const PLATFORMS = [
-  { icon: "logo-twitter", color: "#4F573A" },
-  { icon: "logo-instagram", color: "#B14026" },
-  { icon: "logo-facebook", color: "#4F573A" },
+  { icon: "logo-twitter", color: getColors().olive },
+  { icon: "logo-instagram", color: getColors().terracotta },
+  { icon: "logo-facebook", color: getColors().olive },
   { icon: "logo-tiktok", color: "#e5e7eb" },
-  { icon: "logo-youtube", color: "#B14026" },
-  { icon: "logo-linkedin", color: "#4F573A" },
+  { icon: "logo-youtube", color: getColors().terracotta },
+  { icon: "logo-linkedin", color: getColors().olive },
 ];
 
 export default function PageLoadingAnimation({ onFinish }) {
@@ -119,7 +120,7 @@ export default function PageLoadingAnimation({ onFinish }) {
           height: 120,
           borderRadius: 60,
           borderWidth: 2,
-          borderColor: "#B14026",
+          borderColor: getColors().terracotta,
           opacity: ringOpacity,
           transform: [{ scale: ringScale }],
         }}
@@ -154,7 +155,7 @@ export default function PageLoadingAnimation({ onFinish }) {
         }}
       >
         <View className="w-20 h-20 rounded-3xl bg-terracotta items-center justify-center shadow-lg">
-          <Ionicons name="share-social" size={36} color="#E3DAC4" />
+          <Ionicons name="share-social" size={36} color={getColors().paperLight} />
         </View>
       </Animated.View>
     </Animated.View>

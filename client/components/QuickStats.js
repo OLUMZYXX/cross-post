@@ -1,4 +1,5 @@
 ﻿import { View, Text } from "react-native";
+import { getColors } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 
 function StatCard({ icon, iconColor, value, label }) {
@@ -7,9 +8,9 @@ function StatCard({ icon, iconColor, value, label }) {
       <View
         className="rounded-2xl px-3.5 py-3.5"
         style={{
-          backgroundColor: "#E3DAC4",
+          backgroundColor: getColors().paperLight,
           borderWidth: 1,
-          borderColor: "#BFB39B",
+          borderColor: getColors().rule,
         }}
       >
         <View className="flex-row items-center justify-between mb-2.5">
@@ -44,7 +45,7 @@ export default function QuickStats({
     <View className="flex-row mb-4 -mx-1.5">
       <StatCard
         icon="checkmark-circle"
-        iconColor="#B14026"
+        iconColor={getColors().terracotta}
         value={publishedCount}
         label="Published"
       />

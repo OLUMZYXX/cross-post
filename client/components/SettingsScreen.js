@@ -1,6 +1,8 @@
 ﻿import { View, Text, TouchableOpacity, ScrollView, RefreshControl } from "react-native";
+import { getColors, useTheme } from "../constants/theme";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
+import ThemePicker from "./ThemePicker";
 
 function SettingsRow({ icon, iconColor, iconBg, label, description, value, onPress, isLast }) {
   return (
@@ -48,13 +50,14 @@ export default function SettingsScreen({
   onHelp,
   onLogout,
 }) {
+  const { resolved } = useTheme();
   const initials = user?.name
     ? user.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
   return (
     <View className="flex-1 bg-paper">
-      <StatusBar style="dark" />
+      <StatusBar style={resolved === "dark" ? "light" : "dark"} />
       <View className="flex-1 px-5 pt-14">
         <Text className="text-ink text-2xl font-serif-bold mb-5">Settings</Text>
 
@@ -65,9 +68,9 @@ export default function SettingsScreen({
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={"#B14026"}
-              colors={["#B14026"]}
-              progressBackgroundColor="#E3DAC4"
+              tintColor={getColors().terracotta}
+              colors={[getColors().terracotta]}
+              progressBackgroundColor={getColors().paperLight}
             />
           }
         >
@@ -96,7 +99,7 @@ export default function SettingsScreen({
           <View className="bg-paper-light rounded-2xl border border-rule overflow-hidden">
             <SettingsRow
               icon="link-outline"
-              iconColor="#B14026"
+              iconColor={getColors().terracotta}
               iconBg="bg-terracotta-soft/30"
               label="Connected Accounts"
               description="Manage your linked social platforms"
@@ -114,11 +117,14 @@ export default function SettingsScreen({
             />
           </View>
 
+          <SectionLabel label="Appearance" />
+          <ThemePicker />
+
           <SectionLabel label="General" />
           <View className="bg-paper-light rounded-2xl border border-rule overflow-hidden">
             <SettingsRow
               icon="shield-checkmark-outline"
-              iconColor="#8E311B"
+              iconColor={getColors().terracottaShadow}
               iconBg="bg-paper-deep"
               label="Privacy & Security"
               description="Data, password and account safety"
@@ -141,7 +147,7 @@ export default function SettingsScreen({
             className="bg-paper-light rounded-2xl py-3.5 border border-rule flex-row items-center justify-center"
             activeOpacity={0.7}
           >
-            <Ionicons name="log-out-outline" size={17} color="#B14026" />
+            <Ionicons name="log-out-outline" size={17} color={getColors().terracotta} />
             <Text className="text-terracotta font-sans-medium text-sm ml-2">Log Out</Text>
           </TouchableOpacity>
 

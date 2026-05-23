@@ -1,6 +1,6 @@
 import { View, TouchableOpacity, Text, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS } from "../constants/theme";
+import { useTheme } from "../constants/theme";
 
 const TABS = [
   { id: "home", icon: "home-outline", activeIcon: "home", label: "Home" },
@@ -9,7 +9,7 @@ const TABS = [
   { id: "settings", icon: "person-outline", activeIcon: "person", label: "You" },
 ];
 
-function NavPill({ tab, isActive, onPress }) {
+function NavPill({ tab, isActive, onPress, colors }) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={{ flex: isActive ? 0 : 1, alignItems: "center" }}>
       <View
@@ -20,18 +20,18 @@ function NavPill({ tab, isActive, onPress }) {
           paddingVertical: 10,
           paddingHorizontal: isActive ? 18 : 14,
           borderRadius: 999,
-          backgroundColor: isActive ? COLORS.terracottaSoft : "transparent",
+          backgroundColor: isActive ? colors.terracottaSoft : "transparent",
         }}
       >
         <Ionicons
           name={isActive ? tab.activeIcon : tab.icon}
           size={20}
-          color={isActive ? COLORS.terracotta : COLORS.inkMuted}
+          color={isActive ? colors.terracotta : colors.inkMuted}
         />
         {isActive && (
           <Text
             style={{
-              color: COLORS.terracotta,
+              color: colors.terracotta,
               fontFamily: "HankenGrotesk_700Bold",
               fontSize: 13,
               marginLeft: 8,
@@ -47,12 +47,13 @@ function NavPill({ tab, isActive, onPress }) {
 }
 
 export default function BottomNav({ activeTab, onTabChange }) {
+  const { colors, resolved } = useTheme();
   const shadowProps =
     Platform.OS === "ios"
       ? {
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.12,
+          shadowOpacity: resolved === "dark" ? 0.4 : 0.12,
           shadowRadius: 18,
         }
       : { elevation: 10 };
@@ -66,12 +67,12 @@ export default function BottomNav({ activeTab, onTabChange }) {
         right: 16,
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: COLORS.paperLight,
+        backgroundColor: colors.paperLight,
         borderRadius: 999,
         paddingVertical: 8,
         paddingHorizontal: 8,
         borderWidth: 1,
-        borderColor: COLORS.rule,
+        borderColor: colors.rule,
         ...shadowProps,
       }}
     >
@@ -80,6 +81,7 @@ export default function BottomNav({ activeTab, onTabChange }) {
           key={tab.id}
           tab={tab}
           isActive={activeTab === tab.id}
+          colors={colors}
           onPress={() => onTabChange(tab.id)}
         />
       ))}

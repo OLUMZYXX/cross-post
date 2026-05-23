@@ -1,4 +1,5 @@
 ﻿import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import { getColors } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { PLATFORM_STYLES } from "./sentPostUtils";
 
@@ -9,7 +10,7 @@ function FailedRow({ result, isRetrying, isRetryingAll, onRetry }) {
       <View className="flex-row items-center flex-1">
         {style && (
           <View className="w-7 h-7 rounded-lg bg-paper-deep items-center justify-center mr-2.5">
-            <Ionicons name={style.icon} size={14} color="#B14026" />
+            <Ionicons name={style.icon} size={14} color={getColors().terracotta} />
           </View>
         )}
         <View className="flex-1 mr-2">
@@ -27,10 +28,10 @@ function FailedRow({ result, isRetrying, isRetryingAll, onRetry }) {
         }`}
       >
         {isRetrying ? (
-          <ActivityIndicator size="small" color="#B14026" />
+          <ActivityIndicator size="small" color={getColors().terracotta} />
         ) : (
           <>
-            <Ionicons name="refresh" size={12} color="#B14026" />
+            <Ionicons name="refresh" size={12} color={getColors().terracotta} />
             <Text className="text-terracotta text-xs font-sans-semibold ml-1">Retry</Text>
           </>
         )}
@@ -52,7 +53,7 @@ export default function FailedResults({
   return (
     <View className="bg-terracotta/5 rounded-xl border border-terracotta/25 p-3 mb-3">
       <View className="flex-row items-center mb-2.5">
-        <Ionicons name="alert-circle" size={14} color="#B14026" />
+        <Ionicons name="alert-circle" size={14} color={getColors().terracotta} />
         <Text className="text-terracotta text-xs font-sans-semibold ml-1.5">
           Failed ({failedResults.length})
         </Text>
@@ -78,10 +79,10 @@ export default function FailedResults({
           }`}
         >
           {isRetryingAll ? (
-            <ActivityIndicator size="small" color="#B14026" />
+            <ActivityIndicator size="small" color={getColors().terracotta} />
           ) : (
             <>
-              <Ionicons name="refresh" size={14} color="#B14026" />
+              <Ionicons name="refresh" size={14} color={getColors().terracotta} />
               <Text className="text-terracotta text-xs font-sans-bold ml-1.5">Retry All</Text>
             </>
           )}

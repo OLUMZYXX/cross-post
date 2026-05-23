@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from "react";
+import { getColors } from "../constants/theme";
 import {
   View,
   Text,
@@ -17,7 +18,7 @@ const TOGGLES = [
     desc: "Receive alerts on your device",
     key: "pushEnabled",
     icon: "notifications",
-    color: "#4F573A",
+    color: getColors().olive,
     section: "channels",
   },
   {
@@ -25,7 +26,7 @@ const TOGGLES = [
     desc: "Get updates via email",
     key: "emailEnabled",
     icon: "mail",
-    color: "#4F573A",
+    color: getColors().olive,
     section: "channels",
   },
   {
@@ -33,7 +34,7 @@ const TOGGLES = [
     desc: "Notify when posts go live or fail",
     key: "postAlerts",
     icon: "paper-plane",
-    color: "#B14026",
+    color: getColors().terracotta,
     section: "alerts",
   },
   {
@@ -41,7 +42,7 @@ const TOGGLES = [
     desc: "Remind before scheduled posts",
     key: "scheduleReminders",
     icon: "time",
-    color: "#8E311B",
+    color: getColors().terracottaShadow,
     section: "alerts",
   },
 ];
@@ -63,7 +64,7 @@ function ToggleRow({ item, onToggle, isLast }) {
         value={item.value}
         onValueChange={() => onToggle(item.key, item.value, item.label)}
         trackColor={{ false: "#374151", true: "#166534" }}
-        thumbColor={item.value ? "#B14026" : "#564B3F"}
+        thumbColor={item.value ? getColors().terracotta : getColors().inkMuted}
       />
     </View>
   );
@@ -112,7 +113,7 @@ export default function NotificationSettings({ onBack }) {
   if (loading) {
     return (
       <View className="flex-1 bg-paper items-center justify-center">
-        <ActivityIndicator size="large" color="#B14026" />
+        <ActivityIndicator size="large" color={getColors().terracotta} />
       </View>
     );
   }
@@ -127,7 +128,7 @@ export default function NotificationSettings({ onBack }) {
           onPress={onBack}
           className="w-10 h-10 rounded-xl bg-paper-light items-center justify-center mr-3 border border-rule"
         >
-          <Ionicons name="arrow-back" size={18} color="#1B1711" />
+          <Ionicons name="arrow-back" size={18} color={getColors().ink} />
         </TouchableOpacity>
         <Text className="text-ink text-xl font-serif-bold">Notifications</Text>
       </View>
@@ -153,7 +154,7 @@ export default function NotificationSettings({ onBack }) {
 
         <View className="bg-paper-light rounded-2xl p-4 border border-rule">
           <View className="flex-row items-center mb-2">
-            <Ionicons name="information-circle" size={15} color="#736857" />
+            <Ionicons name="information-circle" size={15} color={getColors().inkSoft} />
             <Text className="text-ink-muted text-[11px] font-sans-medium ml-1.5">About</Text>
           </View>
           <Text className="text-ink-soft text-[11px] leading-4">

@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SectionRule from "./SectionRule";
-import { COLORS } from "../constants/theme";
+import { useTheme } from "../constants/theme";
 
 export default function HomePreview({ recentActivities = [], stats }) {
   return (
@@ -46,9 +46,10 @@ function StatCell({ label, value }) {
 }
 
 function EmptyState() {
+  const { colors } = useTheme();
   return (
     <View className="bg-paper-light rounded-2xl border border-rule mt-3 px-4 py-5 items-center">
-      <Ionicons name="leaf-outline" size={22} color={COLORS.olive} />
+      <Ionicons name="leaf-outline" size={22} color={colors.olive} />
       <Text className="text-ink font-serif text-[15px] mt-2">
         Your timeline awaits.
       </Text>
@@ -60,6 +61,7 @@ function EmptyState() {
 }
 
 function PreviewRow({ activity }) {
+  const { colors } = useTheme();
   const time = formatTime(activity.timestamp);
   return (
     <View className="bg-paper-light rounded-2xl border border-rule px-4 py-3 mb-2 flex-row items-start">
@@ -67,7 +69,7 @@ function PreviewRow({ activity }) {
         <Ionicons
           name={activity.type === "post" ? "paper-plane" : "link"}
           size={12}
-          color={COLORS.ink}
+          color={colors.ink}
         />
       </View>
       <View className="flex-1">

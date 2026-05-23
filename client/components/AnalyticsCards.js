@@ -1,4 +1,5 @@
 ﻿import { View, Text } from "react-native";
+import { getColors } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 
 export function StatCard({ label, value, subtitle, icon, iconColor, iconBg }) {
@@ -8,7 +9,7 @@ export function StatCard({ label, value, subtitle, icon, iconColor, iconBg }) {
         <Text className="text-ink-muted text-xs">{label}</Text>
         {icon && (
           <View className={`w-7 h-7 rounded-lg ${iconBg || "bg-paper-deep"} items-center justify-center`}>
-            <Ionicons name={icon} size={14} color={iconColor || "#564B3F"} />
+            <Ionicons name={icon} size={14} color={iconColor || getColors().inkMuted} />
           </View>
         )}
       </View>
@@ -19,7 +20,7 @@ export function StatCard({ label, value, subtitle, icon, iconColor, iconBg }) {
 }
 
 export function SuccessRateRing({ successRate, totalSuccess, totalFailed }) {
-  const ringColor = successRate >= 80 ? "#B14026" : successRate >= 50 ? "#8E311B" : "#B14026";
+  const ringColor = successRate >= 80 ? getColors().terracotta : successRate >= 50 ? getColors().terracottaShadow : getColors().terracotta;
   const ringBg = successRate >= 80 ? "bg-terracotta-soft/30" : successRate >= 50 ? "bg-paper-deep" : "bg-terracotta/15";
 
   return (

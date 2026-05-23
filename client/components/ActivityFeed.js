@@ -1,4 +1,5 @@
 ﻿import { View, Text } from "react-native";
+import { getColors } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 
 function getRelativeTime(timestamp) {
@@ -18,13 +19,13 @@ function getRelativeTime(timestamp) {
 function ActivityRow({ activity, isLast }) {
   const isPost = activity.type === "post";
   const iconName = isPost ? "paper-plane" : "link";
-  const iconColor = isPost ? "#B14026" : "#60a5fa";
+  const iconColor = isPost ? getColors().terracotta : "#60a5fa";
   const badgeText = isPost ? "Published" : "Connected";
 
   return (
     <View
       className="flex-row items-center py-3.5"
-      style={!isLast ? { borderBottomWidth: 1, borderBottomColor: "#E3DAC4" } : {}}
+      style={!isLast ? { borderBottomWidth: 1, borderBottomColor: getColors().paperLight } : {}}
     >
       <View
         className="w-9 h-9 rounded-xl items-center justify-center mr-3"
@@ -60,16 +61,16 @@ export default function ActivityFeed({ activities }) {
       <View
         className="rounded-2xl p-6 items-center"
         style={{
-          backgroundColor: "#E3DAC4",
+          backgroundColor: getColors().paperLight,
           borderWidth: 1,
-          borderColor: "#BFB39B",
+          borderColor: getColors().rule,
         }}
       >
         <View
           className="w-12 h-12 rounded-2xl items-center justify-center mb-3"
-          style={{ backgroundColor: "#E3DAC4" }}
+          style={{ backgroundColor: getColors().paperLight }}
         >
-          <Ionicons name="pulse-outline" size={22} color="#564B3F" />
+          <Ionicons name="pulse-outline" size={22} color={getColors().inkMuted} />
         </View>
         <Text className="text-ink text-sm font-sans-semibold mb-1">No activity yet</Text>
         <Text className="text-ink-soft text-xs text-center">
@@ -83,9 +84,9 @@ export default function ActivityFeed({ activities }) {
     <View
       className="rounded-2xl px-4"
       style={{
-        backgroundColor: "#E3DAC4",
+        backgroundColor: getColors().paperLight,
         borderWidth: 1,
-        borderColor: "#BFB39B",
+        borderColor: getColors().rule,
       }}
     >
       {activities.map((activity, index) => (

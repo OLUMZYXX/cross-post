@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect, useCallback } from "react";
+import { getColors } from "../constants/theme";
 import {
   View,
   Text,
@@ -13,12 +14,12 @@ import { useToast } from "./Toast";
 import { platformAPI } from "../services/api";
 
 const PLATFORM_STYLES = {
-  Twitter: { icon: "logo-twitter", bg: "bg-paper-deep", color: "#4F573A" },
-  Instagram: { icon: "logo-instagram", bg: "bg-paper-deep", color: "#B14026" },
-  LinkedIn: { icon: "logo-linkedin", bg: "bg-paper-deep", color: "#4F573A" },
+  Twitter: { icon: "logo-twitter", bg: "bg-paper-deep", color: getColors().olive },
+  Instagram: { icon: "logo-instagram", bg: "bg-paper-deep", color: getColors().terracotta },
+  LinkedIn: { icon: "logo-linkedin", bg: "bg-paper-deep", color: getColors().olive },
   Facebook: { icon: "logo-facebook", bg: "bg-paper-deep", color: "#1d4ed8" },
   TikTok: { icon: "logo-tiktok", bg: "bg-paper-deep", color: "#e5e7eb" },
-  YouTube: { icon: "logo-youtube", bg: "bg-terracotta/20", color: "#B14026" },
+  YouTube: { icon: "logo-youtube", bg: "bg-terracotta/20", color: getColors().terracotta },
   Reddit: { icon: "logo-reddit", bg: "bg-paper-deep", color: "#f97316" },
   Telegram: { icon: "paper-plane", bg: "bg-paper-deep", color: "#0ea5e9" },
 };
@@ -177,7 +178,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
     <View className="flex-1 bg-paper px-6 pt-16">
       <View className="flex-row items-center mb-8">
         <TouchableOpacity onPress={onBack} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#1B1711" />
+          <Ionicons name="arrow-back" size={24} color={getColors().ink} />
         </TouchableOpacity>
         <Text className="text-ink text-xl font-serif-bold flex-1">
           Connected Accounts
@@ -187,7 +188,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
 
       {loading ? (
         <View className="items-center py-12">
-          <ActivityIndicator color="#B14026" />
+          <ActivityIndicator color={getColors().terracotta} />
         </View>
       ) : (
         <ScrollView
@@ -231,12 +232,12 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                     className="mr-3"
                   >
                     {togglingActiveId === (platform._parentId || platform._id) ? (
-                      <ActivityIndicator size="small" color="#B14026" />
+                      <ActivityIndicator size="small" color={getColors().terracotta} />
                     ) : (
                       <Ionicons
                         name={platform.active !== false ? "checkbox" : "square-outline"}
                         size={24}
-                        color={platform.active !== false ? "#B14026" : "#564B3F"}
+                        color={platform.active !== false ? getColors().terracotta : getColors().inkMuted}
                       />
                     )}
                   </TouchableOpacity>
@@ -255,7 +256,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                     onPress={handleOpenPagePicker}
                     className="mt-3 bg-paper-deep py-2.5 rounded-lg border border-rule flex-row items-center justify-center"
                   >
-                    <Ionicons name="list" size={16} color="#4F573A" />
+                    <Ionicons name="list" size={16} color={getColors().olive} />
                     <Text className="text-olive text-xs font-sans-medium ml-2">
                       Manage Pages
                     </Text>
@@ -271,7 +272,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
             style={{ borderStyle: "dashed" }}
           >
             <View className="w-11 h-11 rounded-full bg-terracotta-soft/40 items-center justify-center mr-3">
-              <Ionicons name="add" size={22} color="#B14026" />
+              <Ionicons name="add" size={22} color={getColors().terracotta} />
             </View>
             <Text className="text-terracotta font-sans-medium">Add New Account</Text>
           </TouchableOpacity>
@@ -295,7 +296,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
 
             {loadingPages ? (
               <View className="py-8 items-center">
-                <ActivityIndicator color="#4F573A" />
+                <ActivityIndicator color={getColors().olive} />
               </View>
             ) : fbPages.length === 0 ? (
               <View className="py-6 px-2 items-center">
@@ -348,7 +349,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                       ) : null}
                     </View>
                     {togglingPageId === page.id ? (
-                      <ActivityIndicator size="small" color="#4F573A" />
+                      <ActivityIndicator size="small" color={getColors().olive} />
                     ) : (
                       <Ionicons
                         name={
@@ -357,7 +358,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
                             : "square-outline"
                         }
                         size={22}
-                        color={page.isSelected ? "#4F573A" : "#564B3F"}
+                        color={page.isSelected ? getColors().olive : getColors().inkMuted}
                       />
                     )}
                   </TouchableOpacity>

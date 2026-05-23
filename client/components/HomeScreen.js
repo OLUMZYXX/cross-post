@@ -10,7 +10,7 @@ import RephraseModal from "./RephraseModal";
 import CopyrightModal from "./CopyrightModal";
 import { useToast } from "./Toast";
 import useCreatePost from "../hooks/useCreatePost";
-import { COLORS } from "../constants/theme";
+import { useTheme } from "../constants/theme";
 
 export default function HomeScreen({
   user,
@@ -30,6 +30,7 @@ export default function HomeScreen({
   onResetDraft,
 }) {
   const { showToast } = useToast();
+  const { colors, resolved } = useTheme();
 
   const composer = useCreatePost({
     connectedPlatforms,
@@ -59,7 +60,7 @@ export default function HomeScreen({
 
   return (
     <View className="flex-1 bg-paper">
-      <StatusBar style="dark" />
+      <StatusBar style={resolved === "dark" ? "light" : "dark"} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -68,9 +69,9 @@ export default function HomeScreen({
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={COLORS.terracotta}
-            colors={[COLORS.terracotta]}
-            progressBackgroundColor={COLORS.paperLight}
+            tintColor={colors.terracotta}
+            colors={[colors.terracotta]}
+            progressBackgroundColor={colors.paperLight}
           />
         }
       >

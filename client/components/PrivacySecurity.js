@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from "react";
+import { getColors } from "../constants/theme";
 import {
   View,
   Text,
@@ -230,7 +231,7 @@ export default function PrivacySecurity({ onBack, user }) {
     <View className="flex-1 bg-paper px-6 pt-16">
       <View className="flex-row items-center mb-8">
         <TouchableOpacity onPress={onBack} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#1B1711" />
+          <Ionicons name="arrow-back" size={24} color={getColors().ink} />
         </TouchableOpacity>
         <Text className="text-ink text-xl font-serif-bold">
           Privacy & Security
@@ -249,7 +250,7 @@ export default function PrivacySecurity({ onBack, user }) {
             value={currentPassword}
             onChangeText={setCurrentPassword}
             placeholder="Current password"
-            placeholderTextColor="#564B3F"
+            placeholderTextColor={getColors().inkMuted}
             secureTextEntry={!showPassword}
             className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink mb-3"
           />
@@ -257,7 +258,7 @@ export default function PrivacySecurity({ onBack, user }) {
             value={newPassword}
             onChangeText={setNewPassword}
             placeholder="New password"
-            placeholderTextColor="#564B3F"
+            placeholderTextColor={getColors().inkMuted}
             secureTextEntry={!showPassword}
             className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink mb-3"
           />
@@ -265,7 +266,7 @@ export default function PrivacySecurity({ onBack, user }) {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             placeholder="Confirm new password"
-            placeholderTextColor="#564B3F"
+            placeholderTextColor={getColors().inkMuted}
             secureTextEntry={!showPassword}
             className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink mb-3"
           />
@@ -283,7 +284,7 @@ export default function PrivacySecurity({ onBack, user }) {
             className={`py-3 rounded-xl ${saving ? "bg-terracotta/50" : "bg-terracotta"}`}
           >
             {saving ? (
-              <ActivityIndicator color="#E3DAC4" />
+              <ActivityIndicator color={getColors().paperLight} />
             ) : (
               <Text className="text-paper-light text-center font-sans-bold text-sm">
                 Update Password
@@ -301,7 +302,7 @@ export default function PrivacySecurity({ onBack, user }) {
               <Ionicons
                 name="shield-checkmark-outline"
                 size={20}
-                color="#B14026"
+                color={getColors().terracotta}
               />
             </View>
             <View className="flex-1">
@@ -335,7 +336,7 @@ export default function PrivacySecurity({ onBack, user }) {
               className={`py-3 rounded-xl ${setting2FA ? "bg-terracotta/50" : "bg-terracotta"}`}
             >
               {setting2FA ? (
-                <ActivityIndicator color="#E3DAC4" />
+                <ActivityIndicator color={getColors().paperLight} />
               ) : (
                 <Text className="text-paper-light text-center font-sans-bold text-sm">
                   Enable 2FA
@@ -356,7 +357,7 @@ export default function PrivacySecurity({ onBack, user }) {
                     : "finger-print-outline"
                 }
                 size={20}
-                color="#4F573A"
+                color={getColors().olive}
               />
             </View>
             <View className="flex-1">
@@ -375,8 +376,8 @@ export default function PrivacySecurity({ onBack, user }) {
               value={biometricEnabled}
               onValueChange={toggleBiometric}
               disabled={!biometricAvailable}
-              trackColor={{ false: "#374151", true: "#B14026" }}
-              thumbColor={biometricEnabled ? "#fff" : "#564B3F"}
+              trackColor={{ false: "#374151", true: getColors().terracotta }}
+              thumbColor={biometricEnabled ? "#fff" : getColors().inkMuted}
             />
           </View>
         </View>
@@ -384,7 +385,7 @@ export default function PrivacySecurity({ onBack, user }) {
         <Text className="text-ink-muted text-xs mb-3 ml-1">ACCOUNT</Text>
         <View className="bg-paper-light rounded-2xl border border-rule">
           <View className="flex-row items-center p-4">
-            <Ionicons name="eye-off-outline" size={18} color="#4F573A" />
+            <Ionicons name="eye-off-outline" size={18} color={getColors().olive} />
             <Text className="text-ink text-sm ml-3 flex-1">
               Private Account
             </Text>
@@ -442,7 +443,7 @@ export default function PrivacySecurity({ onBack, user }) {
               value={otpCode}
               onChangeText={(t) => setOtpCode(t.replace(/[^0-9]/g, ""))}
               placeholder="000000"
-              placeholderTextColor="#564B3F"
+              placeholderTextColor={getColors().inkMuted}
               keyboardType="number-pad"
               maxLength={6}
               className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink text-center text-xl mb-4"
@@ -455,7 +456,7 @@ export default function PrivacySecurity({ onBack, user }) {
               className={`py-3 rounded-xl mb-3 ${verifying2FA ? "bg-terracotta/50" : "bg-terracotta"}`}
             >
               {verifying2FA ? (
-                <ActivityIndicator color="#E3DAC4" />
+                <ActivityIndicator color={getColors().paperLight} />
               ) : (
                 <Text className="text-paper-light text-center font-sans-bold text-sm">
                   Verify & Enable
@@ -498,7 +499,7 @@ export default function PrivacySecurity({ onBack, user }) {
               value={disableCode}
               onChangeText={(t) => setDisableCode(t.replace(/[^0-9]/g, ""))}
               placeholder="000000"
-              placeholderTextColor="#564B3F"
+              placeholderTextColor={getColors().inkMuted}
               keyboardType="number-pad"
               maxLength={6}
               className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink text-center text-xl mb-4"

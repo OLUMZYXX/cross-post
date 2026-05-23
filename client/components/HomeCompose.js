@@ -7,8 +7,6 @@ import CaptionToolbar from "./CaptionToolbar";
 import FontPicker from "./FontPicker";
 import PlatformSelector from "./PlatformSelector";
 import ChunkyButton from "./ChunkyButton";
-import { COLORS } from "../constants/theme";
-
 export default function HomeCompose({
   caption,
   setCaption,
@@ -88,7 +86,7 @@ export default function HomeCompose({
             <Ionicons
               name={isPosting ? "hourglass-outline" : "send"}
               size={16}
-              color={COLORS.paperLight}
+              color="#FFFFFF"
             />
           }
         />

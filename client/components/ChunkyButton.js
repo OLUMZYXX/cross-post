@@ -1,5 +1,5 @@
 import { TouchableOpacity, View, Text } from "react-native";
-import { COLORS } from "../constants/theme";
+import { useTheme } from "../constants/theme";
 
 export default function ChunkyButton({
   label,
@@ -9,7 +9,8 @@ export default function ChunkyButton({
   icon = null,
   fullWidth = false,
 }) {
-  const palette = getPalette(variant);
+  const { colors } = useTheme();
+  const palette = getPalette(variant, colors);
   const opacity = disabled ? 0.5 : 1;
 
   return (
@@ -61,27 +62,27 @@ export default function ChunkyButton({
   );
 }
 
-function getPalette(variant) {
+function getPalette(variant, colors) {
   if (variant === "primary") {
     return {
-      bg: COLORS.terracotta,
-      shadow: COLORS.terracottaShadow,
-      border: COLORS.terracottaShadow,
-      text: COLORS.paperLight,
+      bg: colors.terracotta,
+      shadow: colors.terracottaShadow,
+      border: colors.terracottaShadow,
+      text: "#FFFFFF",
     };
   }
   if (variant === "ink") {
     return {
-      bg: COLORS.ink,
+      bg: colors.ink,
       shadow: "#000",
-      border: COLORS.ink,
-      text: COLORS.paperLight,
+      border: colors.ink,
+      text: colors.paperLight,
     };
   }
   return {
-    bg: COLORS.paperLight,
-    shadow: COLORS.rule,
-    border: COLORS.rule,
-    text: COLORS.ink,
+    bg: colors.paperLight,
+    shadow: colors.rule,
+    border: colors.rule,
+    text: colors.ink,
   };
 }

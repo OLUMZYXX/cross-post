@@ -1,4 +1,5 @@
 ﻿import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert } from "react-native";
+import { getColors } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 
 function DraftCard({ post, iconName, iconColor, iconBg, subtitle, onPress, onDelete }) {
@@ -22,7 +23,7 @@ function DraftCard({ post, iconName, iconColor, iconBg, subtitle, onPress, onDel
           onPress={onDelete}
           className="w-8 h-8 rounded-lg bg-paper-deep items-center justify-center ml-2"
         >
-          <Ionicons name="trash-outline" size={13} color="#564B3F" />
+          <Ionicons name="trash-outline" size={13} color={getColors().inkMuted} />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -82,9 +83,9 @@ export default function DraftsScreen({
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor={"#B14026"}
-          colors={["#B14026"]}
-          progressBackgroundColor="#E3DAC4"
+          tintColor={getColors().terracotta}
+          colors={[getColors().terracotta]}
+          progressBackgroundColor={getColors().paperLight}
         />
       }
     >
@@ -94,7 +95,7 @@ export default function DraftsScreen({
           className="flex-row items-center justify-center bg-terracotta/15 border border-terracotta/30 rounded-xl py-2.5 mb-3"
           activeOpacity={0.7}
         >
-          <Ionicons name="trash-outline" size={14} color="#B14026" />
+          <Ionicons name="trash-outline" size={14} color={getColors().terracotta} />
           <Text className="text-terracotta text-xs font-sans-semibold ml-1.5">
             Clear All Drafts ({totalDrafts})
           </Text>
@@ -104,7 +105,7 @@ export default function DraftsScreen({
       {isEmpty && (
         <View className="items-center py-16">
           <View className="w-16 h-16 rounded-2xl bg-paper-deep items-center justify-center mb-4">
-            <Ionicons name="document-text-outline" size={28} color="#564B3F" />
+            <Ionicons name="document-text-outline" size={28} color={getColors().inkMuted} />
           </View>
           <Text className="text-ink font-sans-medium text-base mb-1">No drafts yet</Text>
           <Text className="text-ink-muted text-xs text-center">
@@ -121,7 +122,7 @@ export default function DraftsScreen({
               key={draft.id}
               post={draft}
               iconName="bookmark"
-              iconColor="#8E311B"
+              iconColor={getColors().terracottaShadow}
               iconBg="bg-paper-deep"
               subtitle={`${draft.savedAt} · ${draft.platforms?.length || 0} platforms${draft.media?.length > 0 ? " · has media" : ""}`}
               onPress={() => onOpenDraft(draft)}
@@ -163,7 +164,7 @@ export default function DraftsScreen({
                 key={post._id}
                 post={post}
                 iconName="time"
-                iconColor="#4F573A"
+                iconColor={getColors().olive}
                 iconBg="bg-paper-deep"
                 subtitle={`${schedDate} · ${post.platforms?.length || 0} platforms`}
                 onPress={() => onOpenServerPost(post)}

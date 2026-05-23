@@ -14,7 +14,7 @@ import CopyrightModal from "./CopyrightModal";
 import CaptionToolbar from "./CaptionToolbar";
 import FontPicker from "./FontPicker";
 import ChunkyButton from "./ChunkyButton";
-import { COLORS, FONTS } from "../constants/theme";
+import { FONTS, useTheme } from "../constants/theme";
 
 export default function CreatePost({
   connectedPlatforms,
@@ -44,6 +44,7 @@ export default function CreatePost({
   });
 
   const { showToast } = useToast();
+  const { colors, resolved } = useTheme();
   const [showFontPicker, setShowFontPicker] = useState(false);
   const isOverLimit = hasTwitterSelected && caption.length > 280;
 
@@ -60,11 +61,11 @@ export default function CreatePost({
 
   return (
     <View className="flex-1 bg-paper">
-      <StatusBar style="dark" />
+      <StatusBar style={resolved === "dark" ? "light" : "dark"} />
 
       <View className="px-5 pt-14 pb-3 flex-row items-center justify-between">
         <TouchableOpacity onPress={onClose} disabled={isPosting} className="w-10 h-10 rounded-full bg-paper-light border border-rule items-center justify-center">
-          <Ionicons name="arrow-back" size={18} color={COLORS.ink} />
+          <Ionicons name="arrow-back" size={18} color={colors.ink} />
         </TouchableOpacity>
         <Text className="text-ink font-serif-bold text-[18px]">Compose</Text>
         <ChunkyButton label={publishLabel} onPress={handlePostPress} variant="primary" disabled={isPosting || isUploading} />
@@ -80,13 +81,14 @@ export default function CreatePost({
             value={caption}
             onChangeText={setCaption}
             placeholder="Say something worth crossing five timelines..."
-            placeholderTextColor={COLORS.inkSoft}
+            placeholderTextColor={colors.inkSoft}
             multiline
+            keyboardAppearance={resolved === "dark" ? "dark" : "light"}
             style={{
               fontFamily: FONTS.sans,
               fontSize: 16,
               lineHeight: 24,
-              color: COLORS.ink,
+              color: colors.ink,
               paddingHorizontal: 16,
               paddingTop: 16,
               paddingBottom: 12,

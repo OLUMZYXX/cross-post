@@ -1,4 +1,5 @@
 ﻿import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { getColors } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 
 const PLATFORM_COLORS = {
@@ -16,7 +17,7 @@ const PLATFORM_COLORS = {
 
 function getPlatformColor(name) {
   const baseName = name.split(":")[0].toLowerCase();
-  return PLATFORM_COLORS[baseName] || "#564B3F";
+  return PLATFORM_COLORS[baseName] || getColors().inkMuted;
 }
 
 function PlatformChip({ name, username, style }) {
@@ -28,9 +29,9 @@ function PlatformChip({ name, username, style }) {
       <View
         className="rounded-2xl p-3.5"
         style={{
-          backgroundColor: "#E3DAC4",
+          backgroundColor: getColors().paperLight,
           borderWidth: 1,
-          borderColor: "#BFB39B",
+          borderColor: getColors().rule,
         }}
       >
         <View className="flex-row items-center justify-between mb-3">
@@ -65,7 +66,7 @@ function EmptyState({ onAddPlatform }) {
       <View
         className="rounded-2xl p-6 items-center"
         style={{
-          backgroundColor: "#DDD3BD",
+          backgroundColor: getColors().paper,
           borderWidth: 1,
           borderColor: "rgba(34,197,94,0.15)",
           borderStyle: "dashed",
@@ -75,7 +76,7 @@ function EmptyState({ onAddPlatform }) {
           className="w-14 h-14 rounded-2xl items-center justify-center mb-3"
           style={{ backgroundColor: "rgba(34,197,94,0.08)" }}
         >
-          <Ionicons name="add" size={28} color="#B14026" />
+          <Ionicons name="add" size={28} color={getColors().terracotta} />
         </View>
         <Text className="text-ink text-sm font-sans-bold">Connect your first platform</Text>
         <Text className="text-ink-muted text-xs mt-1">Get started by linking a social account</Text>
@@ -91,17 +92,17 @@ function AddButton({ onAddPlatform }) {
         className="rounded-2xl p-3.5 items-center justify-center"
         style={{
           width: 75,
-          backgroundColor: "#DDD3BD",
+          backgroundColor: getColors().paper,
           borderWidth: 1,
-          borderColor: "#CFC4AB",
+          borderColor: getColors().paperDeep,
           borderStyle: "dashed",
         }}
       >
         <View
           className="w-9 h-9 rounded-xl items-center justify-center mb-2"
-          style={{ backgroundColor: "#E3DAC4" }}
+          style={{ backgroundColor: getColors().paperLight }}
         >
-          <Ionicons name="add" size={18} color="#B14026" />
+          <Ionicons name="add" size={18} color={getColors().terracotta} />
         </View>
         <Text className="text-ink-muted text-[10px] font-sans-semibold">Add</Text>
       </View>

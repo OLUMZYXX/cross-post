@@ -7,20 +7,21 @@
 } from "react";
 import { View, Text, Animated, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { getColors } from "../constants/theme";
 
 const ToastContext = createContext(null);
 
 const TOAST_CONFIG = {
   success: {
     icon: "checkmark-circle",
-    iconColor: "#B14026",
+    iconColor: getColors().terracotta,
     bg: "bg-paper-light",
     border: "border-terracotta/40",
     titleColor: "text-terracotta",
   },
   error: {
     icon: "close-circle",
-    iconColor: "#B14026",
+    iconColor: getColors().terracotta,
     bg: "bg-paper-light",
     border: "border-terracotta/40",
     titleColor: "text-terracotta",
@@ -34,7 +35,7 @@ const TOAST_CONFIG = {
   },
   info: {
     icon: "information-circle",
-    iconColor: "#4F573A",
+    iconColor: getColors().olive,
     bg: "bg-paper-light",
     border: "border-rule",
     titleColor: "text-olive",
@@ -144,7 +145,7 @@ function ToastItem({ toast, onDismiss }) {
               </Text>
             )}
           </View>
-          <Ionicons name="close" size={16} color="#564B3F" />
+          <Ionicons name="close" size={16} color={getColors().inkMuted} />
         </View>
       </TouchableOpacity>
     </Animated.View>

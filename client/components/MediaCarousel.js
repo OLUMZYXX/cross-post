@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { getColors } from "../constants/theme";
 import {
   View,
   ScrollView,
@@ -31,7 +32,7 @@ function CarouselItem({ uri, width }) {
             />
           ) : (
             <View style={{ width, height: 192 }} className="items-center justify-center">
-              <Ionicons name="videocam-outline" size={36} color="#564B3F" />
+              <Ionicons name="videocam-outline" size={36} color={getColors().inkMuted} />
             </View>
           )}
           <View className="absolute inset-0 items-center justify-center">

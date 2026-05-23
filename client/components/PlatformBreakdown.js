@@ -1,4 +1,5 @@
 ﻿import { View, Text } from "react-native";
+import { getColors } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 
 const PLATFORM_ICONS = {
@@ -13,7 +14,7 @@ const PLATFORM_ICONS = {
 };
 
 function PlatformRow({ platform }) {
-  const info = PLATFORM_ICONS[platform.name] || { icon: "globe-outline", color: "#564B3F" };
+  const info = PLATFORM_ICONS[platform.name] || { icon: "globe-outline", color: getColors().inkMuted };
   const attempts = platform.success + platform.failed;
   const rateColor =
     platform.successRate >= 80 ? "text-terracotta" : platform.successRate >= 50 ? "text-terracotta-shadow" : "text-terracotta";

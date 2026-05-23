@@ -8,6 +8,7 @@
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { platformAPI } from "../services/api";
+import { getColors } from "../constants/theme";
 
 export default function InstagramConfirm({ accountData, onConfirm, onCancel }) {
   const [loading, setLoading] = useState(false);
@@ -44,7 +45,7 @@ export default function InstagramConfirm({ accountData, onConfirm, onCancel }) {
     <View className="flex-1 bg-paper items-center justify-center px-6">
       <View className="bg-paper-light rounded-3xl p-8 w-full max-w-sm border border-rule items-center">
         <View className="w-16 h-16 rounded-full bg-paper-deep items-center justify-center mb-4">
-          <Ionicons name="logo-instagram" size={32} color="#B14026" />
+          <Ionicons name="logo-instagram" size={32} color={getColors().terracotta} />
         </View>
 
         <Text className="text-ink text-xl font-serif-bold mb-2">
@@ -56,7 +57,7 @@ export default function InstagramConfirm({ accountData, onConfirm, onCancel }) {
 
         {fetching ? (
           <View className="py-8">
-            <ActivityIndicator color="#B14026" />
+            <ActivityIndicator color={getColors().terracotta} />
           </View>
         ) : fetchError ? (
           <View className="py-4">
@@ -81,7 +82,7 @@ export default function InstagramConfirm({ accountData, onConfirm, onCancel }) {
               />
             ) : (
               <View className="w-20 h-20 rounded-full bg-paper-deep items-center justify-center mb-4">
-                <Ionicons name="person" size={36} color="#564B3F" />
+                <Ionicons name="person" size={36} color={getColors().inkMuted} />
               </View>
             )}
 

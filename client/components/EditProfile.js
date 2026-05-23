@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { getColors } from "../constants/theme";
 import {
   View,
   Text,
@@ -46,13 +47,13 @@ export default function EditProfile({ user, onBack, onUpdateUser }) {
     <View className="flex-1 bg-paper px-6 pt-16">
       <View className="flex-row items-center mb-8">
         <TouchableOpacity onPress={onBack} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#1B1711" />
+          <Ionicons name="arrow-back" size={24} color={getColors().ink} />
         </TouchableOpacity>
         <Text className="text-ink text-xl font-serif-bold">Edit Profile</Text>
       </View>
       <View className="items-center mb-8">
         <View className="w-20 h-20 rounded-full bg-terracotta-soft/40 items-center justify-center mb-3">
-          <Ionicons name="person" size={36} color="#B14026" />
+          <Ionicons name="person" size={36} color={getColors().terracotta} />
         </View>
         <Text className="text-ink-muted text-sm">{user?.email}</Text>
       </View>
@@ -62,7 +63,7 @@ export default function EditProfile({ user, onBack, onUpdateUser }) {
         value={name}
         onChangeText={setName}
         placeholder="Your name"
-        placeholderTextColor="#564B3F"
+        placeholderTextColor={getColors().inkMuted}
         className="bg-paper-light border border-rule rounded-xl px-4 py-3.5 text-ink mb-5"
       />
 
@@ -71,7 +72,7 @@ export default function EditProfile({ user, onBack, onUpdateUser }) {
         value={email}
         onChangeText={setEmail}
         placeholder="Your email"
-        placeholderTextColor="#564B3F"
+        placeholderTextColor={getColors().inkMuted}
         keyboardType="email-address"
         autoCapitalize="none"
         className="bg-paper-light border border-rule rounded-xl px-4 py-3.5 text-ink mb-8"
@@ -83,7 +84,7 @@ export default function EditProfile({ user, onBack, onUpdateUser }) {
         className={`py-4 rounded-xl ${saving ? "bg-terracotta/50" : "bg-terracotta"}`}
       >
         {saving ? (
-          <ActivityIndicator color="#E3DAC4" />
+          <ActivityIndicator color={getColors().paperLight} />
         ) : (
           <Text className="text-paper-light text-center font-sans-bold">
             Save Changes

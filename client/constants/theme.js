@@ -1,4 +1,18 @@
-export const COLORS = {
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { Appearance, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { vars } from "nativewind";
+
+const THEME_KEY = "@crosspost_theme";
+
+export const LIGHT_COLORS = {
   paper: "#DDD3BD",
   paperLight: "#E3DAC4",
   paperDeep: "#CFC4AB",
@@ -14,6 +28,30 @@ export const COLORS = {
   ruleSoft: "#CEC4AD",
   white: "#FFFFFF",
 };
+
+export const DARK_COLORS = {
+  paper: "#0B141A",
+  paperLight: "#161F25",
+  paperDeep: "#1A252C",
+  ink: "#E9EDEF",
+  inkMuted: "#8696A0",
+  inkSoft: "#5E6B72",
+  terracotta: "#D9613F",
+  terracottaShadow: "#A53A20",
+  terracottaSoft: "#3A2A24",
+  olive: "#8A9468",
+  oliveSoft: "#3A4030",
+  rule: "#2A3942",
+  ruleSoft: "#202C33",
+  white: "#FFFFFF",
+};
+
+let activeColors = LIGHT_COLORS;
+export function getColors() {
+  return activeColors;
+}
+
+export const COLORS = LIGHT_COLORS;
 
 export const FONTS = {
   serif: "Fraunces_500Medium",
@@ -33,19 +71,89 @@ export const BRAND = {
   eyebrow: "COMPOSE ONCE",
 };
 
-export const SHADOWS = {
-  button: {
-    shadowColor: COLORS.terracottaShadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 0,
-    elevation: 4,
-  },
-  card: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 1,
-  },
+function hexToRgbTriple(hex) {
+  const m = hex.replace("#", "");
+  const r = parseInt(m.substring(0, 2), 16);
+  const g = parseInt(m.substring(2, 4), 16);
+  const b = parseInt(m.substring(4, 6), 16);
+  return `${r} ${g} ${b}`;
+}
+
+const TOKEN_TO_VAR = {
+  paper: "--c-paper",
+  paperLight: "--c-paper-light",
+  paperDeep: "--c-paper-deep",
+  ink: "--c-ink",
+  inkMuted: "--c-ink-muted",
+  inkSoft: "--c-ink-soft",
+  terracotta: "--c-terracotta",
+  terracottaShadow: "--c-terracotta-shadow",
+  terracottaSoft: "--c-terracotta-soft",
+  olive: "--c-olive",
+  oliveSoft: "--c-olive-soft",
+  rule: "--c-rule",
+  ruleSoft: "--c-rule-soft",
 };
+
+function paletteToVars(palette) {
+  const out = {};
+  for (const [token, varName] of Object.entries(TOKEN_TO_VAR)) {
+    out[varName] = hexToRgbTriple(palette[token]);
+  }
+  return vars(out);
+}
+
+const ThemeContext = createContext({
+  mode: "system",
+  resolved: "light",
+  colors: LIGHT_COLORS,
+  setTheme: () => {},
+});
+
+export function ThemeProvider({ children }) {
+  const [mode, setMode] = useState("system");
+  const [systemScheme, setSystemScheme] = useState(
+    Appearance.getColorScheme() || "light",
+  );
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem(THEME_KEY)
+      .then((v) => {
+        if (v === "light" || v === "dark" || v === "system") setMode(v);
+      })
+      .finally(() => setHydrated(true));
+  }, []);
+
+  useEffect(() => {
+    const sub = Appearance.addChangeListener(({ colorScheme }) => {
+      setSystemScheme(colorScheme || "light");
+    });
+    return () => sub.remove();
+  }, []);
+
+  const resolved = mode === "system" ? systemScheme : mode;
+  const colors = resolved === "dark" ? DARK_COLORS : LIGHT_COLORS;
+  activeColors = colors;
+  const themeVars = useMemo(() => paletteToVars(colors), [colors]);
+
+  const setTheme = useCallback((next) => {
+    setMode(next);
+    AsyncStorage.setItem(THEME_KEY, next).catch(() => {});
+  }, []);
+
+  const value = useMemo(
+    () => ({ mode, resolved, colors, setTheme, hydrated }),
+    [mode, resolved, colors, setTheme, hydrated],
+  );
+
+  return (
+    <ThemeContext.Provider value={value}>
+      <View style={[{ flex: 1 }, themeVars]}>{children}</View>
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  return useContext(ThemeContext);
+}

@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { getColors } from "../constants/theme";
 import { View, Text, TouchableOpacity, ScrollView, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -21,7 +22,7 @@ export default function HelpSupport({ onBack }) {
     <View className="flex-1 bg-paper px-6 pt-16">
       <View className="flex-row items-center mb-8">
         <TouchableOpacity onPress={onBack} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#1B1711" />
+          <Ionicons name="arrow-back" size={24} color={getColors().ink} />
         </TouchableOpacity>
         <Text className="text-ink text-xl font-serif-bold">Help & Support</Text>
       </View>
@@ -36,12 +37,12 @@ export default function HelpSupport({ onBack }) {
               className={i < FAQ_ITEMS.length - 1 ? "border-b border-rule" : ""}
             >
               <View className="flex-row items-center p-4">
-                <Ionicons name="help-circle-outline" size={18} color="#B14026" />
+                <Ionicons name="help-circle-outline" size={18} color={getColors().terracotta} />
                 <Text className="text-ink text-sm ml-3 flex-1">{item.q}</Text>
                 <Ionicons
                   name={expandedIndex === i ? "chevron-up" : "chevron-down"}
                   size={16}
-                  color="#564B3F"
+                  color={getColors().inkMuted}
                 />
               </View>
               {expandedIndex === i && (
@@ -59,12 +60,12 @@ export default function HelpSupport({ onBack }) {
             onPress={() => Linking.openURL("mailto:support@crosspost.app")}
             className="flex-row items-center p-4 border-b border-rule"
           >
-            <Ionicons name="mail-outline" size={18} color="#4F573A" />
+            <Ionicons name="mail-outline" size={18} color={getColors().olive} />
             <Text className="text-ink text-sm ml-3 flex-1">Email Support</Text>
             <Text className="text-ink-muted text-xs">support@crosspost.app</Text>
           </TouchableOpacity>
           <View className="flex-row items-center p-4">
-            <Ionicons name="information-circle-outline" size={18} color="#564B3F" />
+            <Ionicons name="information-circle-outline" size={18} color={getColors().inkMuted} />
             <Text className="text-ink text-sm ml-3 flex-1">App Version</Text>
             <Text className="text-ink-muted text-xs">1.0.0</Text>
           </View>

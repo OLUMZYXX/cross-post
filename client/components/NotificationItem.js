@@ -1,14 +1,15 @@
 ﻿import { View, Text, TouchableOpacity } from "react-native";
+import { getColors } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 
 const TYPE_CONFIG = {
-  post_published: { icon: "checkmark-circle", color: "#4F573A", label: "Published" },
-  post_failed: { icon: "close-circle", color: "#B14026", label: "Failed" },
-  post_partial: { icon: "alert-circle", color: "#8E311B", label: "Partial" },
-  post_scheduled: { icon: "time", color: "#4F573A", label: "Scheduled" },
-  schedule_reminder: { icon: "alarm", color: "#4F573A", label: "Reminder" },
-  platform_connected: { icon: "link", color: "#4F573A", label: "Connected" },
-  platform_disconnected: { icon: "unlink", color: "#B14026", label: "Disconnected" },
+  post_published: { icon: "checkmark-circle", color: getColors().olive, label: "Published" },
+  post_failed: { icon: "close-circle", color: getColors().terracotta, label: "Failed" },
+  post_partial: { icon: "alert-circle", color: getColors().terracottaShadow, label: "Partial" },
+  post_scheduled: { icon: "time", color: getColors().olive, label: "Scheduled" },
+  schedule_reminder: { icon: "alarm", color: getColors().olive, label: "Reminder" },
+  platform_connected: { icon: "link", color: getColors().olive, label: "Connected" },
+  platform_disconnected: { icon: "unlink", color: getColors().terracotta, label: "Disconnected" },
 };
 
 function getTimeAgo(dateString) {
@@ -43,9 +44,9 @@ export default function NotificationItem({ notif, onPress, onDelete }) {
       <View
         className="rounded-2xl p-3.5"
         style={{
-          backgroundColor: isUnread ? "#E3DAC4" : "#DDD3BD",
+          backgroundColor: isUnread ? getColors().paperLight : getColors().paper,
           borderWidth: 1,
-          borderColor: isUnread ? `${config.color}20` : "#E3DAC4",
+          borderColor: isUnread ? `${config.color}20` : getColors().paperLight,
         }}
       >
         <View className="flex-row items-start">

@@ -1,4 +1,5 @@
 ﻿import { useState, useRef, useEffect } from "react";
+import { getColors } from "../constants/theme";
 import {
   Modal,
   View,
@@ -54,7 +55,7 @@ export default function VideoPlayerModal({ visible, videoUri, onClose }) {
         {isLoading && (
           <ActivityIndicator
             size="large"
-            color="#B14026"
+            color={getColors().terracotta}
             className="absolute z-10"
           />
         )}

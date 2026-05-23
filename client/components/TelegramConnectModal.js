@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { getColors } from "../constants/theme";
 import {
   View,
   Text,
@@ -95,7 +96,7 @@ export default function TelegramConnectModal({ visible, onClose, onConnected }) 
             value={botToken}
             onChangeText={setBotToken}
             placeholder="123456:ABC-DEF..."
-            placeholderTextColor="#564B3F"
+            placeholderTextColor={getColors().inkMuted}
             className="bg-paper-deep text-ink rounded-xl px-4 py-3 mb-3 text-sm border border-rule"
             autoCapitalize="none"
             autoCorrect={false}
@@ -108,7 +109,7 @@ export default function TelegramConnectModal({ visible, onClose, onConnected }) 
             value={channelId}
             onChangeText={setChannelId}
             placeholder="@yourchannel"
-            placeholderTextColor="#564B3F"
+            placeholderTextColor={getColors().inkMuted}
             className="bg-paper-deep text-ink rounded-xl px-4 py-3 mb-4 text-sm border border-rule"
             autoCapitalize="none"
             autoCorrect={false}

@@ -1,3 +1,5 @@
+const cssVar = (name) => `rgb(var(${name}) / <alpha-value>)`;
+
 module.exports = {
   content: [
     "./App.{js,jsx,ts,tsx}",
@@ -9,19 +11,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        paper: "#DDD3BD",
-        "paper-light": "#E3DAC4",
-        "paper-deep": "#CFC4AB",
-        ink: "#1B1711",
-        "ink-muted": "#564B3F",
-        "ink-soft": "#736857",
-        terracotta: "#B14026",
-        "terracotta-shadow": "#8E311B",
-        "terracotta-soft": "#D9B19F",
-        olive: "#4F573A",
-        "olive-soft": "#A8AE94",
-        rule: "#BFB39B",
-        "rule-soft": "#CEC4AD",
+        paper: cssVar("--c-paper"),
+        "paper-light": cssVar("--c-paper-light"),
+        "paper-deep": cssVar("--c-paper-deep"),
+        ink: cssVar("--c-ink"),
+        "ink-muted": cssVar("--c-ink-muted"),
+        "ink-soft": cssVar("--c-ink-soft"),
+        terracotta: cssVar("--c-terracotta"),
+        "terracotta-shadow": cssVar("--c-terracotta-shadow"),
+        "terracotta-soft": cssVar("--c-terracotta-soft"),
+        olive: cssVar("--c-olive"),
+        "olive-soft": cssVar("--c-olive-soft"),
+        rule: cssVar("--c-rule"),
+        "rule-soft": cssVar("--c-rule-soft"),
       },
       fontFamily: {
         serif: ["Fraunces_500Medium"],

@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS } from "../constants/theme";
+import { useTheme } from "../constants/theme";
 
-function ToolbarButton({ icon, label, onPress, disabled }) {
+function ToolbarButton({ icon, label, onPress, disabled, colors }) {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -11,19 +11,19 @@ function ToolbarButton({ icon, label, onPress, disabled }) {
       style={{
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: COLORS.paper,
+        backgroundColor: colors.paper,
         borderWidth: 1,
-        borderColor: COLORS.rule,
+        borderColor: colors.rule,
         borderRadius: 999,
         paddingHorizontal: 12,
         paddingVertical: 7,
         marginRight: 8,
       }}
     >
-      <Ionicons name={icon} size={13} color={COLORS.ink} />
+      <Ionicons name={icon} size={13} color={colors.ink} />
       <Text
         style={{
-          color: COLORS.ink,
+          color: colors.ink,
           fontFamily: "HankenGrotesk_600SemiBold",
           fontSize: 11,
           marginLeft: 6,
@@ -45,25 +45,26 @@ export default function CaptionToolbar({
   captionLength,
   disabled,
 }) {
+  const { colors } = useTheme();
   return (
     <View
       className="flex-row items-center px-3 py-3 border-t border-rule"
-      style={{ backgroundColor: COLORS.paperLight }}
+      style={{ backgroundColor: colors.paperLight }}
     >
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         className="flex-1"
       >
-        <ToolbarButton icon="image-outline" label="Media" onPress={onMedia} disabled={disabled} />
-        <ToolbarButton icon="text" label="Font" onPress={onFont} disabled={disabled} />
-        <ToolbarButton icon="sparkles-outline" label="Rephrase" onPress={onRephrase} disabled={disabled} />
-        <ToolbarButton icon="copy-outline" label="Copy" onPress={onCopy} disabled={disabled} />
-        <ToolbarButton icon="bookmark-outline" label="Draft" onPress={onDraft} disabled={disabled} />
+        <ToolbarButton icon="image-outline" label="Media" onPress={onMedia} disabled={disabled} colors={colors} />
+        <ToolbarButton icon="text" label="Font" onPress={onFont} disabled={disabled} colors={colors} />
+        <ToolbarButton icon="sparkles-outline" label="Rephrase" onPress={onRephrase} disabled={disabled} colors={colors} />
+        <ToolbarButton icon="copy-outline" label="Copy" onPress={onCopy} disabled={disabled} colors={colors} />
+        <ToolbarButton icon="bookmark-outline" label="Draft" onPress={onDraft} disabled={disabled} colors={colors} />
       </ScrollView>
       <Text
         style={{
-          color: COLORS.inkMuted,
+          color: colors.inkMuted,
           fontFamily: "HankenGrotesk_500Medium",
           fontSize: 11,
           marginLeft: 8,

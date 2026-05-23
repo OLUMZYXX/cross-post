@@ -9,6 +9,7 @@ import { useState, useMemo, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import SentPostCard from "./SentPostCard";
 import useSentPostActions from "./useSentPostActions";
+import { getColors } from "../constants/theme";
 
 const PAGE_SIZE = 10;
 
@@ -57,7 +58,7 @@ export default function SentPosts({
           onPress={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
           className="bg-paper-deep rounded-xl px-5 py-2.5 flex-row items-center"
         >
-          <Ionicons name="chevron-down" size={14} color="#B14026" />
+          <Ionicons name="chevron-down" size={14} color={getColors().terracotta} />
           <Text className="text-terracotta text-xs font-sans-semibold ml-1.5">
             Load More
           </Text>
@@ -70,7 +71,7 @@ export default function SentPosts({
     return (
       <View className="flex-1 items-center justify-center px-8" style={{ marginTop: -40 }}>
         <View className="w-16 h-16 rounded-2xl bg-paper-deep items-center justify-center mb-4">
-          <Ionicons name="paper-plane-outline" size={28} color="#564B3F" />
+          <Ionicons name="paper-plane-outline" size={28} color={getColors().inkMuted} />
         </View>
         <Text className="text-ink text-base font-sans-medium mb-1">No posts yet</Text>
         <Text className="text-ink-muted text-xs text-center">
@@ -92,9 +93,9 @@ export default function SentPosts({
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor={"#B14026"}
-          colors={["#B14026"]}
-          progressBackgroundColor="#E3DAC4"
+          tintColor={getColors().terracotta}
+          colors={[getColors().terracotta]}
+          progressBackgroundColor={getColors().paperLight}
         />
       }
     />

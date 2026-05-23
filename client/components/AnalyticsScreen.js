@@ -1,4 +1,5 @@
 ﻿import { View, Text, ScrollView, RefreshControl } from "react-native";
+import { getColors, useTheme } from "../constants/theme";
 import { StatusBar } from "expo-status-bar";
 import { useMemo } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,7 +32,7 @@ export default function AnalyticsScreen({
 
   return (
     <View className="flex-1 bg-paper">
-      <StatusBar style="dark" />
+      <StatusBar style={(useTheme().resolved === "dark") ? "light" : "dark"} />
       <View className="flex-1 px-6 pt-16">
         <View className="flex-row items-center justify-between mb-6">
           <View>
@@ -40,7 +41,7 @@ export default function AnalyticsScreen({
           </View>
           <View className="flex-row items-center">
             <View className="bg-paper-light rounded-lg px-3 py-1.5 flex-row items-center">
-              <Ionicons name="stats-chart" size={14} color="#B14026" />
+              <Ionicons name="stats-chart" size={14} color={getColors().terracotta} />
               <Text className="text-terracotta text-xs font-sans-medium ml-1">
                 {sentPosts.length} posts
               </Text>
@@ -55,9 +56,9 @@ export default function AnalyticsScreen({
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={"#B14026"}
-              colors={["#B14026"]}
-              progressBackgroundColor="#E3DAC4"
+              tintColor={getColors().terracotta}
+              colors={[getColors().terracotta]}
+              progressBackgroundColor={getColors().paperLight}
             />
           }
         >
@@ -84,7 +85,7 @@ export default function AnalyticsScreen({
                 label="PUBLISHED"
                 value={sentPosts.length}
                 icon="checkmark-circle"
-                iconColor="#B14026"
+                iconColor={getColors().terracotta}
                 iconBg="bg-terracotta-soft/40"
               />
             </View>
@@ -114,7 +115,7 @@ export default function AnalyticsScreen({
                 label="PLATFORMS"
                 value={connectedPlatforms.length}
                 icon="globe"
-                iconColor="#8E311B"
+                iconColor={getColors().terracottaShadow}
                 iconBg="bg-paper-deep"
               />
             </View>
