@@ -24,6 +24,7 @@ export default function HomeCompose({
   togglePlatform,
   getPlatformStyle,
   getDisplayName,
+  onAddPlatform,
   handlePostPress,
 }) {
   const [showFontPicker, setShowFontPicker] = useState(false);
@@ -71,6 +72,7 @@ export default function HomeCompose({
           onToggle={togglePlatform}
           getPlatformStyle={getPlatformStyle}
           getDisplayName={getDisplayName}
+          onAddPlatform={onAddPlatform}
           disabled={isPosting}
         />
       </View>

@@ -1,4 +1,5 @@
-import { TouchableOpacity, View, Text } from "react-native";
+import { useRef } from "react";
+import { Pressable, View, Text, Animated } from "react-native";
 import { useTheme } from "../constants/theme";
 
 export default function ChunkyButton({
@@ -11,54 +12,70 @@ export default function ChunkyButton({
 }) {
   const { colors } = useTheme();
   const palette = getPalette(variant, colors);
+  const scale = useRef(new Animated.Value(1)).current;
+  const sink = useRef(new Animated.Value(-3)).current;
   const opacity = disabled ? 0.5 : 1;
 
+  const handlePressIn = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 60, bounciness: 0 }),
+      Animated.spring(sink, { toValue: -1, useNativeDriver: true, speed: 60, bounciness: 0 }),
+    ]).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 40, bounciness: 8 }),
+      Animated.spring(sink, { toValue: -3, useNativeDriver: true, speed: 40, bounciness: 6 }),
+    ]).start();
+  };
+
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       disabled={disabled}
-      activeOpacity={0.85}
-      style={{
-        alignSelf: fullWidth ? "stretch" : "flex-start",
-        opacity,
-      }}
+      style={{ alignSelf: fullWidth ? "stretch" : "flex-start", opacity }}
     >
-      <View
-        style={{
-          backgroundColor: palette.shadow,
-          borderRadius: 18,
-          paddingTop: 3,
-        }}
-      >
+      <Animated.View style={{ transform: [{ scale }] }}>
         <View
           style={{
-            backgroundColor: palette.bg,
-            borderRadius: 16,
-            paddingVertical: 14,
-            paddingHorizontal: 22,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 1,
-            borderColor: palette.border,
-            transform: [{ translateY: -3 }],
+            backgroundColor: palette.shadow,
+            borderRadius: 18,
+            paddingTop: 3,
           }}
         >
-          {icon}
-          <Text
+          <Animated.View
             style={{
-              color: palette.text,
-              fontFamily: "HankenGrotesk_700Bold",
-              fontSize: 14,
-              letterSpacing: 0.3,
-              marginLeft: icon ? 8 : 0,
+              backgroundColor: palette.bg,
+              borderRadius: 16,
+              paddingVertical: 14,
+              paddingHorizontal: 22,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              borderWidth: 1,
+              borderColor: palette.border,
+              transform: [{ translateY: sink }],
             }}
           >
-            {label}
-          </Text>
+            {icon}
+            <Text
+              style={{
+                color: palette.text,
+                fontFamily: "HankenGrotesk_700Bold",
+                fontSize: 14,
+                letterSpacing: 0.3,
+                marginLeft: icon ? 8 : 0,
+              }}
+            >
+              {label}
+            </Text>
+          </Animated.View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </Animated.View>
+    </Pressable>
   );
 }
 

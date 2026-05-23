@@ -1,14 +1,18 @@
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import PlatformChip from "./PlatformChip";
 import SectionRule from "./SectionRule";
+import { useTheme } from "../constants/theme";
 
 export default function PlatformSelector({
   connectedPlatforms,
   selectedPlatforms,
   onToggle,
   getDisplayName,
+  onAddPlatform,
   disabled,
 }) {
+  const { colors } = useTheme();
   const selectedCount = selectedPlatforms.length;
   const totalCount = connectedPlatforms.length;
 
@@ -43,9 +47,47 @@ export default function PlatformSelector({
             />
           );
         })}
+
+        {onAddPlatform && (
+          <TouchableOpacity
+            onPress={onAddPlatform}
+            disabled={disabled}
+            activeOpacity={0.75}
+            style={{
+              paddingVertical: 9,
+              paddingHorizontal: 14,
+              borderRadius: 999,
+              borderWidth: 1,
+              borderColor: colors.rule,
+              borderStyle: "dashed",
+              flexDirection: "row",
+              alignItems: "center",
+              marginRight: 8,
+              marginBottom: 8,
+            }}
+          >
+            <Ionicons name="add" size={14} color={colors.terracotta} />
+            <Text
+              style={{
+                color: colors.terracotta,
+                fontFamily: "HankenGrotesk_700Bold",
+                fontSize: 13,
+                marginLeft: 6,
+              }}
+            >
+              Add
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
-      {selectedCount === 0 && (
+      {totalCount === 0 && (
+        <Text className="text-ink-muted text-[12px] font-sans italic mt-1">
+          Connect a platform with the + button to start sending posts.
+        </Text>
+      )}
+
+      {totalCount > 0 && selectedCount === 0 && (
         <Text className="text-terracotta text-[12px] font-sans-medium mt-1 italic">
           Select at least one platform to send.
         </Text>

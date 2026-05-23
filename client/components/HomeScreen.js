@@ -24,6 +24,7 @@ export default function HomeScreen({
   refreshing,
   onRefresh,
   onNotifications,
+  onAddPlatform,
   initialDraft,
   onSaveDraft,
   onPostPublished,
@@ -97,6 +98,7 @@ export default function HomeScreen({
           togglePlatform={composer.togglePlatform}
           getPlatformStyle={composer.getPlatformStyle}
           getDisplayName={composer.getDisplayName}
+          onAddPlatform={onAddPlatform}
           handlePostPress={composer.handlePostPress}
         />
 

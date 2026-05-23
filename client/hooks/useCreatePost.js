@@ -2,9 +2,13 @@ import { useState, useEffect } from "react";
 import * as ImagePicker from "expo-image-picker";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useToast } from "../components/Toast";
 import { postAPI, ensureServerAwake } from "../services/api";
 import { uploadToCloudinary } from "../services/cloudinary";
+import { addPending, removePending } from "../services/pendingPublishes";
+
+const SELECTED_PLATFORMS_KEY = "@crosspost_selected_platforms";
 
 export default function useCreatePost({
   connectedPlatforms,
@@ -33,10 +37,51 @@ export default function useCreatePost({
 
   const [caption, setCaption] = useState(initialDraft?.caption || "");
   const [selectedPlatforms, setSelectedPlatforms] = useState(
-    initialDraft?.platforms || [...connectedPlatforms],
+    initialDraft?.platforms || [],
+  );
+  const [platformsHydrated, setPlatformsHydrated] = useState(
+    !!initialDraft?.platforms,
   );
   const [selectedMedia, setSelectedMedia] = useState(initialDraft?.media || []);
   const [mediaType, setMediaType] = useState(initialDraft?.mediaType || null);
+
+  useEffect(() => {
+    if (platformsHydrated) return;
+    if (connectedPlatforms.length === 0) return;
+    let cancelled = false;
+    AsyncStorage.getItem(SELECTED_PLATFORMS_KEY)
+      .then((raw) => {
+        if (cancelled) return;
+        let next = [...connectedPlatforms];
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              const filtered = parsed.filter((p) => connectedPlatforms.includes(p));
+              if (filtered.length > 0) next = filtered;
+            }
+          } catch {}
+        }
+        setSelectedPlatforms(next);
+        setPlatformsHydrated(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSelectedPlatforms([...connectedPlatforms]);
+        setPlatformsHydrated(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [connectedPlatforms, platformsHydrated]);
+
+  useEffect(() => {
+    if (!platformsHydrated || initialDraft?.platforms) return;
+    AsyncStorage.setItem(
+      SELECTED_PLATFORMS_KEY,
+      JSON.stringify(selectedPlatforms),
+    ).catch(() => {});
+  }, [selectedPlatforms, platformsHydrated, initialDraft]);
   const [isUploading, setIsUploading] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -123,6 +168,7 @@ export default function useCreatePost({
   const publishNow = async () => {
     setShowScheduleModal(false);
     setIsPosting(true);
+    let pendingPostId = null;
     try {
       const serverReady = await ensureServerAwake();
       if (!serverReady) {
@@ -133,7 +179,14 @@ export default function useCreatePost({
       const { data: createData } = await postAPI.create({
         caption, media: selectedMedia, platforms: selectedPlatforms, status: "draft",
       });
-      const { data: publishData } = await postAPI.publish(createData.post._id);
+      pendingPostId = createData.post._id;
+      await addPending(pendingPostId, {
+        caption: (caption || "").slice(0, 80),
+        platformCount: selectedPlatforms.length,
+      });
+
+      const { data: publishData } = await postAPI.publish(pendingPostId);
+      await removePending(pendingPostId);
       const results = publishData.publishResults || [];
       const succeeded = results.filter((r) => r.success);
       const failed = results.filter((r) => !r.success);
@@ -149,7 +202,17 @@ export default function useCreatePost({
       await new Promise((r) => setTimeout(r, 3000));
       onClose();
     } catch (err) {
-      showToast({ type: "error", title: "Publish failed", message: err.message, duration: 5000 });
+      if (pendingPostId) {
+        showToast({
+          type: "warning",
+          title: "Finishing in background",
+          message: "We'll keep sending and update you when it's live.",
+          duration: 4000,
+        });
+        onClose();
+      } else {
+        showToast({ type: "error", title: "Publish failed", message: err.message, duration: 5000 });
+      }
     } finally {
       setIsPosting(false);
     }

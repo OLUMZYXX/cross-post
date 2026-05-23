@@ -4,6 +4,7 @@
   TouchableOpacity,
   Modal,
   BackHandler,
+  AppState,
 } from "react-native";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,6 +26,7 @@ import PageLoadingAnimation from "./PageLoadingAnimation";
 import ScreenTransition from "./ScreenTransition";
 import { useToast } from "./Toast";
 import { postAPI, platformAPI, notificationAPI, clearToken } from "../services/api";
+import { listPending, removePending, clearStale } from "../services/pendingPublishes";
 import { getColors } from "../constants/theme";
 
 export default function HomePage({
@@ -236,6 +238,79 @@ export default function HomePage({
     const subscription = BackHandler.addEventListener("hardwareBackPress", handler);
     return () => subscription.remove();
   }, [showNotifications, activeTab, settingsScreen, editingDraft]);
+
+  const reconcilePending = useCallback(async () => {
+    await clearStale();
+    const pending = await listPending();
+    if (pending.length === 0) return;
+    try {
+      const { data } = await postAPI.list();
+      const stillPending = [];
+      let publishedCount = 0;
+      let failedCount = 0;
+
+      for (const entry of pending) {
+        const post = data.posts.find((p) => p._id === entry.postId);
+        if (!post) {
+          stillPending.push(entry);
+          continue;
+        }
+        if (post.status === "published") {
+          publishedCount += 1;
+          await removePending(entry.postId);
+        } else if (post.status === "failed") {
+          failedCount += 1;
+          await removePending(entry.postId);
+        } else {
+          const age = Date.now() - (entry.attemptedAt || 0);
+          if (age > 10 * 60 * 1000) {
+            await removePending(entry.postId);
+          } else {
+            stillPending.push(entry);
+          }
+        }
+      }
+
+      setAllPosts(data.posts);
+      setSentPosts(data.posts.filter((p) => p.status === "published"));
+      setServerDrafts(data.posts.filter((p) => p.status === "draft"));
+      setScheduledPosts(data.posts.filter((p) => p.status === "scheduled"));
+
+      if (publishedCount > 0) {
+        showToast({
+          type: "success",
+          title: publishedCount === 1 ? "Post published" : `${publishedCount} posts published`,
+          message: "Finished sending while you were away.",
+          duration: 4000,
+        });
+        fetchRecentActivities();
+        fetchUnreadCount();
+      }
+      if (failedCount > 0) {
+        showToast({
+          type: "warning",
+          title: failedCount === 1 ? "Post failed" : `${failedCount} posts failed`,
+          message: "Some platforms didn't accept the post. Tap notifications for details.",
+          duration: 5000,
+        });
+      }
+    } catch {}
+  }, [showToast, fetchRecentActivities, fetchUnreadCount]);
+
+  useEffect(() => {
+    reconcilePending();
+  }, [reconcilePending]);
+
+  useEffect(() => {
+    const appStateRef = { current: AppState.currentState };
+    const sub = AppState.addEventListener("change", (nextState) => {
+      if (appStateRef.current.match(/inactive|background/) && nextState === "active") {
+        reconcilePending();
+      }
+      appStateRef.current = nextState;
+    });
+    return () => sub.remove();
+  }, [reconcilePending]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -678,6 +753,7 @@ export default function HomePage({
           refreshing={refreshing}
           onRefresh={onRefresh}
           onNotifications={() => setShowNotifications(true)}
+          onAddPlatform={() => setModalVisible(true)}
           initialDraft={editingDraft}
           onSaveDraft={handleSaveDraft}
           onPostPublished={handlePostPublished}
