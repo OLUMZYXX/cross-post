@@ -227,7 +227,7 @@ export default function Onboarding({ onComplete }) {
             <Dots count={SLIDES.length} active={index} colors={colors} />
           </View>
 
-          <View className="px-6 pb-6">
+          <View className="px-6 pt-8 pb-6">
             {isLast ? (
               <ChunkyArrowButton label="Get Started" onPress={onComplete} colors={colors} />
             ) : (
