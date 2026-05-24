@@ -23,7 +23,8 @@
         "CFBundleURLTypes": [
           {
             "CFBundleURLSchemes": [
-              "com.googleusercontent.apps.1023764187200-6jf3uvng1benbp1jpkqensag08gf0848"
+              "com.googleusercontent.apps.1023764187200-6jf3uvng1benbp1jpkqensag08gf0848",
+              "crosspost"
             ]
           }
         ]
