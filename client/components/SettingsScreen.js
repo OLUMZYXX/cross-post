@@ -1,4 +1,4 @@
-﻿import { View, Text, TouchableOpacity, ScrollView, RefreshControl } from "react-native";
+﻿import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert } from "react-native";
 import { getColors, useTheme } from "../constants/theme";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
@@ -49,7 +49,19 @@ export default function SettingsScreen({
   onPrivacy,
   onHelp,
   onLogout,
+  onResetOnboarding,
 }) {
+  const handleVersionLongPress = () => {
+    if (!onResetOnboarding) return;
+    Alert.alert(
+      "Replay onboarding?",
+      "This signs you out and shows the welcome flow again, the same way a brand-new user would see it.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Reset", style: "destructive", onPress: () => onResetOnboarding() },
+      ],
+    );
+  };
   const { resolved } = useTheme();
   const initials = user?.name
     ? user.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
@@ -152,7 +164,13 @@ export default function SettingsScreen({
           </TouchableOpacity>
 
           <View className="items-center mt-6">
-            <Text className="text-ink-soft text-[10px]">Cross-Post v1.0.0</Text>
+            <TouchableOpacity
+              onLongPress={handleVersionLongPress}
+              delayLongPress={800}
+              activeOpacity={0.6}
+            >
+              <Text className="text-ink-soft text-[10px]">Cross-Post v1.0.0</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </View>

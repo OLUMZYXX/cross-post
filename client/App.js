@@ -278,6 +278,15 @@ export default function App() {
     setCurrentScreen("signup");
   };
 
+  const resetOnboarding = async () => {
+    try {
+      await AsyncStorage.removeItem(ONBOARDING_KEY);
+      await clearToken();
+    } catch {}
+    setUser(null);
+    setCurrentScreen("onboarding");
+  };
+
   if (!currentScreen || !fontsLoaded) {
     return <ServerLoadingAnimation />;
   }
@@ -323,6 +332,7 @@ export default function App() {
             setUser(null);
             setCurrentScreen("signin");
           }}
+          onResetOnboarding={resetOnboarding}
           sharedContent={sharedContent}
           onSharedContentHandled={() => setSharedContent(null)}
         />

@@ -33,6 +33,7 @@ export default function HomePage({
   user,
   onUpdateUser,
   onLogout,
+  onResetOnboarding,
   oauthRefreshKey,
   sharedContent,
   onSharedContentHandled,
@@ -723,6 +724,7 @@ export default function HomePage({
             onPrivacy={() => setSettingsScreen("privacy")}
             onHelp={() => setSettingsScreen("help")}
             onLogout={handleLogout}
+            onResetOnboarding={onResetOnboarding}
           />
         </ScreenTransition>
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
