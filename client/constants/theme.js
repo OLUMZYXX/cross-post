@@ -155,7 +155,9 @@ export function ThemeProvider({ children }) {
 
   return (
     <ThemeContext.Provider value={value}>
-      <View style={[{ flex: 1 }, themeVars]}>{children}</View>
+      <View style={[{ flex: 1, backgroundColor: colors.paper }, themeVars]}>
+        {children}
+      </View>
     </ThemeContext.Provider>
   );
 }

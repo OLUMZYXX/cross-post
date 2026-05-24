@@ -52,17 +52,17 @@ function NavPill({ tab, isActive, onPress, colors }) {
         justifyContent: "center",
       }}
     >
-      <Animated.View style={{ transform: [{ scale }], maxWidth: "100%" }}>
+      <Animated.View style={{ transform: [{ scale }] }}>
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
-            paddingVertical: 10,
+            height: 36,
             paddingHorizontal: isActive ? 14 : 10,
-            borderRadius: 999,
+            borderRadius: 22,
+            overflow: "hidden",
             backgroundColor: isActive ? colors.terracottaSoft : "transparent",
-            maxWidth: "100%",
           }}
         >
           <Ionicons
@@ -126,7 +126,6 @@ export default function BottomNav({ activeTab, onTabChange }) {
         paddingHorizontal: 6,
         borderWidth: 1,
         borderColor: colors.rule,
-        overflow: "hidden",
         ...shadowProps,
       }}
     >

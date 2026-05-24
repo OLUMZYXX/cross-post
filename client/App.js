@@ -34,7 +34,14 @@ import ServerLoadingAnimation from "./components/ServerLoadingAnimation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ToastProvider } from "./components/Toast";
 import { ThemeProvider } from "./constants/theme";
-import { authAPI, notificationAPI, platformAPI, getToken, clearToken, wakeUpServer } from "./services/api";
+import {
+  authAPI,
+  notificationAPI,
+  platformAPI,
+  getToken,
+  clearToken,
+  wakeUpServer,
+} from "./services/api";
 
 try {
   Notifications.setNotificationHandler({
@@ -44,8 +51,7 @@ try {
       shouldSetBadge: true,
     }),
   });
-} catch {
-}
+} catch {}
 
 const ONBOARDING_KEY = "@crosspost_onboarded";
 const BIOMETRIC_KEY = "@crosspost_biometric_enabled";
@@ -71,11 +77,18 @@ export default function App() {
   const [oauthRefreshKey, setOauthRefreshKey] = useState(0);
   const [biometricLocked, setBiometricLocked] = useState(false);
   const [sharedContent, setSharedContent] = useState(null);
+  const [bootHoldElapsed, setBootHoldElapsed] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setBootHoldElapsed(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
   const appState = useRef(AppState.currentState);
   const notificationListener = useRef();
   const responseListener = useRef();
 
-  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntentSafe();
+  const { hasShareIntent, shareIntent, resetShareIntent } =
+    useShareIntentSafe();
 
   useEffect(() => {
     if (hasShareIntent && shareIntent) {
@@ -100,7 +113,8 @@ export default function App() {
         }).catch(() => {});
       }
 
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
 
       if (existingStatus !== "granted") {
@@ -116,8 +130,7 @@ export default function App() {
       });
 
       await notificationAPI.registerPushToken(tokenData.data).catch(() => {});
-    } catch {
-    }
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -181,47 +194,50 @@ export default function App() {
   const backgroundAtRef = useRef(null);
 
   useEffect(() => {
-    const subscription = AppState.addEventListener("change", async (nextState) => {
-      if (nextState === "background") {
-        backgroundAtRef.current = Date.now();
-      }
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextState) => {
+        if (nextState === "background") {
+          backgroundAtRef.current = Date.now();
+        }
 
-      if (appState.current === "background" && nextState === "active") {
-        const elapsed = Date.now() - (backgroundAtRef.current || 0);
-        if (elapsed >= 3000) {
-          const enabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
-          const token = await getToken();
-          if (enabled === "true" && token) {
-            setBiometricLocked(true);
+        if (appState.current === "background" && nextState === "active") {
+          const elapsed = Date.now() - (backgroundAtRef.current || 0);
+          if (elapsed >= 3000) {
+            const enabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
+            const token = await getToken();
+            if (enabled === "true" && token) {
+              setBiometricLocked(true);
+            }
           }
         }
-      }
-      appState.current = nextState;
-    });
+        appState.current = nextState;
+      },
+    );
 
     return () => subscription?.remove();
   }, []);
 
   useEffect(() => {
     try {
-      notificationListener.current = Notifications.addNotificationReceivedListener(() => {
-        setOauthRefreshKey((prev) => prev + 1);
-      });
+      notificationListener.current =
+        Notifications.addNotificationReceivedListener(() => {
+          setOauthRefreshKey((prev) => prev + 1);
+        });
 
-      responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {
-        if (currentScreen !== "home") {
-          setCurrentScreen("home");
-        }
-      });
-    } catch {
-    }
+      responseListener.current =
+        Notifications.addNotificationResponseReceivedListener(() => {
+          if (currentScreen !== "home") {
+            setCurrentScreen("home");
+          }
+        });
+    } catch {}
 
     return () => {
       try {
         notificationListener.current?.remove();
         responseListener.current?.remove();
-      } catch {
-      }
+      } catch {}
     };
   }, [currentScreen]);
 
@@ -269,7 +285,10 @@ export default function App() {
       return false;
     };
 
-    const subscription = BackHandler.addEventListener("hardwareBackPress", handler);
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handler,
+    );
     return () => subscription.remove();
   }, [currentScreen]);
 
@@ -287,11 +306,12 @@ export default function App() {
     setCurrentScreen("onboarding");
   };
 
-  if (!currentScreen || !fontsLoaded) {
-    return <ServerLoadingAnimation />;
-  }
+  const isBooting = !currentScreen || !fontsLoaded || !bootHoldElapsed;
 
   const renderScreen = () => {
+    if (isBooting) {
+      return <ServerLoadingAnimation />;
+    }
     if (currentScreen === "onboarding") {
       return <Onboarding onComplete={completeOnboarding} />;
     }

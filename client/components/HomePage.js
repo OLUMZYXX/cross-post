@@ -22,7 +22,6 @@ import NotificationSettings from "./NotificationSettings";
 import NotificationsInbox from "./NotificationsInbox";
 import PrivacySecurity from "./PrivacySecurity";
 import HelpSupport from "./HelpSupport";
-import PageLoadingAnimation from "./PageLoadingAnimation";
 import ScreenTransition from "./ScreenTransition";
 import { useToast } from "./Toast";
 import { postAPI, platformAPI, notificationAPI, clearToken } from "../services/api";
@@ -51,7 +50,6 @@ export default function HomePage({
   const [settingsScreen, setSettingsScreen] = useState(null);
   const { showToast } = useToast();
   const [refreshing, setRefreshing] = useState(false);
-  const [showLoadingAnimation, setShowLoadingAnimation] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [telegramModalVisible, setTelegramModalVisible] = useState(false);
@@ -724,10 +722,6 @@ export default function HomePage({
 
   return (
     <View className="flex-1 bg-paper">
-      {showLoadingAnimation && activeTab === "home" && (
-        <PageLoadingAnimation onFinish={() => setShowLoadingAnimation(false)} />
-      )}
-
       <ScreenTransition activeKey={activeTab}>
         {renderActiveTab()}
       </ScreenTransition>
