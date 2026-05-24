@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Text, View, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Text, View, TouchableOpacity, ActivityIndicator, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
@@ -27,11 +27,11 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
   const [tempToken, setTempToken] = useState(null);
   const { showToast } = useToast();
 
-  const [, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
-    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-    iosClientId: GOOGLE_IOS_CLIENT_ID,
-    webClientId: GOOGLE_WEB_CLIENT_ID,
-  });
+  const googleAuthConfig = {};
+  if (GOOGLE_ANDROID_CLIENT_ID) googleAuthConfig.androidClientId = GOOGLE_ANDROID_CLIENT_ID;
+  if (GOOGLE_IOS_CLIENT_ID) googleAuthConfig.iosClientId = GOOGLE_IOS_CLIENT_ID;
+  if (GOOGLE_WEB_CLIENT_ID) googleAuthConfig.webClientId = GOOGLE_WEB_CLIENT_ID;
+  const [, googleResponse, promptGoogleAsync] = Google.useAuthRequest(googleAuthConfig);
 
   useEffect(() => {
     if (!googleResponse) return;
@@ -48,6 +48,24 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
   }, [googleResponse, showToast]);
 
   const handleGoogleSignIn = async () => {
+    if (Platform.OS === "ios" && !GOOGLE_IOS_CLIENT_ID) {
+      showToast({
+        type: "error",
+        title: "Google sign-in not configured",
+        message: "Missing iOS client ID. Add one in Google Cloud Console and update googleConfig.js.",
+        duration: 6000,
+      });
+      return;
+    }
+    if (Platform.OS === "android" && !GOOGLE_ANDROID_CLIENT_ID) {
+      showToast({
+        type: "error",
+        title: "Google sign-in not configured",
+        message: "Missing Android client ID. Update googleConfig.js.",
+        duration: 6000,
+      });
+      return;
+    }
     try {
       await promptGoogleAsync({ showInRecents: true });
     } catch (err) {

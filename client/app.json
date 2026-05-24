@@ -19,7 +19,14 @@
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSUserNotificationsUsageDescription": "CrossPost needs notifications to alert you when posts are published, fail, or are about to go live."
+        "NSUserNotificationsUsageDescription": "CrossPost needs notifications to alert you when posts are published, fail, or are about to go live.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.1023764187200-6jf3uvng1benbp1jpkqensag08gf0848"
+            ]
+          }
+        ]
       }
     },
     "android": {
