@@ -18,14 +18,14 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 const TABS = [
   { id: "home", icon: "home-outline", activeIcon: "home", label: "Home" },
   { id: "sent", icon: "paper-plane-outline", activeIcon: "paper-plane", label: "Sent" },
-  { id: "analytics", icon: "stats-chart-outline", activeIcon: "stats-chart", label: "Insights" },
+  { id: "analytics", icon: "stats-chart-outline", activeIcon: "stats-chart", label: "Stats" },
   { id: "settings", icon: "person-outline", activeIcon: "person", label: "You" },
 ];
 
 const TAB_LAYOUT = {
-  duration: 260,
+  duration: 220,
   create: { type: "easeInEaseOut", property: "opacity" },
-  update: { type: "spring", springDamping: 0.78 },
+  update: { type: "easeInEaseOut" },
   delete: { type: "easeInEaseOut", property: "opacity" },
 };
 
@@ -45,18 +45,24 @@ function NavPill({ tab, isActive, onPress, colors }) {
       onPress={onPress}
       onPressIn={() => animateTo(0.92)}
       onPressOut={() => animateTo(1, 6)}
-      style={{ flex: isActive ? 0 : 1, alignItems: "center" }}
+      style={{
+        flex: 1,
+        minWidth: 0,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      <Animated.View style={{ transform: [{ scale }] }}>
+      <Animated.View style={{ transform: [{ scale }], maxWidth: "100%" }}>
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
             paddingVertical: 10,
-            paddingHorizontal: isActive ? 18 : 14,
+            paddingHorizontal: isActive ? 14 : 10,
             borderRadius: 999,
             backgroundColor: isActive ? colors.terracottaSoft : "transparent",
+            maxWidth: "100%",
           }}
         >
           <Ionicons
@@ -66,12 +72,15 @@ function NavPill({ tab, isActive, onPress, colors }) {
           />
           {isActive && (
             <Text
+              numberOfLines={1}
+              ellipsizeMode="clip"
               style={{
                 color: colors.terracotta,
                 fontFamily: "HankenGrotesk_700Bold",
                 fontSize: 13,
-                marginLeft: 8,
+                marginLeft: 6,
                 letterSpacing: 0.2,
+                flexShrink: 1,
               }}
             >
               {tab.label}
@@ -114,9 +123,10 @@ export default function BottomNav({ activeTab, onTabChange }) {
         backgroundColor: colors.paperLight,
         borderRadius: 999,
         paddingVertical: 8,
-        paddingHorizontal: 8,
+        paddingHorizontal: 6,
         borderWidth: 1,
         borderColor: colors.rule,
+        overflow: "hidden",
         ...shadowProps,
       }}
     >

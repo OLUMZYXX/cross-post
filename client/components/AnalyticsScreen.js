@@ -12,7 +12,6 @@ import {
   computeMediaStats,
   computeSuccessFailure,
 } from "./analyticsUtils";
-import BottomNav from "./BottomNav";
 
 export default function AnalyticsScreen({
   sentPosts,
@@ -142,7 +141,6 @@ export default function AnalyticsScreen({
           )}
         </ScrollView>
       </View>
-      <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
     </View>
   );
 }

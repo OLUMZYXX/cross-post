@@ -48,13 +48,15 @@ function StatCell({ label, value }) {
 function EmptyState() {
   const { colors } = useTheme();
   return (
-    <View className="bg-paper-light rounded-2xl border border-rule mt-3 px-4 py-5 items-center">
-      <Ionicons name="leaf-outline" size={22} color={colors.olive} />
-      <Text className="text-ink font-serif text-[15px] mt-2">
+    <View className="bg-paper-light rounded-3xl border border-rule mt-3 px-5 py-7 items-center">
+      <View className="w-12 h-12 rounded-2xl bg-paper-deep items-center justify-center mb-3">
+        <Ionicons name="paper-plane-outline" size={22} color={colors.terracotta} />
+      </View>
+      <Text className="text-ink font-serif-bold text-[17px] mb-1.5">
         Your timeline awaits.
       </Text>
-      <Text className="text-ink-muted font-sans text-[12px] mt-1 text-center">
-        Send your first thought and it will live here.
+      <Text className="text-ink-muted font-sans text-[13px] text-center leading-[18px] max-w-[260px]">
+        Write something above and tap Publish.{"\n"}Your post will appear here when it goes out.
       </Text>
     </View>
   );
@@ -73,7 +75,7 @@ function PreviewRow({ activity }) {
         />
       </View>
       <View className="flex-1">
-        <Text className="text-ink font-serif text-[14px]" numberOfLines={2}>
+        <Text className="text-ink font-sans-medium text-[14px] leading-[20px]" numberOfLines={2}>
           {activity.title}
         </Text>
         <Text className="text-ink-muted font-sans text-[11px] mt-1">

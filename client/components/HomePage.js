@@ -607,26 +607,42 @@ export default function HomePage({
     );
   }
 
-  if (activeTab === "sent") {
-    const totalDrafts = drafts.length + serverDrafts.length + scheduledPosts.length;
+  if (activeTab === "settings" && settingsScreen === "editProfile") {
+    return <EditProfile user={user} onBack={() => setSettingsScreen(null)} onUpdateUser={onUpdateUser} />;
+  }
+  if (activeTab === "settings" && settingsScreen === "connectedAccounts") {
     return (
-      <View className="flex-1 bg-paper">
-        <ScreenTransition activeKey="sent">
+      <ConnectedAccounts
+        onBack={() => { setSettingsScreen(null); fetchPlatforms(); }}
+        onOpenConnectModal={() => { setSettingsScreen(null); setModalVisible(true); }}
+      />
+    );
+  }
+  if (activeTab === "settings" && settingsScreen === "notifications") {
+    return <NotificationSettings onBack={() => setSettingsScreen(null)} />;
+  }
+  if (activeTab === "settings" && settingsScreen === "privacy") {
+    return <PrivacySecurity onBack={() => setSettingsScreen(null)} user={user} />;
+  }
+  if (activeTab === "settings" && settingsScreen === "help") {
+    return <HelpSupport onBack={() => setSettingsScreen(null)} />;
+  }
+
+  const totalDrafts = drafts.length + serverDrafts.length + scheduledPosts.length;
+
+  const renderActiveTab = () => {
+    if (activeTab === "sent") {
+      return (
+        <View className="flex-1">
           <View className="px-5 pt-14 pb-2">
             <Text className="text-ink text-2xl font-serif-bold mb-4">Posts</Text>
             <View className="flex-row bg-paper-light rounded-xl p-1 border border-rule">
-              <TouchableOpacity
-                onPress={() => setSentSubTab("published")}
-                className={`flex-1 py-2 rounded-lg ${sentSubTab === "published" ? "bg-terracotta" : ""}`}
-              >
+              <TouchableOpacity onPress={() => setSentSubTab("published")} className={`flex-1 py-2 rounded-lg ${sentSubTab === "published" ? "bg-terracotta" : ""}`}>
                 <Text className={`text-center text-xs font-sans-bold ${sentSubTab === "published" ? "text-paper-light" : "text-ink-muted"}`}>
                   Published ({sentPosts.length})
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setSentSubTab("drafts")}
-                className={`flex-1 py-2 rounded-lg ${sentSubTab === "drafts" ? "bg-terracotta" : ""}`}
-              >
+              <TouchableOpacity onPress={() => setSentSubTab("drafts")} className={`flex-1 py-2 rounded-lg ${sentSubTab === "drafts" ? "bg-terracotta" : ""}`}>
                 <Text className={`text-center text-xs font-sans-bold ${sentSubTab === "drafts" ? "text-paper-light" : "text-ink-muted"}`}>
                   Drafts ({totalDrafts})
                 </Text>
@@ -634,12 +650,7 @@ export default function HomePage({
             </View>
           </View>
           {sentSubTab === "published" ? (
-            <SentPosts
-              posts={sentPosts}
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              onDeletePost={handleDeletePost}
-            />
+            <SentPosts posts={sentPosts} refreshing={refreshing} onRefresh={onRefresh} onDeletePost={handleDeletePost} />
           ) : (
             <DraftsScreen
               localDrafts={drafts}
@@ -654,15 +665,11 @@ export default function HomePage({
               onRefresh={onRefresh}
             />
           )}
-        </ScreenTransition>
-        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-      </View>
-    );
-  }
-
-  if (activeTab === "analytics") {
-    return (
-      <ScreenTransition activeKey="analytics">
+        </View>
+      );
+    }
+    if (activeTab === "analytics") {
+      return (
         <AnalyticsScreen
           sentPosts={sentPosts}
           allPosts={allPosts}
@@ -672,111 +679,64 @@ export default function HomePage({
           activeTab={activeTab}
           onTabChange={handleTabChange}
         />
-      </ScreenTransition>
-    );
-  }
-
-  if (activeTab === "settings") {
-    if (settingsScreen === "editProfile") {
+      );
+    }
+    if (activeTab === "settings") {
       return (
-        <EditProfile
+        <SettingsScreen
           user={user}
-          onBack={() => setSettingsScreen(null)}
-          onUpdateUser={onUpdateUser}
+          connectedPlatformsCount={connectedPlatforms.length}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          onEditProfile={() => setSettingsScreen("editProfile")}
+          onConnectedAccounts={() => setSettingsScreen("connectedAccounts")}
+          onNotifications={() => setSettingsScreen("notifications")}
+          onPrivacy={() => setSettingsScreen("privacy")}
+          onHelp={() => setSettingsScreen("help")}
+          onLogout={handleLogout}
+          onResetOnboarding={onResetOnboarding}
         />
       );
     }
-    if (settingsScreen === "connectedAccounts") {
-      return (
-        <ConnectedAccounts
-          onBack={() => {
-            setSettingsScreen(null);
-            fetchPlatforms();
-          }}
-          onOpenConnectModal={() => {
-            setSettingsScreen(null);
-            setModalVisible(true);
-          }}
-        />
-      );
-    }
-    if (settingsScreen === "notifications") {
-      return <NotificationSettings onBack={() => setSettingsScreen(null)} />;
-    }
-    if (settingsScreen === "privacy") {
-      return <PrivacySecurity onBack={() => setSettingsScreen(null)} user={user} />;
-    }
-    if (settingsScreen === "help") {
-      return <HelpSupport onBack={() => setSettingsScreen(null)} />;
-    }
-
     return (
-      <View className="flex-1 bg-paper">
-        <ScreenTransition activeKey="settings">
-          <SettingsScreen
-            user={user}
-            connectedPlatformsCount={connectedPlatforms.length}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            onEditProfile={() => setSettingsScreen("editProfile")}
-            onConnectedAccounts={() => setSettingsScreen("connectedAccounts")}
-            onNotifications={() => setSettingsScreen("notifications")}
-            onPrivacy={() => setSettingsScreen("privacy")}
-            onHelp={() => setSettingsScreen("help")}
-            onLogout={handleLogout}
-            onResetOnboarding={onResetOnboarding}
-          />
-        </ScreenTransition>
-        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-      </View>
+      <HomeScreen
+        key={`compose-${composerEpoch}`}
+        user={user}
+        sentPosts={sentPosts}
+        allPosts={allPosts}
+        connectedPlatforms={connectedPlatforms}
+        connectedPlatformObjects={connectedPlatformObjects}
+        allPlatforms={allPlatforms}
+        loadingPlatforms={loadingPlatforms}
+        recentActivities={recentActivities}
+        unreadNotifications={unreadNotifications}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        onNotifications={() => setShowNotifications(true)}
+        onAddPlatform={() => setModalVisible(true)}
+        initialDraft={editingDraft}
+        onSaveDraft={handleSaveDraft}
+        onPostPublished={handlePostPublished}
+        onResetDraft={resetComposer}
+      />
     );
-  }
+  };
 
   return (
     <View className="flex-1 bg-paper">
-      {showLoadingAnimation && (
-        <PageLoadingAnimation
-          onFinish={() => setShowLoadingAnimation(false)}
-        />
+      {showLoadingAnimation && activeTab === "home" && (
+        <PageLoadingAnimation onFinish={() => setShowLoadingAnimation(false)} />
       )}
 
-      <ScreenTransition activeKey="home">
-        <HomeScreen
-          key={`compose-${composerEpoch}`}
-          user={user}
-          sentPosts={sentPosts}
-          allPosts={allPosts}
-          connectedPlatforms={connectedPlatforms}
-          connectedPlatformObjects={connectedPlatformObjects}
-          allPlatforms={allPlatforms}
-          loadingPlatforms={loadingPlatforms}
-          recentActivities={recentActivities}
-          unreadNotifications={unreadNotifications}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          onNotifications={() => setShowNotifications(true)}
-          onAddPlatform={() => setModalVisible(true)}
-          initialDraft={editingDraft}
-          onSaveDraft={handleSaveDraft}
-          onPostPublished={handlePostPublished}
-          onResetDraft={resetComposer}
-        />
+      <ScreenTransition activeKey={activeTab}>
+        {renderActiveTab()}
       </ScreenTransition>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+      <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
         <View className="flex-1 justify-center items-center bg-ink/60 px-6">
           <View className="bg-paper-light rounded-3xl border border-rule p-6 w-full max-w-sm">
-            <Text className="text-terracotta text-[10px] font-sans-bold tracking-[2px] mb-1">
-              CONNECT
-            </Text>
-            <Text className="text-ink text-2xl font-serif-bold mb-5">
-              Add a platform
-            </Text>
+            <Text className="text-terracotta text-[10px] font-sans-bold tracking-[2px] mb-1">CONNECT</Text>
+            <Text className="text-ink text-2xl font-serif-bold mb-5">Add a platform</Text>
             {availablePlatforms.map((platform) => (
               <TouchableOpacity
                 key={platform}
@@ -785,22 +745,13 @@ export default function HomePage({
                 activeOpacity={0.75}
               >
                 <View className="w-10 h-10 rounded-xl bg-paper-deep items-center justify-center mr-3">
-                  <Ionicons
-                    name={allPlatforms[platform].icon}
-                    size={18}
-                    color={getColors().ink}
-                  />
+                  <Ionicons name={allPlatforms[platform].icon} size={18} color={getColors().ink} />
                 </View>
-                <Text className="text-ink font-sans-semibold flex-1">
-                  {platform}
-                </Text>
+                <Text className="text-ink font-sans-semibold flex-1">{platform}</Text>
                 <Ionicons name="arrow-forward" size={16} color={getColors().terracotta} />
               </TouchableOpacity>
             ))}
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              className="py-3 rounded-2xl mt-3 border border-rule"
-            >
+            <TouchableOpacity onPress={() => setModalVisible(false)} className="py-3 rounded-2xl mt-3 border border-rule">
               <Text className="text-ink-muted text-center font-sans-semibold">Close</Text>
             </TouchableOpacity>
           </View>

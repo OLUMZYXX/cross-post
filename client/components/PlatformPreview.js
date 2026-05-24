@@ -111,7 +111,7 @@ export default function PlatformPreview({
               </View>
 
               {caption.length > 0 && (
-                <Text className="text-ink text-sm font-serif mb-1" numberOfLines={3} style={{ lineHeight: 20 }}>
+                <Text className="text-ink text-[14px] font-sans mb-1" numberOfLines={3} style={{ lineHeight: 20 }}>
                   {displayCaption}
                 </Text>
               )}

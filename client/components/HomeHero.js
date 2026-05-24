@@ -52,8 +52,9 @@ function PulseBadge({ count, color, paper }) {
   );
 }
 
-function NotificationButton({ unread, onPress, colors }) {
+function NotificationButton({ unread, onPress, colors, compact }) {
   const press = useRef(new Animated.Value(1)).current;
+  const size = compact ? 38 : 44;
 
   return (
     <Pressable
@@ -66,17 +67,17 @@ function NotificationButton({ unread, onPress, colors }) {
       }
     >
       <Animated.View
-        className="w-11 h-11 rounded-full bg-paper-light border border-rule items-center justify-center"
-        style={{ transform: [{ scale: press }] }}
+        className="rounded-full bg-paper-light border border-rule items-center justify-center"
+        style={{ width: size, height: size, transform: [{ scale: press }] }}
       >
-        <Ionicons name="notifications-outline" size={20} color={colors.ink} />
+        <Ionicons name="notifications-outline" size={compact ? 18 : 20} color={colors.ink} />
         <PulseBadge count={unread} color={colors.terracotta} paper={colors.paperLight} />
       </Animated.View>
     </Pressable>
   );
 }
 
-export default function HomeHero({ unreadNotifications, onNotifications }) {
+export default function HomeHero({ unreadNotifications, onNotifications, compact = false }) {
   const { colors } = useTheme();
   const fade = useRef(new Animated.Value(0)).current;
   const lift = useRef(new Animated.Value(12)).current;
@@ -88,33 +89,36 @@ export default function HomeHero({ unreadNotifications, onNotifications }) {
     ]).start();
   }, []);
 
+  const wordmarkSize = compact ? 22 : 36;
+  const wordmarkLine = compact ? 26 : 42;
+
   return (
     <Animated.View
-      className="px-5 pt-4 pb-1"
+      className={compact ? "px-5 pt-3 pb-1" : "px-5 pt-4 pb-1"}
       style={{ opacity: fade, transform: [{ translateY: lift }] }}
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-1">
           <View className="flex-row items-baseline">
-            <Text className="text-ink font-serif-bold" style={{ fontSize: 36, lineHeight: 42 }}>
+            <Text className="text-ink font-serif-bold" style={{ fontSize: wordmarkSize, lineHeight: wordmarkLine }}>
               {BRAND.name}
             </Text>
-            <Text
-              className="text-terracotta font-serif-bold ml-1"
-              style={{ fontSize: 36, lineHeight: 42 }}
-            >
+            <Text className="text-terracotta font-serif-bold ml-1" style={{ fontSize: wordmarkSize, lineHeight: wordmarkLine }}>
               {BRAND.dot}
             </Text>
           </View>
-          <Text className="text-ink-muted font-sans text-[13px] mt-1 leading-[18px] pr-6">
-            {BRAND.tagline}
-          </Text>
+          {!compact && (
+            <Text className="text-ink-muted font-sans text-[13px] mt-1 leading-[18px] pr-6">
+              {BRAND.tagline}
+            </Text>
+          )}
         </View>
 
         <NotificationButton
           unread={unreadNotifications}
           onPress={onNotifications}
           colors={colors}
+          compact={compact}
         />
       </View>
     </Animated.View>

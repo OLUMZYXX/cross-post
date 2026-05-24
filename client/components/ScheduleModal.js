@@ -98,8 +98,8 @@ export default function ScheduleModal({ visible, onClose, onPostNow, onSchedule 
 
             <View className="bg-paper rounded-2xl p-4 border border-rule">
               <View className="flex-row items-center mb-4">
-                <View className="w-10 h-10 rounded-full bg-paper-deep items-center justify-center mr-3">
-                  <Ionicons name="calendar-outline" size={18} color={getColors().ink} />
+                <View className="w-10 h-10 rounded-full items-center justify-center mr-3" style={{ backgroundColor: getColors().infoSoft }}>
+                  <Ionicons name="calendar-outline" size={18} color={getColors().info} />
                 </View>
                 <Text className="text-ink font-sans-bold text-base">Schedule for Later</Text>
               </View>

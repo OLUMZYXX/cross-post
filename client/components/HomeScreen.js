@@ -83,6 +83,7 @@ export default function HomeScreen({
         <HomeHero
           unreadNotifications={unreadNotifications}
           onNotifications={onNotifications}
+          compact={sentPosts.length > 0 || allPosts.length > 0}
         />
 
         <HomeCompose

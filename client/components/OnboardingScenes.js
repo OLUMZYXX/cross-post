@@ -67,31 +67,118 @@ function deviceCardStyle(colors) {
 
 export function WelcomeScene() {
   const { colors } = useTheme();
-  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const enter = useRef(new Animated.Value(0)).current;
+  const cursor = useRef(new Animated.Value(1)).current;
+
   useEffect(() => {
-    Animated.spring(scaleAnim, { toValue: 1, friction: 6, tension: 40, useNativeDriver: true }).start();
+    Animated.spring(enter, { toValue: 1, friction: 7, tension: 50, useNativeDriver: true }).start();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(cursor, { toValue: 0, duration: 500, useNativeDriver: true }),
+        Animated.timing(cursor, { toValue: 1, duration: 500, useNativeDriver: true }),
+      ]),
+    ).start();
   }, []);
 
+  const enterScale = enter.interpolate({ inputRange: [0, 1], outputRange: [0.92, 1] });
+
   return (
-    <Animated.View style={[sceneWrap, { transform: [{ scale: scaleAnim }] }]}>
-      <View style={deviceCardStyle(colors)}>
-        <Ionicons name="grid" size={26} color={colors.terracotta} />
-        <View style={{ marginTop: 10, gap: 5 }}>
-          <View style={{ width: 44, height: 3, borderRadius: 2, backgroundColor: colors.terracottaSoft }} />
-          <View style={{ width: 28, height: 3, borderRadius: 2, backgroundColor: colors.terracottaSoft }} />
+    <Animated.View style={[sceneWrap, { transform: [{ scale: enterScale }], opacity: enter }]}>
+      <View
+        style={{
+          width: width * 0.72,
+          backgroundColor: colors.paperLight,
+          borderRadius: 18,
+          borderWidth: 1,
+          borderColor: colors.rule,
+          paddingHorizontal: 14,
+          paddingTop: 14,
+          paddingBottom: 10,
+          shadowColor: colors.terracottaShadow,
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.18,
+          shadowRadius: 18,
+          elevation: 6,
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Animated.Text
+            style={{
+              color: colors.ink,
+              fontFamily: "HankenGrotesk_500Medium",
+              fontSize: 13,
+              flex: 1,
+            }}
+            numberOfLines={1}
+          >
+            Just shipped the new home screen.
+          </Animated.Text>
+          <Animated.View
+            style={{
+              width: 2,
+              height: 14,
+              marginLeft: 2,
+              backgroundColor: colors.terracotta,
+              opacity: cursor,
+            }}
+          />
+        </View>
+
+        <View
+          style={{
+            height: 1,
+            borderTopWidth: 1,
+            borderStyle: "dashed",
+            borderColor: colors.rule,
+            marginTop: 12,
+            marginBottom: 8,
+          }}
+        />
+
+        <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 4 }}>
+          {[
+            { icon: "logo-twitter", selected: true },
+            { icon: "logo-instagram", selected: true },
+            { icon: "logo-linkedin", selected: true },
+            { icon: "logo-tiktok", selected: false },
+          ].map((p, i) => (
+            <View
+              key={i}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                paddingHorizontal: 9,
+                paddingVertical: 5,
+                borderRadius: 999,
+                marginRight: 6,
+                marginBottom: 6,
+                backgroundColor: p.selected ? colors.ink : colors.paper,
+                borderWidth: 1,
+                borderColor: p.selected ? colors.ink : colors.rule,
+              }}
+            >
+              <Ionicons
+                name={p.icon}
+                size={11}
+                color={p.selected ? colors.paperLight : colors.ink}
+              />
+              {p.selected && (
+                <Ionicons
+                  name="checkmark"
+                  size={11}
+                  color={colors.paperLight}
+                  style={{ marginLeft: 4 }}
+                />
+              )}
+            </View>
+          ))}
         </View>
       </View>
 
-      <FloatingIcon name="logo-twitter" size={26} color={colors.olive} style={{ position: "absolute", top: 8, left: width * 0.12 }} delay={100} floatRange={6} />
-      <FloatingIcon name="logo-instagram" size={28} color={colors.terracotta} style={{ position: "absolute", top: 24, right: width * 0.1 }} delay={300} floatRange={10} />
-      <FloatingIcon name="logo-linkedin" size={24} color={colors.olive} style={{ position: "absolute", bottom: 36, left: width * 0.08 }} delay={200} floatRange={8} />
-      <FloatingIcon name="logo-youtube" size={26} color={colors.terracotta} style={{ position: "absolute", bottom: 18, right: width * 0.12 }} delay={400} floatRange={7} />
-      <FloatingIcon name="logo-tiktok" size={22} color={colors.ink} style={{ position: "absolute", top: 64, left: width * 0.04 }} delay={500} floatRange={5} />
-      <FloatingIcon name="logo-facebook" size={22} color={colors.olive} style={{ position: "absolute", top: 56, right: width * 0.02 }} delay={350} floatRange={9} />
-
-      <GlowDot size={6} color={colors.terracotta} style={{ position: "absolute", top: 0, left: width * 0.25 }} delay={200} />
-      <GlowDot size={5} color={colors.olive} style={{ position: "absolute", top: 86, right: width * 0.06 }} delay={500} />
-      <GlowDot size={4} color={colors.terracottaShadow} style={{ position: "absolute", bottom: 66, right: width * 0.28 }} delay={400} />
+      <FloatingIcon name="logo-twitter" size={22} color={colors.olive} style={{ position: "absolute", top: -8, left: width * 0.04 }} delay={100} floatRange={6} />
+      <FloatingIcon name="logo-instagram" size={22} color={colors.terracotta} style={{ position: "absolute", top: -2, right: width * 0.04 }} delay={300} floatRange={8} />
+      <GlowDot size={6} color={colors.terracotta} style={{ position: "absolute", bottom: 10, left: width * 0.32 }} delay={200} />
+      <GlowDot size={4} color={colors.info} style={{ position: "absolute", top: 10, right: width * 0.3 }} delay={500} />
     </Animated.View>
   );
 }

@@ -82,14 +82,21 @@ export default function PlatformSelector({
       </View>
 
       {totalCount === 0 && (
-        <Text className="text-ink-muted text-[12px] font-sans italic mt-1">
-          Connect a platform with the + button to start sending posts.
-        </Text>
+        <View className="bg-paper-light rounded-2xl border border-rule px-4 py-4 mt-1 mb-1">
+          <Text className="text-ink font-serif-bold text-[14px] mb-1">
+            One inbox starts with one connection.
+          </Text>
+          <Text className="text-ink-muted font-sans text-[12px] leading-[18px]">
+            Tap{" "}
+            <Text className="text-terracotta font-sans-bold">+ Add</Text>
+            {" "}above to link Twitter, Instagram, LinkedIn, TikTok or any of the other platforms Crosspost supports.
+          </Text>
+        </View>
       )}
 
       {totalCount > 0 && selectedCount === 0 && (
         <Text className="text-terracotta text-[12px] font-sans-medium mt-1 italic">
-          Select at least one platform to send.
+          Tap a platform above to send your post there.
         </Text>
       )}
     </View>

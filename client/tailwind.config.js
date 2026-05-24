@@ -22,6 +22,8 @@ module.exports = {
         "terracotta-soft": cssVar("--c-terracotta-soft"),
         olive: cssVar("--c-olive"),
         "olive-soft": cssVar("--c-olive-soft"),
+        info: cssVar("--c-info"),
+        "info-soft": cssVar("--c-info-soft"),
         rule: cssVar("--c-rule"),
         "rule-soft": cssVar("--c-rule-soft"),
       },

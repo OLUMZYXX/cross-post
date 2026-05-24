@@ -11,36 +11,39 @@ import { getColors } from "../constants/theme";
 
 const ToastContext = createContext(null);
 
-const TOAST_CONFIG = {
-  success: {
-    icon: "checkmark-circle",
-    iconColor: getColors().terracotta,
-    bg: "bg-paper-light",
-    border: "border-terracotta/40",
-    titleColor: "text-terracotta",
-  },
-  error: {
-    icon: "close-circle",
-    iconColor: getColors().terracotta,
-    bg: "bg-paper-light",
-    border: "border-terracotta/40",
-    titleColor: "text-terracotta",
-  },
-  warning: {
-    icon: "warning",
-    iconColor: "#eab308",
-    bg: "bg-paper-light",
-    border: "border-yellow-500/30",
-    titleColor: "text-terracotta-shadow",
-  },
-  info: {
-    icon: "information-circle",
-    iconColor: getColors().olive,
-    bg: "bg-paper-light",
-    border: "border-rule",
-    titleColor: "text-olive",
-  },
-};
+function buildToastConfig() {
+  const c = getColors();
+  return {
+    success: {
+      icon: "checkmark-circle",
+      iconColor: c.olive,
+      bg: "bg-paper-light",
+      border: "border-rule",
+      titleColor: "text-olive",
+    },
+    error: {
+      icon: "close-circle",
+      iconColor: c.terracotta,
+      bg: "bg-paper-light",
+      border: "border-terracotta/40",
+      titleColor: "text-terracotta",
+    },
+    warning: {
+      icon: "warning",
+      iconColor: c.terracottaShadow,
+      bg: "bg-paper-light",
+      border: "border-rule",
+      titleColor: "text-terracotta-shadow",
+    },
+    info: {
+      icon: "information-circle",
+      iconColor: c.info,
+      bg: "bg-paper-light",
+      border: "border-rule",
+      titleColor: "text-info",
+    },
+  };
+}
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
@@ -79,6 +82,7 @@ export function ToastProvider({ children }) {
 function ToastItem({ toast, onDismiss }) {
   const translateY = useRef(new Animated.Value(-80)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const TOAST_CONFIG = buildToastConfig();
   const config = TOAST_CONFIG[toast.type] || TOAST_CONFIG.info;
 
   React.useEffect(() => {
