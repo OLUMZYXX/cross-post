@@ -423,7 +423,7 @@ export default function HomePage({
         const result = await WebBrowser.openAuthSessionAsync(
           data.authUrl,
           "crosspost://",
-          { preferEphemeralSession: true },
+          { preferEphemeralSession: false },
         );
 
         setModalVisible(false);

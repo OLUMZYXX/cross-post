@@ -22,15 +22,14 @@ export async function initiateTwitterAuth(req, res) {
   const redirectUri = `${SERVER_URL}/api/platforms/auth/twitter/callback`;
 
   const authUrl =
-    `https://twitter.com/i/oauth2/authorize?` +
+    `https://x.com/i/oauth2/authorize?` +
     `response_type=code&` +
     `client_id=${TWITTER_CLIENT_ID}&` +
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
     `scope=${encodeURIComponent("tweet.read tweet.write users.read media.write offline.access")}&` +
     `state=${stateId}&` +
     `code_challenge=${codeChallenge}&` +
-    `code_challenge_method=S256&` +
-    `force_login=true`;
+    `code_challenge_method=S256`;
 
   res.json({ success: true, data: { authUrl } });
 }

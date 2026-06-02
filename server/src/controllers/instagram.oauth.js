@@ -167,12 +167,18 @@ export async function handleInstagramCallback(req, res) {
     const accessToken = longTokenData.access_token || shortToken;
     const expiresIn = longTokenData.expires_in;
     const profileRes = await fetch(
-      `https://graph.instagram.com/v21.0/me?fields=user_id,username,account_type,profile_picture_url&access_token=${accessToken}`,
+      `https://graph.instagram.com/me?fields=user_id,username,account_type&access_token=${accessToken}`,
     );
     const profile = await profileRes.json();
 
-    const igUsername = profile.username || "Instagram User";
-    const igUserId = profile.id;
+    const igUsername = profile.username;
+    const igUserId = profile.user_id || profile.id;
+
+    if (!igUsername || !igUserId) {
+      console.error("Instagram profile fetch failed:", JSON.stringify(profile));
+      const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent("Could not read Instagram profile")}`;
+      return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
+    }
 
     const tokenExpiresAt = expiresIn
       ? new Date(Date.now() + expiresIn * 1000)
