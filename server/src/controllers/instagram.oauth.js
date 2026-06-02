@@ -176,7 +176,10 @@ export async function handleInstagramCallback(req, res) {
 
     if (!igUsername || !igUserId) {
       console.error("Instagram profile fetch failed:", JSON.stringify(profile));
-      const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent("Could not read Instagram profile")}`;
+      const detail =
+        profile?.error?.message ||
+        `Unexpected profile response: ${JSON.stringify(profile).slice(0, 250)}`;
+      const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent(detail)}`;
       return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
     }
 
