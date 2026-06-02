@@ -1,10 +1,11 @@
 import Platform from "../models/Platform.js";
-import {
-  INSTAGRAM_APP_ID,
-  INSTAGRAM_APP_SECRET,
-  CLIENT_URL,
-} from "../config/env.js";
 import { createState, getState, peekState } from "../utils/oauthState.js";
+import {
+  buildInstagramAuthUrl,
+  exchangeInstagramCode,
+  getLongLivedInstagramToken,
+  fetchInstagramProfile,
+} from "../services/instagram.auth.service.js";
 
 export async function getInstagramPendingInfo(req, res) {
   const { stateId } = req.query;
@@ -98,17 +99,7 @@ function buildRedirectHtml(title, url) {
 
 export async function initiateInstagramAuth(req, res) {
   const stateId = await createState({ userId: req.user.id });
-  const redirectUri = `${CLIENT_URL}/api/platforms/auth/instagram/callback`;
-
-  const authUrl =
-    `https://www.instagram.com/oauth/authorize?` +
-    `client_id=${INSTAGRAM_APP_ID}&` +
-    `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-    `scope=${encodeURIComponent("instagram_business_basic,instagram_business_content_publish,instagram_business_manage_messages")}&` +
-    `response_type=code&` +
-    `state=${stateId}&` +
-    `force_authentication=1`;
-
+  const authUrl = buildInstagramAuthUrl(stateId);
   res.json({ success: true, data: { authUrl } });
 }
 
@@ -128,60 +119,11 @@ export async function handleInstagramCallback(req, res) {
   }
 
   try {
-    const redirectUri = `${CLIENT_URL}/api/platforms/auth/instagram/callback`;
-
-    const tokenBody = new URLSearchParams({
-      client_id: INSTAGRAM_APP_ID,
-      client_secret: INSTAGRAM_APP_SECRET,
-      grant_type: "authorization_code",
-      redirect_uri: redirectUri,
-      code,
-    });
-
-    const tokenResponse = await fetch(
-      "https://api.instagram.com/oauth/access_token",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: tokenBody.toString(),
-      },
-    );
-
-    const tokenData = await tokenResponse.json();
-
-    if (tokenData.error_type || tokenData.error_message) {
-      const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent(tokenData.error_message || "Token exchange failed")}`;
-      return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
-    }
-
-    const shortToken = tokenData.access_token;
-
-    const longTokenRes = await fetch(
-      `https://graph.instagram.com/access_token?` +
-        `grant_type=ig_exchange_token&` +
-        `client_secret=${INSTAGRAM_APP_SECRET}&` +
-        `access_token=${shortToken}`,
-    );
-    const longTokenData = await longTokenRes.json();
-
-    const accessToken = longTokenData.access_token || shortToken;
-    const expiresIn = longTokenData.expires_in;
-    const profileRes = await fetch(
-      `https://graph.instagram.com/me?fields=user_id,username,account_type&access_token=${accessToken}`,
-    );
-    const profile = await profileRes.json();
-
-    const igUsername = profile.username;
-    const igUserId = profile.user_id || profile.id;
-
-    if (!igUsername || !igUserId) {
-      console.error("Instagram profile fetch failed:", JSON.stringify(profile));
-      const detail =
-        profile?.error?.message ||
-        `Unexpected profile response: ${JSON.stringify(profile).slice(0, 250)}`;
-      const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent(detail)}`;
-      return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
-    }
+    const shortToken = await exchangeInstagramCode(code);
+    const { accessToken, expiresIn } =
+      await getLongLivedInstagramToken(shortToken);
+    const { username: igUsername, userId: igUserId } =
+      await fetchInstagramProfile(accessToken);
 
     const tokenExpiresAt = expiresIn
       ? new Date(Date.now() + expiresIn * 1000)
@@ -212,7 +154,7 @@ export async function handleInstagramCallback(req, res) {
     const appUrl = `crosspost://oauth/instagram/callback?success=true&name=${encodeURIComponent(igUsername)}`;
     res.send(buildRedirectHtml("Instagram Connected", appUrl));
   } catch (err) {
-    const appUrl = `crosspost://oauth/instagram/callback?error=server_error`;
+    const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent(err.message || "server_error")}`;
     res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
   }
 }
