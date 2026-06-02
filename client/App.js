@@ -32,7 +32,7 @@ import Onboarding from "./components/Onboarding";
 import BiometricLock from "./components/BiometricLock";
 import ServerLoadingAnimation from "./components/ServerLoadingAnimation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ToastProvider } from "./components/Toast";
+import { ToastProvider, toast } from "./components/Toast";
 import { ThemeProvider } from "./constants/theme";
 import {
   authAPI,
@@ -155,28 +155,38 @@ export default function App() {
           const res = await platformAPI.completeFacebookAuth(code, state);
 
           if (res?.data?.missingPages) {
-            alert(
-              `${displayName} connected — no Facebook Pages were found. Create or link a Facebook Page (or ensure your account manages one) to enable page publishing.`,
-            );
+            toast({
+              type: "info",
+              title: `${displayName} connected`,
+              message:
+                "No Facebook Page found. Link a Page to enable publishing.",
+            });
           } else {
-            alert(`${displayName} connected successfully!`);
+            toast({ type: "success", title: `${displayName} connected!` });
           }
 
           setOauthRefreshKey((prev) => prev + 1);
         } catch (err) {
-          alert(
-            `${displayName} connection failed: ${err.message || "server error"}`,
-          );
+          toast({
+            type: "error",
+            title: "Couldn't connect",
+            message:
+              "We couldn't connect this account. Please try a different account.",
+          });
         }
 
         return;
       }
 
       if (params.get("success") === "true") {
-        alert(`${displayName} connected successfully!`);
+        toast({ type: "success", title: `${displayName} connected!` });
         setOauthRefreshKey((prev) => prev + 1);
       } else {
-        alert(`${displayName} connection failed: ${params.get("error")}`);
+        toast({
+          type: "error",
+          title: "Couldn't connect",
+          message: `We couldn't connect this ${displayName} account. Please try a different account.`,
+        });
       }
     };
 

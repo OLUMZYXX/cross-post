@@ -4,12 +4,19 @@
   useState,
   useRef,
   useCallback,
+  useEffect,
 } from "react";
 import { View, Text, Animated, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getColors } from "../constants/theme";
 
 const ToastContext = createContext(null);
+
+let externalToastHandler = null;
+
+export function toast(options) {
+  if (externalToastHandler) externalToastHandler(options);
+}
 
 function buildToastConfig() {
   const c = getColors();
@@ -58,6 +65,13 @@ export function ToastProvider({ children }) {
   const removeToast = useCallback((id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
+
+  useEffect(() => {
+    externalToastHandler = showToast;
+    return () => {
+      externalToastHandler = null;
+    };
+  }, [showToast]);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
