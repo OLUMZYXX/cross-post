@@ -423,7 +423,7 @@ export default function HomePage({
         const result = await WebBrowser.openAuthSessionAsync(
           data.authUrl,
           "crosspost://",
-          { preferEphemeralSession: false },
+          { preferEphemeralSession: platformName === "Twitter" },
         );
 
         setModalVisible(false);
