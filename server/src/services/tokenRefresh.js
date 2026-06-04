@@ -9,15 +9,20 @@ import {
   REDDIT_CLIENT_SECRET,
 } from "../config/env.js";
 
-const REFRESH_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const REFRESH_WINDOWS_MS = {
+  Instagram: 7 * 24 * 60 * 60 * 1000,
+};
+const DEFAULT_REFRESH_WINDOW_MS = 5 * 60 * 1000;
 
 export async function ensureValidToken(platform) {
   const expiresAt = platform.tokenExpiresAt
     ? new Date(platform.tokenExpiresAt).getTime()
     : null;
   const now = Date.now();
+  const refreshWindow =
+    REFRESH_WINDOWS_MS[platform.name] ?? DEFAULT_REFRESH_WINDOW_MS;
 
-  if (expiresAt && expiresAt - now > REFRESH_WINDOW_MS) return;
+  if (expiresAt && expiresAt - now > refreshWindow) return;
   if (!expiresAt && !platform.refreshToken && platform.name !== "Instagram") return;
 
   if (platform.name === "Instagram") {
@@ -59,6 +64,12 @@ export async function ensureValidToken(platform) {
   }
 
   const newTokens = await refresher(platform.refreshToken);
+
+  if (!newTokens.access_token) {
+    throw new Error(
+      `${platform.name} session has expired. Please reconnect your account.`,
+    );
+  }
 
   platform.accessToken = newTokens.access_token;
   if (newTokens.refresh_token) {
