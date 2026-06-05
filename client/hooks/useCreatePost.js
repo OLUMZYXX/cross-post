@@ -92,6 +92,8 @@ export default function useCreatePost({
   const [showCopyrightModal, setShowCopyrightModal] = useState(false);
   const [isCopyrightChecking, setIsCopyrightChecking] = useState(false);
   const [copyrightResult, setCopyrightResult] = useState(null);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateInfo, setDuplicateInfo] = useState(null);
 
   useEffect(() => {
     if (isPosting || isUploading) {
@@ -241,15 +243,10 @@ export default function useCreatePost({
     }
   };
 
-  const handlePostPress = async () => {
-    if (selectedPlatforms.length === 0) {
-      showToast({ type: "warning", title: "No platforms selected", message: "Select at least one platform." });
-      return;
-    }
+  const runCopyrightCheck = async () => {
     const imageUrls = selectedMedia.filter((m) => m.type === "image" && m.cloudinaryUrl).map((m) => m.cloudinaryUrl);
     const hasCaption = caption?.trim().length > 0;
     const hasImages = imageUrls.length > 0;
-    if (!hasCaption && !hasImages) { setShowScheduleModal(true); return; }
 
     setShowCopyrightModal(true);
     setIsCopyrightChecking(true);
@@ -264,6 +261,41 @@ export default function useCreatePost({
     } finally {
       setIsCopyrightChecking(false);
     }
+  };
+
+  const handlePostPress = async () => {
+    if (selectedPlatforms.length === 0) {
+      showToast({ type: "warning", title: "No platforms selected", message: "Select at least one platform." });
+      return;
+    }
+    const imageUrls = selectedMedia.filter((m) => m.type === "image" && m.cloudinaryUrl).map((m) => m.cloudinaryUrl);
+    const hasCaption = caption?.trim().length > 0;
+    const hasImages = imageUrls.length > 0;
+    if (!hasCaption && !hasImages) { setShowScheduleModal(true); return; }
+
+    if (hasCaption) {
+      try {
+        const { data } = await postAPI.duplicateCheck(caption);
+        if (data.duplicate) {
+          setDuplicateInfo(data.existingPost);
+          setShowDuplicateModal(true);
+          return;
+        }
+      } catch {}
+    }
+
+    await runCopyrightCheck();
+  };
+
+  const handleDuplicateProceed = async () => {
+    setShowDuplicateModal(false);
+    setDuplicateInfo(null);
+    await runCopyrightCheck();
+  };
+
+  const handleDuplicateCancel = () => {
+    setShowDuplicateModal(false);
+    setDuplicateInfo(null);
   };
 
   const handleCopyrightProceed = () => { setShowCopyrightModal(false); setCopyrightResult(null); setShowScheduleModal(true); };
@@ -367,9 +399,11 @@ export default function useCreatePost({
     isRephrasing, rephrasedText, selectedTone,
     showCopyrightModal, setShowCopyrightModal,
     isCopyrightChecking, copyrightResult,
+    showDuplicateModal, setShowDuplicateModal, duplicateInfo,
     getPlatformStyle, getDisplayName, togglePlatform, hasTwitterSelected,
     handleRephrase, applyRephrase, openRephraseModal, handleShortenForTwitter,
     publishNow, schedulePost, handlePostPress,
+    handleDuplicateProceed, handleDuplicateCancel,
     handleCopyrightProceed, handleCopyrightEdit, handleUseSafeVersion, handleAddHashtag,
     handleSaveDraft, handleMediaSelect, removeMedia,
   };

@@ -18,6 +18,7 @@ import {
   schedulePost,
   rephraseCaption,
   copyrightCheck,
+  duplicateCheck,
 } from "../controllers/post.controller.js";
 
 const router = express.Router();
@@ -43,6 +44,7 @@ router.put("/:id", asyncHandler(updatePost));
 router.delete("/:id", asyncHandler(deletePost));
 router.post("/rephrase", rephraseLimiter, asyncHandler(rephraseCaption));
 router.post("/copyright-check", asyncHandler(copyrightCheck));
+router.post("/duplicate-check", asyncHandler(duplicateCheck));
 router.post("/:id/publish", publishLimiter, asyncHandler(publishPost));
 router.post("/:id/retry", publishLimiter, asyncHandler(retryPublish));
 router.post("/:id/schedule", asyncHandler(schedulePost));

@@ -1,8 +1,9 @@
-﻿import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert } from "react-native";
+﻿import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert, Linking } from "react-native";
 import { getColors, useTheme } from "../constants/theme";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import ThemePicker from "./ThemePicker";
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "../constants/legal";
 
 function SettingsRow({ icon, iconColor, iconBg, label, description, value, onPress, isLast }) {
   return (
@@ -51,6 +52,14 @@ export default function SettingsScreen({
   onLogout,
   onResetOnboarding,
 }) {
+  const openLink = async (url) => {
+    try {
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert("Unable to open link", "Please try again later.");
+    }
+  };
+
   const handleVersionLongPress = () => {
     if (!onResetOnboarding) return;
     Alert.alert(
@@ -149,6 +158,27 @@ export default function SettingsScreen({
               label="Help & Support"
               description="FAQs, contact us, report a bug"
               onPress={onHelp}
+              isLast
+            />
+          </View>
+
+          <SectionLabel label="Legal" />
+          <View className="bg-paper-light rounded-2xl border border-rule overflow-hidden">
+            <SettingsRow
+              icon="document-text-outline"
+              iconColor={getColors().olive}
+              iconBg="bg-paper-deep"
+              label="Privacy Policy"
+              description="How we collect, use and protect your data"
+              onPress={() => openLink(PRIVACY_POLICY_URL)}
+            />
+            <SettingsRow
+              icon="reader-outline"
+              iconColor="#a78bfa"
+              iconBg="bg-paper-deep"
+              label="Terms of Service"
+              description="The rules for using Cross-Post"
+              onPress={() => openLink(TERMS_OF_SERVICE_URL)}
               isLast
             />
           </View>

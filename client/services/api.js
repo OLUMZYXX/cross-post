@@ -246,6 +246,12 @@ export const postAPI = {
       body: { caption, imageUrls },
       timeout: 30000,
     }),
+
+  duplicateCheck: (caption) =>
+    fetchJSON("/posts/duplicate-check", {
+      body: { caption },
+      timeout: 15000,
+    }),
 };
 
 export const notificationAPI = {

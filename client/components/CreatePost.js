@@ -11,6 +11,7 @@ import MediaPreview from "./MediaPreview";
 import ScheduleModal from "./ScheduleModal";
 import RephraseModal from "./RephraseModal";
 import CopyrightModal from "./CopyrightModal";
+import DuplicateModal from "./DuplicateModal";
 import CaptionToolbar from "./CaptionToolbar";
 import FontPicker from "./FontPicker";
 import ChunkyButton from "./ChunkyButton";
@@ -33,9 +34,11 @@ export default function CreatePost({
     isRephrasing, rephrasedText, selectedTone,
     showCopyrightModal, setShowCopyrightModal,
     isCopyrightChecking, copyrightResult,
+    showDuplicateModal, setShowDuplicateModal, duplicateInfo,
     getPlatformStyle, getDisplayName, togglePlatform, hasTwitterSelected,
     handleRephrase, applyRephrase, openRephraseModal, handleShortenForTwitter,
     publishNow, schedulePost, handlePostPress,
+    handleDuplicateProceed, handleDuplicateCancel,
     handleCopyrightProceed, handleCopyrightEdit, handleUseSafeVersion, handleAddHashtag,
     handleSaveDraft, handleMediaSelect, removeMedia,
   } = useCreatePost({
@@ -186,6 +189,14 @@ export default function CreatePost({
         onEdit={handleCopyrightEdit}
         onUseSafeVersion={handleUseSafeVersion}
         onAddHashtag={handleAddHashtag}
+      />
+
+      <DuplicateModal
+        visible={showDuplicateModal}
+        onClose={() => setShowDuplicateModal(false)}
+        info={duplicateInfo}
+        onProceed={handleDuplicateProceed}
+        onEdit={handleDuplicateCancel}
       />
     </View>
   );

@@ -10,6 +10,10 @@ const postSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  contentHash: {
+    type: String,
+    default: null,
+  },
   media: [
     {
       type: String,
@@ -55,6 +59,7 @@ const postSchema = new mongoose.Schema({
 });
 
 postSchema.index({ status: 1, scheduledAt: 1 });
+postSchema.index({ userId: 1, contentHash: 1, status: 1 });
 
 postSchema.pre("save", function () {
   this.updatedAt = Date.now();

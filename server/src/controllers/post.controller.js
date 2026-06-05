@@ -10,6 +10,8 @@ import {
 } from "../services/notificationService.js";
 import { SERVER_URL, OPENAI_API_KEY } from "../config/env.js";
 import { uploadToGridFS, deleteFromGridFS } from "../utils/gridfs.js";
+import { hashCaption } from "../utils/contentHash.js";
+import { findDuplicatePost } from "../services/duplicatePost.js";
 
 export async function listPosts(req, res) {
   const posts = await Post.find({ userId: req.user.id }).sort({
@@ -55,6 +57,7 @@ export async function createPost(req, res) {
   const post = new Post({
     userId: req.user.id,
     caption: caption || "",
+    contentHash: hashCaption(caption),
     media: mediaUrls,
     platforms: platformList,
     status: status || "draft",
@@ -78,7 +81,10 @@ export async function updatePost(req, res) {
 
   const { caption, media, platforms, status } = req.body;
 
-  if (caption !== undefined) post.caption = caption;
+  if (caption !== undefined) {
+    post.caption = caption;
+    post.contentHash = hashCaption(caption);
+  }
   if (media !== undefined)
     post.media = media.map((item) =>
       typeof item === "string" ? item : item.uri,
@@ -535,5 +541,16 @@ Only flag clear issues. Do not flag generic objects, common symbols, or incident
       brandHashtags: uniqueHashtags,
       safeVersion,
     },
+  });
+}
+
+export async function duplicateCheck(req, res) {
+  const { caption } = req.body;
+
+  const existingPost = await findDuplicatePost(req.user.id, caption);
+
+  res.json({
+    success: true,
+    data: { duplicate: !!existingPost, existingPost },
   });
 }

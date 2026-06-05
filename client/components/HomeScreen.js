@@ -9,6 +9,7 @@ import PlatformPreview from "./PlatformPreview";
 import ScheduleModal from "./ScheduleModal";
 import RephraseModal from "./RephraseModal";
 import CopyrightModal from "./CopyrightModal";
+import DuplicateModal from "./DuplicateModal";
 import { useToast } from "./Toast";
 import useCreatePost from "../hooks/useCreatePost";
 import { useTheme } from "../constants/theme";
@@ -150,6 +151,14 @@ export default function HomeScreen({
         onEdit={composer.handleCopyrightEdit}
         onUseSafeVersion={composer.handleUseSafeVersion}
         onAddHashtag={composer.handleAddHashtag}
+      />
+
+      <DuplicateModal
+        visible={composer.showDuplicateModal}
+        onClose={() => composer.setShowDuplicateModal(false)}
+        info={composer.duplicateInfo}
+        onProceed={composer.handleDuplicateProceed}
+        onEdit={composer.handleDuplicateCancel}
       />
     </View>
   );
