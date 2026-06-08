@@ -8,6 +8,7 @@
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getColors } from "../constants/theme";
+import { TWITTER_CHAR_LIMIT } from "./platformLimits";
 
 const TONE_OPTIONS = [
   { key: "professional", label: "Professional", icon: "briefcase-outline", color: getColors().olive },
@@ -92,7 +93,7 @@ export default function RephraseModal({
               <View className="mb-4">
                 <View className="flex-row items-center justify-between mb-2">
                   <Text className="text-ink-muted text-[10px] tracking-wider">RESULT</Text>
-                  <Text className={`text-[10px] font-sans-semibold ${rephrasedText.length > 280 && hasTwitterSelected ? "text-terracotta" : "text-ink-soft"}`}>
+                  <Text className={`text-[10px] font-sans-semibold ${rephrasedText.length > TWITTER_CHAR_LIMIT && hasTwitterSelected ? "text-terracotta" : "text-ink-soft"}`}>
                     {rephrasedText.length} chars
                   </Text>
                 </View>
@@ -100,7 +101,7 @@ export default function RephraseModal({
                   <Text className="text-ink text-sm leading-5">{rephrasedText}</Text>
                 </View>
 
-                {hasTwitterSelected && rephrasedText.length > 280 && (
+                {hasTwitterSelected && rephrasedText.length > TWITTER_CHAR_LIMIT && (
                   <TouchableOpacity
                     onPress={onShortenForTwitter}
                     className="flex-row items-center justify-center bg-paper-deep border border-rule py-3 rounded-xl mt-3"
@@ -108,7 +109,7 @@ export default function RephraseModal({
                     <Ionicons name="logo-twitter" size={16} color="#1DA1F2" />
                     <Text className="text-olive font-sans-bold text-sm ml-2">Shorten for Twitter</Text>
                     <View className="bg-terracotta/20 rounded-full px-2 py-0.5 ml-2">
-                      <Text className="text-terracotta text-[10px] font-sans-bold">{rephrasedText.length}/280</Text>
+                      <Text className="text-terracotta text-[10px] font-sans-bold">{rephrasedText.length}/{TWITTER_CHAR_LIMIT.toLocaleString()}</Text>
                     </View>
                   </TouchableOpacity>
                 )}

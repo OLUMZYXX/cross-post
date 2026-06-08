@@ -1,5 +1,7 @@
+export const TWITTER_CHAR_LIMIT = 25000;
+
 export const PLATFORM_LIMITS = {
-  Twitter: { chars: 280, maxImages: 4, maxVideos: 1, note: null },
+  Twitter: { chars: TWITTER_CHAR_LIMIT, maxImages: 4, maxVideos: 1, note: null },
   Instagram: { chars: 2200, maxImages: 10, maxVideos: 1, note: null },
   LinkedIn: { chars: 3000, maxImages: 9, maxVideos: 0, note: "No video" },
   Facebook: { chars: 63206, maxImages: 10, maxVideos: 1, note: null },

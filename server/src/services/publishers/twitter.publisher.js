@@ -1,10 +1,50 @@
 import { uploadMediaToTwitter, isVideoUrl } from "./twitter.helpers.js";
 
+const TWITTER_CHAR_LIMIT = 25000;
+const TWITTER_BASIC_LIMIT = 280;
+
+function friendlyTwitterError(textLength, data, status) {
+  const raw = (
+    data?.errors?.[0]?.message ||
+    data?.detail ||
+    data?.title ||
+    ""
+  ).toLowerCase();
+
+  const looksLikeLength =
+    raw.includes("280") ||
+    raw.includes("too long") ||
+    raw.includes("maximum") ||
+    raw.includes("length") ||
+    raw.includes("character");
+
+  if (textLength > TWITTER_BASIC_LIMIT && (looksLikeLength || status === 403)) {
+    return "This post is too long for X. Posts over 280 characters need X Premium on the connected X account. Shorten it to 280 characters, or upgrade that account to X Premium.";
+  }
+
+  if (status === 429 || raw.includes("rate limit") || raw.includes("too many")) {
+    return "X is temporarily limiting how often you can post. Please wait a few minutes and try again.";
+  }
+
+  if (raw.includes("duplicate")) {
+    return "X blocked this because the same post was shared recently. Edit the text and try again.";
+  }
+
+  if (status === 401 || raw.includes("unauthorized") || raw.includes("token")) {
+    return "Your X account connection has expired. Please reconnect X in Settings and try again.";
+  }
+
+  return "We couldn't post this to X. Please try again in a moment.";
+}
+
 export async function publishToTwitter(platform, post) {
   const { accessToken } = platform;
   const { caption, media } = post;
 
-  const text = caption.length > 280 ? caption.slice(0, 277) + "..." : caption;
+  const text =
+    caption.length > TWITTER_CHAR_LIMIT
+      ? caption.slice(0, TWITTER_CHAR_LIMIT - 3) + "..."
+      : caption;
   const tweetBody = { text };
 
   if (media && media.length > 0) {
@@ -43,9 +83,7 @@ export async function publishToTwitter(platform, post) {
   const data = await response.json();
 
   if (!response.ok || data.errors) {
-    const errMsg =
-      data.errors?.[0]?.message || data.detail || "Failed to post tweet";
-    throw new Error(errMsg);
+    throw new Error(friendlyTwitterError(text.length, data, response.status));
   }
 
   return {

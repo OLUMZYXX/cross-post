@@ -15,6 +15,7 @@ import DuplicateModal from "./DuplicateModal";
 import CaptionToolbar from "./CaptionToolbar";
 import FontPicker from "./FontPicker";
 import ChunkyButton from "./ChunkyButton";
+import { TWITTER_CHAR_LIMIT } from "./platformLimits";
 import { FONTS, useTheme } from "../constants/theme";
 
 export default function CreatePost({
@@ -49,7 +50,7 @@ export default function CreatePost({
   const { showToast } = useToast();
   const { colors, resolved } = useTheme();
   const [showFontPicker, setShowFontPicker] = useState(false);
-  const isOverLimit = hasTwitterSelected && caption.length > 280;
+  const isOverLimit = hasTwitterSelected && caption.length > TWITTER_CHAR_LIMIT;
 
   const handleCopy = async () => {
     if (!caption.trim()) {
@@ -106,11 +107,11 @@ export default function CreatePost({
               <View className="h-1 flex-1 rounded-full mr-3 bg-rule">
                 <View
                   className={`h-full rounded-full ${isOverLimit ? "bg-terracotta" : "bg-olive"}`}
-                  style={{ width: `${Math.min((caption.length / 280) * 100, 100)}%` }}
+                  style={{ width: `${Math.min((caption.length / TWITTER_CHAR_LIMIT) * 100, 100)}%` }}
                 />
               </View>
               <Text className={`text-[10px] font-sans-semibold ${isOverLimit ? "text-terracotta" : "text-ink-muted"}`}>
-                {caption.length}/280
+                {caption.length}/{TWITTER_CHAR_LIMIT.toLocaleString()}
               </Text>
             </View>
           )}

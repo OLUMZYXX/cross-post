@@ -7,6 +7,7 @@ import { useToast } from "../components/Toast";
 import { postAPI, ensureServerAwake } from "../services/api";
 import { uploadToCloudinary } from "../services/cloudinary";
 import { addPending, removePending } from "../services/pendingPublishes";
+import { TWITTER_CHAR_LIMIT } from "../components/platformLimits";
 
 const SELECTED_PLATFORMS_KEY = "@crosspost_selected_platforms";
 
@@ -107,7 +108,8 @@ export default function useCreatePost({
   const hasTwitterSelected = selectedPlatforms.some((p) => p.split(":")[0] === "Twitter");
 
   const getTwitterCharLimit = () => {
-    if (hasTwitterSelected && caption.length > 280) return 280;
+    if (hasTwitterSelected && caption.length > TWITTER_CHAR_LIMIT)
+      return TWITTER_CHAR_LIMIT;
     return null;
   };
 
@@ -116,7 +118,7 @@ export default function useCreatePost({
     if (!textToShorten.trim()) return;
     setIsRephrasing(true);
     try {
-      const { data } = await postAPI.rephrase(textToShorten, selectedTone || "casual", 280);
+      const { data } = await postAPI.rephrase(textToShorten, selectedTone || "casual", TWITTER_CHAR_LIMIT);
       setRephrasedText(data.rephrased);
     } catch (err) {
       showToast({ type: "error", title: "Shorten failed", message: err.message });
