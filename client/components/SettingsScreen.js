@@ -1,9 +1,16 @@
 ﻿import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert, Linking } from "react-native";
+import * as Application from "expo-application";
 import { getColors, useTheme } from "../constants/theme";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import ThemePicker from "./ThemePicker";
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "../constants/legal";
+
+const appVersion = Application.nativeApplicationVersion || "1.0.0";
+const buildNumber = Application.nativeBuildVersion;
+const versionLabel = buildNumber
+  ? `Cross-Post v${appVersion} (${buildNumber})`
+  : `Cross-Post v${appVersion}`;
 
 function SettingsRow({ icon, iconColor, iconBg, label, description, value, onPress, isLast }) {
   return (
@@ -199,7 +206,7 @@ export default function SettingsScreen({
               delayLongPress={800}
               activeOpacity={0.6}
             >
-              <Text className="text-ink-soft text-[10px]">Cross-Post v1.0.0</Text>
+              <Text className="text-ink-soft text-[10px]">{versionLabel}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
