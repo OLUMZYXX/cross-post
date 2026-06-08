@@ -17,8 +17,13 @@ import * as LocalAuthentication from "expo-local-authentication";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useToast } from "./Toast";
 import { authAPI } from "../services/api";
-
-const BIOMETRIC_KEY = "@crosspost_biometric_enabled";
+import AutoLockSelector from "./AutoLockSelector";
+import {
+  BIOMETRIC_KEY,
+  DEFAULT_AUTO_LOCK_DELAY_MS,
+  getAutoLockDelay,
+  setAutoLockDelay,
+} from "../constants/appLock";
 
 export default function PrivacySecurity({ onBack, user }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -44,6 +49,9 @@ export default function PrivacySecurity({ onBack, user }) {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricType, setBiometricType] = useState(null);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [autoLockDelay, setAutoLockDelayState] = useState(
+    DEFAULT_AUTO_LOCK_DELAY_MS,
+  );
 
   useEffect(() => {
     checkBiometric();
@@ -73,6 +81,14 @@ export default function PrivacySecurity({ onBack, user }) {
 
     const stored = await AsyncStorage.getItem(BIOMETRIC_KEY);
     setBiometricEnabled(stored === "true");
+
+    const delay = await getAutoLockDelay();
+    setAutoLockDelayState(delay);
+  };
+
+  const handleAutoLockChange = async (value) => {
+    setAutoLockDelayState(value);
+    await setAutoLockDelay(value);
   };
 
   const toggleBiometric = async (value) => {
@@ -99,7 +115,7 @@ export default function PrivacySecurity({ onBack, user }) {
       type: "success",
       title: value ? `${biometricType} enabled` : `${biometricType} disabled`,
       message: value
-        ? "You'll need to authenticate when opening the app."
+        ? "Choose how long you can be away before unlock is required."
         : "Biometric lock has been turned off.",
     });
   };
@@ -380,6 +396,14 @@ export default function PrivacySecurity({ onBack, user }) {
               thumbColor={biometricEnabled ? "#fff" : getColors().inkMuted}
             />
           </View>
+
+          {biometricAvailable && biometricEnabled && (
+            <AutoLockSelector
+              value={autoLockDelay}
+              onChange={handleAutoLockChange}
+              biometricType={biometricType}
+            />
+          )}
         </View>
 
         <Text className="text-ink-muted text-xs mb-3 ml-1">ACCOUNT</Text>

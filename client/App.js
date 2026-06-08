@@ -42,6 +42,7 @@ import {
   clearToken,
   wakeUpServer,
 } from "./services/api";
+import { BIOMETRIC_KEY, getAutoLockDelay } from "./constants/appLock";
 
 try {
   Notifications.setNotificationHandler({
@@ -54,7 +55,6 @@ try {
 } catch {}
 
 const ONBOARDING_KEY = "@crosspost_onboarded";
-const BIOMETRIC_KEY = "@crosspost_biometric_enabled";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -212,11 +212,12 @@ export default function App() {
         }
 
         if (appState.current === "background" && nextState === "active") {
-          const elapsed = Date.now() - (backgroundAtRef.current || 0);
-          if (elapsed >= 3000) {
-            const enabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
-            const token = await getToken();
-            if (enabled === "true" && token) {
+          const enabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
+          const token = await getToken();
+          if (enabled === "true" && token) {
+            const elapsed = Date.now() - (backgroundAtRef.current || 0);
+            const delay = await getAutoLockDelay();
+            if (elapsed >= delay) {
               setBiometricLocked(true);
             }
           }
