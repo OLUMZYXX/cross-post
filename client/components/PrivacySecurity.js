@@ -11,6 +11,9 @@ import {
   Image,
   Switch,
   Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -405,17 +408,6 @@ export default function PrivacySecurity({ onBack, user }) {
             />
           )}
         </View>
-
-        <Text className="text-ink-muted text-xs mb-3 ml-1">ACCOUNT</Text>
-        <View className="bg-paper-light rounded-2xl border border-rule">
-          <View className="flex-row items-center p-4">
-            <Ionicons name="eye-off-outline" size={18} color={getColors().olive} />
-            <Text className="text-ink text-sm ml-3 flex-1">
-              Private Account
-            </Text>
-            <Text className="text-terracotta-shadow text-xs">Coming soon</Text>
-          </View>
-        </View>
       </ScrollView>
 
       <Modal
@@ -424,7 +416,12 @@ export default function PrivacySecurity({ onBack, user }) {
         animationType="slide"
         onRequestClose={() => setQrModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-ink/60 px-6">
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View className="flex-1 justify-center items-center bg-ink/60 px-6">
           <View className="bg-paper-light rounded-3xl p-6 w-full max-w-sm">
             <Text className="text-ink text-lg font-serif-bold mb-2">
               Set Up 2FA
@@ -465,7 +462,11 @@ export default function PrivacySecurity({ onBack, user }) {
             </Text>
             <TextInput
               value={otpCode}
-              onChangeText={(t) => setOtpCode(t.replace(/[^0-9]/g, ""))}
+              onChangeText={(t) => {
+                const digits = t.replace(/[^0-9]/g, "");
+                setOtpCode(digits);
+                if (digits.length === 6) Keyboard.dismiss();
+              }}
               placeholder="000000"
               placeholderTextColor={getColors().inkMuted}
               keyboardType="number-pad"
@@ -500,7 +501,9 @@ export default function PrivacySecurity({ onBack, user }) {
               <Text className="text-ink text-center text-sm">Cancel</Text>
             </TouchableOpacity>
           </View>
-        </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal
@@ -509,7 +512,12 @@ export default function PrivacySecurity({ onBack, user }) {
         animationType="slide"
         onRequestClose={() => setDisableModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-ink/60 px-6">
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View className="flex-1 justify-center items-center bg-ink/60 px-6">
           <View className="bg-paper-light rounded-3xl p-6 w-full max-w-sm">
             <Text className="text-ink text-lg font-serif-bold mb-2">
               Disable 2FA
@@ -521,7 +529,11 @@ export default function PrivacySecurity({ onBack, user }) {
 
             <TextInput
               value={disableCode}
-              onChangeText={(t) => setDisableCode(t.replace(/[^0-9]/g, ""))}
+              onChangeText={(t) => {
+                const digits = t.replace(/[^0-9]/g, "");
+                setDisableCode(digits);
+                if (digits.length === 6) Keyboard.dismiss();
+              }}
               placeholder="000000"
               placeholderTextColor={getColors().inkMuted}
               keyboardType="number-pad"
@@ -554,7 +566,9 @@ export default function PrivacySecurity({ onBack, user }) {
               <Text className="text-ink text-center text-sm">Cancel</Text>
             </TouchableOpacity>
           </View>
-        </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
