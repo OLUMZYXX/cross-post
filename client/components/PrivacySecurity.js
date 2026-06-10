@@ -97,6 +97,17 @@ export default function PrivacySecurity({ onBack, user, onLogout }) {
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [accountHasPassword, setAccountHasPassword] = useState(
+    !!user?.hasPassword,
+  );
+
+  const openDeleteModal = async () => {
+    setDeleteModalVisible(true);
+    try {
+      const { data } = await authAPI.getMe();
+      setAccountHasPassword(!!data.user?.hasPassword);
+    } catch {}
+  };
 
   const handleDeleteAccount = async ({ password, confirmText }) => {
     setDeletingAccount(true);
@@ -452,7 +463,7 @@ export default function PrivacySecurity({ onBack, user, onLogout }) {
             </View>
           </View>
           <TouchableOpacity
-            onPress={() => setDeleteModalVisible(true)}
+            onPress={openDeleteModal}
             className="bg-terracotta/15 py-3 rounded-xl border border-terracotta/30"
           >
             <Text className="text-terracotta text-center font-sans-bold text-sm">
@@ -626,7 +637,7 @@ export default function PrivacySecurity({ onBack, user, onLogout }) {
       <DeleteAccountModal
         visible={deleteModalVisible}
         onClose={() => setDeleteModalVisible(false)}
-        hasPassword={!!user?.hasPassword}
+        hasPassword={accountHasPassword}
         submitting={deletingAccount}
         onConfirm={handleDeleteAccount}
       />
