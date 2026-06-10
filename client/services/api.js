@@ -149,6 +149,9 @@ export const authAPI = {
 
   login2FA: (tempToken, code) =>
     api.post("/auth/2fa/login", { tempToken, code }),
+
+  deleteAccount: ({ password, confirmText }) =>
+    api.post("/auth/delete-account", { password, confirmText }),
 };
 
 export const postAPI = {

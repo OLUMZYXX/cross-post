@@ -72,6 +72,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 
 userSchema.methods.toJSON = function () {
   const userObject = this.toObject();
+  userObject.hasPassword = !!userObject.passwordHash;
   delete userObject.passwordHash;
   delete userObject.twoFactorSecret;
   return userObject;

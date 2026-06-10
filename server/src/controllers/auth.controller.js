@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import User from "../models/User.js";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/env.js";
 import { Errors } from "../utils/AppError.js";
+import { deleteUserAccount } from "../services/accountDeletion.js";
 
 function generateToken(user) {
   return jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, {
@@ -19,6 +20,7 @@ function generateTempToken(user) {
 
 function sanitiseUser(user) {
   const { passwordHash, twoFactorSecret, ...safe } = user.toObject();
+  safe.hasPassword = !!passwordHash;
   return safe;
 }
 
@@ -234,4 +236,29 @@ export async function disable2FA(req, res) {
   await user.save();
 
   res.json({ success: true, data: { twoFactorEnabled: false } });
+}
+
+export async function deleteAccount(req, res) {
+  const { password, confirmText } = req.body;
+
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    throw Errors.notFound("User not found");
+  }
+
+  if (user.passwordHash) {
+    if (!password) {
+      throw Errors.badRequest("Your password is required to delete your account");
+    }
+    const match = await user.comparePassword(password);
+    if (!match) {
+      throw Errors.unauthorized("The password is incorrect");
+    }
+  } else if ((confirmText || "").trim().toUpperCase() !== "DELETE") {
+    throw Errors.badRequest("Type DELETE to confirm account deletion");
+  }
+
+  await deleteUserAccount(user._id);
+
+  res.json({ success: true, data: null });
 }

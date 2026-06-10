@@ -19,8 +19,9 @@ import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useToast } from "./Toast";
-import { authAPI } from "../services/api";
+import { authAPI, clearToken } from "../services/api";
 import AutoLockSelector from "./AutoLockSelector";
+import DeleteAccountModal from "./DeleteAccountModal";
 import {
   BIOMETRIC_KEY,
   DEFAULT_AUTO_LOCK_DELAY_MS,
@@ -28,7 +29,7 @@ import {
   setAutoLockDelay,
 } from "../constants/appLock";
 
-export default function PrivacySecurity({ onBack, user }) {
+export default function PrivacySecurity({ onBack, user, onLogout }) {
   const [showPassword, setShowPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -92,6 +93,32 @@ export default function PrivacySecurity({ onBack, user }) {
   const handleAutoLockChange = async (value) => {
     setAutoLockDelayState(value);
     await setAutoLockDelay(value);
+  };
+
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
+  const handleDeleteAccount = async ({ password, confirmText }) => {
+    setDeletingAccount(true);
+    try {
+      await authAPI.deleteAccount({ password, confirmText });
+      setDeleteModalVisible(false);
+      showToast({
+        type: "success",
+        title: "Account deleted",
+        message: "Your account and data have been permanently removed.",
+      });
+      await clearToken();
+      onLogout?.();
+    } catch (err) {
+      showToast({
+        type: "error",
+        title: "Could not delete account",
+        message: err.message,
+      });
+    } finally {
+      setDeletingAccount(false);
+    }
   };
 
   const toggleBiometric = async (value) => {
@@ -408,6 +435,31 @@ export default function PrivacySecurity({ onBack, user }) {
             />
           )}
         </View>
+
+        <Text className="text-ink-muted text-xs mb-3 ml-1">DANGER ZONE</Text>
+        <View className="bg-paper-light rounded-2xl border border-terracotta/30 p-4 mb-6">
+          <View className="flex-row items-center mb-3">
+            <View className="w-10 h-10 rounded-full bg-terracotta/15 items-center justify-center mr-3">
+              <Ionicons name="trash-outline" size={18} color={getColors().terracotta} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-ink font-sans-bold text-sm">
+                Delete Account
+              </Text>
+              <Text className="text-ink-muted text-xs mt-0.5">
+                Permanently remove your account and all data
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            onPress={() => setDeleteModalVisible(true)}
+            className="bg-terracotta/15 py-3 rounded-xl border border-terracotta/30"
+          >
+            <Text className="text-terracotta text-center font-sans-bold text-sm">
+              Delete Account
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       <Modal
@@ -570,6 +622,14 @@ export default function PrivacySecurity({ onBack, user }) {
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </Modal>
+
+      <DeleteAccountModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        hasPassword={!!user?.hasPassword}
+        submitting={deletingAccount}
+        onConfirm={handleDeleteAccount}
+      />
     </View>
   );
 }
