@@ -1,9 +1,13 @@
-﻿import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert, Linking } from "react-native";
+﻿import { useState } from "react";
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert, Linking } from "react-native";
 import * as Application from "expo-application";
 import { getColors, useTheme } from "../constants/theme";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import ThemePicker from "./ThemePicker";
+import DeleteAccountModal from "./DeleteAccountModal";
+import { useToast } from "./Toast";
+import { authAPI, clearToken } from "../services/api";
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "../constants/legal";
 
 const appVersion = Application.nativeApplicationVersion || "1.0.0";
@@ -59,11 +63,49 @@ export default function SettingsScreen({
   onLogout,
   onResetOnboarding,
 }) {
+  const { showToast } = useToast();
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [accountHasPassword, setAccountHasPassword] = useState(
+    !!user?.hasPassword,
+  );
+
   const openLink = async (url) => {
     try {
       await Linking.openURL(url);
     } catch {
       Alert.alert("Unable to open link", "Please try again later.");
+    }
+  };
+
+  const openDeleteModal = async () => {
+    setDeleteModalVisible(true);
+    try {
+      const { data } = await authAPI.getMe();
+      setAccountHasPassword(!!data.user?.hasPassword);
+    } catch {}
+  };
+
+  const handleDeleteAccount = async ({ password, confirmText }) => {
+    setDeletingAccount(true);
+    try {
+      await authAPI.deleteAccount({ password, confirmText });
+      setDeleteModalVisible(false);
+      showToast({
+        type: "success",
+        title: "Account deleted",
+        message: "Your account and data have been permanently removed.",
+      });
+      await clearToken();
+      onLogout?.();
+    } catch (err) {
+      showToast({
+        type: "error",
+        title: "Could not delete account",
+        message: err.message,
+      });
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -192,6 +234,15 @@ export default function SettingsScreen({
 
           <SectionLabel label="" />
           <TouchableOpacity
+            onPress={openDeleteModal}
+            className="bg-paper-light rounded-2xl py-3.5 border border-terracotta/30 flex-row items-center justify-center mb-3"
+            activeOpacity={0.7}
+          >
+            <Ionicons name="trash-outline" size={17} color={getColors().terracotta} />
+            <Text className="text-terracotta font-sans-medium text-sm ml-2">Delete Account</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={onLogout}
             className="bg-paper-light rounded-2xl py-3.5 border border-rule flex-row items-center justify-center"
             activeOpacity={0.7}
@@ -211,6 +262,14 @@ export default function SettingsScreen({
           </View>
         </ScrollView>
       </View>
+
+      <DeleteAccountModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        hasPassword={accountHasPassword}
+        submitting={deletingAccount}
+        onConfirm={handleDeleteAccount}
+      />
     </View>
   );
 }

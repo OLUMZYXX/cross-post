@@ -620,7 +620,7 @@ export default function HomePage({
     return <NotificationSettings onBack={() => setSettingsScreen(null)} />;
   }
   if (activeTab === "settings" && settingsScreen === "privacy") {
-    return <PrivacySecurity onBack={() => setSettingsScreen(null)} user={user} onLogout={handleLogout} />;
+    return <PrivacySecurity onBack={() => setSettingsScreen(null)} user={user} />;
   }
   if (activeTab === "settings" && settingsScreen === "help") {
     return <HelpSupport onBack={() => setSettingsScreen(null)} />;
