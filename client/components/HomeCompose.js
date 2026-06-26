@@ -10,6 +10,9 @@ import ChunkyButton from "./ChunkyButton";
 export default function HomeCompose({
   caption,
   setCaption,
+  selectedFont,
+  selectFont,
+  handleCaptionChange,
   selectedMedia,
   mediaType,
   isUploading,
@@ -37,7 +40,7 @@ export default function HomeCompose({
 
   return (
     <View>
-      <ComposeCard caption={caption} onChangeCaption={setCaption} editable={!isPosting}>
+      <ComposeCard caption={caption} onChangeCaption={handleCaptionChange} editable={!isPosting}>
         <MediaPreview
           media={selectedMedia}
           mediaType={mediaType}
@@ -58,8 +61,8 @@ export default function HomeCompose({
 
         {showFontPicker && (
           <FontPicker
-            caption={caption}
-            onChange={setCaption}
+            selected={selectedFont}
+            onSelectFont={selectFont}
             onClose={() => setShowFontPicker(false)}
           />
         )}

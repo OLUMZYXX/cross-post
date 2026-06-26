@@ -90,6 +90,9 @@ export default function HomeScreen({
         <HomeCompose
           caption={composer.caption}
           setCaption={composer.setCaption}
+          selectedFont={composer.selectedFont}
+          selectFont={composer.selectFont}
+          handleCaptionChange={composer.handleCaptionChange}
           selectedMedia={composer.selectedMedia}
           mediaType={composer.mediaType}
           isUploading={composer.isUploading}

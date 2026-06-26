@@ -36,6 +36,7 @@ export default function CreatePost({
     showCopyrightModal, setShowCopyrightModal,
     isCopyrightChecking, copyrightResult,
     showDuplicateModal, setShowDuplicateModal, duplicateInfo,
+    selectedFont, selectFont, handleCaptionChange,
     getPlatformStyle, getDisplayName, togglePlatform, hasTwitterSelected,
     handleRephrase, applyRephrase, openRephraseModal, handleShortenForTwitter,
     publishNow, schedulePost, handlePostPress,
@@ -83,7 +84,7 @@ export default function CreatePost({
         <View className="bg-paper-light rounded-3xl border border-rule mb-4 overflow-hidden">
           <TextInput
             value={caption}
-            onChangeText={setCaption}
+            onChangeText={handleCaptionChange}
             placeholder="Say something worth crossing five timelines..."
             placeholderTextColor={colors.inkSoft}
             multiline
@@ -136,8 +137,8 @@ export default function CreatePost({
 
           {showFontPicker && (
             <FontPicker
-              caption={caption}
-              onChange={setCaption}
+              selected={selectedFont}
+              onSelectFont={selectFont}
               onClose={() => setShowFontPicker(false)}
             />
           )}

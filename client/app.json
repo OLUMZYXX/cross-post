@@ -20,10 +20,12 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSUserNotificationsUsageDescription": "CrossPost needs notifications to alert you when posts are published, fail, or are about to go live.",
+        "NSPhotoLibraryUsageDescription": "CrossPost needs access to your photo library so you can choose photos and videos to attach to your posts. For example, you can pick an image from your library to publish to your connected social media accounts.",
+        "NSCameraUsageDescription": "CrossPost needs access to your camera so you can capture a photo or video to attach to your posts. For example, you can take a picture and publish it to your connected social media accounts.",
         "CFBundleURLTypes": [
           {
             "CFBundleURLSchemes": [
-              "com.googleusercontent.apps.1023764187200-6jf3uvng1benbp1jpkqensag08gf0848",
+              "com.googleusercontent.apps.1060869198401-ft8s5gbsfd1m8s8ml0f9565pt5thfirt",
               "crosspost"
             ]
           }
@@ -65,9 +67,32 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "e6e6d941-ff9c-474f-bdb1-5ce54de12693"
+        "projectId": "e6e6d941-ff9c-474f-bdb1-5ce54de12693",
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "ShareExtension",
+                  "bundleIdentifier": "com.crosspostapp.mobile.share-extension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.crosspostapp.mobile"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
       }
     },
-    "owner": "mide_1"
+    "owner": "mide_1",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e6e6d941-ff9c-474f-bdb1-5ce54de12693"
+    }
   }
 }

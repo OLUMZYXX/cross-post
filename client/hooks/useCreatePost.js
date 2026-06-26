@@ -8,8 +8,10 @@ import { postAPI, ensureServerAwake } from "../services/api";
 import { uploadToCloudinary } from "../services/cloudinary";
 import { addPending, removePending } from "../services/pendingPublishes";
 import { TWITTER_CHAR_LIMIT } from "../components/platformLimits";
+import { applyFont } from "../utils/unicodeFonts";
 
 const SELECTED_PLATFORMS_KEY = "@crosspost_selected_platforms";
+const SELECTED_FONT_KEY = "@crosspost_selected_font";
 
 export default function useCreatePost({
   connectedPlatforms,
@@ -95,6 +97,29 @@ export default function useCreatePost({
   const [copyrightResult, setCopyrightResult] = useState(null);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateInfo, setDuplicateInfo] = useState(null);
+  const [selectedFont, setSelectedFont] = useState("plain");
+
+  useEffect(() => {
+    AsyncStorage.getItem(SELECTED_FONT_KEY)
+      .then((stored) => {
+        if (stored) setSelectedFont(stored);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleCaptionChange = (text) => {
+    setCaption(
+      selectedFont && selectedFont !== "plain"
+        ? applyFont(text, selectedFont)
+        : text,
+    );
+  };
+
+  const selectFont = (key) => {
+    setSelectedFont(key);
+    AsyncStorage.setItem(SELECTED_FONT_KEY, key).catch(() => {});
+    setCaption((prev) => applyFont(prev, key));
+  };
 
   useEffect(() => {
     if (isPosting || isUploading) {
@@ -153,7 +178,7 @@ export default function useCreatePost({
   };
 
   const applyRephrase = () => {
-    if (rephrasedText) setCaption(rephrasedText);
+    if (rephrasedText) handleCaptionChange(rephrasedText);
     setShowRephraseModal(false);
     setRephrasedText(null);
     setSelectedTone(null);
@@ -303,7 +328,7 @@ export default function useCreatePost({
   const handleCopyrightProceed = () => { setShowCopyrightModal(false); setCopyrightResult(null); setShowScheduleModal(true); };
   const handleCopyrightEdit = () => { setShowCopyrightModal(false); setCopyrightResult(null); };
   const handleUseSafeVersion = () => {
-    if (copyrightResult?.safeVersion) setCaption(copyrightResult.safeVersion);
+    if (copyrightResult?.safeVersion) handleCaptionChange(copyrightResult.safeVersion);
     setShowCopyrightModal(false);
     setCopyrightResult(null);
   };
@@ -402,6 +427,7 @@ export default function useCreatePost({
     showCopyrightModal, setShowCopyrightModal,
     isCopyrightChecking, copyrightResult,
     showDuplicateModal, setShowDuplicateModal, duplicateInfo,
+    selectedFont, selectFont, handleCaptionChange,
     getPlatformStyle, getDisplayName, togglePlatform, hasTwitterSelected,
     handleRephrase, applyRephrase, openRephraseModal, handleShortenForTwitter,
     publishNow, schedulePost, handlePostPress,

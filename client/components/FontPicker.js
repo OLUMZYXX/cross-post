@@ -1,13 +1,10 @@
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { FONT_OPTIONS, applyFont } from "../utils/unicodeFonts";
+import { FONT_OPTIONS } from "../utils/unicodeFonts";
 import { useTheme } from "../constants/theme";
 
-export default function FontPicker({ caption, onChange, onClose }) {
+export default function FontPicker({ selected, onSelectFont, onClose }) {
   const { colors } = useTheme();
-  const handleSelect = (key) => {
-    onChange(applyFont(caption, key));
-  };
 
   return (
     <View
@@ -23,36 +20,39 @@ export default function FontPicker({ caption, onChange, onClose }) {
         </TouchableOpacity>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {FONT_OPTIONS.map((opt) => (
-          <TouchableOpacity
-            key={opt.key}
-            onPress={() => handleSelect(opt.key)}
-            activeOpacity={0.8}
-            style={{
-              backgroundColor: colors.paper,
-              borderWidth: 1,
-              borderColor: colors.rule,
-              borderRadius: 14,
-              paddingHorizontal: 16,
-              paddingVertical: 10,
-              marginRight: 8,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: colors.ink, fontSize: 16 }}>{opt.preview}</Text>
-            <Text
+        {FONT_OPTIONS.map((opt) => {
+          const isActive = (selected || "plain") === opt.key;
+          return (
+            <TouchableOpacity
+              key={opt.key}
+              onPress={() => onSelectFont(opt.key)}
+              activeOpacity={0.8}
               style={{
-                color: colors.inkMuted,
-                fontFamily: "HankenGrotesk_500Medium",
-                fontSize: 9,
-                marginTop: 2,
-                letterSpacing: 0.4,
+                backgroundColor: isActive ? colors.terracottaSoft : colors.paper,
+                borderWidth: 1,
+                borderColor: isActive ? colors.terracotta : colors.rule,
+                borderRadius: 14,
+                paddingHorizontal: 16,
+                paddingVertical: 10,
+                marginRight: 8,
+                alignItems: "center",
               }}
             >
-              {opt.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text style={{ color: colors.ink, fontSize: 16 }}>{opt.preview}</Text>
+              <Text
+                style={{
+                  color: isActive ? colors.terracotta : colors.inkMuted,
+                  fontFamily: "HankenGrotesk_500Medium",
+                  fontSize: 9,
+                  marginTop: 2,
+                  letterSpacing: 0.4,
+                }}
+              >
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
     </View>
   );
