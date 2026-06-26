@@ -36,7 +36,10 @@ export default function SignUp({ onNavigateToSignIn, onNavigateToHome }) {
     if (!googleResponse) return;
     if (googleResponse.type === "success") {
       const accessToken = googleResponse.authentication?.accessToken;
-      if (accessToken) return handleGoogleToken(accessToken);
+      if (accessToken) {
+        handleGoogleToken(accessToken);
+        return;
+      }
       showToast({ type: "error", title: "Google sign-up failed", message: "No access token returned." });
       return;
     }
