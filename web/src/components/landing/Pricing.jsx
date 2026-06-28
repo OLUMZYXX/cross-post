@@ -13,52 +13,51 @@ const FEATURES = [
 
 export default function Pricing() {
   return (
-    <section id="pricing" className="py-14 md:py-24 px-4 md:px-6">
+    <section id="pricing" className="py-20 md:py-28 px-5 md:px-6 border-t border-white/[0.06] bg-white/[0.015]">
       <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-10 md:mb-16">
-          <h2 className="text-2xl md:text-4xl font-extrabold text-white mb-2 md:mb-4 tracking-tight">
+        <div className="text-center mb-12">
+          <p className="text-green-400 text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+            Pricing
+          </p>
+          <h2 className="font-headline text-3xl md:text-4xl font-bold tracking-tight text-white mb-3">
             Free to use
           </h2>
-          <p className="text-neutral-400 text-xs md:text-base">
-            Every feature, no subscription, no hidden costs
+          <p className="text-neutral-400 text-base">
+            Every feature, no subscription, no hidden costs.
           </p>
         </div>
 
-        <div className="max-w-md mx-auto">
-          <div className="relative rounded-xl md:rounded-2xl p-5 md:p-7 glass gradient-border bg-white/[0.03]">
-            <span className="inline-block text-green-400 text-[10px] md:text-[11px] font-semibold mb-2 md:mb-3 tracking-wide uppercase">
-              Everything included
+        <div className="max-w-md mx-auto rounded-3xl border border-white/[0.08] bg-[#0a0a0a] p-8">
+          <p className="text-green-400 text-xs font-semibold tracking-[0.15em] uppercase mb-3">
+            Everything included
+          </p>
+          <div className="flex items-baseline gap-1.5 mb-1">
+            <span className="font-headline text-5xl font-bold tracking-tight text-white">
+              $0
             </span>
-            <h3 className="text-white text-base md:text-lg font-bold">Free</h3>
-            <div className="flex items-baseline gap-1 mt-1 mb-1">
-              <span className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-                $0
-              </span>
-              <span className="text-neutral-500 text-xs md:text-sm">forever</span>
-            </div>
-            <p className="text-neutral-500 text-xs md:text-sm mb-4 md:mb-6">
-              All features, completely free
-            </p>
-
-            <ul className="space-y-2 md:space-y-3 mb-5 md:mb-7">
-              {FEATURES.map((f) => (
-                <li key={f} className="flex items-center gap-2">
-                  <div className="w-4 h-4 md:w-5 md:h-5 rounded-md bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                    <span className="md:hidden"><Check size={10} className="text-green-400" /></span>
-                    <span className="hidden md:inline-flex"><Check size={12} className="text-green-400" /></span>
-                  </div>
-                  <span className="text-neutral-300 text-xs md:text-sm">{f}</span>
-                </li>
-              ))}
-            </ul>
-
-            <Link
-              href="/signup"
-              className="block text-center py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 bg-white text-black hover:bg-neutral-200 shadow-lg shadow-white/5"
-            >
-              Get Started
-            </Link>
+            <span className="text-neutral-500 text-sm">forever</span>
           </div>
+          <p className="text-neutral-400 text-sm mb-7">
+            All features, completely free.
+          </p>
+
+          <ul className="space-y-3 mb-8">
+            {FEATURES.map((f) => (
+              <li key={f} className="flex items-center gap-3">
+                <span className="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                  <Check size={12} className="text-green-400" />
+                </span>
+                <span className="text-neutral-300 text-sm">{f}</span>
+              </li>
+            ))}
+          </ul>
+
+          <Link
+            href="/signup"
+            className="block text-center py-3 rounded-xl text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition-colors duration-200"
+          >
+            Get Started
+          </Link>
         </div>
       </div>
     </section>

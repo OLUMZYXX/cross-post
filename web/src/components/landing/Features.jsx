@@ -1,46 +1,39 @@
-import {
-  Send,
-  Calendar,
-  Image,
-  Sparkles,
-  BarChart3,
-  Shield,
-} from "lucide-react";
+import { Send, Calendar, Image, Sparkles, BarChart3, Shield } from "lucide-react";
 
 const FEATURES = [
   {
     icon: Send,
-    title: "Multi-Platform Posting",
+    title: "Multi-platform posting",
     description:
       "Publish to Facebook, Instagram, TikTok, Twitter/X, LinkedIn, YouTube, Reddit, and Telegram at once.",
   },
   {
     icon: Calendar,
-    title: "Schedule Content",
+    title: "Schedule content",
     description:
       "Plan ahead and let Cross-Post publish automatically on your schedule.",
   },
   {
     icon: Image,
-    title: "Media Support",
+    title: "Media support",
     description:
       "Upload images and videos with automatic optimization for each platform.",
   },
   {
     icon: Sparkles,
-    title: "AI Rephrase",
+    title: "AI rephrase",
     description:
-      "Rewrite captions in different tones — casual, professional, funny — powered by AI.",
+      "Rewrite captions in different tones — casual, professional, or funny — powered by AI.",
   },
   {
     icon: BarChart3,
     title: "Analytics",
     description:
-      "Track publishing performance with success rates, weekly activity, and platform breakdowns.",
+      "Track success rates, weekly activity, and platform breakdowns at a glance.",
   },
   {
     icon: Shield,
-    title: "Secure",
+    title: "Secure by default",
     description:
       "Two-factor authentication, encrypted tokens, and no access to your platform passwords.",
   },
@@ -48,33 +41,25 @@ const FEATURES = [
 
 export default function Features() {
   return (
-    <section id="features" className="py-14 md:py-24 px-4 md:px-6 relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(34,197,94,0.04)_0%,_transparent_70%)]" />
-
-      <div className="max-w-5xl mx-auto relative">
-        <div className="text-center mb-10 md:mb-16">
-          <h2 className="text-2xl md:text-4xl font-extrabold text-white mb-2 md:mb-4 tracking-tight">
-            Everything you need
-          </h2>
-          <p className="text-neutral-400 text-xs md:text-base max-w-md mx-auto">
-            Powerful features to streamline your social media workflow
+    <section id="features" className="py-20 md:py-28 px-5 md:px-6 border-t border-white/[0.06]">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-14 md:mb-20">
+          <p className="text-green-400 text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+            Features
           </p>
+          <h2 className="font-headline text-3xl md:text-4xl font-bold tracking-tight text-white">
+            Everything you need to post smarter
+          </h2>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
-          {FEATURES.map((feature, i) => (
-            <div
-              key={feature.title}
-              className={`group glass rounded-xl md:rounded-2xl p-4 md:p-6 hover:bg-white/[0.04] transition-all duration-300 animate-fade-in-up delay-${(i + 1) * 100}`}
-            >
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-white/[0.06] flex items-center justify-center mb-3 md:mb-4 group-hover:bg-green-500/10 transition-colors duration-300">
-                <span className="md:hidden"><feature.icon size={15} className="text-neutral-400 group-hover:text-green-400 transition-colors duration-300" /></span>
-                <span className="hidden md:inline-flex"><feature.icon size={18} className="text-neutral-400 group-hover:text-green-400 transition-colors duration-300" /></span>
-              </div>
-              <h3 className="text-white font-semibold text-xs md:text-[15px] mb-1 md:mb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+          {FEATURES.map((feature) => (
+            <div key={feature.title} className="border-t border-white/10 pt-6">
+              <feature.icon size={22} className="text-green-400 mb-5" />
+              <h3 className="text-white font-semibold text-lg mb-2">
                 {feature.title}
               </h3>
-              <p className="text-neutral-500 text-[11px] md:text-sm leading-relaxed">
+              <p className="text-neutral-400 text-sm leading-relaxed">
                 {feature.description}
               </p>
             </div>

@@ -1,5 +1,6 @@
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
+import Stats from "@/components/landing/Stats";
 import Features from "@/components/landing/Features";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Platforms from "@/components/landing/Platforms";
@@ -14,6 +15,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#0a0a0a] overflow-x-hidden">
       <Navbar />
       <Hero />
+      <Stats />
       <Features />
       <HowItWorks />
       <Platforms />

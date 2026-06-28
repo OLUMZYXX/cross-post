@@ -8,25 +8,25 @@ const NAV_LINKS = [
   { label: "Features", href: "#features" },
   { label: "Platforms", href: "#platforms" },
   { label: "Pricing", href: "#pricing" },
+  { label: "Support", href: "/support" },
 ];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-white/[0.04]">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20">
-            <span className="md:hidden"><Share2 size={13} className="text-black" /></span>
-            <span className="hidden md:inline-flex"><Share2 size={15} className="text-black" /></span>
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/[0.06]">
+      <div className="max-w-6xl mx-auto px-5 md:px-6 h-16 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center">
+            <Share2 size={15} className="text-white" />
           </div>
-          <span className="text-white font-bold text-[13px] md:text-[15px] tracking-tight">
+          <span className="text-white font-semibold text-[15px] tracking-tight">
             Cross-Post
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-9">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
@@ -38,7 +38,7 @@ export default function Navbar() {
           ))}
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2">
           <Link
             href="/signin"
             className="text-neutral-400 hover:text-white text-sm px-4 py-2 transition-colors duration-200"
@@ -47,42 +47,43 @@ export default function Navbar() {
           </Link>
           <Link
             href="/signup"
-            className="bg-white text-black text-sm font-semibold px-5 py-2 rounded-xl hover:bg-neutral-200 transition-all duration-200 shadow-lg shadow-white/5"
+            className="bg-green-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-green-600 transition-colors duration-200"
           >
-            Get Started
+            Start your free trial
           </Link>
         </div>
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden text-neutral-400 hover:text-white transition-colors"
+          aria-label="Toggle menu"
         >
-          {menuOpen ? <X size={20} /> : <Menu size={20} />}
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
       {menuOpen && (
-        <div className="md:hidden bg-[#0a0a0a]/95 backdrop-blur-2xl border-t border-white/[0.04] px-4 py-3 animate-fade-in">
+        <div className="md:hidden bg-[#0a0a0a] border-t border-white/[0.06] px-5 py-4 animate-fade-in">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              className="block text-neutral-400 hover:text-white text-xs py-2.5 transition-colors"
+              className="block text-neutral-400 hover:text-white text-sm py-2.5 transition-colors"
             >
               {link.label}
             </a>
           ))}
-          <div className="flex gap-2.5 mt-3 pt-3 border-t border-white/[0.04]">
+          <div className="flex gap-2.5 mt-3 pt-4 border-t border-white/[0.06]">
             <Link
               href="/signin"
-              className="flex-1 text-center text-neutral-400 text-xs py-2 rounded-lg border border-neutral-800 hover:border-neutral-700 transition-colors"
+              className="flex-1 text-center text-neutral-300 text-sm py-2.5 rounded-xl border border-white/10 hover:border-white/20 transition-colors"
             >
               Sign In
             </Link>
             <Link
               href="/signup"
-              className="flex-1 text-center bg-white text-black text-xs font-semibold py-2 rounded-lg"
+              className="flex-1 text-center bg-green-500 text-white text-sm font-medium py-2.5 rounded-xl"
             >
               Get Started
             </Link>
