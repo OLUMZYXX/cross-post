@@ -57,12 +57,12 @@ export default function HelpSupport({ onBack }) {
         <Text className="text-ink-muted text-xs mb-3 ml-1">CONTACT US</Text>
         <View className="bg-paper-light rounded-2xl border border-rule mb-6">
           <TouchableOpacity
-            onPress={() => Linking.openURL("mailto:support@crosspost.app")}
+            onPress={() => Linking.openURL("mailto:akinwumiolumide5@gmail.com")}
             className="flex-row items-center p-4 border-b border-rule"
           >
             <Ionicons name="mail-outline" size={18} color={getColors().olive} />
             <Text className="text-ink text-sm ml-3 flex-1">Email Support</Text>
-            <Text className="text-ink-muted text-xs">support@crosspost.app</Text>
+            <Text className="text-ink-muted text-xs">akinwumiolumide5@gmail.com</Text>
           </TouchableOpacity>
           <View className="flex-row items-center p-4">
             <Ionicons name="information-circle-outline" size={18} color={getColors().inkMuted} />

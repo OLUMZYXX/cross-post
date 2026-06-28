@@ -1,8 +1,8 @@
 const FAQS = [
   {
-    question: "Is there a free plan?",
+    question: "How much does it cost?",
     answer:
-      "Yes. The free plan includes up to 3 connected platforms, 10 posts per month, basic analytics, and 5 AI rephrases. No credit card required.",
+      "Cross-Post is completely free. Connect your platforms, publish unlimited posts, schedule, and use AI rephrase at no cost. No credit card required.",
   },
   {
     question: "Which platforms are supported?",
@@ -12,7 +12,7 @@ const FAQS = [
   {
     question: "Can I schedule posts for later?",
     answer:
-      "Absolutely. Set a date and time for any post and Cross-Post will publish it automatically. You can also bulk-schedule on the Pro plan.",
+      "Absolutely. Set a date and time for any post and Cross-Post will publish it automatically. You can also bulk-schedule multiple posts at once.",
   },
   {
     question: "How does AI rephrase work?",
@@ -25,9 +25,9 @@ const FAQS = [
       "Yes. We use encrypted OAuth tokens for platform access, two-factor authentication for your account, and never store your platform passwords.",
   },
   {
-    question: "Can I cancel anytime?",
+    question: "Are there any paid upgrades?",
     answer:
-      "Of course. There are no contracts or commitments. You can downgrade to the free plan or cancel your Pro subscription at any time.",
+      "No. Every feature is included for free with no contracts, commitments, or subscriptions. You can delete your account at any time from Settings.",
   },
 ];
 

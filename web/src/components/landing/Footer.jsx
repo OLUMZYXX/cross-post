@@ -16,13 +16,19 @@ export default function Footer() {
 
         <div className="flex items-center gap-6 md:gap-8">
           <a
-            href="/terms.html"
+            href="/support"
+            className="text-neutral-500 hover:text-neutral-300 text-xs md:text-sm transition-colors duration-200"
+          >
+            Support
+          </a>
+          <a
+            href="/terms"
             className="text-neutral-500 hover:text-neutral-300 text-xs md:text-sm transition-colors duration-200"
           >
             Terms
           </a>
           <a
-            href="/privacy.html"
+            href="/privacy"
             className="text-neutral-500 hover:text-neutral-300 text-xs md:text-sm transition-colors duration-200"
           >
             Privacy
