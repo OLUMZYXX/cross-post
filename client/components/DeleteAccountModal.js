@@ -86,32 +86,34 @@ export default function DeleteAccountModal({
                 className="bg-paper-deep border border-rule rounded-xl px-4 py-3 text-ink mb-4"
               />
 
-              <Text className="text-ink-muted text-xs mb-2">
-                {hasPassword
-                  ? "Enter your account password:"
-                  : "Account password (leave blank if you signed in with Google or Apple):"}
-              </Text>
-              <View className="flex-row items-center bg-paper-deep border border-rule rounded-xl mb-2">
-                <TextInput
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="Password"
-                  placeholderTextColor={getColors().inkMuted}
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                  className="flex-1 px-4 py-3 text-ink"
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword((v) => !v)}
-                  className="px-4"
-                >
-                  <Ionicons
-                    name={showPassword ? "eye-off-outline" : "eye-outline"}
-                    size={18}
-                    color={getColors().inkMuted}
-                  />
-                </TouchableOpacity>
-              </View>
+              {hasPassword && (
+                <>
+                  <Text className="text-ink-muted text-xs mb-2">
+                    Enter your account password:
+                  </Text>
+                  <View className="flex-row items-center bg-paper-deep border border-rule rounded-xl mb-2">
+                    <TextInput
+                      value={password}
+                      onChangeText={setPassword}
+                      placeholder="Password"
+                      placeholderTextColor={getColors().inkMuted}
+                      secureTextEntry={!showPassword}
+                      autoCapitalize="none"
+                      className="flex-1 px-4 py-3 text-ink"
+                    />
+                    <TouchableOpacity
+                      onPress={() => setShowPassword((v) => !v)}
+                      className="px-4"
+                    >
+                      <Ionicons
+                        name={showPassword ? "eye-off-outline" : "eye-outline"}
+                        size={18}
+                        color={getColors().inkMuted}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
 
               <TouchableOpacity
                 onPress={handleConfirm}
