@@ -1,4 +1,5 @@
 import Platform from "../models/Platform.js";
+import User from "../models/User.js";
 import {
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
@@ -10,12 +11,21 @@ import {
   generateCodeVerifier,
   generateCodeChallenge,
 } from "../utils/oauthState.js";
+import { isUserPro } from "../services/proAccess.js";
+import { Errors } from "../utils/AppError.js";
 
 function buildRedirectHtml(title, url) {
   return `<!DOCTYPE html><html><head><title>${title}</title><script>window.location.href="${url}";</script></head><body><p>${title}</p><p><a href="${url}">Click here if not redirected</a></p></body></html>`;
 }
 
 export async function initiateTwitterAuth(req, res) {
+  const user = await User.findById(req.user.id);
+  if (!isUserPro(user)) {
+    throw Errors.forbidden(
+      "Connecting Twitter/X requires Cross-Post Pro. Upgrade to post to Twitter/X.",
+    );
+  }
+
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
   const stateId = await createState({ userId: req.user.id, codeVerifier });

@@ -13,21 +13,21 @@ import { vars } from "nativewind";
 const THEME_KEY = "@crosspost_theme";
 
 export const LIGHT_COLORS = {
-  paper: "#DDD3BD",
-  paperLight: "#E3DAC4",
-  paperDeep: "#CFC4AB",
-  ink: "#1B1711",
-  inkMuted: "#473D33",
-  inkSoft: "#6A5F50",
+  paper: "#FFFFFF",
+  paperLight: "#FFFFFF",
+  paperDeep: "#F4F4F5",
+  ink: "#18181B",
+  inkMuted: "#52525B",
+  inkSoft: "#71717A",
   terracotta: "#B14026",
   terracottaShadow: "#8E311B",
-  terracottaSoft: "#D9B19F",
+  terracottaSoft: "#F0D7CC",
   olive: "#4F573A",
-  oliveSoft: "#A8AE94",
+  oliveSoft: "#DDE2CF",
   info: "#3F576A",
-  infoSoft: "#BBC7D1",
-  rule: "#BFB39B",
-  ruleSoft: "#CEC4AD",
+  infoSoft: "#D7E0E8",
+  rule: "#E4E4E7",
+  ruleSoft: "#F1F1F3",
   white: "#FFFFFF",
 };
 

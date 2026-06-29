@@ -1,5 +1,7 @@
 import Post from "../models/Post.js";
+import User from "../models/User.js";
 import { Errors } from "../utils/AppError.js";
+import { isUserPro, platformsRequirePro } from "../services/proAccess.js";
 import {
   publishToAllPlatforms,
   deleteFromAllPlatforms,
@@ -133,6 +135,15 @@ export async function publishPost(req, res) {
     throw Errors.badRequest("Select at least one platform to publish");
   }
 
+  if (platformsRequirePro(post.platforms)) {
+    const user = await User.findById(req.user.id);
+    if (!isUserPro(user)) {
+      throw Errors.forbidden(
+        "Posting to Twitter/X requires Cross-Post Pro. Upgrade to publish to Twitter/X.",
+      );
+    }
+  }
+
   const results = await publishToAllPlatforms(req.user.id, post);
 
   const anySuccess = results.some((r) => r.success);
@@ -162,6 +173,15 @@ export async function retryPublish(req, res) {
     retryPlatforms.length === 0
   ) {
     throw Errors.badRequest("Specify which platforms to retry");
+  }
+
+  if (platformsRequirePro(retryPlatforms)) {
+    const user = await User.findById(req.user.id);
+    if (!isUserPro(user)) {
+      throw Errors.forbidden(
+        "Posting to Twitter/X requires Cross-Post Pro. Upgrade to publish to Twitter/X.",
+      );
+    }
   }
 
   const originalPlatforms = post.platforms;
@@ -197,6 +217,15 @@ export async function schedulePost(req, res) {
 
   if (!post) {
     throw Errors.notFound("Post not found");
+  }
+
+  if (platformsRequirePro(post.platforms)) {
+    const user = await User.findById(req.user.id);
+    if (!isUserPro(user)) {
+      throw Errors.forbidden(
+        "Scheduling to Twitter/X requires Cross-Post Pro. Upgrade to publish to Twitter/X.",
+      );
+    }
   }
 
   const { scheduledAt } = req.body;

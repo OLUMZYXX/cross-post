@@ -26,3 +26,6 @@ export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
 export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 export const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:4000";
 export const SERVER_URL = process.env.SERVER_URL || "http://localhost:4000";
+export const PRO_ALLOWLIST_EMAILS =
+  process.env.PRO_ALLOWLIST_EMAILS || "akinwumiemmanuel02@gmail.com";
+export const REVENUECAT_WEBHOOK_AUTH = process.env.REVENUECAT_WEBHOOK_AUTH || "";

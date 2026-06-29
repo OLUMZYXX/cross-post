@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import {
+  isUserPro,
+  getProSource,
+  trialDaysLeft,
+} from "../services/proAccess.js";
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -44,6 +49,16 @@ const userSchema = new mongoose.Schema({
     postAlerts: { type: Boolean, default: true },
     scheduleReminders: { type: Boolean, default: true },
   },
+  subscription: {
+    isPro: { type: Boolean, default: false },
+    plan: { type: String, default: null },
+    store: { type: String, default: null },
+    productId: { type: String, default: null },
+    expiresAt: { type: Date, default: null },
+    willRenew: { type: Boolean, default: false },
+    originalTransactionId: { type: String, default: null },
+    updatedAt: { type: Date, default: null },
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -73,6 +88,9 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 userSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   userObject.hasPassword = !!userObject.passwordHash;
+  userObject.isPro = isUserPro(this);
+  userObject.proSource = getProSource(this);
+  userObject.trialDaysLeft = trialDaysLeft(this);
   delete userObject.passwordHash;
   delete userObject.twoFactorSecret;
   return userObject;

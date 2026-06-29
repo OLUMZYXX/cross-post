@@ -43,6 +43,10 @@ import {
   wakeUpServer,
 } from "./services/api";
 import { BIOMETRIC_KEY, getAutoLockDelay } from "./constants/appLock";
+import {
+  configureSubscriptions,
+  logOutSubscriptions,
+} from "./services/subscription";
 
 try {
   Notifications.setNotificationHandler({
@@ -270,6 +274,7 @@ export default function App() {
           setUser(data.user);
           setCurrentScreen("home");
 
+          configureSubscriptions(data.user?._id);
           registerForPushNotifications();
 
           const biometricEnabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
@@ -334,6 +339,7 @@ export default function App() {
           onNavigateToHome={(userData) => {
             setUser(userData);
             setCurrentScreen("home");
+            configureSubscriptions(userData?._id);
             registerForPushNotifications();
           }}
         />
@@ -347,6 +353,7 @@ export default function App() {
           onNavigateToHome={(userData) => {
             setUser(userData);
             setCurrentScreen("home");
+            configureSubscriptions(userData?._id);
             registerForPushNotifications();
           }}
         />
@@ -360,6 +367,7 @@ export default function App() {
           onUpdateUser={setUser}
           oauthRefreshKey={oauthRefreshKey}
           onLogout={() => {
+            logOutSubscriptions();
             setUser(null);
             setCurrentScreen("signin");
           }}

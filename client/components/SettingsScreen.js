@@ -6,6 +6,8 @@ import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import ThemePicker from "./ThemePicker";
 import DeleteAccountModal from "./DeleteAccountModal";
+import Paywall from "./Paywall";
+import useSubscription from "../hooks/useSubscription";
 import { useToast } from "./Toast";
 import { authAPI, clearToken } from "../services/api";
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "../constants/legal";
@@ -64,6 +66,10 @@ export default function SettingsScreen({
   onResetOnboarding,
 }) {
   const { showToast } = useToast();
+  const { isPro } = useSubscription(user);
+  const trialDaysLeft = user?.trialDaysLeft ?? 0;
+  const onTrial = user?.proSource === "trial" && trialDaysLeft > 0;
+  const [paywallVisible, setPaywallVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [accountHasPassword, setAccountHasPassword] = useState(
@@ -165,6 +171,40 @@ export default function SettingsScreen({
             </View>
           </TouchableOpacity>
 
+          <SectionLabel label="Subscription" />
+          <TouchableOpacity
+            onPress={() => setPaywallVisible(true)}
+            className="bg-paper-light rounded-2xl p-4 border border-olive/40 mb-2 flex-row items-center"
+            activeOpacity={0.7}
+          >
+            <View className="w-10 h-10 rounded-xl bg-olive/15 items-center justify-center mr-3">
+              <Ionicons name="star" size={18} color={getColors().olive} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-ink text-sm font-sans-bold">
+                {onTrial ? "Free trial" : isPro ? "Cross-Post Pro" : "Upgrade to Pro"}
+              </Text>
+              <Text className="text-ink-muted text-[11px] mt-0.5">
+                {onTrial
+                  ? `${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} of Pro left · tap to upgrade`
+                  : isPro
+                    ? "Active — all features unlocked"
+                    : "Unlock Twitter/X & unlimited features"}
+              </Text>
+            </View>
+            {onTrial ? (
+              <View className="bg-olive/15 rounded-full px-2.5 py-1">
+                <Text className="text-olive text-[10px] font-sans-bold">TRIAL</Text>
+              </View>
+            ) : isPro ? (
+              <View className="bg-olive/15 rounded-full px-2.5 py-1">
+                <Text className="text-olive text-[10px] font-sans-bold">ACTIVE</Text>
+              </View>
+            ) : (
+              <Ionicons name="chevron-forward" size={16} color="#374151" />
+            )}
+          </TouchableOpacity>
+
           <SectionLabel label="Account" />
           <View className="bg-paper-light rounded-2xl border border-rule overflow-hidden">
             <SettingsRow
@@ -262,6 +302,13 @@ export default function SettingsScreen({
           </View>
         </ScrollView>
       </View>
+
+      <Paywall
+        visible={paywallVisible}
+        onClose={() => setPaywallVisible(false)}
+        onSuccess={onRefresh}
+        user={user}
+      />
 
       <DeleteAccountModal
         visible={deleteModalVisible}

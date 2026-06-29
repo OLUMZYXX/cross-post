@@ -23,6 +23,8 @@ import NotificationsInbox from "./NotificationsInbox";
 import PrivacySecurity from "./PrivacySecurity";
 import HelpSupport from "./HelpSupport";
 import ScreenTransition from "./ScreenTransition";
+import Paywall from "./Paywall";
+import useSubscription from "../hooks/useSubscription";
 import { useToast } from "./Toast";
 import { postAPI, platformAPI, notificationAPI, clearToken } from "../services/api";
 import { listPending, removePending, clearStale } from "../services/pendingPublishes";
@@ -53,6 +55,8 @@ export default function HomePage({
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [telegramModalVisible, setTelegramModalVisible] = useState(false);
+  const [paywallVisible, setPaywallVisible] = useState(false);
+  const { isPro } = useSubscription(user);
   const [sentSubTab, setSentSubTab] = useState("published");
   const [composerEpoch, setComposerEpoch] = useState(0);
   const prevTabRef = useRef(activeTab);
@@ -400,6 +404,12 @@ export default function HomePage({
   };
 
   const handleConnectPlatform = async (platformName) => {
+    if (platformName === "Twitter" && !isPro) {
+      setModalVisible(false);
+      setPaywallVisible(true);
+      return;
+    }
+
     if (platformName === "Telegram") {
       setModalVisible(false);
       setTelegramModalVisible(true);
@@ -756,6 +766,13 @@ export default function HomePage({
         visible={telegramModalVisible}
         onClose={() => setTelegramModalVisible(false)}
         onConnected={handleTelegramConnected}
+      />
+
+      <Paywall
+        visible={paywallVisible}
+        onClose={() => setPaywallVisible(false)}
+        onSuccess={onRefresh}
+        user={user}
       />
 
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
