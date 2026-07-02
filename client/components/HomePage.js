@@ -775,7 +775,13 @@ export default function HomePage({
         user={user}
       />
 
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <BottomNav
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        onCompose={() => {
+          if (activeTab !== "home") focusComposer();
+        }}
+      />
     </View>
   );
 }

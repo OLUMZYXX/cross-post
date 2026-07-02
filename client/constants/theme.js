@@ -13,7 +13,7 @@ import { vars } from "nativewind";
 const THEME_KEY = "@crosspost_theme";
 
 export const LIGHT_COLORS = {
-  paper: "#FFFFFF",
+  paper: "#FAFAFA",
   paperLight: "#FFFFFF",
   paperDeep: "#F4F4F5",
   ink: "#18181B",
