@@ -34,7 +34,10 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const { data } = await authAPI.signin(email, password);
-    if (data.requires2FA) return { requires2FA: true, tempToken: data.tempToken };
+    if (data.requiresTwoFactor || data.requires2FA) {
+      return { requires2FA: true, tempToken: data.tempToken };
+    }
+    if (!data.token) throw new Error("Sign in failed. Please try again.");
     saveToken(data.token);
     setUser(data.user);
     return { success: true };

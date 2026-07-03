@@ -22,9 +22,9 @@ const PLATFORMS = [
 
 export default function Platforms() {
   return (
-    <section id="platforms" className="py-20 md:py-28 px-5 md:px-6 border-t border-white/[0.06]">
-      <div className="max-w-5xl mx-auto text-center">
-        <p className="text-green-400 text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+    <section id="platforms" className="py-24 md:py-36 px-5 md:px-6 border-t border-white/[0.06]">
+      <div className="max-w-[1400px] mx-auto text-center">
+        <p className="text-green-400 text-sm font-semibold tracking-[0.15em] uppercase mb-4">
           Platforms
         </p>
         <h2 className="font-headline text-3xl md:text-4xl font-bold tracking-tight text-white mb-3">

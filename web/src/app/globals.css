@@ -1,6 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap");
 @import "tailwindcss";
 
+@theme {
+  --color-green-300: #82cfa8;
+  --color-green-400: #3aa871;
+  --color-green-500: #1f8f57;
+  --color-green-600: #197a49;
+}
+
 body {
   font-family:
     "Inter",
@@ -171,7 +178,7 @@ body {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), transparent 60%);
+  background: linear-gradient(135deg, rgba(31, 143, 87, 0.35), transparent 60%);
   mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
@@ -187,8 +194,37 @@ body {
 }
 
 .text-gradient-green {
-  background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+  background: linear-gradient(135deg, #3aa871 0%, #1f8f57 50%, #197a49 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.hero-glow {
+  background:
+    radial-gradient(
+      ellipse 70% 50% at 50% -10%,
+      rgba(31, 143, 87, 0.12) 0%,
+      transparent 65%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 85%,
+      rgba(255, 255, 255, 0.015) 100%
+    );
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 90% 65% at 50% 0%, #000 25%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 65% at 50% 0%, #000 25%, transparent 78%);
+}
+
+::selection {
+  background: rgba(31, 143, 87, 0.45);
+  color: #fff;
 }

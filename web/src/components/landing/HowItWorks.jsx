@@ -26,10 +26,10 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-20 md:py-28 px-5 md:px-6 border-t border-white/[0.06] bg-white/[0.015]">
-      <div className="max-w-5xl mx-auto">
+    <section className="py-24 md:py-36 px-5 md:px-6 border-t border-white/[0.06] bg-white/[0.015]">
+      <div className="max-w-[1400px] mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-14 md:mb-20">
-          <p className="text-green-400 text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+          <p className="text-green-400 text-sm font-semibold tracking-[0.15em] uppercase mb-4">
             How it works
           </p>
           <h2 className="font-headline text-3xl md:text-4xl font-bold tracking-tight text-white">
@@ -51,7 +51,7 @@ export default function HowItWorks() {
               <h3 className="text-white font-semibold text-lg mb-2">
                 {step.title}
               </h3>
-              <p className="text-neutral-400 text-sm leading-relaxed">
+              <p className="text-neutral-400 text-[15px] leading-relaxed">
                 {step.description}
               </p>
             </div>

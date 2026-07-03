@@ -1,8 +1,13 @@
+"use client";
+
+import { useState } from "react";
+import { Plus } from "lucide-react";
+
 const FAQS = [
   {
     question: "How much does it cost?",
     answer:
-      "Cross-Post is completely free. Connect your platforms, publish unlimited posts, schedule, and use AI rephrase at no cost. No credit card required.",
+      "Cross-Post is free to start. Connect your platforms, publish posts, schedule, and use AI rephrase at no cost. No credit card required.",
   },
   {
     question: "Which platforms are supported?",
@@ -25,38 +30,79 @@ const FAQS = [
       "Yes. We use encrypted OAuth tokens, two-factor authentication, and never store your platform passwords.",
   },
   {
-    question: "Are there any paid upgrades?",
+    question: "Can I delete my account?",
     answer:
-      "No. Every feature is free with no contracts or subscriptions. You can delete your account any time from Settings.",
+      "Any time. Go to Settings → Delete Account and your account, posts, and connected platforms are permanently removed.",
   },
 ];
 
-export default function Faq() {
+function FaqItem({ faq, isOpen, onToggle }) {
   return (
-    <section id="faq" className="py-20 md:py-28 px-5 md:px-6 border-t border-white/[0.06] bg-white/[0.015]">
-      <div className="max-w-5xl mx-auto">
-        <div className="max-w-xl mb-14 md:mb-16">
-          <p className="text-green-400 text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+    <div className="border-b border-white/[0.07]">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between gap-4 py-5 text-left group"
+      >
+        <span className="text-white text-base md:text-lg font-semibold group-hover:text-green-300 transition-colors duration-200">
+          {faq.question}
+        </span>
+        <span
+          className={`flex-shrink-0 w-7 h-7 rounded-full border border-white/10 flex items-center justify-center transition-all duration-300 ${
+            isOpen ? "rotate-45 bg-green-500/10 border-green-500/30" : "group-hover:border-white/25"
+          }`}
+        >
+          <Plus
+            size={14}
+            className={isOpen ? "text-green-400" : "text-neutral-400"}
+          />
+        </span>
+      </button>
+      <div
+        className={`grid transition-all duration-300 ease-out ${
+          isOpen ? "grid-rows-[1fr] opacity-100 pb-5" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="text-neutral-400 text-[15px] leading-relaxed max-w-2xl">
+            {faq.answer}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Faq() {
+  const [openIndex, setOpenIndex] = useState(0);
+
+  return (
+    <section id="faq" className="py-24 md:py-36 px-5 md:px-6 border-t border-white/[0.06] bg-white/[0.015]">
+      <div className="max-w-[1240px] mx-auto grid lg:grid-cols-[1fr_1.6fr] gap-10 lg:gap-20">
+        <div>
+          <p className="text-green-400 text-sm font-semibold tracking-[0.15em] uppercase mb-4">
             FAQ
           </p>
           <h2 className="font-headline text-3xl md:text-4xl font-bold tracking-tight text-white mb-3">
             Frequently asked questions
           </h2>
           <p className="text-neutral-400 text-base">
-            Everything you need to know about Cross-Post.
+            Everything you need to know about Cross-Post. Can&apos;t find your
+            answer?{" "}
+            <a href="/support" className="text-green-400 hover:text-green-300 transition-colors">
+              Contact support
+            </a>
+            .
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-10">
+        <div className="border-t border-white/[0.07]">
           {FAQS.map((faq, i) => (
-            <div key={i}>
-              <h3 className="text-white text-[15px] font-semibold mb-2.5">
-                {faq.question}
-              </h3>
-              <p className="text-neutral-400 text-sm leading-relaxed">
-                {faq.answer}
-              </p>
-            </div>
+            <FaqItem
+              key={i}
+              faq={faq}
+              isOpen={openIndex === i}
+              onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
+            />
           ))}
         </div>
       </div>
