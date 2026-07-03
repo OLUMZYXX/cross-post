@@ -4,7 +4,13 @@ import { API_BASE_URL } from "../config/apiConfig";
 const TOKEN_KEY = "@crosspost_token";
 const UPLOAD_TIMEOUT = 600000;
 
-export async function uploadToCloudinary(uri, type = "image", mimeType, fileName) {
+export async function uploadToCloudinary(
+  uri,
+  type = "image",
+  mimeType,
+  fileName,
+  { skipWatermark = false } = {},
+) {
   const token = await AsyncStorage.getItem(TOKEN_KEY);
 
   const actualMimeType = mimeType || (type === "video" ? "video/mp4" : "image/jpeg");
@@ -19,6 +25,9 @@ export async function uploadToCloudinary(uri, type = "image", mimeType, fileName
     name: actualName,
     type: actualMimeType,
   });
+  if (skipWatermark) {
+    formData.append("skipWatermark", "true");
+  }
 
   const serverUrl = API_BASE_URL.replace(/\/api$/, "");
   const controller = new AbortController();

@@ -152,6 +152,8 @@ export const authAPI = {
 
   deleteAccount: ({ password, confirmText }) =>
     api.post("/auth/delete-account", { password, confirmText }),
+
+  updateWatermark: (config) => api.put("/auth/watermark", config),
 };
 
 export const postAPI = {

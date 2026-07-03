@@ -49,6 +49,14 @@ const userSchema = new mongoose.Schema({
     postAlerts: { type: Boolean, default: true },
     scheduleReminders: { type: Boolean, default: true },
   },
+  watermark: {
+    enabled: { type: Boolean, default: false },
+    publicId: { type: String, default: null },
+    url: { type: String, default: null },
+    position: { type: String, default: "top-right" },
+    size: { type: Number, default: 18 },
+    opacity: { type: Number, default: 85 },
+  },
   subscription: {
     isPro: { type: Boolean, default: false },
     plan: { type: String, default: null },

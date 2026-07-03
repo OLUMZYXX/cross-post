@@ -5,6 +5,11 @@ import User from "../models/User.js";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/env.js";
 import { Errors } from "../utils/AppError.js";
 import { deleteUserAccount } from "../services/accountDeletion.js";
+import {
+  isUserPro,
+  getProSource,
+  trialDaysLeft,
+} from "../services/proAccess.js";
 
 function generateToken(user) {
   return jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, {
@@ -21,6 +26,9 @@ function generateTempToken(user) {
 function sanitiseUser(user) {
   const { passwordHash, twoFactorSecret, ...safe } = user.toObject();
   safe.hasPassword = !!passwordHash;
+  safe.isPro = isUserPro(user);
+  safe.proSource = getProSource(user);
+  safe.trialDaysLeft = trialDaysLeft(user);
   return safe;
 }
 
@@ -236,6 +244,29 @@ export async function disable2FA(req, res) {
   await user.save();
 
   res.json({ success: true, data: { twoFactorEnabled: false } });
+}
+
+export async function updateWatermark(req, res) {
+  const { enabled, publicId, url, position, size, opacity } = req.body;
+
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    throw Errors.notFound("User not found");
+  }
+
+  const current = user.watermark || {};
+  user.watermark = {
+    enabled: enabled !== undefined ? !!enabled : current.enabled,
+    publicId: publicId !== undefined ? publicId : current.publicId,
+    url: url !== undefined ? url : current.url,
+    position: position || current.position || "top-right",
+    size: size !== undefined ? Number(size) : current.size ?? 18,
+    opacity: opacity !== undefined ? Number(opacity) : current.opacity ?? 85,
+  };
+
+  await user.save();
+
+  res.json({ success: true, data: { user: sanitiseUser(user) } });
 }
 
 export async function deleteAccount(req, res) {

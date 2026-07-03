@@ -60,6 +60,7 @@ export default function SettingsScreen({
   onEditProfile,
   onConnectedAccounts,
   onNotifications,
+  onWatermark,
   onPrivacy,
   onHelp,
   onLogout,
@@ -223,6 +224,14 @@ export default function SettingsScreen({
               label="Notifications"
               description="Push alerts and email preferences"
               onPress={onNotifications}
+            />
+            <SettingsRow
+              icon="water-outline"
+              iconColor={getColors().info}
+              iconBg="bg-paper-deep"
+              label="Watermark"
+              description="Auto-add your logo to uploaded images"
+              onPress={onWatermark}
               isLast
             />
           </View>

@@ -19,6 +19,8 @@ import {
   CLOUDINARY_API_SECRET,
 } from "./config/env.js";
 import { authenticate } from "./middleware/auth.js";
+import User from "./models/User.js";
+import { applyWatermarkToUrl } from "./services/watermark.js";
 
 const app = express();
 
@@ -109,8 +111,9 @@ app.post(
     const resourceType = req.file.mimetype.startsWith("video/")
       ? "video"
       : "image";
+    const skipWatermark = req.body.skipWatermark === "true";
     const timestamp = Math.floor(Date.now() / 1000);
-    const folder = "cross-post";
+    const folder = skipWatermark ? "cross-post/watermarks" : "cross-post";
 
     const paramsToSign = `folder=${folder}&timestamp=${timestamp}${CLOUDINARY_API_SECRET}`;
     const signature = crypto
@@ -148,9 +151,15 @@ app.post(
       "/upload/f_auto,q_auto/",
     );
 
+    let finalUrl = optimizedUrl;
+    if (resourceType === "image" && !skipWatermark && req.user?.id) {
+      const user = await User.findById(req.user.id).select("watermark");
+      finalUrl = applyWatermarkToUrl(optimizedUrl, user?.watermark);
+    }
+
     res.json({
       success: true,
-      data: { url: optimizedUrl, publicId: data.public_id },
+      data: { url: finalUrl, publicId: data.public_id },
     });
   },
 );
