@@ -57,6 +57,10 @@ const userSchema = new mongoose.Schema({
     size: { type: Number, default: 18 },
     opacity: { type: Number, default: 85 },
   },
+  scorecardTemplate: {
+    publicId: { type: String, default: null },
+    url: { type: String, default: null },
+  },
   subscription: {
     isPro: { type: Boolean, default: false },
     plan: { type: String, default: null },

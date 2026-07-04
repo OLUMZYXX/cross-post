@@ -1,8 +1,11 @@
+import { useState } from "react";
 import * as Clipboard from "expo-clipboard";
-import { View, ScrollView, RefreshControl, Platform } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Platform } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
 import HomeHero from "./HomeHero";
+import ScorecardModal from "./ScorecardModal";
 import HomeCompose from "./HomeCompose";
 import HomePreview from "./HomePreview";
 import PlatformPreview from "./PlatformPreview";
@@ -45,6 +48,11 @@ export default function HomeScreen({
     onSaveDraft,
     onPostPublished,
   });
+
+  const [scorecardVisible, setScorecardVisible] = useState(false);
+  const baseImageUrl = composer.selectedMedia.find(
+    (m) => m.type === "image" && m.cloudinaryUrl,
+  )?.cloudinaryUrl;
 
   const scheduledCount = allPosts.filter((p) => p.status === "scheduled").length;
   const stats = {
@@ -111,6 +119,19 @@ export default function HomeScreen({
           handlePostPress={composer.handlePostPress}
         />
 
+        {user?.isOwner && (
+          <View className="px-5 mt-4">
+            <TouchableOpacity
+              onPress={() => setScorecardVisible(true)}
+              className="flex-row items-center justify-center bg-paper-light border border-olive/40 rounded-xl py-3"
+              activeOpacity={0.7}
+            >
+              <Ionicons name="football-outline" size={18} color={colors.olive} />
+              <Text className="text-ink font-sans-semibold text-sm ml-2">Apply Scorecard</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <View className="px-5 mt-6">
           <PlatformPreview
             selectedPlatforms={composer.selectedPlatforms}
@@ -125,6 +146,14 @@ export default function HomeScreen({
         <HomePreview recentActivities={recentActivities} stats={stats} />
       </ScrollView>
       </SafeAreaView>
+
+      <ScorecardModal
+        visible={scorecardVisible}
+        onClose={() => setScorecardVisible(false)}
+        user={user}
+        baseImageUrl={baseImageUrl}
+        onApply={composer.applyScorecard}
+      />
 
       <ScheduleModal
         visible={composer.showScheduleModal}

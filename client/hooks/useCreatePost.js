@@ -409,6 +409,13 @@ export default function useCreatePost({
     setIsUploading(false);
   };
 
+  const applyScorecard = (url) => {
+    setMediaType("image");
+    setSelectedMedia([
+      { type: "image", uri: url, cloudinaryUrl: url, name: "scorecard.jpg" },
+    ]);
+  };
+
   const removeMedia = (index) => {
     setSelectedMedia((prev) => {
       const updated = prev.filter((_, i) => i !== index);
@@ -433,6 +440,6 @@ export default function useCreatePost({
     publishNow, schedulePost, handlePostPress,
     handleDuplicateProceed, handleDuplicateCancel,
     handleCopyrightProceed, handleCopyrightEdit, handleUseSafeVersion, handleAddHashtag,
-    handleSaveDraft, handleMediaSelect, removeMedia,
+    handleSaveDraft, handleMediaSelect, removeMedia, applyScorecard,
   };
 }

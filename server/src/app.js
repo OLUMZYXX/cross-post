@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes.js";
 import platformRoutes from "./routes/platform.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
+import scorecardRoutes from "./routes/scorecard.routes.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import {
   uploadToGridFS,
@@ -172,6 +173,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/platforms", platformRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/scorecard", scorecardRoutes);
 
 app.use(notFoundHandler);
 

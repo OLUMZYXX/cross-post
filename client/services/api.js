@@ -156,6 +156,13 @@ export const authAPI = {
   updateWatermark: (config) => api.put("/auth/watermark", config),
 };
 
+export const scorecardAPI = {
+  saveTemplate: ({ publicId, url }) =>
+    api.put("/scorecard/template", { publicId, url }),
+
+  compose: (payload) => api.post("/scorecard/compose", payload),
+};
+
 export const postAPI = {
   list: () => api.get("/posts"),
 

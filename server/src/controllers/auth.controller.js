@@ -9,6 +9,7 @@ import {
   isUserPro,
   getProSource,
   trialDaysLeft,
+  isAllowlistedEmail,
 } from "../services/proAccess.js";
 
 function generateToken(user) {
@@ -29,6 +30,7 @@ function sanitiseUser(user) {
   safe.isPro = isUserPro(user);
   safe.proSource = getProSource(user);
   safe.trialDaysLeft = trialDaysLeft(user);
+  safe.isOwner = isAllowlistedEmail(user.email);
   return safe;
 }
 
