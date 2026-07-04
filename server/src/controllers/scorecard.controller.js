@@ -1,7 +1,11 @@
 import User from "../models/User.js";
 import { Errors } from "../utils/AppError.js";
 import { isAllowlistedEmail } from "../services/proAccess.js";
-import { fetchTeamBadge, buildScorecardUrl } from "../services/scorecard.js";
+import {
+  fetchTeamBadge,
+  uploadRemoteImage,
+  buildScorecardUrl,
+} from "../services/scorecard.js";
 
 async function requireOwner(userId) {
   const user = await User.findById(userId);
@@ -45,16 +49,21 @@ export async function composeScorecard(req, res) {
     fetchTeamBadge(awayTeam),
   ]);
 
+  const [homeBadgeId, awayBadgeId] = await Promise.all([
+    uploadRemoteImage(homeBadgeUrl),
+    uploadRemoteImage(awayBadgeUrl),
+  ]);
+
   const url = buildScorecardUrl(imageUrl, {
     templatePublicId: user.scorecardTemplate.publicId,
-    homeBadgeUrl,
-    awayBadgeUrl,
+    homeBadgeId,
+    awayBadgeId,
     homeScore,
     awayScore,
   });
 
   res.json({
     success: true,
-    data: { url, homeBadgeFound: !!homeBadgeUrl, awayBadgeFound: !!awayBadgeUrl },
+    data: { url, homeBadgeFound: !!homeBadgeId, awayBadgeFound: !!awayBadgeId },
   });
 }
