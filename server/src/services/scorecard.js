@@ -9,12 +9,12 @@ const SPORTSDB_URL = "https://www.thesportsdb.com/api/v1/json/3/searchteams.php"
 const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
-  canvas: { w: 1280, h: 720 },
-  darken: 40,
-  badge: { w: 190, h: 190, edgeX: 150 },
-  score: { size: 150 },
-  title: { size: 46, y: 110 },
-  name: { size: 40, edgeX: 120, y: 150 },
+  width: 1440,
+  band: 520,
+  bandColor: "0d0d12",
+  badge: { w: 210, h: 210, edgeX: 190, y: 150 },
+  score: { size: 175, y: 165 },
+  title: { size: 52, y: 410, opacity: 80 },
 };
 
 export async function searchTeams(query) {
@@ -67,40 +67,39 @@ export async function uploadRemoteImage(remoteUrl, folder = "cross-post/scorecar
   }
 }
 
-function textLayer(text, size, gravity, x, y, extra = "") {
-  const value = encodeURIComponent(String(text));
-  const offset = `${x ? `,x_${x}` : ""}${y ? `,y_${y}` : ""}`;
-  return `l_text:Arial_${size}_bold:${value},co_white${extra}/fl_layer_apply,g_${gravity}${offset}`;
-}
-
 export function buildScorecardUrl(photoUrl, options) {
-  const { homeBadgeId, awayBadgeId, homeScore, awayScore, homeName, awayName } = options;
-  const markerIndex = photoUrl.indexOf(UPLOAD_MARKER);
-  if (markerIndex === -1) return photoUrl;
+  const { homeBadgeId, awayBadgeId, homeScore, awayScore } = options;
+  if (photoUrl.indexOf(UPLOAD_MARKER) === -1) return photoUrl;
 
-  const base = photoUrl.slice(0, markerIndex + UPLOAD_MARKER.length);
-  const after = photoUrl.slice(markerIndex + UPLOAD_MARKER.length);
-  const versionMatch = after.match(/v\d+\/.+$/);
-  const tail = versionMatch ? versionMatch[0] : after;
+  const { width, band, bandColor, badge, score, title } = LAYOUT;
 
-  const { canvas, darken, badge, score, title, name } = LAYOUT;
-  const parts = [`c_fill,w_${canvas.w},h_${canvas.h}/e_brightness:-${darken}`];
-
+  const parts = [
+    `c_scale,w_${width}`,
+    `c_pad,w_${width},h_ih_mul_${width}_div_iw_add_${band},g_north,b_rgb:${bandColor}`,
+  ];
   if (homeBadgeId) {
     parts.push(
-      `l_${homeBadgeId.replace(/\//g, ":")}/c_fill,w_${badge.w},h_${badge.h},r_max/fl_layer_apply,g_west,x_${badge.edgeX}`,
+      `l_${homeBadgeId.replace(/\//g, ":")}/c_fill,w_${badge.w},h_${badge.h},r_max/fl_layer_apply,g_south_west,x_${badge.edgeX},y_${badge.y}`,
     );
   }
   if (awayBadgeId) {
     parts.push(
-      `l_${awayBadgeId.replace(/\//g, ":")}/c_fill,w_${badge.w},h_${badge.h},r_max/fl_layer_apply,g_east,x_${badge.edgeX}`,
+      `l_${awayBadgeId.replace(/\//g, ":")}/c_fill,w_${badge.w},h_${badge.h},r_max/fl_layer_apply,g_south_east,x_${badge.edgeX},y_${badge.y}`,
     );
   }
+  parts.push(
+    `l_text:Arial_${title.size}_bold:${encodeURIComponent("FULL TIME")},co_white,o_${title.opacity}/fl_layer_apply,g_south,y_${title.y}`,
+  );
+  parts.push(
+    `l_text:Arial_${score.size}_bold:${encodeURIComponent(`${homeScore} - ${awayScore}`)},co_white/fl_layer_apply,g_south,y_${score.y}`,
+  );
 
-  parts.push(textLayer("FULL TIME", title.size, "north", 0, title.y, ",o_90"));
-  parts.push(textLayer(`${homeScore} - ${awayScore}`, score.size, "center", 0, 0));
-  if (homeName) parts.push(textLayer(homeName.toUpperCase(), name.size, "west", name.edgeX, name.y));
-  if (awayName) parts.push(textLayer(awayName.toUpperCase(), name.size, "east", name.edgeX, name.y));
-
-  return `${base}${parts.join("/")}/${tail}`;
+  const chain = parts.join("/");
+  const versionMatch = photoUrl.match(/\/v\d+\//);
+  if (versionMatch) {
+    const at = versionMatch.index;
+    return `${photoUrl.slice(0, at)}/${chain}${photoUrl.slice(at)}`;
+  }
+  const at = photoUrl.indexOf(UPLOAD_MARKER) + UPLOAD_MARKER.length;
+  return `${photoUrl.slice(0, at)}${chain}/${photoUrl.slice(at)}`;
 }
