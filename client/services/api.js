@@ -157,8 +157,7 @@ export const authAPI = {
 };
 
 export const scorecardAPI = {
-  saveTemplate: ({ publicId, url }) =>
-    api.put("/scorecard/template", { publicId, url }),
+  searchTeams: (q) => api.get(`/scorecard/teams?q=${encodeURIComponent(q)}`),
 
   compose: (payload) => api.post("/scorecard/compose", payload),
 };
