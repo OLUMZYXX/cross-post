@@ -9,11 +9,11 @@ const SPORTSDB_URL = "https://www.thesportsdb.com/api/v1/json/3/searchteams.php"
 const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
-  panel: { w: 0.9, h: 0.27, y: 0.07, radius: 22, color: "0a0d16", fillAlpha: "4d" },
-  line: { w: 0.86, thickness: 0.006, color: "ffffffe6" },
+  region: { top: 0.37, color: "0a0d16", fillAlpha: "4d" },
+  line: { thickness: 0.006, color: "ffffffe6", bottomY: 0.076 },
   badge: { w: 0.13, edgeX: 0.17, y: 0.13 },
   score: { w: 0.23, y: 0.15 },
-  title: { w: 0.2, y: 0.245, opacity: 95 },
+  title: { w: 0.2, y: 0.27, opacity: 95 },
 };
 
 export async function searchTeams(query) {
@@ -78,16 +78,16 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
   const photoUrl = closeInlineWatermark(rawPhotoUrl);
   if (photoUrl.indexOf(UPLOAD_MARKER) === -1) return photoUrl;
 
-  const { panel, line, badge, score, title } = LAYOUT;
+  const { region, line, badge, score, title } = LAYOUT;
 
   const blank = encodeURIComponent(" ");
   const lineLayer = (y) =>
-    `l_text:Arial_2:${blank},c_fill,w_${line.w},h_${line.thickness},fl_relative,b_rgb:${line.color}/fl_layer_apply,g_south,y_${y}`;
+    `l_text:Arial_2:${blank},c_fill,w_1.0,h_${line.thickness},fl_relative,b_rgb:${line.color}/fl_layer_apply,g_south,y_${y}`;
 
   const parts = [
-    `l_text:Arial_2:${blank},c_fill,w_${panel.w},h_${panel.h},fl_relative,b_rgb:${panel.color}${panel.fillAlpha},r_${panel.radius}/fl_layer_apply,g_south,y_${panel.y}`,
-    lineLayer((panel.y + panel.h - 0.006).toFixed(3)),
-    lineLayer((panel.y + 0.006).toFixed(3)),
+    `l_text:Arial_2:${blank},c_fill,w_1.0,h_${region.top},fl_relative,b_rgb:${region.color}${region.fillAlpha}/fl_layer_apply,g_south,y_0`,
+    lineLayer(region.top.toFixed(3)),
+    lineLayer(line.bottomY.toFixed(3)),
   ];
   if (homeBadgeId) {
     parts.push(
