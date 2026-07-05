@@ -9,12 +9,10 @@ const SPORTSDB_URL = "https://www.thesportsdb.com/api/v1/json/3/searchteams.php"
 const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
-  width: 1440,
-  band: 520,
-  bandColor: "0d0d12",
-  badge: { w: 210, h: 210, edgeX: 190, y: 150 },
-  score: { size: 175, y: 165 },
-  title: { size: 52, y: 410, opacity: 80 },
+  shadow: 60,
+  badge: { w: 0.14, edgeX: 0.07, y: 0.06 },
+  score: { w: 0.26, y: 0.07 },
+  title: { w: 0.22, y: 0.17, opacity: 85 },
 };
 
 export async function searchTeams(query) {
@@ -79,27 +77,24 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
   const photoUrl = closeInlineWatermark(rawPhotoUrl);
   if (photoUrl.indexOf(UPLOAD_MARKER) === -1) return photoUrl;
 
-  const { width, band, bandColor, badge, score, title } = LAYOUT;
+  const { shadow, badge, score, title } = LAYOUT;
 
-  const parts = [
-    `c_scale,w_${width}`,
-    `c_pad,w_${width},h_ih_mul_${width}_div_iw_add_${band},g_north,b_rgb:${bandColor}`,
-  ];
+  const parts = [];
   if (homeBadgeId) {
     parts.push(
-      `l_${homeBadgeId.replace(/\//g, ":")}/c_fill,w_${badge.w},h_${badge.h},r_max/fl_layer_apply,g_south_west,x_${badge.edgeX},y_${badge.y}`,
+      `l_${homeBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max/fl_layer_apply,g_south_west,x_${badge.edgeX},y_${badge.y}`,
     );
   }
   if (awayBadgeId) {
     parts.push(
-      `l_${awayBadgeId.replace(/\//g, ":")}/c_fill,w_${badge.w},h_${badge.h},r_max/fl_layer_apply,g_south_east,x_${badge.edgeX},y_${badge.y}`,
+      `l_${awayBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max/fl_layer_apply,g_south_east,x_${badge.edgeX},y_${badge.y}`,
     );
   }
   parts.push(
-    `l_text:Arial_${title.size}_bold:${encodeURIComponent("FULL TIME")},co_white,o_${title.opacity}/fl_layer_apply,g_south,y_${title.y}`,
+    `l_text:Arial_90_bold:${encodeURIComponent("FULL TIME")},co_white,w_${title.w},c_fit,fl_relative,o_${title.opacity},e_shadow:${shadow}/fl_layer_apply,g_south,y_${title.y}`,
   );
   parts.push(
-    `l_text:Arial_${score.size}_bold:${encodeURIComponent(`${homeScore} - ${awayScore}`)},co_white/fl_layer_apply,g_south,y_${score.y}`,
+    `l_text:Arial_120_bold:${encodeURIComponent(`${homeScore} - ${awayScore}`)},co_white,w_${score.w},c_fit,fl_relative,e_shadow:${shadow}/fl_layer_apply,g_south,y_${score.y}`,
   );
 
   const chain = parts.join("/");
