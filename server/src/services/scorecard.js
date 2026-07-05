@@ -11,8 +11,8 @@ const UPLOAD_MARKER = "/upload/";
 const LAYOUT = {
   region: { top: 0.37, color: "0a0d16", fillAlpha: "4d" },
   line: { thickness: 0.006, color: "ffffffe6", bottomY: 0.076 },
-  badge: { w: 0.13, edgeX: 0.17, y: 0.13, ring: "3px_solid_rgb:ffffffcc" },
-  score: { w: 0.23, y: 0.15 },
+  badge: { w: 0.13, edgeX: 0.17, y: 0.13 },
+  score: { w: 0.33, y: 0.14 },
   title: { w: 0.2, y: 0.27, opacity: 95 },
 };
 
@@ -91,12 +91,12 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
   ];
   if (homeBadgeId) {
     parts.push(
-      `l_${homeBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max,bo_${badge.ring}/fl_layer_apply,g_south_west,x_${badge.edgeX},y_${badge.y}`,
+      `l_${homeBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max/fl_layer_apply,g_south_west,x_${badge.edgeX},y_${badge.y}`,
     );
   }
   if (awayBadgeId) {
     parts.push(
-      `l_${awayBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max,bo_${badge.ring}/fl_layer_apply,g_south_east,x_${badge.edgeX},y_${badge.y}`,
+      `l_${awayBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max/fl_layer_apply,g_south_east,x_${badge.edgeX},y_${badge.y}`,
     );
   }
   parts.push(
