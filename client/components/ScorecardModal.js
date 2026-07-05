@@ -16,6 +16,8 @@ import { getColors } from "../constants/theme";
 import { useToast } from "./Toast";
 import { scorecardAPI } from "../services/api";
 
+const SPORTSDB_SEARCH = "https://www.thesportsdb.com/api/v1/json/3/searchteams.php";
+
 function useTeamSearch(query, active) {
   const [suggestions, setSuggestions] = useState([]);
 
@@ -27,12 +29,23 @@ function useTeamSearch(query, active) {
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
-        const { data } = await scorecardAPI.searchTeams(query.trim());
-        if (!cancelled) setSuggestions(data.teams || []);
+        const res = await fetch(
+          `${SPORTSDB_SEARCH}?t=${encodeURIComponent(query.trim())}`,
+        );
+        const data = await res.json();
+        const teams = (data?.teams || [])
+          .filter((t) => t.strSport === "Soccer")
+          .slice(0, 6)
+          .map((t) => ({
+            name: t.strTeam,
+            badge: t.strTeamBadge || t.strBadge || null,
+            country: t.strCountry || null,
+          }));
+        if (!cancelled) setSuggestions(teams);
       } catch {
         if (!cancelled) setSuggestions([]);
       }
-    }, 350);
+    }, 200);
     return () => {
       cancelled = true;
       clearTimeout(timer);
