@@ -67,8 +67,16 @@ export async function uploadRemoteImage(remoteUrl, folder = "cross-post/scorecar
   }
 }
 
-export function buildScorecardUrl(photoUrl, options) {
+function closeInlineWatermark(url) {
+  return url.replace(
+    /l_([^/]*:watermarks:[^/,]+),g_([a-z_]+),(w_[\d.]+),fl_relative,(o_\d+),x_(\d+),y_(\d+)/,
+    "l_$1,$3,fl_relative,$4/fl_layer_apply,g_$2,x_$5,y_$6",
+  );
+}
+
+export function buildScorecardUrl(rawPhotoUrl, options) {
   const { homeBadgeId, awayBadgeId, homeScore, awayScore } = options;
+  const photoUrl = closeInlineWatermark(rawPhotoUrl);
   if (photoUrl.indexOf(UPLOAD_MARKER) === -1) return photoUrl;
 
   const { width, band, bandColor, badge, score, title } = LAYOUT;
