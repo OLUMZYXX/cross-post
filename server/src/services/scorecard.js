@@ -16,9 +16,9 @@ const LAYOUT = {
     y: 0.07,
     radius: 28,
     color: "0a0d16",
-    fillOpacity: 18,
+    fillAlpha: "4d",
     border: 4,
-    borderOpacity: 85,
+    borderAlpha: "e6",
   },
   badge: { w: 0.13, edgeX: 0.11, y: 0.13 },
   score: { w: 0.23, y: 0.155 },
@@ -91,8 +91,7 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
 
   const blank = encodeURIComponent(" ");
   const parts = [
-    `l_text:Arial_2:${blank},c_fill,w_${panel.w},h_${panel.h},fl_relative,b_rgb:${panel.color},r_${panel.radius},o_${panel.fillOpacity}/fl_layer_apply,g_south,y_${panel.y}`,
-    `l_text:Arial_2:${blank},c_fill,w_${panel.w},h_${panel.h},fl_relative,bo_${panel.border}px_solid_rgb:ffffff,r_${panel.radius},o_${panel.borderOpacity}/fl_layer_apply,g_south,y_${panel.y}`,
+    `l_text:Arial_2:${blank},c_fill,w_${panel.w},h_${panel.h},fl_relative,b_rgb:${panel.color}${panel.fillAlpha},bo_${panel.border}px_solid_rgb:ffffff${panel.borderAlpha},r_${panel.radius}/fl_layer_apply,g_south,y_${panel.y}`,
   ];
   if (homeBadgeId) {
     parts.push(
