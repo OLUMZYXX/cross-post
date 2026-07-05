@@ -53,6 +53,10 @@ export async function composeScorecard(req, res) {
     awayName: awayTeam,
   });
 
+  console.log("[scorecard] base:", imageUrl);
+  console.log("[scorecard] badges:", homeBadgeId, awayBadgeId);
+  console.log("[scorecard] composed:", url);
+
   res.json({
     success: true,
     data: { url, homeBadgeFound: !!homeBadgeId, awayBadgeFound: !!awayBadgeId },
