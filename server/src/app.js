@@ -165,7 +165,9 @@ app.post(
   },
 );
 
-app.get("/health", (_req, res) => res.json({ status: "ok" }));
+app.get("/health", (_req, res) =>
+  res.json({ status: "ok", build: "scorecard-band-2" }),
+);
 app.get("/", (_req, res) => res.sendFile("index.html", { root: "public" }));
 
 app.use("/api/auth", authRoutes);
