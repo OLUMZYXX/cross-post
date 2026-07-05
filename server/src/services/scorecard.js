@@ -9,10 +9,11 @@ const SPORTSDB_URL = "https://www.thesportsdb.com/api/v1/json/3/searchteams.php"
 const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
-  shadow: 60,
-  badge: { w: 0.14, edgeX: 0.07, y: 0.06 },
-  score: { w: 0.26, y: 0.07 },
-  title: { w: 0.22, y: 0.17, opacity: 85 },
+  shadow: 50,
+  panel: { w: 0.9, h: 0.27, y: 0.07, radius: 28, color: "0a0d16", opacity: 46, border: 3 },
+  badge: { w: 0.13, edgeX: 0.11, y: 0.13 },
+  score: { w: 0.23, y: 0.155 },
+  title: { w: 0.2, y: 0.28, opacity: 90 },
 };
 
 export async function searchTeams(query) {
@@ -77,9 +78,11 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
   const photoUrl = closeInlineWatermark(rawPhotoUrl);
   if (photoUrl.indexOf(UPLOAD_MARKER) === -1) return photoUrl;
 
-  const { shadow, badge, score, title } = LAYOUT;
+  const { shadow, panel, badge, score, title } = LAYOUT;
 
-  const parts = [];
+  const parts = [
+    `l_text:Arial_2:${encodeURIComponent(" ")},c_fill,w_${panel.w},h_${panel.h},fl_relative,b_rgb:${panel.color},bo_${panel.border}px_solid_rgb:ffffff,r_${panel.radius},o_${panel.opacity}/fl_layer_apply,g_south,y_${panel.y}`,
+  ];
   if (homeBadgeId) {
     parts.push(
       `l_${homeBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max/fl_layer_apply,g_south_west,x_${badge.edgeX},y_${badge.y}`,
