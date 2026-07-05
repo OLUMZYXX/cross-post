@@ -19,7 +19,7 @@ export function buildWatermarkTransform(watermark) {
   const opacity = clamp(watermark.opacity, 10, 100, 85);
   const margin = 30;
 
-  return `l_${layerId},g_${gravity},w_${widthRatio},fl_relative,o_${opacity},x_${margin},y_${margin}`;
+  return `l_${layerId},w_${widthRatio},fl_relative,o_${opacity}/fl_layer_apply,g_${gravity},x_${margin},y_${margin}`;
 }
 
 export function applyWatermarkToUrl(url, watermark) {
