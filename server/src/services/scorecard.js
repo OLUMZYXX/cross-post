@@ -9,20 +9,11 @@ const SPORTSDB_URL = "https://www.thesportsdb.com/api/v1/json/3/searchteams.php"
 const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
-  shadow: 60,
-  panel: {
-    w: 0.9,
-    h: 0.27,
-    y: 0.07,
-    radius: 28,
-    color: "0a0d16",
-    fillAlpha: "4d",
-    border: 4,
-    borderAlpha: "e6",
-  },
-  badge: { w: 0.13, edgeX: 0.11, y: 0.13 },
-  score: { w: 0.23, y: 0.155 },
-  title: { w: 0.2, y: 0.28, opacity: 95 },
+  panel: { w: 0.9, h: 0.27, y: 0.07, radius: 22, color: "0a0d16", fillAlpha: "4d" },
+  line: { w: 0.86, thickness: 0.006, color: "ffffffe6" },
+  badge: { w: 0.13, edgeX: 0.17, y: 0.13 },
+  score: { w: 0.23, y: 0.15 },
+  title: { w: 0.2, y: 0.245, opacity: 95 },
 };
 
 export async function searchTeams(query) {
@@ -87,11 +78,16 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
   const photoUrl = closeInlineWatermark(rawPhotoUrl);
   if (photoUrl.indexOf(UPLOAD_MARKER) === -1) return photoUrl;
 
-  const { shadow, panel, badge, score, title } = LAYOUT;
+  const { panel, line, badge, score, title } = LAYOUT;
 
   const blank = encodeURIComponent(" ");
+  const lineLayer = (y) =>
+    `l_text:Arial_2:${blank},c_fill,w_${line.w},h_${line.thickness},fl_relative,b_rgb:${line.color}/fl_layer_apply,g_south,y_${y}`;
+
   const parts = [
-    `l_text:Arial_2:${blank},c_fill,w_${panel.w},h_${panel.h},fl_relative,b_rgb:${panel.color}${panel.fillAlpha},bo_${panel.border}px_solid_rgb:ffffff${panel.borderAlpha},r_${panel.radius}/fl_layer_apply,g_south,y_${panel.y}`,
+    `l_text:Arial_2:${blank},c_fill,w_${panel.w},h_${panel.h},fl_relative,b_rgb:${panel.color}${panel.fillAlpha},r_${panel.radius}/fl_layer_apply,g_south,y_${panel.y}`,
+    lineLayer((panel.y + panel.h - 0.006).toFixed(3)),
+    lineLayer((panel.y + 0.006).toFixed(3)),
   ];
   if (homeBadgeId) {
     parts.push(
@@ -104,10 +100,10 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
     );
   }
   parts.push(
-    `l_text:Arial_90_bold:${encodeURIComponent("FULL TIME")},co_white,w_${title.w},c_fit,fl_relative,o_${title.opacity},e_shadow:${shadow}/fl_layer_apply,g_south,y_${title.y}`,
+    `l_text:Arial_90_bold:${encodeURIComponent("FULL TIME")},co_white,w_${title.w},c_fit,fl_relative,o_${title.opacity}/fl_layer_apply,g_south,y_${title.y}`,
   );
   parts.push(
-    `l_text:Arial_120_bold:${encodeURIComponent(`${homeScore} - ${awayScore}`)},co_white,w_${score.w},c_fit,fl_relative,e_shadow:${shadow}/fl_layer_apply,g_south,y_${score.y}`,
+    `l_text:Arial_120_bold:${encodeURIComponent(`${homeScore} - ${awayScore}`)},co_white,w_${score.w},c_fit,fl_relative/fl_layer_apply,g_south,y_${score.y}`,
   );
 
   const chain = parts.join("/");
