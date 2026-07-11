@@ -295,6 +295,15 @@ export default function useCreatePost({
       showToast({ type: "warning", title: "No platforms selected", message: "Select at least one platform." });
       return;
     }
+    if (hasTwitterSelected && caption.length > TWITTER_CHAR_LIMIT) {
+      showToast({
+        type: "warning",
+        title: "Too long for Twitter/X",
+        message: `${caption.length}/${TWITTER_CHAR_LIMIT} characters. Tap Rephrase → "Shorten for Twitter", or unselect Twitter/X.`,
+        duration: 5000,
+      });
+      return;
+    }
     const imageUrls = selectedMedia.filter((m) => m.type === "image" && m.cloudinaryUrl).map((m) => m.cloudinaryUrl);
     const hasCaption = caption?.trim().length > 0;
     const hasImages = imageUrls.length > 0;

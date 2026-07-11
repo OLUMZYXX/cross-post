@@ -1,4 +1,4 @@
-export const TWITTER_CHAR_LIMIT = 25000;
+export const TWITTER_CHAR_LIMIT = 250;
 
 export const PLATFORM_LIMITS = {
   Twitter: { chars: TWITTER_CHAR_LIMIT, maxImages: 4, maxVideos: 1, note: null },
