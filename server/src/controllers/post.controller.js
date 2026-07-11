@@ -333,12 +333,12 @@ export async function rephraseCaption(req, res) {
     : `You MUST keep the result strictly under ${charLimit} characters (including emojis and spaces). Count carefully.`;
 
   const instruction = isOwner
-    ? `Rewrite this as a clear, engaging football/sports news update${tone ? ` with a ${tone} feel` : ""}. Keep every fact accurate — player and club names, scores, dates, numbers and quotes — and do not add hype or claims that are not in the original.`
+    ? "Rewrite this as a concise breaking-news football update in the PRESENT tense, as if it is happening right now. Report only the facts in the original and do not add anything that is not there."
     : toneInstructions[tone] ||
       "Rewrite this social media post to sound better while keeping the same meaning.";
 
   const systemContent = isOwner
-    ? `You are a football/sports news editor writing for a dedicated football news page. Rewrite the post as a sharp, credible news update. Preserve EVERY fact exactly — player and club names, scores, dates, numbers, quotes and transfer details — and never invent details. Keep the wording original and free of copyrighted lyrics or trademarked slogans. Use emojis very sparingly — at most one, usually none. No hashtags unless the original already has them. Return only the rewritten text — no quotes, no explanation. ${limitNote}`
+    ? `You are a breaking-news football reporter for a football news page. Rewrite the post as an immediate breaking-news report in the PRESENT tense, as if the news is breaking right now (e.g. "Arsenal sign...", "Real Madrid confirm...", "reports claim..."). Report ONLY the facts in the original — player and club names, scores, dates, numbers, quotes and transfer details — and never invent anything. Do NOT add analysis, opinion, background, predictions or feature-style commentary in your own words; just report the news cleanly and directly. Keep the wording original and free of copyrighted lyrics or trademarked slogans. Use emojis very sparingly — at most one, usually none. No hashtags unless the original already has them. Return only the rewritten text — no quotes, no explanation. ${limitNote}`
     : `You are a social media copywriter. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. ${limitNote}`;
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -437,7 +437,7 @@ export async function rephraseMultiCaption(req, res) {
     .join("\n");
 
   const systemContent = isOwner
-    ? "You are a football/sports news editor. Rewrite the post for each platform as an accurate news update, keeping ALL facts intact — player and club names, scores, dates, numbers and quotes. Adapt tone, format and length to each platform under its character limit. Use emojis very sparingly (none to one) and no hashtags unless the original has them. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption."
+    ? "You are a breaking-news football reporter. Rewrite the post for each platform as an immediate breaking-news report in the PRESENT tense, as if it is happening right now. Report ONLY the facts in the original — player and club names, scores, dates, numbers and quotes — and never invent details or add analysis, opinion or feature-style commentary in your own words. Adapt only the format and length to each platform under its character limit. Use emojis very sparingly (none to one) and no hashtags unless the original has them. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption."
     : "You are a social media copywriter. Rewrite the post for each platform, keeping the SAME information and meaning but adapting tone, format and length to each platform, staying under each character limit. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption.";
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
