@@ -19,10 +19,16 @@ function stripHtml(s) {
 }
 
 function firstImage(block) {
-  const m = block.match(
-    /<(?:media:content|media:thumbnail|enclosure)[^>]*url="([^"]+)"/i,
+  const media = block.match(
+    /<(?:media:content|media:thumbnail|enclosure)[^>]*\burl=["']([^"']+)["']/i,
   );
-  return m ? m[1] : null;
+  if (media && /\.(jpg|jpeg|png|webp)/i.test(media[1])) return media[1];
+
+  const img = block.match(/<img[^>]*\bsrc=["']([^"']+)["']/i);
+  if (img) return img[1];
+
+  if (media) return media[1];
+  return null;
 }
 
 function parseFeed(xml, source) {

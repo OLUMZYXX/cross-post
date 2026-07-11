@@ -62,7 +62,6 @@ export default function SettingsScreen({
   onConnectedAccounts,
   onNotifications,
   onWatermark,
-  onFeed,
   onPrivacy,
   onHelp,
   onLogout,
@@ -247,23 +246,6 @@ export default function SettingsScreen({
               isLast
             />
           </View>
-
-          {user?.isOwner && (
-            <>
-              <SectionLabel label="Owner" />
-              <View className="bg-paper-light rounded-2xl border border-rule overflow-hidden">
-                <SettingsRow
-                  icon="football-outline"
-                  iconColor={getColors().olive}
-                  iconBg="bg-paper-deep"
-                  label="Football News"
-                  description="Latest news, one tap to cross-post"
-                  onPress={onFeed}
-                  isLast
-                />
-              </View>
-            </>
-          )}
 
           <SectionLabel label="Composing" />
           <View className="flex-row items-center justify-between bg-paper-light rounded-2xl border border-rule p-4">

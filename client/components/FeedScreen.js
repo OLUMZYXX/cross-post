@@ -13,38 +13,61 @@ import { getColors } from "../constants/theme";
 import { useToast } from "./Toast";
 import { feedAPI } from "../services/api";
 
+const SOURCE_COLOR = {
+  "BBC Sport": "#bb1919",
+  "Sky Sports": "#0072c9",
+  "The Guardian": "#c70000",
+  ESPN: "#cc0000",
+};
+
 function timeAgo(iso) {
   if (!iso) return "";
   const mins = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return "now";
+  if (mins < 60) return `${mins}m`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+  if (hrs < 24) return `${hrs}h`;
+  return `${Math.floor(hrs / 24)}d`;
 }
 
-function NewsCard({ item, onCompose, colors }) {
+function Post({ item, onCompose, colors }) {
+  const initial = (item.source || "?").charAt(0);
   return (
-    <View className="bg-paper-light rounded-2xl border border-rule mb-3 overflow-hidden">
-      {item.image ? (
-        <Image source={{ uri: item.image }} className="w-full h-40" resizeMode="cover" />
-      ) : null}
-      <View className="p-4">
-        <View className="flex-row items-center mb-1.5">
-          <Text className="text-olive text-[10px] font-sans-bold uppercase tracking-wide">
-            {item.source}
-          </Text>
-          <Text className="text-ink-soft text-[10px] mx-1.5">·</Text>
-          <Text className="text-ink-soft text-[10px]">{timeAgo(item.publishedAt)}</Text>
+    <View className="px-5 py-4 border-b border-rule">
+      <View className="flex-row items-center mb-2.5">
+        <View
+          className="w-9 h-9 rounded-full items-center justify-center mr-2.5"
+          style={{ backgroundColor: SOURCE_COLOR[item.source] || colors.olive }}
+        >
+          <Text className="text-white font-sans-bold text-sm">{initial}</Text>
         </View>
-        <Text className="text-ink text-sm font-sans-bold leading-5 mb-3">{item.title}</Text>
+        <View className="flex-1">
+          <Text className="text-ink font-sans-bold text-[13px]">{item.source}</Text>
+          <Text className="text-ink-soft text-[11px]">{timeAgo(item.publishedAt)} ago</Text>
+        </View>
+      </View>
+
+      <TouchableOpacity activeOpacity={0.8} onPress={() => onCompose(item)}>
+        <Text className="text-ink text-[15px] leading-6 font-sans-medium mb-3">
+          {item.title}
+        </Text>
+        {item.image ? (
+          <Image
+            source={{ uri: item.image }}
+            className="w-full h-52 rounded-2xl mb-1"
+            resizeMode="cover"
+          />
+        ) : null}
+      </TouchableOpacity>
+
+      <View className="flex-row items-center justify-end mt-2">
         <TouchableOpacity
           onPress={() => onCompose(item)}
-          className="flex-row items-center justify-center bg-olive rounded-xl py-2.5"
+          className="flex-row items-center bg-olive rounded-full px-4 py-2"
           activeOpacity={0.85}
         >
-          <Ionicons name="send" size={14} color={colors.paperLight} />
-          <Text className="text-paper-light font-sans-bold text-xs ml-2">Cross-post this</Text>
+          <Ionicons name="repeat" size={15} color={colors.paperLight} />
+          <Text className="text-paper-light font-sans-bold text-xs ml-2">Cross-post</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -80,16 +103,18 @@ export default function FeedScreen({ onBack, onCompose }) {
   };
 
   const handleCompose = (item) => {
-    onCompose({ caption: `${item.title}\n\n${item.link}` });
+    onCompose({ caption: item.title });
   };
 
   return (
-    <View className="flex-1 bg-paper px-5 pt-14">
-      <View className="flex-row items-center mb-4">
-        <TouchableOpacity onPress={onBack} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color={colors.ink} />
-        </TouchableOpacity>
-        <Text className="text-ink text-xl font-serif-bold flex-1">Football News</Text>
+    <View className="flex-1 bg-paper pt-14">
+      <View className="flex-row items-center px-5 pb-3 border-b border-rule">
+        {onBack ? (
+          <TouchableOpacity onPress={onBack} className="mr-3">
+            <Ionicons name="arrow-back" size={24} color={colors.ink} />
+          </TouchableOpacity>
+        ) : null}
+        <Text className="text-ink text-2xl font-serif-bold flex-1">Feed</Text>
         <TouchableOpacity onPress={onRefresh}>
           <Ionicons name="refresh" size={20} color={colors.inkMuted} />
         </TouchableOpacity>
@@ -104,7 +129,7 @@ export default function FeedScreen({ onBack, onCompose }) {
           data={items}
           keyExtractor={(item, i) => `${item.link}-${i}`}
           renderItem={({ item }) => (
-            <NewsCard item={item} onCompose={handleCompose} colors={colors} />
+            <Post item={item} onCompose={handleCompose} colors={colors} />
           )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 120 }}

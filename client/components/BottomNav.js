@@ -17,8 +17,9 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const TABS = [
-  { id: "home", icon: "home-outline", activeIcon: "home", label: "Home" },
+const HOME_TAB = { id: "home", icon: "home-outline", activeIcon: "home", label: "Home" };
+const FEED_TAB = { id: "feed", icon: "newspaper-outline", activeIcon: "newspaper", label: "Feed" };
+const BASE_TABS = [
   { id: "sent", icon: "paper-plane-outline", activeIcon: "paper-plane", label: "Sent" },
   { id: "analytics", icon: "stats-chart-outline", activeIcon: "stats-chart", label: "Stats" },
   { id: "settings", icon: "person-outline", activeIcon: "person", label: "Profile" },
@@ -124,9 +125,10 @@ function ComposeFab({ onPress, colors, shadowProps }) {
   );
 }
 
-export default function BottomNav({ activeTab, onTabChange, onCompose }) {
+export default function BottomNav({ activeTab, onTabChange, onCompose, isOwner }) {
   const { colors, resolved } = useTheme();
   const g = glass(resolved);
+  const tabs = isOwner ? [HOME_TAB, FEED_TAB, ...BASE_TABS] : [HOME_TAB, ...BASE_TABS];
 
   const handlePress = (tabId) => {
     if (tabId === activeTab) return;
@@ -185,7 +187,7 @@ export default function BottomNav({ activeTab, onTabChange, onCompose }) {
           />
 
           <View style={{ flex: 1, flexDirection: "row", alignItems: "center", paddingVertical: 7, paddingHorizontal: 8 }}>
-            {TABS.map((tab) => (
+            {tabs.map((tab) => (
               <NavItem
                 key={tab.id}
                 tab={tab}

@@ -634,16 +634,6 @@ export default function HomePage({
   if (activeTab === "settings" && settingsScreen === "watermark") {
     return <WatermarkSettings user={user} onBack={() => setSettingsScreen(null)} onUpdateUser={onUpdateUser} />;
   }
-  if (activeTab === "settings" && settingsScreen === "feed") {
-    return (
-      <FeedScreen
-        onBack={() => setSettingsScreen(null)}
-        onCompose={(draft) =>
-          focusComposer({ ...draft, platforms: [...connectedPlatforms] })
-        }
-      />
-    );
-  }
   if (activeTab === "settings" && settingsScreen === "privacy") {
     return <PrivacySecurity onBack={() => setSettingsScreen(null)} user={user} />;
   }
@@ -704,6 +694,15 @@ export default function HomePage({
         />
       );
     }
+    if (activeTab === "feed") {
+      return (
+        <FeedScreen
+          onCompose={(draft) =>
+            focusComposer({ ...draft, platforms: [...connectedPlatforms] })
+          }
+        />
+      );
+    }
     if (activeTab === "settings") {
       return (
         <SettingsScreen
@@ -715,7 +714,6 @@ export default function HomePage({
           onConnectedAccounts={() => setSettingsScreen("connectedAccounts")}
           onNotifications={() => setSettingsScreen("notifications")}
           onWatermark={() => setSettingsScreen("watermark")}
-          onFeed={() => setSettingsScreen("feed")}
           onPrivacy={() => setSettingsScreen("privacy")}
           onHelp={() => setSettingsScreen("help")}
           onLogout={handleLogout}
@@ -795,6 +793,7 @@ export default function HomePage({
       <BottomNav
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        isOwner={user?.isOwner}
         onCompose={() => {
           if (activeTab !== "home") focusComposer();
         }}
