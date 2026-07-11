@@ -20,6 +20,7 @@ import EditProfile from "./EditProfile";
 import ConnectedAccounts from "./ConnectedAccounts";
 import NotificationSettings from "./NotificationSettings";
 import WatermarkSettings from "./WatermarkSettings";
+import FeedScreen from "./FeedScreen";
 import NotificationsInbox from "./NotificationsInbox";
 import PrivacySecurity from "./PrivacySecurity";
 import HelpSupport from "./HelpSupport";
@@ -633,6 +634,16 @@ export default function HomePage({
   if (activeTab === "settings" && settingsScreen === "watermark") {
     return <WatermarkSettings user={user} onBack={() => setSettingsScreen(null)} onUpdateUser={onUpdateUser} />;
   }
+  if (activeTab === "settings" && settingsScreen === "feed") {
+    return (
+      <FeedScreen
+        onBack={() => setSettingsScreen(null)}
+        onCompose={(draft) =>
+          focusComposer({ ...draft, platforms: [...connectedPlatforms] })
+        }
+      />
+    );
+  }
   if (activeTab === "settings" && settingsScreen === "privacy") {
     return <PrivacySecurity onBack={() => setSettingsScreen(null)} user={user} />;
   }
@@ -704,6 +715,7 @@ export default function HomePage({
           onConnectedAccounts={() => setSettingsScreen("connectedAccounts")}
           onNotifications={() => setSettingsScreen("notifications")}
           onWatermark={() => setSettingsScreen("watermark")}
+          onFeed={() => setSettingsScreen("feed")}
           onPrivacy={() => setSettingsScreen("privacy")}
           onHelp={() => setSettingsScreen("help")}
           onLogout={handleLogout}

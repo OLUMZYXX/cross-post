@@ -162,6 +162,10 @@ export const scorecardAPI = {
   compose: (payload) => api.post("/scorecard/compose", payload),
 };
 
+export const feedAPI = {
+  football: () => api.get("/feed/football"),
+};
+
 export const postAPI = {
   list: () => api.get("/posts"),
 
