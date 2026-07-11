@@ -1,7 +1,11 @@
 import Post from "../models/Post.js";
 import User from "../models/User.js";
 import { Errors } from "../utils/AppError.js";
-import { isUserPro, platformsRequirePro } from "../services/proAccess.js";
+import {
+  isUserPro,
+  platformsRequirePro,
+  isAllowlistedEmail,
+} from "../services/proAccess.js";
 import {
   publishToAllPlatforms,
   deleteFromAllPlatforms,
@@ -263,6 +267,14 @@ export async function schedulePost(req, res) {
   res.json({ success: true, data: { post } });
 }
 
+function trimToLimit(text, limit) {
+  if (!limit || limit <= 0 || text.length <= limit) return text;
+  let cut = text.slice(0, limit);
+  const lastSpace = cut.lastIndexOf(" ");
+  if (lastSpace > limit * 0.6) cut = cut.slice(0, lastSpace);
+  return cut.trim();
+}
+
 export async function rephraseCaption(req, res) {
   const { caption, tone, maxLength } = req.body;
 
@@ -275,6 +287,8 @@ export async function rephraseCaption(req, res) {
       "AI rephrasing is not configured. Add OPENAI_API_KEY to your environment variables.",
     );
   }
+
+  const isOwner = isAllowlistedEmail(req.user.email);
 
   const toneInstructions = {
     professional:
@@ -300,16 +314,21 @@ export async function rephraseCaption(req, res) {
       "Rewrite with dry sarcasm and irony — witty, slightly roasting, tongue-in-cheek humor. Add emojis that play into the sarcasm.",
   };
 
-  const instruction =
-    toneInstructions[tone] ||
-    "Rewrite this social media post to sound better while keeping the same meaning.";
-
   const charLimit = maxLength && maxLength > 0 ? maxLength : 500;
   const isShortenMode =
     maxLength && maxLength > 0 && caption.length > maxLength;
   const limitNote = isShortenMode
     ? `CRITICAL: The text is currently ${caption.length} characters and MUST be shortened to UNDER ${charLimit} characters. Cut aggressively — remove filler words, shorten sentences, use abbreviations. The final result MUST be ${charLimit} characters or fewer. Count every character including emojis and spaces.`
     : `You MUST keep the result strictly under ${charLimit} characters (including emojis and spaces). Count carefully.`;
+
+  const instruction = isOwner
+    ? `Rewrite this as a clear, engaging football/sports news update${tone ? ` with a ${tone} feel` : ""}. Keep every fact accurate — player and club names, scores, dates, numbers and quotes — and do not add hype or claims that are not in the original.`
+    : toneInstructions[tone] ||
+      "Rewrite this social media post to sound better while keeping the same meaning.";
+
+  const systemContent = isOwner
+    ? `You are a football/sports news editor writing for a dedicated football news page. Rewrite the post as a sharp, credible news update. Preserve EVERY fact exactly — player and club names, scores, dates, numbers, quotes and transfer details — and never invent details. Keep the wording original and free of copyrighted lyrics or trademarked slogans. Use emojis very sparingly — at most one, usually none. No hashtags unless the original already has them. Return only the rewritten text — no quotes, no explanation. ${limitNote}`
+    : `You are a social media copywriter. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. ${limitNote}`;
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -320,17 +339,14 @@ export async function rephraseCaption(req, res) {
     body: JSON.stringify({
       model: "gpt-4o-mini",
       messages: [
-        {
-          role: "system",
-          content: `You are a social media copywriter. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. ${limitNote}`,
-        },
+        { role: "system", content: systemContent },
         {
           role: "user",
           content: `${instruction}\n\nOriginal post:\n${caption}`,
         },
       ],
       max_tokens: isShortenMode ? 150 : 300,
-      temperature: isShortenMode ? 0.5 : 0.8,
+      temperature: isShortenMode ? 0.4 : isOwner ? 0.5 : 0.8,
     }),
   });
 
@@ -340,11 +356,13 @@ export async function rephraseCaption(req, res) {
   }
 
   const data = await response.json();
-  const rephrased = data.choices?.[0]?.message?.content?.trim();
+  const raw = data.choices?.[0]?.message?.content?.trim();
 
-  if (!rephrased) {
+  if (!raw) {
     throw Errors.badRequest("AI returned an empty response. Try again.");
   }
+
+  const rephrased = trimToLimit(raw, maxLength && maxLength > 0 ? maxLength : 0);
 
   res.json({ success: true, data: { rephrased } });
 }
@@ -371,6 +389,17 @@ const PLATFORM_STYLE = {
   Telegram: "clear and direct",
 };
 
+const PLATFORM_STYLE_NEWS = {
+  Twitter: "punchy news headline, no hashtags",
+  Instagram: "clear engaging news caption, minimal emojis",
+  LinkedIn: "professional news tone, no emojis",
+  Facebook: "clear conversational news update",
+  TikTok: "very short news hook",
+  YouTube: "short descriptive news title",
+  Reddit: "plain and factual, no hashtags or emojis",
+  Telegram: "clear and direct news update",
+};
+
 export async function rephraseMultiCaption(req, res) {
   const { caption, platforms } = req.body;
 
@@ -381,6 +410,9 @@ export async function rephraseMultiCaption(req, res) {
     throw Errors.badRequest("AI rephrasing is not configured.");
   }
 
+  const isOwner = isAllowlistedEmail(req.user.email);
+  const styleMap = isOwner ? PLATFORM_STYLE_NEWS : PLATFORM_STYLE;
+
   const bases = [
     ...new Set((platforms || []).map((p) => String(p).split(":")[0])),
   ].filter((b) => PLATFORM_LIMITS[b]);
@@ -390,8 +422,12 @@ export async function rephraseMultiCaption(req, res) {
   }
 
   const spec = bases
-    .map((b) => `- ${b}: under ${PLATFORM_LIMITS[b]} characters, ${PLATFORM_STYLE[b]}`)
+    .map((b) => `- ${b}: under ${PLATFORM_LIMITS[b]} characters, ${styleMap[b]}`)
     .join("\n");
+
+  const systemContent = isOwner
+    ? "You are a football/sports news editor. Rewrite the post for each platform as an accurate news update, keeping ALL facts intact — player and club names, scores, dates, numbers and quotes. Adapt tone, format and length to each platform under its character limit. Use emojis very sparingly (none to one) and no hashtags unless the original has them. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption."
+    : "You are a social media copywriter. Rewrite the post for each platform, keeping the SAME information and meaning but adapting tone, format and length to each platform, staying under each character limit. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption.";
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -404,8 +440,7 @@ export async function rephraseMultiCaption(req, res) {
       messages: [
         {
           role: "system",
-          content:
-            "You are a social media copywriter. Rewrite the post for each platform, keeping the SAME information and meaning but adapting tone, format and length to each platform, staying under each character limit. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption.",
+          content: systemContent,
         },
         {
           role: "user",

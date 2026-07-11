@@ -178,11 +178,7 @@ export default function useCreatePost({
 
   const hasTwitterSelected = selectedPlatforms.some((p) => p.split(":")[0] === "Twitter");
 
-  const getTwitterCharLimit = () => {
-    if (hasTwitterSelected && caption.length > TWITTER_CHAR_LIMIT)
-      return TWITTER_CHAR_LIMIT;
-    return null;
-  };
+  const getTwitterCharLimit = () => (hasTwitterSelected ? TWITTER_CHAR_LIMIT : null);
 
   const handleShortenForTwitter = async () => {
     const textToShorten = rephrasedText || caption;
