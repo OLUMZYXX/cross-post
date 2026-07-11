@@ -17,9 +17,8 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const HOME_TAB = { id: "home", icon: "home-outline", activeIcon: "home", label: "Home" };
-const FEED_TAB = { id: "feed", icon: "newspaper-outline", activeIcon: "newspaper", label: "Feed" };
-const BASE_TABS = [
+const TABS = [
+  { id: "home", icon: "home-outline", activeIcon: "home", label: "Home" },
   { id: "sent", icon: "paper-plane-outline", activeIcon: "paper-plane", label: "Sent" },
   { id: "analytics", icon: "stats-chart-outline", activeIcon: "stats-chart", label: "Stats" },
   { id: "settings", icon: "person-outline", activeIcon: "person", label: "Profile" },
@@ -125,10 +124,10 @@ function ComposeFab({ onPress, colors, shadowProps }) {
   );
 }
 
-export default function BottomNav({ activeTab, onTabChange, onCompose, isOwner }) {
+export default function BottomNav({ activeTab, onTabChange, onCompose }) {
   const { colors, resolved } = useTheme();
   const g = glass(resolved);
-  const tabs = isOwner ? [HOME_TAB, FEED_TAB, ...BASE_TABS] : [HOME_TAB, ...BASE_TABS];
+  const tabs = TABS;
 
   const handlePress = (tabId) => {
     if (tabId === activeTab) return;

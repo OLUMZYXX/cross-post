@@ -2,11 +2,33 @@ const FEEDS = [
   { url: "https://feeds.bbci.co.uk/sport/football/rss.xml", source: "BBC Sport" },
   { url: "https://www.skysports.com/rss/12040", source: "Sky Sports" },
   { url: "https://www.theguardian.com/football/rss", source: "The Guardian" },
-  { url: "https://www.espn.com/espn/rss/soccer/news", source: "ESPN" },
 ];
 
 const TTL = 90 * 1000;
 let cache = { items: [], at: 0 };
+
+const ENTITIES = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+  hellip: "…",
+  mdash: "—",
+  ndash: "–",
+  rsquo: "’",
+  lsquo: "‘",
+  ldquo: "“",
+  rdquo: "”",
+};
+
+function decodeEntities(s) {
+  return s
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
+    .replace(/&([a-z]+);/gi, (m, name) => ENTITIES[name.toLowerCase()] ?? m);
+}
 
 function tag(block, name) {
   const m = block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`, "i"));
@@ -15,7 +37,7 @@ function tag(block, name) {
 }
 
 function stripHtml(s) {
-  return s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  return decodeEntities(s.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
 }
 
 function firstImage(block) {

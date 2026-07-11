@@ -640,6 +640,17 @@ export default function HomePage({
   if (activeTab === "settings" && settingsScreen === "help") {
     return <HelpSupport onBack={() => setSettingsScreen(null)} />;
   }
+  if (activeTab === "settings" && settingsScreen === "feed") {
+    return (
+      <FeedScreen
+        onBack={() => setSettingsScreen(null)}
+        onCompose={(draft) => {
+          setSettingsScreen(null);
+          focusComposer({ ...draft, platforms: [...connectedPlatforms] });
+        }}
+      />
+    );
+  }
 
   const totalDrafts = drafts.length + serverDrafts.length + scheduledPosts.length;
 
@@ -694,15 +705,6 @@ export default function HomePage({
         />
       );
     }
-    if (activeTab === "feed") {
-      return (
-        <FeedScreen
-          onCompose={(draft) =>
-            focusComposer({ ...draft, platforms: [...connectedPlatforms] })
-          }
-        />
-      );
-    }
     if (activeTab === "settings") {
       return (
         <SettingsScreen
@@ -716,6 +718,7 @@ export default function HomePage({
           onWatermark={() => setSettingsScreen("watermark")}
           onPrivacy={() => setSettingsScreen("privacy")}
           onHelp={() => setSettingsScreen("help")}
+          onFeed={() => setSettingsScreen("feed")}
           onLogout={handleLogout}
           onResetOnboarding={onResetOnboarding}
         />
@@ -793,7 +796,6 @@ export default function HomePage({
       <BottomNav
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        isOwner={user?.isOwner}
         onCompose={() => {
           if (activeTab !== "home") focusComposer();
         }}

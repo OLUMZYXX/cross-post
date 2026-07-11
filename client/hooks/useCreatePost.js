@@ -147,6 +147,20 @@ export default function useCreatePost({
   const updatePerPlatformCaption = (base, text) =>
     setPerPlatformCaptions((prev) => ({ ...prev, [base]: text }));
 
+  const resolvePlatformCaptions = async () => {
+    if (Object.keys(perPlatformCaptions).length) return perPlatformCaptions;
+    if (!perPlatformEnabled || !caption.trim() || selectedPlatforms.length === 0)
+      return {};
+    try {
+      const { data } = await postAPI.rephraseMulti(caption, selectedPlatforms);
+      const captions = data.captions || {};
+      setPerPlatformCaptions(captions);
+      return captions;
+    } catch {
+      return {};
+    }
+  };
+
   const selectFont = (key) => {
     setSelectedFont(key);
     AsyncStorage.setItem(SELECTED_FONT_KEY, key).catch(() => {});
@@ -237,9 +251,10 @@ export default function useCreatePost({
         setIsPosting(false);
         return;
       }
+      const platformCaptions = await resolvePlatformCaptions();
       const { data: createData } = await postAPI.create({
         caption, media: selectedMedia, platforms: selectedPlatforms, status: "draft",
-        ...(Object.keys(perPlatformCaptions).length && { platformCaptions: perPlatformCaptions }),
+        ...(Object.keys(platformCaptions).length && { platformCaptions }),
       });
       pendingPostId = createData.post._id;
       await addPending(pendingPostId, {
@@ -290,9 +305,10 @@ export default function useCreatePost({
         setIsPosting(false);
         return;
       }
+      const platformCaptions = await resolvePlatformCaptions();
       const { data: createData } = await postAPI.create({
         caption, media: selectedMedia, platforms: selectedPlatforms, status: "draft",
-        ...(Object.keys(perPlatformCaptions).length && { platformCaptions: perPlatformCaptions }),
+        ...(Object.keys(platformCaptions).length && { platformCaptions }),
       });
       await postAPI.schedule(createData.post._id, date.toISOString());
       showToast({ type: "info", title: "Post scheduled!", message: `Will publish on ${label}.`, duration: 4000 });
