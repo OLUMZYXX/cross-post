@@ -1,5 +1,6 @@
-﻿import { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert, Linking } from "react-native";
+﻿import { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert, Linking, Switch } from "react-native";
+import { getPerPlatformEnabled, setPerPlatformEnabled } from "../constants/composePrefs";
 import * as Application from "expo-application";
 import { getColors, useTheme } from "../constants/theme";
 import { StatusBar } from "expo-status-bar";
@@ -72,6 +73,16 @@ export default function SettingsScreen({
   const trialDaysLeft = user?.trialDaysLeft ?? 0;
   const onTrial = user?.proSource === "trial" && trialDaysLeft > 0;
   const [paywallVisible, setPaywallVisible] = useState(false);
+  const [perPlatform, setPerPlatform] = useState(false);
+
+  useEffect(() => {
+    getPerPlatformEnabled().then(setPerPlatform);
+  }, []);
+
+  const togglePerPlatform = (value) => {
+    setPerPlatform(value);
+    setPerPlatformEnabled(value);
+  };
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [accountHasPassword, setAccountHasPassword] = useState(
@@ -253,6 +264,22 @@ export default function SettingsScreen({
               </View>
             </>
           )}
+
+          <SectionLabel label="Composing" />
+          <View className="flex-row items-center justify-between bg-paper-light rounded-2xl border border-rule p-4">
+            <View className="flex-1 mr-3">
+              <Text className="text-ink font-sans-bold text-sm">Tailor caption per platform</Text>
+              <Text className="text-ink-muted text-[11px] mt-0.5">
+                AI rewrites your post to fit each platform before posting
+              </Text>
+            </View>
+            <Switch
+              value={perPlatform}
+              onValueChange={togglePerPlatform}
+              trackColor={{ true: getColors().olive, false: getColors().rule }}
+              thumbColor={getColors().paperLight}
+            />
+          </View>
 
           <SectionLabel label="Appearance" />
           <ThemePicker />

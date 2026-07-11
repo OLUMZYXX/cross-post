@@ -106,6 +106,9 @@ export async function publishToAllPlatforms(userId, post) {
     .filter((p) => p.startsWith("Facebook:"))
     .map((p) => p.split(":")[1]);
 
+  const platformCaptions = post.platformCaptions || {};
+  const basePost = typeof post.toObject === "function" ? post.toObject() : post;
+
   const processed = new Set();
   const publishTasks = [];
 
@@ -153,8 +156,14 @@ export async function publishToAllPlatforms(userId, post) {
       continue;
     }
 
+    const override = platformCaptions[baseName];
+    const postForPlatform =
+      typeof override === "string" && override.trim()
+        ? { ...basePost, caption: override }
+        : post;
+
     publishTasks.push(
-      publishSinglePlatform(baseName, platform, publisher, post, facebookPageIds)
+      publishSinglePlatform(baseName, platform, publisher, postForPlatform, facebookPageIds)
     );
   }
 

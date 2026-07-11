@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import HomeHero from "./HomeHero";
 import ScorecardModal from "./ScorecardModal";
+import PerPlatformModal from "./PerPlatformModal";
 import HomeCompose from "./HomeCompose";
 import HomePreview from "./HomePreview";
 import PlatformPreview from "./PlatformPreview";
@@ -119,6 +120,26 @@ export default function HomeScreen({
           handlePostPress={composer.handlePostPress}
         />
 
+        {composer.perPlatformEnabled && (
+          <View className="px-5 mt-4">
+            <TouchableOpacity
+              onPress={composer.generatePerPlatform}
+              className="flex-row items-center justify-center bg-paper-light border border-olive/40 rounded-xl py-3"
+              activeOpacity={0.7}
+            >
+              <Ionicons name="sparkles-outline" size={18} color={colors.olive} />
+              <Text className="text-ink font-sans-semibold text-sm ml-2">
+                Tailor per platform
+              </Text>
+              {Object.keys(composer.perPlatformCaptions).length > 0 && (
+                <View className="bg-olive/15 rounded-full px-2 py-0.5 ml-2">
+                  <Text className="text-olive text-[10px] font-sans-bold">READY</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+
         {user?.isOwner && (
           <View className="px-5 mt-4">
             <TouchableOpacity
@@ -153,6 +174,15 @@ export default function HomeScreen({
         user={user}
         baseImageUrl={baseImageUrl}
         onApply={composer.applyScorecard}
+      />
+
+      <PerPlatformModal
+        visible={composer.showPerPlatformModal}
+        onClose={() => composer.setShowPerPlatformModal(false)}
+        captions={composer.perPlatformCaptions}
+        onChange={composer.updatePerPlatformCaption}
+        isTailoring={composer.isTailoring}
+        onRegenerate={composer.generatePerPlatform}
       />
 
       <ScheduleModal

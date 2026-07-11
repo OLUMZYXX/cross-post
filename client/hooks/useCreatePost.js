@@ -9,6 +9,7 @@ import { uploadToCloudinary } from "../services/cloudinary";
 import { addPending, removePending } from "../services/pendingPublishes";
 import { TWITTER_CHAR_LIMIT } from "../components/platformLimits";
 import { applyFont } from "../utils/unicodeFonts";
+import { getPerPlatformEnabled } from "../constants/composePrefs";
 
 const SELECTED_PLATFORMS_KEY = "@crosspost_selected_platforms";
 const SELECTED_FONT_KEY = "@crosspost_selected_font";
@@ -98,6 +99,10 @@ export default function useCreatePost({
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateInfo, setDuplicateInfo] = useState(null);
   const [selectedFont, setSelectedFont] = useState("plain");
+  const [perPlatformEnabled, setPerPlatformEnabled] = useState(false);
+  const [perPlatformCaptions, setPerPlatformCaptions] = useState({});
+  const [showPerPlatformModal, setShowPerPlatformModal] = useState(false);
+  const [isTailoring, setIsTailoring] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(SELECTED_FONT_KEY)
@@ -105,6 +110,7 @@ export default function useCreatePost({
         if (stored) setSelectedFont(stored);
       })
       .catch(() => {});
+    getPerPlatformEnabled().then(setPerPlatformEnabled);
   }, []);
 
   const handleCaptionChange = (text) => {
@@ -113,7 +119,33 @@ export default function useCreatePost({
         ? applyFont(text, selectedFont)
         : text,
     );
+    setPerPlatformCaptions((prev) => (Object.keys(prev).length ? {} : prev));
   };
+
+  const generatePerPlatform = async () => {
+    if (!caption.trim()) {
+      showToast({ type: "warning", title: "Nothing to tailor", message: "Write something first." });
+      return;
+    }
+    if (selectedPlatforms.length === 0) {
+      showToast({ type: "warning", title: "No platforms", message: "Select platforms first." });
+      return;
+    }
+    setIsTailoring(true);
+    setShowPerPlatformModal(true);
+    try {
+      const { data } = await postAPI.rephraseMulti(caption, selectedPlatforms);
+      setPerPlatformCaptions(data.captions || {});
+    } catch (err) {
+      showToast({ type: "error", title: "Tailoring failed", message: err.message });
+      setShowPerPlatformModal(false);
+    } finally {
+      setIsTailoring(false);
+    }
+  };
+
+  const updatePerPlatformCaption = (base, text) =>
+    setPerPlatformCaptions((prev) => ({ ...prev, [base]: text }));
 
   const selectFont = (key) => {
     setSelectedFont(key);
@@ -207,6 +239,7 @@ export default function useCreatePost({
       }
       const { data: createData } = await postAPI.create({
         caption, media: selectedMedia, platforms: selectedPlatforms, status: "draft",
+        ...(Object.keys(perPlatformCaptions).length && { platformCaptions: perPlatformCaptions }),
       });
       pendingPostId = createData.post._id;
       await addPending(pendingPostId, {
@@ -259,6 +292,7 @@ export default function useCreatePost({
       }
       const { data: createData } = await postAPI.create({
         caption, media: selectedMedia, platforms: selectedPlatforms, status: "draft",
+        ...(Object.keys(perPlatformCaptions).length && { platformCaptions: perPlatformCaptions }),
       });
       await postAPI.schedule(createData.post._id, date.toISOString());
       showToast({ type: "info", title: "Post scheduled!", message: `Will publish on ${label}.`, duration: 4000 });
@@ -450,5 +484,8 @@ export default function useCreatePost({
     handleDuplicateProceed, handleDuplicateCancel,
     handleCopyrightProceed, handleCopyrightEdit, handleUseSafeVersion, handleAddHashtag,
     handleSaveDraft, handleMediaSelect, removeMedia, applyScorecard,
+    perPlatformEnabled, perPlatformCaptions, showPerPlatformModal,
+    setShowPerPlatformModal, isTailoring, generatePerPlatform,
+    updatePerPlatformCaption,
   };
 }

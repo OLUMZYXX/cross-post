@@ -17,6 +17,7 @@ import {
   retryPublish,
   schedulePost,
   rephraseCaption,
+  rephraseMultiCaption,
   copyrightCheck,
   duplicateCheck,
 } from "../controllers/post.controller.js";
@@ -43,6 +44,7 @@ router.post("/", createLimiter, optionalUpload, asyncHandler(createPost));
 router.put("/:id", asyncHandler(updatePost));
 router.delete("/:id", asyncHandler(deletePost));
 router.post("/rephrase", rephraseLimiter, asyncHandler(rephraseCaption));
+router.post("/rephrase-multi", rephraseLimiter, asyncHandler(rephraseMultiCaption));
 router.post("/copyright-check", asyncHandler(copyrightCheck));
 router.post("/duplicate-check", asyncHandler(duplicateCheck));
 router.post("/:id/publish", publishLimiter, asyncHandler(publishPost));

@@ -10,6 +10,10 @@ const postSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  platformCaptions: {
+    type: mongoose.Schema.Types.Mixed,
+    default: undefined,
+  },
   contentHash: {
     type: String,
     default: null,

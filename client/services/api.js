@@ -256,6 +256,9 @@ export const postAPI = {
   rephrase: (caption, tone, maxLength) =>
     fetchJSON("/posts/rephrase", { body: { caption, tone, ...(maxLength && { maxLength }) } }),
 
+  rephraseMulti: (caption, platforms) =>
+    fetchJSON("/posts/rephrase-multi", { body: { caption, platforms } }),
+
   copyrightCheck: (caption, imageUrls) =>
     fetchJSON("/posts/copyright-check", {
       body: { caption, imageUrls },

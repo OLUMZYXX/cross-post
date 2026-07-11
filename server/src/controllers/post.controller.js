@@ -34,7 +34,7 @@ export async function getPost(req, res) {
 }
 
 export async function createPost(req, res) {
-  const { caption, platforms, status, mediaUrls: cloudinaryUrls } = req.body;
+  const { caption, platforms, status, mediaUrls: cloudinaryUrls, platformCaptions } = req.body;
 
   const mediaUrls = [];
   if (cloudinaryUrls && cloudinaryUrls.length > 0) {
@@ -63,6 +63,9 @@ export async function createPost(req, res) {
     media: mediaUrls,
     platforms: platformList,
     status: status || "draft",
+    ...(platformCaptions && typeof platformCaptions === "object"
+      ? { platformCaptions }
+      : {}),
   });
 
   await post.save();
@@ -344,6 +347,98 @@ export async function rephraseCaption(req, res) {
   }
 
   res.json({ success: true, data: { rephrased } });
+}
+
+const PLATFORM_LIMITS = {
+  Twitter: 250,
+  Instagram: 2200,
+  LinkedIn: 3000,
+  Facebook: 63206,
+  TikTok: 150,
+  YouTube: 100,
+  Reddit: 300,
+  Telegram: 4096,
+};
+
+const PLATFORM_STYLE = {
+  Twitter: "punchy and concise, 1-2 relevant hashtags",
+  Instagram: "warm and engaging, emojis and a few hashtags",
+  LinkedIn: "professional and insightful, minimal hashtags",
+  Facebook: "conversational and friendly",
+  TikTok: "very short, catchy hook",
+  YouTube: "short and descriptive",
+  Reddit: "plain and direct, no hashtags or emojis",
+  Telegram: "clear and direct",
+};
+
+export async function rephraseMultiCaption(req, res) {
+  const { caption, platforms } = req.body;
+
+  if (!caption || !caption.trim()) {
+    throw Errors.badRequest("Caption is required");
+  }
+  if (!OPENAI_API_KEY) {
+    throw Errors.badRequest("AI rephrasing is not configured.");
+  }
+
+  const bases = [
+    ...new Set((platforms || []).map((p) => String(p).split(":")[0])),
+  ].filter((b) => PLATFORM_LIMITS[b]);
+
+  if (bases.length === 0) {
+    throw Errors.badRequest("Select at least one platform first.");
+  }
+
+  const spec = bases
+    .map((b) => `- ${b}: under ${PLATFORM_LIMITS[b]} characters, ${PLATFORM_STYLE[b]}`)
+    .join("\n");
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a social media copywriter. Rewrite the post for each platform, keeping the SAME information and meaning but adapting tone, format and length to each platform, staying under each character limit. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption.",
+        },
+        {
+          role: "user",
+          content: `Platforms:\n${spec}\n\nUse these exact keys: ${bases.join(", ")}.\n\nPost:\n${caption}`,
+        },
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 900,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw Errors.badRequest(err?.error?.message || "AI service request failed");
+  }
+
+  const data = await response.json();
+  let captions;
+  try {
+    captions = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+  } catch {
+    throw Errors.badRequest("AI returned an invalid response. Try again.");
+  }
+
+  const result = {};
+  for (const b of bases) {
+    let text = typeof captions[b] === "string" ? captions[b].trim() : caption;
+    if (text.length > PLATFORM_LIMITS[b]) text = text.slice(0, PLATFORM_LIMITS[b]);
+    result[b] = text;
+  }
+
+  res.json({ success: true, data: { captions: result } });
 }
 
 export async function copyrightCheck(req, res) {
