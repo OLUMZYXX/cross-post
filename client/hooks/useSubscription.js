@@ -12,16 +12,19 @@ export default function useSubscription(user) {
   const allowlistPro = !!user?.isPro;
   const [purchasedPro, setPurchasedPro] = useState(false);
   const [packages, setPackages] = useState([]);
+  const [loadError, setLoadError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    if (!isSubscriptionSupported()) return;
-    const [status, pkgs] = await Promise.all([
-      getProStatus(),
-      getProPackages(),
-    ]);
+    if (!isSubscriptionSupported()) {
+      setLoadError("No RevenueCat key in this build (or not iOS).");
+      return;
+    }
+    const status = await getProStatus();
+    const { packages: pkgs, error } = await getProPackages();
     setPurchasedPro(status);
     setPackages(pkgs);
+    setLoadError(error);
   }, []);
 
   useEffect(() => {
@@ -60,6 +63,7 @@ export default function useSubscription(user) {
   return {
     isPro: allowlistPro || purchasedPro,
     packages,
+    loadError,
     loading,
     purchase,
     restore,

@@ -181,7 +181,20 @@ export default function SignIn({ onNavigateToSignUp, onNavigateToHome }) {
         editable={!loading}
       />
 
-      <TouchableOpacity className="mb-6 self-end" disabled={loading} activeOpacity={0.7}>
+      <TouchableOpacity
+        className="mb-6 self-end"
+        disabled={loading}
+        activeOpacity={0.7}
+        onPress={() =>
+          showToast({
+            type: "info",
+            title: "Reset your password",
+            message:
+              "Email akinwumiolumide5@gmail.com from your account email and we'll help you reset it.",
+            duration: 7000,
+          })
+        }
+      >
         <Text className="text-ink-muted text-[12px] font-sans-medium">
           Forgot password?
         </Text>

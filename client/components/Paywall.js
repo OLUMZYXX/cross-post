@@ -33,7 +33,7 @@ const TERMS_URL = "https://cross-post-web.vercel.app/terms";
 const PRIVACY_URL = "https://cross-post-web.vercel.app/privacy";
 
 export default function Paywall({ visible, onClose, onSuccess, user }) {
-  const { packages, loading, purchase, restore, isPro } = useSubscription(user);
+  const { packages, loadError, loading, purchase, restore, isPro } = useSubscription(user);
   const { showToast } = useToast();
   const [selected, setSelected] = useState(null);
 
@@ -95,9 +95,16 @@ export default function Paywall({ visible, onClose, onSuccess, user }) {
             </View>
 
             {sorted.length === 0 ? (
-              <Text className="text-ink-muted text-xs text-center my-6">
-                Subscription plans are loading or unavailable on this device.
-              </Text>
+              <View className="my-6">
+                <Text className="text-ink-muted text-xs text-center mb-2">
+                  Subscription plans couldn&apos;t load.
+                </Text>
+                {loadError ? (
+                  <Text className="text-terracotta text-[11px] text-center leading-4">
+                    {loadError}
+                  </Text>
+                ) : null}
+              </View>
             ) : (
               sorted.map((pkg) => {
                 const meta = PLAN_META[pkg.packageType] || { label: pkg.product.title };
