@@ -171,7 +171,7 @@ export const postAPI = {
 
   get: (id) => api.get(`/posts/${id}`),
 
-  create: async ({ caption, media, platforms, status }) => {
+  create: async ({ caption, media, platforms, status, platformCaptions }) => {
     const hasRawFiles =
       media && media.length > 0 && !media.every((m) => m.cloudinaryUrl);
 
@@ -181,6 +181,8 @@ export const postAPI = {
           caption,
           status,
           platforms,
+          ...(platformCaptions &&
+            Object.keys(platformCaptions).length && { platformCaptions }),
           ...(media && media.length > 0 && {
             mediaUrls: media.map((m) => m.cloudinaryUrl),
           }),
@@ -193,6 +195,9 @@ export const postAPI = {
     if (status) formData.append("status", status);
     if (platforms) {
       platforms.forEach((p) => formData.append("platforms", p));
+    }
+    if (platformCaptions && Object.keys(platformCaptions).length) {
+      formData.append("platformCaptions", JSON.stringify(platformCaptions));
     }
     if (media && media.length > 0) {
       media.forEach((item) => {

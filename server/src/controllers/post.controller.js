@@ -60,6 +60,15 @@ export async function createPost(req, res) {
       ? [platforms]
       : [];
 
+  let parsedCaptions = platformCaptions;
+  if (typeof parsedCaptions === "string") {
+    try {
+      parsedCaptions = JSON.parse(parsedCaptions);
+    } catch {
+      parsedCaptions = null;
+    }
+  }
+
   const post = new Post({
     userId: req.user.id,
     caption: caption || "",
@@ -67,8 +76,10 @@ export async function createPost(req, res) {
     media: mediaUrls,
     platforms: platformList,
     status: status || "draft",
-    ...(platformCaptions && typeof platformCaptions === "object"
-      ? { platformCaptions }
+    ...(parsedCaptions &&
+    typeof parsedCaptions === "object" &&
+    Object.keys(parsedCaptions).length
+      ? { platformCaptions: parsedCaptions }
       : {}),
   });
 
