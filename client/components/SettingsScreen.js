@@ -1,6 +1,11 @@
 ﻿import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Alert, Linking, Switch } from "react-native";
-import { getPerPlatformEnabled, setPerPlatformEnabled } from "../constants/composePrefs";
+import {
+  getPerPlatformEnabled,
+  setPerPlatformEnabled,
+  getTwitterLongPosts,
+  setTwitterLongPosts,
+} from "../constants/composePrefs";
 import * as Application from "expo-application";
 import { getColors, useTheme } from "../constants/theme";
 import { StatusBar } from "expo-status-bar";
@@ -75,14 +80,21 @@ export default function SettingsScreen({
   const onTrial = user?.proSource === "trial" && trialDaysLeft > 0;
   const [paywallVisible, setPaywallVisible] = useState(false);
   const [perPlatform, setPerPlatform] = useState(false);
+  const [twitterLong, setTwitterLong] = useState(false);
 
   useEffect(() => {
     getPerPlatformEnabled().then(setPerPlatform);
+    getTwitterLongPosts().then(setTwitterLong);
   }, []);
 
   const togglePerPlatform = (value) => {
     setPerPlatform(value);
     setPerPlatformEnabled(value);
+  };
+
+  const toggleTwitterLong = (value) => {
+    setTwitterLong(value);
+    setTwitterLongPosts(value);
   };
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
@@ -278,7 +290,7 @@ export default function SettingsScreen({
           )}
 
           <SectionLabel label="Composing" />
-          <View className="flex-row items-center justify-between bg-paper-light rounded-2xl border border-rule p-4">
+          <View className="flex-row items-center justify-between bg-paper-light rounded-2xl border border-rule p-4 mb-2">
             <View className="flex-1 mr-3">
               <Text className="text-ink font-sans-bold text-sm">Tailor caption per platform</Text>
               <Text className="text-ink-muted text-[11px] mt-0.5">
@@ -288,6 +300,20 @@ export default function SettingsScreen({
             <Switch
               value={perPlatform}
               onValueChange={togglePerPlatform}
+              trackColor={{ true: getColors().olive, false: getColors().rule }}
+              thumbColor={getColors().paperLight}
+            />
+          </View>
+          <View className="flex-row items-center justify-between bg-paper-light rounded-2xl border border-rule p-4">
+            <View className="flex-1 mr-3">
+              <Text className="text-ink font-sans-bold text-sm">Long posts on X (Premium)</Text>
+              <Text className="text-ink-muted text-[11px] mt-0.5">
+                Turn on only if your connected X account has Premium. Removes the 250-character limit.
+              </Text>
+            </View>
+            <Switch
+              value={twitterLong}
+              onValueChange={toggleTwitterLong}
               trackColor={{ true: getColors().olive, false: getColors().rule }}
               thumbColor={getColors().paperLight}
             />

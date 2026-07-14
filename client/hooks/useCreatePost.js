@@ -9,7 +9,9 @@ import { uploadToCloudinary } from "../services/cloudinary";
 import { addPending, removePending } from "../services/pendingPublishes";
 import { TWITTER_CHAR_LIMIT } from "../components/platformLimits";
 import { applyFont } from "../utils/unicodeFonts";
-import { getPerPlatformEnabled } from "../constants/composePrefs";
+import { getPerPlatformEnabled, getTwitterLongPosts } from "../constants/composePrefs";
+
+const TWITTER_PREMIUM_LIMIT = 25000;
 
 const SELECTED_PLATFORMS_KEY = "@crosspost_selected_platforms";
 const SELECTED_FONT_KEY = "@crosspost_selected_font";
@@ -103,6 +105,7 @@ export default function useCreatePost({
   const [perPlatformCaptions, setPerPlatformCaptions] = useState({});
   const [showPerPlatformModal, setShowPerPlatformModal] = useState(false);
   const [isTailoring, setIsTailoring] = useState(false);
+  const [twitterLimit, setTwitterLimit] = useState(TWITTER_CHAR_LIMIT);
 
   useEffect(() => {
     AsyncStorage.getItem(SELECTED_FONT_KEY)
@@ -111,6 +114,9 @@ export default function useCreatePost({
       })
       .catch(() => {});
     getPerPlatformEnabled().then(setPerPlatformEnabled);
+    getTwitterLongPosts().then((on) =>
+      setTwitterLimit(on ? TWITTER_PREMIUM_LIMIT : TWITTER_CHAR_LIMIT),
+    );
   }, []);
 
   const handleCaptionChange = (text) => {
@@ -178,14 +184,14 @@ export default function useCreatePost({
 
   const hasTwitterSelected = selectedPlatforms.some((p) => p.split(":")[0] === "Twitter");
 
-  const getTwitterCharLimit = () => (hasTwitterSelected ? TWITTER_CHAR_LIMIT : null);
+  const getTwitterCharLimit = () => (hasTwitterSelected ? twitterLimit : null);
 
   const handleShortenForTwitter = async () => {
     const textToShorten = rephrasedText || caption;
     if (!textToShorten.trim()) return;
     setIsRephrasing(true);
     try {
-      const { data } = await postAPI.rephrase(textToShorten, selectedTone || "casual", TWITTER_CHAR_LIMIT);
+      const { data } = await postAPI.rephrase(textToShorten, selectedTone || "casual", twitterLimit);
       setRephrasedText(data.rephrased);
     } catch (err) {
       showToast({ type: "error", title: "Shorten failed", message: err.message });
@@ -341,11 +347,11 @@ export default function useCreatePost({
       showToast({ type: "warning", title: "No platforms selected", message: "Select at least one platform." });
       return;
     }
-    if (hasTwitterSelected && caption.length > TWITTER_CHAR_LIMIT) {
+    if (hasTwitterSelected && caption.length > twitterLimit) {
       showToast({
         type: "warning",
         title: "Too long for Twitter/X",
-        message: `${caption.length}/${TWITTER_CHAR_LIMIT} characters. Tap Rephrase → "Shorten for Twitter", or unselect Twitter/X.`,
+        message: `${caption.length}/${twitterLimit} characters. Tap Rephrase → "Shorten for Twitter", or unselect Twitter/X.`,
         duration: 5000,
       });
       return;

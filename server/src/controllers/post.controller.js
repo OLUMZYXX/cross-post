@@ -334,13 +334,13 @@ export async function rephraseCaption(req, res) {
     : `You MUST keep the result strictly under ${charLimit} characters (including emojis and spaces). Count carefully.`;
 
   const instruction = isOwner
-    ? "Rewrite this as a concise breaking-news football update in the PRESENT tense, as if it is happening right now. Report only the facts in the original and do not add anything that is not there."
+    ? "Completely rewrite this football news in your OWN original words and a fresh sentence structure — do not keep the original phrasing. Report it in the PRESENT tense as breaking news, keeping every fact accurate."
     : toneInstructions[tone] ||
       "Rewrite this social media post to sound better while keeping the same meaning.";
 
   const systemContent = isOwner
-    ? `You are a breaking-news football reporter for a football news page. Rewrite the post as an immediate breaking-news report in the PRESENT tense, as if the news is breaking right now (e.g. "Arsenal sign...", "Real Madrid confirm...", "reports claim..."). Report ONLY the facts in the original — player and club names, scores, dates, numbers, quotes and transfer details — and never invent anything. Do NOT add analysis, opinion, background, predictions or feature-style commentary in your own words; just report the news cleanly and directly. Keep the wording original and free of copyrighted lyrics or trademarked slogans. Use emojis very sparingly — at most one, usually none. No hashtags unless the original already has them. Return only the rewritten text — no quotes, no explanation. ${limitNote}`
-    : `You are a social media copywriter. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. ${limitNote}`;
+    ? `You are a breaking-news football reporter for a football news page. FULLY REWRITE the post in your own words as an immediate breaking-news report in the PRESENT tense (e.g. "Arsenal sign...", "Real Madrid confirm...", "reports claim..."). Preserve every fact — player and club names, scores, dates, numbers, quotes and transfer details — but DO NOT reuse the source's sentences, phrasing or word order. The result MUST be original enough that it will not be flagged for copyright or plagiarism, so restructure it substantially rather than swapping a word or two. Do not invent facts or add personal opinion. Add a few (about 1 to 3) relevant emojis to give it life, without overdoing it. No hashtags unless the original already has them. Return only the rewritten text — no quotes, no explanation. ${limitNote}`
+    : `You are a social media copywriter. Fully rewrite the post in your own words with a fresh structure — never return the original with only a word or two changed. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. ${limitNote}`;
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -358,7 +358,7 @@ export async function rephraseCaption(req, res) {
         },
       ],
       max_tokens: isShortenMode ? 150 : 300,
-      temperature: isShortenMode ? 0.4 : isOwner ? 0.5 : 0.8,
+      temperature: isShortenMode ? 0.4 : isOwner ? 0.78 : 0.8,
     }),
   });
 
@@ -438,8 +438,8 @@ export async function rephraseMultiCaption(req, res) {
     .join("\n");
 
   const systemContent = isOwner
-    ? "You are a breaking-news football reporter. Rewrite the post for each platform as an immediate breaking-news report in the PRESENT tense, as if it is happening right now. Report ONLY the facts in the original — player and club names, scores, dates, numbers and quotes — and never invent details or add analysis, opinion or feature-style commentary in your own words. Adapt only the format and length to each platform under its character limit. Use emojis very sparingly (none to one) and no hashtags unless the original has them. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption."
-    : "You are a social media copywriter. Rewrite the post for each platform, keeping the SAME information and meaning but adapting tone, format and length to each platform, staying under each character limit. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption.";
+    ? "You are a breaking-news football reporter. For each platform, FULLY REWRITE the post in your own words as an immediate breaking-news report in the PRESENT tense. Preserve every fact — player and club names, scores, dates, numbers and quotes — but DO NOT reuse the source's sentences, phrasing or word order; each version must be original enough not to be flagged for copyright. Do not invent facts or add opinion. Adapt format and length to each platform under its character limit, add a few (1 to 3) relevant emojis to give it life, and use no hashtags unless the original has them. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption."
+    : "You are a social media copywriter. Fully rewrite the post for each platform in original wording, keeping the SAME information and meaning but adapting tone, format and length to each platform, staying under each character limit. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption.";
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
