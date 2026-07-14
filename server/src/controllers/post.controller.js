@@ -6,6 +6,7 @@ import {
   platformsRequirePro,
   isAllowlistedEmail,
 } from "../services/proAccess.js";
+import { resolveIsPro } from "../services/teamAccess.js";
 import {
   publishToAllPlatforms,
   deleteFromAllPlatforms,
@@ -155,7 +156,7 @@ export async function publishPost(req, res) {
 
   if (platformsRequirePro(post.platforms)) {
     const user = await User.findById(req.user.id);
-    if (!isUserPro(user)) {
+    if (!(await resolveIsPro(user))) {
       throw Errors.forbidden(
         "Posting to Twitter/X requires Cross-Post Pro. Upgrade to publish to Twitter/X.",
       );
@@ -195,7 +196,7 @@ export async function retryPublish(req, res) {
 
   if (platformsRequirePro(retryPlatforms)) {
     const user = await User.findById(req.user.id);
-    if (!isUserPro(user)) {
+    if (!(await resolveIsPro(user))) {
       throw Errors.forbidden(
         "Posting to Twitter/X requires Cross-Post Pro. Upgrade to publish to Twitter/X.",
       );
@@ -239,7 +240,7 @@ export async function schedulePost(req, res) {
 
   if (platformsRequirePro(post.platforms)) {
     const user = await User.findById(req.user.id);
-    if (!isUserPro(user)) {
+    if (!(await resolveIsPro(user))) {
       throw Errors.forbidden(
         "Scheduling to Twitter/X requires Cross-Post Pro. Upgrade to publish to Twitter/X.",
       );
@@ -717,7 +718,8 @@ Only flag clear issues. Do not flag generic objects, common symbols, or incident
 export async function duplicateCheck(req, res) {
   const { caption } = req.body;
 
-  const existingPost = await findDuplicatePost(req.user.id, caption);
+  const user = await User.findById(req.user.id);
+  const existingPost = await findDuplicatePost(user, caption);
 
   res.json({
     success: true,

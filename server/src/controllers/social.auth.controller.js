@@ -2,16 +2,19 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/env.js";
 import { Errors } from "../utils/AppError.js";
+import { buildUserResponse } from "../services/userResponse.js";
 
 function generateToken(user) {
-  return jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
-  });
-}
-
-function sanitiseUser(user) {
-  const { passwordHash, ...safe } = user.toObject();
-  return safe;
+  return jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+      role: user.role || "owner",
+      teamOwnerId: (user.teamOwnerId || user._id).toString(),
+    },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN },
+  );
 }
 
 export async function googleAuth(req, res) {
@@ -43,7 +46,7 @@ export async function googleAuth(req, res) {
   }
 
   const token = generateToken(user);
-  res.json({ success: true, data: { user: sanitiseUser(user), token } });
+  res.json({ success: true, data: { user: await buildUserResponse(user), token } });
 }
 
 export async function appleAuth(req, res) {
@@ -83,5 +86,5 @@ export async function appleAuth(req, res) {
   }
 
   const token = generateToken(user);
-  res.json({ success: true, data: { user: sanitiseUser(user), token } });
+  res.json({ success: true, data: { user: await buildUserResponse(user), token } });
 }

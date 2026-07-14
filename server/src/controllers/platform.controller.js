@@ -7,6 +7,10 @@ import {
 } from "../config/env.js";
 import { createState, getState } from "../utils/oauthState.js";
 
+function workspaceId(req) {
+  return req.user.teamOwnerId || req.user.id;
+}
+
 const SUPPORTED_PLATFORMS = [
   "Twitter",
   "Instagram",
@@ -19,7 +23,7 @@ const SUPPORTED_PLATFORMS = [
 ];
 
 export async function listPlatforms(req, res) {
-  const platforms = await Platform.find({ userId: req.user.id });
+  const platforms = await Platform.find({ userId: workspaceId(req) });
 
   res.json({ success: true, data: { platforms } });
 }
@@ -36,7 +40,7 @@ export async function connectPlatform(req, res) {
 
   if (platformUserId) {
     const existing = await Platform.findOne({
-      userId: req.user.id,
+      userId: workspaceId(req),
       name,
       platformUserId,
     });
@@ -46,7 +50,7 @@ export async function connectPlatform(req, res) {
   }
 
   const platform = new Platform({
-    userId: req.user.id,
+    userId: workspaceId(req),
     name,
     accessToken,
     refreshToken,
@@ -62,7 +66,7 @@ export async function connectPlatform(req, res) {
 export async function disconnectPlatform(req, res) {
   const platform = await Platform.findOneAndDelete({
     _id: req.params.id,
-    userId: req.user.id,
+    userId: workspaceId(req),
   });
 
   if (!platform) {
@@ -77,7 +81,7 @@ export async function togglePlatformActive(req, res) {
 
   const platform = await Platform.findOne({
     _id: req.params.id,
-    userId: req.user.id,
+    userId: workspaceId(req),
   });
 
   if (!platform) {
@@ -94,7 +98,7 @@ export async function togglePlatformActive(req, res) {
 }
 
 export async function initiateFacebookAuth(req, res) {
-  const stateId = await createState({ userId: req.user.id });
+  const stateId = await createState({ userId: workspaceId(req) });
   const redirectUri = `${CLIENT_URL}/api/platforms/auth/facebook/callback`;
 
   const facebookAuthUrl =
@@ -278,7 +282,7 @@ export async function handleFacebookCallback(req, res) {
 
 export async function listFacebookPages(req, res) {
   const platform = await Platform.findOne({
-    userId: req.user.id,
+    userId: workspaceId(req),
     name: "Facebook",
   });
 
@@ -360,7 +364,7 @@ export async function selectFacebookPage(req, res) {
   }
 
   const platform = await Platform.findOne({
-    userId: req.user.id,
+    userId: workspaceId(req),
     name: "Facebook",
   });
 

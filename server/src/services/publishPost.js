@@ -1,4 +1,6 @@
 import Platform from "../models/Platform.js";
+import User from "../models/User.js";
+import { getWorkspaceId } from "./teamService.js";
 import { ensureValidToken } from "./tokenRefresh.js";
 import { publishToTwitter } from "./publishers/twitter.publisher.js";
 import { publishToFacebook } from "./publishers/facebook.publisher.js";
@@ -96,11 +98,17 @@ function parseIdentifier(identifier) {
   return { baseName, subId, isFacebookPage, isMultiAccount };
 }
 
+async function resolveWorkspaceId(userId) {
+  const actingUser = await User.findById(userId).select("teamOwnerId");
+  return actingUser ? getWorkspaceId(actingUser) : userId;
+}
+
 export async function publishToAllPlatforms(userId, post) {
   const platformIdentifiers = post.platforms || [];
   const results = [];
 
-  const connectedPlatforms = await Platform.find({ userId });
+  const workspaceId = await resolveWorkspaceId(userId);
+  const connectedPlatforms = await Platform.find({ userId: workspaceId });
 
   const facebookPageIds = platformIdentifiers
     .filter((p) => p.startsWith("Facebook:"))
@@ -183,7 +191,8 @@ export async function deleteFromAllPlatforms(userId, post) {
 
   if (!post.publishResults || post.publishResults.length === 0) return results;
 
-  const connectedPlatforms = await Platform.find({ userId });
+  const workspaceId = await resolveWorkspaceId(userId);
+  const connectedPlatforms = await Platform.find({ userId: workspaceId });
 
   for (const pr of post.publishResults) {
     const platformName = pr.platform;

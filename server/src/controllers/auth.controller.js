@@ -5,17 +5,19 @@ import User from "../models/User.js";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/env.js";
 import { Errors } from "../utils/AppError.js";
 import { deleteUserAccount } from "../services/accountDeletion.js";
-import {
-  isUserPro,
-  getProSource,
-  trialDaysLeft,
-  isAllowlistedEmail,
-} from "../services/proAccess.js";
+import { buildUserResponse } from "../services/userResponse.js";
 
 function generateToken(user) {
-  return jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
-  });
+  return jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+      role: user.role || "owner",
+      teamOwnerId: (user.teamOwnerId || user._id).toString(),
+    },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN },
+  );
 }
 
 function generateTempToken(user) {
@@ -24,15 +26,6 @@ function generateTempToken(user) {
   });
 }
 
-function sanitiseUser(user) {
-  const { passwordHash, twoFactorSecret, ...safe } = user.toObject();
-  safe.hasPassword = !!passwordHash;
-  safe.isPro = isUserPro(user);
-  safe.proSource = getProSource(user);
-  safe.trialDaysLeft = trialDaysLeft(user);
-  safe.isOwner = isAllowlistedEmail(user.email);
-  return safe;
-}
 
 export async function signup(req, res) {
   const { name, email, password } = req.body;
@@ -54,7 +47,7 @@ export async function signup(req, res) {
 
   res.status(201).json({
     success: true,
-    data: { user: sanitiseUser(user), token },
+    data: { user: await buildUserResponse(user), token },
   });
 }
 
@@ -88,7 +81,7 @@ export async function signin(req, res) {
 
   res.json({
     success: true,
-    data: { user: sanitiseUser(user), token },
+    data: { user: await buildUserResponse(user), token },
   });
 }
 
@@ -129,7 +122,7 @@ export async function login2FA(req, res) {
   const token = generateToken(user);
   res.json({
     success: true,
-    data: { user: sanitiseUser(user), token },
+    data: { user: await buildUserResponse(user), token },
   });
 }
 
@@ -139,7 +132,7 @@ export async function me(req, res) {
     throw Errors.notFound("User not found");
   }
 
-  res.json({ success: true, data: { user: sanitiseUser(user) } });
+  res.json({ success: true, data: { user: await buildUserResponse(user) } });
 }
 
 export async function updateProfile(req, res) {
@@ -164,7 +157,7 @@ export async function updateProfile(req, res) {
 
   await user.save();
 
-  res.json({ success: true, data: { user: sanitiseUser(user) } });
+  res.json({ success: true, data: { user: await buildUserResponse(user) } });
 }
 
 export async function setup2FA(req, res) {
@@ -268,7 +261,7 @@ export async function updateWatermark(req, res) {
 
   await user.save();
 
-  res.json({ success: true, data: { user: sanitiseUser(user) } });
+  res.json({ success: true, data: { user: await buildUserResponse(user) } });
 }
 
 export async function deleteAccount(req, res) {

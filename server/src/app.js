@@ -9,6 +9,7 @@ import notificationRoutes from "./routes/notification.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
 import scorecardRoutes from "./routes/scorecard.routes.js";
 import feedRoutes from "./routes/feed.routes.js";
+import teamRoutes from "./routes/team.routes.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import {
   uploadToGridFS,
@@ -178,6 +179,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/scorecard", scorecardRoutes);
 app.use("/api/feed", feedRoutes);
+app.use("/api/team", teamRoutes);
 
 app.use(notFoundHandler);
 

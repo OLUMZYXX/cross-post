@@ -19,6 +19,16 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
+  role: {
+    type: String,
+    enum: ["owner", "member"],
+    default: "owner",
+  },
+  teamOwnerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
   passwordHash: {
     type: String,
     required: false,
@@ -85,6 +95,9 @@ userSchema.pre("save", async function () {
   if (this._password) {
     this.passwordHash = await bcrypt.hash(this._password, 12);
     this._password = undefined;
+  }
+  if (!this.teamOwnerId) {
+    this.teamOwnerId = this._id;
   }
 });
 
