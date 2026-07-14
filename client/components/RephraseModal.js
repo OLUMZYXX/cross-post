@@ -10,6 +10,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { getColors } from "../constants/theme";
 import { TWITTER_CHAR_LIMIT } from "./platformLimits";
 
+const fmt = (n) => n.toLocaleString();
+
 const TONE_OPTIONS = [
   { key: "professional", label: "Professional", icon: "briefcase-outline", color: getColors().olive },
   { key: "casual", label: "Casual", icon: "cafe-outline", color: getColors().terracotta },
@@ -35,6 +37,7 @@ export default function RephraseModal({
   onApply,
   hasTwitterSelected,
   onShortenForTwitter,
+  twitterLimit = TWITTER_CHAR_LIMIT,
 }) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -93,7 +96,7 @@ export default function RephraseModal({
               <View className="mb-4">
                 <View className="flex-row items-center justify-between mb-2">
                   <Text className="text-ink-muted text-[10px] tracking-wider">RESULT</Text>
-                  <Text className={`text-[10px] font-sans-semibold ${rephrasedText.length > TWITTER_CHAR_LIMIT && hasTwitterSelected ? "text-terracotta" : "text-ink-soft"}`}>
+                  <Text className={`text-[10px] font-sans-semibold ${rephrasedText.length > twitterLimit && hasTwitterSelected ? "text-terracotta" : "text-ink-soft"}`}>
                     {rephrasedText.length} chars
                   </Text>
                 </View>
@@ -101,7 +104,7 @@ export default function RephraseModal({
                   <Text className="text-ink text-sm leading-5">{rephrasedText}</Text>
                 </View>
 
-                {hasTwitterSelected && rephrasedText.length > TWITTER_CHAR_LIMIT && (
+                {hasTwitterSelected && rephrasedText.length > twitterLimit && (
                   <TouchableOpacity
                     onPress={onShortenForTwitter}
                     className="flex-row items-center justify-center bg-paper-deep border border-rule py-3 rounded-xl mt-3"
@@ -109,7 +112,7 @@ export default function RephraseModal({
                     <Ionicons name="logo-twitter" size={16} color="#1DA1F2" />
                     <Text className="text-olive font-sans-bold text-sm ml-2">Shorten for Twitter</Text>
                     <View className="bg-terracotta/20 rounded-full px-2 py-0.5 ml-2">
-                      <Text className="text-terracotta text-[10px] font-sans-bold">{rephrasedText.length}/{TWITTER_CHAR_LIMIT.toLocaleString()}</Text>
+                      <Text className="text-terracotta text-[10px] font-sans-bold">{rephrasedText.length}/{fmt(twitterLimit)}</Text>
                     </View>
                   </TouchableOpacity>
                 )}

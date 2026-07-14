@@ -232,11 +232,19 @@ export default function useCreatePost({
     setSelectedTone(null);
   };
 
+  const refreshTwitterLimit = async () => {
+    const on = await getTwitterLongPosts();
+    const limit = on ? TWITTER_PREMIUM_LIMIT : TWITTER_CHAR_LIMIT;
+    setTwitterLimit(limit);
+    return limit;
+  };
+
   const openRephraseModal = () => {
     if (!caption.trim()) {
       showToast({ type: "warning", title: "Nothing to rephrase", message: "Write something first." });
       return;
     }
+    refreshTwitterLimit();
     setRephrasedText(null);
     setSelectedTone(null);
     setShowRephraseModal(true);
@@ -347,11 +355,12 @@ export default function useCreatePost({
       showToast({ type: "warning", title: "No platforms selected", message: "Select at least one platform." });
       return;
     }
-    if (hasTwitterSelected && caption.length > twitterLimit) {
+    const limit = await refreshTwitterLimit();
+    if (hasTwitterSelected && caption.length > limit) {
       showToast({
         type: "warning",
         title: "Too long for Twitter/X",
-        message: `${caption.length}/${twitterLimit} characters. Tap Rephrase → "Shorten for Twitter", or unselect Twitter/X.`,
+        message: `${caption.length}/${limit} characters. Tap Rephrase → "Shorten for Twitter", or unselect Twitter/X.`,
         duration: 5000,
       });
       return;
@@ -504,6 +513,6 @@ export default function useCreatePost({
     handleSaveDraft, handleMediaSelect, removeMedia, applyScorecard,
     perPlatformEnabled, perPlatformCaptions, showPerPlatformModal,
     setShowPerPlatformModal, isTailoring, generatePerPlatform,
-    updatePerPlatformCaption,
+    updatePerPlatformCaption, twitterLimit,
   };
 }

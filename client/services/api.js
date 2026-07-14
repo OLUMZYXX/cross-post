@@ -300,8 +300,7 @@ export const notificationAPI = {
 export const teamAPI = {
   listMembers: () => api.get("/team/members"),
 
-  addMember: (name, email, password) =>
-    api.post("/team/members", { name, email, password }),
+  addMember: (email) => api.post("/team/members", { email }),
 
   removeMember: (id) => api.delete(`/team/members/${id}`),
 

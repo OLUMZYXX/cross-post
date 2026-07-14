@@ -42,7 +42,7 @@ export default function CreatePost({
     publishNow, schedulePost, handlePostPress,
     handleDuplicateProceed, handleDuplicateCancel,
     handleCopyrightProceed, handleCopyrightEdit, handleUseSafeVersion, handleAddHashtag,
-    handleSaveDraft, handleMediaSelect, removeMedia,
+    handleSaveDraft, handleMediaSelect, removeMedia, twitterLimit,
   } = useCreatePost({
     connectedPlatforms, connectedPlatformObjects, allPlatforms,
     initialDraft, onClose, onSaveDraft, onPostPublished,
@@ -51,7 +51,7 @@ export default function CreatePost({
   const { showToast } = useToast();
   const { colors, resolved } = useTheme();
   const [showFontPicker, setShowFontPicker] = useState(false);
-  const isOverLimit = hasTwitterSelected && caption.length > TWITTER_CHAR_LIMIT;
+  const isOverLimit = hasTwitterSelected && caption.length > twitterLimit;
 
   const handleCopy = async () => {
     if (!caption.trim()) {
@@ -108,11 +108,11 @@ export default function CreatePost({
               <View className="h-1 flex-1 rounded-full mr-3 bg-rule">
                 <View
                   className={`h-full rounded-full ${isOverLimit ? "bg-terracotta" : "bg-olive"}`}
-                  style={{ width: `${Math.min((caption.length / TWITTER_CHAR_LIMIT) * 100, 100)}%` }}
+                  style={{ width: `${Math.min((caption.length / twitterLimit) * 100, 100)}%` }}
                 />
               </View>
               <Text className={`text-[10px] font-sans-semibold ${isOverLimit ? "text-terracotta" : "text-ink-muted"}`}>
-                {caption.length}/{TWITTER_CHAR_LIMIT.toLocaleString()}
+                {caption.length}/{twitterLimit.toLocaleString()}
               </Text>
             </View>
           )}
@@ -180,6 +180,7 @@ export default function CreatePost({
         onApply={applyRephrase}
         hasTwitterSelected={hasTwitterSelected}
         onShortenForTwitter={handleShortenForTwitter}
+        twitterLimit={twitterLimit}
       />
 
       <CopyrightModal

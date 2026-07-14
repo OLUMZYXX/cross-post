@@ -18,24 +18,34 @@ export async function listMembers(workspaceId) {
     .sort({ createdAt: -1 });
 }
 
-export async function createMember(workspaceId, { name, email, password }) {
-  if (!name || !email || !password) {
-    throw Errors.badRequest("Name, email and password are required");
-  }
-  if (password.length < 6) {
-    throw Errors.badRequest("Password must be at least 6 characters");
+export async function createMember(workspaceId, { email }) {
+  if (!email || !email.trim()) {
+    throw Errors.badRequest("Email is required");
   }
 
   const normalizedEmail = email.toLowerCase().trim();
   const existing = await User.findOne({ email: normalizedEmail });
+
   if (existing) {
-    throw Errors.conflict("A user with this email already exists");
+    if (existing._id.toString() === workspaceId) {
+      throw Errors.badRequest("You cannot add yourself as a member");
+    }
+    if (
+      existing.teamOwnerId &&
+      existing.teamOwnerId.toString() === workspaceId &&
+      existing.role === "member"
+    ) {
+      throw Errors.conflict("This member is already on your team");
+    }
+    existing.role = "member";
+    existing.teamOwnerId = workspaceId;
+    await existing.save();
+    return { id: existing._id, name: existing.name, email: existing.email };
   }
 
   const member = new User({
-    name: name.trim(),
+    name: normalizedEmail.split("@")[0],
     email: normalizedEmail,
-    password,
     role: "member",
     teamOwnerId: workspaceId,
   });

@@ -18,8 +18,8 @@ export async function getMembers(req, res) {
 }
 
 export async function addMember(req, res) {
-  const { name, email, password } = req.body;
-  const member = await createMember(workspaceId(req), { name, email, password });
+  const { email } = req.body;
+  const member = await createMember(workspaceId(req), { email });
   res.status(201).json({ success: true, data: { member } });
 }
 

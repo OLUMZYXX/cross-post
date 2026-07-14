@@ -35,7 +35,7 @@ export default function TeamMembers() {
   const colors = getColors();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const load = useCallback(async () => {
@@ -54,15 +54,20 @@ export default function TeamMembers() {
   }, [load]);
 
   const addMember = async () => {
-    if (!form.name.trim() || !form.email.trim() || form.password.length < 6) {
-      showToast({ type: "warning", title: "Fill everything", message: "Name, email and a 6+ char password." });
+    const value = email.trim();
+    if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      showToast({ type: "warning", title: "Enter a valid email" });
       return;
     }
     setSubmitting(true);
     try {
-      await teamAPI.addMember(form.name.trim(), form.email.trim(), form.password);
-      setForm({ name: "", email: "", password: "" });
-      showToast({ type: "success", title: "Member added", message: "Share the email and password with them." });
+      await teamAPI.addMember(value);
+      setEmail("");
+      showToast({
+        type: "success",
+        title: "Member added",
+        message: "They can sign in with Google/Apple using this email.",
+      });
       load();
     } catch (err) {
       showToast({ type: "error", title: "Couldn't add member", message: err.message });
@@ -93,28 +98,16 @@ export default function TeamMembers() {
   return (
     <View>
       <View className="bg-paper-light border border-rule rounded-2xl p-4 mb-5">
-        <Text className="text-ink font-sans-bold text-sm mb-3">Invite a worker</Text>
+        <Text className="text-ink font-sans-bold text-sm mb-1">Add a worker</Text>
+        <Text className="text-ink-muted text-[11px] mb-3">
+          Enter their email — they sign in with Google or Apple using it.
+        </Text>
         <TextInput
-          value={form.name}
-          onChangeText={(name) => setForm((f) => ({ ...f, name }))}
-          placeholder="Full name"
-          placeholderTextColor={colors.inkSoft}
-          className="bg-paper border border-rule rounded-xl px-4 py-3 text-ink text-sm mb-2"
-        />
-        <TextInput
-          value={form.email}
-          onChangeText={(email) => setForm((f) => ({ ...f, email }))}
-          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="worker@email.com"
           autoCapitalize="none"
           keyboardType="email-address"
-          placeholderTextColor={colors.inkSoft}
-          className="bg-paper border border-rule rounded-xl px-4 py-3 text-ink text-sm mb-2"
-        />
-        <TextInput
-          value={form.password}
-          onChangeText={(password) => setForm((f) => ({ ...f, password }))}
-          placeholder="Temporary password (6+ chars)"
-          autoCapitalize="none"
           placeholderTextColor={colors.inkSoft}
           className="bg-paper border border-rule rounded-xl px-4 py-3 text-ink text-sm mb-3"
         />

@@ -202,6 +202,7 @@ export default function HomeScreen({
         onApply={composer.applyRephrase}
         hasTwitterSelected={composer.hasTwitterSelected}
         onShortenForTwitter={composer.handleShortenForTwitter}
+        twitterLimit={composer.twitterLimit}
       />
 
       <CopyrightModal
