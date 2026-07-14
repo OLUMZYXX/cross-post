@@ -297,6 +297,18 @@ export const notificationAPI = {
     fetchJSON("/notifications/preferences", { method: "PUT", body: prefs }),
 };
 
+export const teamAPI = {
+  listMembers: () => api.get("/team/members"),
+
+  addMember: (name, email, password) =>
+    api.post("/team/members", { name, email, password }),
+
+  removeMember: (id) => api.delete(`/team/members/${id}`),
+
+  performance: (month) =>
+    api.get(`/team/performance${month ? `?month=${month}` : ""}`),
+};
+
 export const platformAPI = {
   list: () => api.get("/platforms"),
 

@@ -9,16 +9,15 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { getColors } from "../constants/theme";
 
-function formatWhen(info) {
-  const date = info?.publishedAt || info?.scheduledAt;
+function timeAgo(info) {
+  const date = info?.publishedAt || info?.scheduledAt || info?.createdAt;
   if (!date) return null;
-  return new Date(date).toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+  const mins = Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 60000));
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 function formatPlatforms(platforms) {
@@ -27,9 +26,11 @@ function formatPlatforms(platforms) {
 }
 
 export default function DuplicateModal({ visible, onClose, info, onProceed, onEdit }) {
-  const when = formatWhen(info);
+  const when = timeAgo(info);
   const where = formatPlatforms(info?.platforms);
   const verb = info?.status === "scheduled" ? "scheduled" : "posted";
+  const who = info?.postedBy || "someone on your team";
+  const match = info?.matchPercent;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -48,16 +49,19 @@ export default function DuplicateModal({ visible, onClose, info, onProceed, onEd
           <View className="bg-terracotta-soft/30 rounded-2xl p-5 border border-terracotta/30 mb-4">
             <View className="flex-row items-center mb-2">
               <Ionicons name="alert-circle" size={20} color={getColors().terracotta} />
-              <Text className="text-terracotta font-sans-bold text-sm ml-2">
-                This news looks like a duplicate
+              <Text className="text-terracotta font-sans-bold text-sm ml-2 flex-1">
+                This news was already {verb}
               </Text>
+              {match ? (
+                <View className="bg-terracotta/15 rounded-full px-2 py-0.5">
+                  <Text className="text-terracotta text-[10px] font-sans-bold">{match}% match</Text>
+                </View>
+              ) : null}
             </View>
             <Text className="text-ink-muted text-xs leading-5">
-              {when && where
-                ? `The same caption was ${verb} on ${when} to ${where}.`
-                : when
-                  ? `The same caption was ${verb} on ${when}.`
-                  : "The same caption already exists in your posts."}
+              {who === "you" ? "You" : who} {verb} very similar news
+              {when ? ` ${when}` : ""}
+              {where ? ` to ${where}` : ""}. You can still proceed if this is an update.
             </Text>
           </View>
 

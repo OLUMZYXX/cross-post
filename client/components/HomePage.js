@@ -21,6 +21,7 @@ import ConnectedAccounts from "./ConnectedAccounts";
 import NotificationSettings from "./NotificationSettings";
 import WatermarkSettings from "./WatermarkSettings";
 import FeedScreen from "./FeedScreen";
+import TeamScreen from "./TeamScreen";
 import NotificationsInbox from "./NotificationsInbox";
 import PrivacySecurity from "./PrivacySecurity";
 import HelpSupport from "./HelpSupport";
@@ -651,6 +652,9 @@ export default function HomePage({
       />
     );
   }
+  if (activeTab === "settings" && settingsScreen === "team") {
+    return <TeamScreen onBack={() => setSettingsScreen(null)} />;
+  }
 
   const totalDrafts = drafts.length + serverDrafts.length + scheduledPosts.length;
 
@@ -719,6 +723,7 @@ export default function HomePage({
           onPrivacy={() => setSettingsScreen("privacy")}
           onHelp={() => setSettingsScreen("help")}
           onFeed={() => setSettingsScreen("feed")}
+          onTeam={() => setSettingsScreen("team")}
           onLogout={handleLogout}
           onResetOnboarding={onResetOnboarding}
         />

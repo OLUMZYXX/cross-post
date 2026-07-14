@@ -65,6 +65,7 @@ export default function SettingsScreen({
   onPrivacy,
   onHelp,
   onFeed,
+  onTeam,
   onLogout,
   onResetOnboarding,
 }) {
@@ -250,7 +251,7 @@ export default function SettingsScreen({
 
           {user?.isOwner && (
             <>
-              <SectionLabel label="Football" />
+              <SectionLabel label="Workspace" />
               <View className="bg-paper-light rounded-2xl border border-rule overflow-hidden">
                 <SettingsRow
                   icon="newspaper-outline"
@@ -259,8 +260,19 @@ export default function SettingsScreen({
                   label="Football News"
                   description="Latest headlines to cross-post"
                   onPress={onFeed}
-                  isLast
+                  isLast={!user?.isTeamOwner}
                 />
+                {user?.isTeamOwner && (
+                  <SettingsRow
+                    icon="people-outline"
+                    iconColor={getColors().info}
+                    iconBg="bg-paper-deep"
+                    label="Team"
+                    description="Add workers, view monthly performance"
+                    onPress={onTeam}
+                    isLast
+                  />
+                )}
               </View>
             </>
           )}
