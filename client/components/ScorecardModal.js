@@ -55,7 +55,7 @@ function useTeamSearch(query, active) {
   return [suggestions, setSuggestions];
 }
 
-function TeamRow({ label, team, setTeam, score, setScore, active, setActive, colors }) {
+function TeamRow({ label, team, setTeam, setBadge, score, setScore, active, setActive, colors }) {
   const [suggestions, setSuggestions] = useTeamSearch(team, active);
 
   return (
@@ -64,7 +64,10 @@ function TeamRow({ label, team, setTeam, score, setScore, active, setActive, col
       <View className="flex-row gap-2">
         <TextInput
           value={team}
-          onChangeText={setTeam}
+          onChangeText={(text) => {
+            setTeam(text);
+            setBadge(null);
+          }}
           onFocus={() => setActive(true)}
           placeholder="Team or country"
           placeholderTextColor={colors.inkSoft}
@@ -88,6 +91,7 @@ function TeamRow({ label, team, setTeam, score, setScore, active, setActive, col
               key={`${s.name}-${i}`}
               onPress={() => {
                 setTeam(s.name);
+                setBadge(s.badge || null);
                 setSuggestions([]);
                 setActive(false);
               }}
@@ -113,6 +117,8 @@ export default function ScorecardModal({ visible, onClose, baseImageUrl, onApply
   const colors = getColors();
   const [homeTeam, setHomeTeam] = useState("");
   const [awayTeam, setAwayTeam] = useState("");
+  const [homeBadge, setHomeBadge] = useState(null);
+  const [awayBadge, setAwayBadge] = useState(null);
   const [homeScore, setHomeScore] = useState("");
   const [awayScore, setAwayScore] = useState("");
   const [activeField, setActiveField] = useState(null);
@@ -133,6 +139,8 @@ export default function ScorecardModal({ visible, onClose, baseImageUrl, onApply
         imageUrl: baseImageUrl,
         homeTeam: homeTeam.trim(),
         awayTeam: awayTeam.trim(),
+        homeBadgeUrl: homeBadge,
+        awayBadgeUrl: awayBadge,
         homeScore: homeScore.trim(),
         awayScore: awayScore.trim(),
       });
@@ -169,6 +177,7 @@ export default function ScorecardModal({ visible, onClose, baseImageUrl, onApply
                 label="HOME"
                 team={homeTeam}
                 setTeam={setHomeTeam}
+                setBadge={setHomeBadge}
                 score={homeScore}
                 setScore={setHomeScore}
                 active={activeField === "home"}
@@ -179,6 +188,7 @@ export default function ScorecardModal({ visible, onClose, baseImageUrl, onApply
                 label="AWAY"
                 team={awayTeam}
                 setTeam={setAwayTeam}
+                setBadge={setAwayBadge}
                 score={awayScore}
                 setScore={setAwayScore}
                 active={activeField === "away"}

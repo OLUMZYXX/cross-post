@@ -25,7 +25,15 @@ export async function suggestTeams(req, res) {
 
 export async function composeScorecard(req, res) {
   await requireOwner(req.user.id);
-  const { imageUrl, homeTeam, awayTeam, homeScore, awayScore } = req.body;
+  const {
+    imageUrl,
+    homeTeam,
+    awayTeam,
+    homeScore,
+    awayScore,
+    homeBadgeUrl,
+    awayBadgeUrl,
+  } = req.body;
 
   if (!imageUrl) {
     throw Errors.badRequest("Select an image to apply the scorecard to");
@@ -34,14 +42,14 @@ export async function composeScorecard(req, res) {
     throw Errors.badRequest("Enter both scores");
   }
 
-  const [homeBadgeUrl, awayBadgeUrl] = await Promise.all([
-    fetchTeamBadge(homeTeam),
-    fetchTeamBadge(awayTeam),
+  const [homeUrl, awayUrl] = await Promise.all([
+    homeBadgeUrl || fetchTeamBadge(homeTeam),
+    awayBadgeUrl || fetchTeamBadge(awayTeam),
   ]);
 
   const [homeBadgeId, awayBadgeId] = await Promise.all([
-    uploadRemoteImage(homeBadgeUrl),
-    uploadRemoteImage(awayBadgeUrl),
+    uploadRemoteImage(homeUrl),
+    uploadRemoteImage(awayUrl),
   ]);
 
   const url = buildScorecardUrl(imageUrl, {

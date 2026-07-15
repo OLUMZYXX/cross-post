@@ -9,11 +9,11 @@ const SPORTSDB_URL = "https://www.thesportsdb.com/api/v1/json/3/searchteams.php"
 const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
-  region: { top: 0.37, color: "0a0d16", fillAlpha: "4d" },
+  region: { top: 0.37, color: "0a0d16", fillAlpha: "66" },
   line: { thickness: 0.006, color: "ffffffe6", bottomY: 0.076 },
-  badge: { w: 0.13, edgeX: 0.17, y: 0.13 },
-  score: { w: 0.33, y: 0.14 },
-  title: { w: 0.2, y: 0.27, opacity: 95 },
+  badge: { w: 0.15, edgeX: 0.1, y: 0.13 },
+  score: { w: 0.42, y: 0.14 },
+  title: { w: 0.28, y: 0.28, opacity: 95 },
 };
 
 export async function searchTeams(query) {
