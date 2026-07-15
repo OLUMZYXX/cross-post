@@ -67,18 +67,22 @@ export default function HomePage({
   const [inviteBusy, setInviteBusy] = useState(false);
   const prevTabRef = useRef(activeTab);
 
-  useEffect(() => {
-    let cancelled = false;
+  const checkInvites = useCallback(() => {
     teamAPI
       .pendingInvites()
       .then(({ data }) => {
-        if (!cancelled && data?.invites?.length) setPendingInvite(data.invites[0]);
+        if (data?.invites?.length) {
+          setPendingInvite((prev) => prev || data.invites[0]);
+        }
       })
       .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useEffect(() => {
+    checkInvites();
+    const id = setInterval(checkInvites, 20000);
+    return () => clearInterval(id);
+  }, [checkInvites]);
 
   const focusComposer = useCallback((draft) => {
     setEditingDraft(draft || null);
@@ -328,11 +332,12 @@ export default function HomePage({
     const sub = AppState.addEventListener("change", (nextState) => {
       if (appStateRef.current.match(/inactive|background/) && nextState === "active") {
         reconcilePending();
+        checkInvites();
       }
       appStateRef.current = nextState;
     });
     return () => sub.remove();
-  }, [reconcilePending]);
+  }, [reconcilePending, checkInvites]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
