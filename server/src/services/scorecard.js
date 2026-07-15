@@ -10,11 +10,11 @@ const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
   canvasWidth: 1600,
-  region: { top: 0.4, color: "05070f", fillAlpha: "80" },
-  line: { thickness: 0.006, color: "d4af37", bottomY: 0.05 },
-  badge: { w: 0.15, edgeX: 0.08, y: 0.125, ring: "6px_solid_rgb:ffffff" },
-  score: { font: 250, y: 0.09 },
-  title: { font: 85, y: 0.315, color: "d4af37" },
+  region: { height: 430, color: "05070f", fillAlpha: "80" },
+  line: { thickness: 8, color: "d4af37", topY: 430, bottomY: 64 },
+  badge: { w: 230, edgeX: 130, y: 120, ring: "6px_solid_rgb:ffffff" },
+  score: { font: "Anton_215", y: 140 },
+  title: { font: "Anton_80", y: 330, color: "d4af37" },
 };
 
 export async function searchTeams(query) {
@@ -83,29 +83,29 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
 
   const blank = encodeURIComponent(" ");
   const lineLayer = (y) =>
-    `l_text:Arial_2:${blank},c_fill,w_1.0,h_${line.thickness},fl_relative,b_rgb:${line.color}/fl_layer_apply,g_south,y_${y}`;
+    `l_text:Arial_2:${blank},c_fill,w_${canvasWidth},h_${line.thickness},b_rgb:${line.color}/fl_layer_apply,g_south,y_${y}`;
 
   const parts = [
     `c_scale,w_${canvasWidth}`,
-    `l_text:Arial_2:${blank},c_fill,w_1.0,h_${region.top},fl_relative,b_rgb:${region.color}${region.fillAlpha}/fl_layer_apply,g_south,y_0`,
-    lineLayer(region.top.toFixed(3)),
-    lineLayer(line.bottomY.toFixed(3)),
+    `l_text:Arial_2:${blank},c_fill,w_${canvasWidth},h_${region.height},b_rgb:${region.color}${region.fillAlpha}/fl_layer_apply,g_south,y_0`,
+    lineLayer(line.topY),
+    lineLayer(line.bottomY),
   ];
   if (homeBadgeId) {
     parts.push(
-      `l_${homeBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max,bo_${badge.ring}/fl_layer_apply,g_south_west,x_${badge.edgeX},y_${badge.y}`,
+      `l_${homeBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},r_max,bo_${badge.ring}/fl_layer_apply,g_south_west,x_${badge.edgeX},y_${badge.y}`,
     );
   }
   if (awayBadgeId) {
     parts.push(
-      `l_${awayBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max,bo_${badge.ring}/fl_layer_apply,g_south_east,x_${badge.edgeX},y_${badge.y}`,
+      `l_${awayBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},r_max,bo_${badge.ring}/fl_layer_apply,g_south_east,x_${badge.edgeX},y_${badge.y}`,
     );
   }
   parts.push(
-    `l_text:Arial_${title.font}_bold:${encodeURIComponent("FULL TIME")},co_rgb:${title.color}/fl_layer_apply,g_south,y_${title.y},fl_relative`,
+    `l_text:${title.font}:${encodeURIComponent("FULL TIME")},co_rgb:${title.color}/fl_layer_apply,g_south,y_${title.y}`,
   );
   parts.push(
-    `l_text:Arial_${score.font}_bold:${encodeURIComponent(`${homeScore} - ${awayScore}`)},co_white/fl_layer_apply,g_south,y_${score.y},fl_relative`,
+    `l_text:${score.font}:${encodeURIComponent(`${homeScore} - ${awayScore}`)},co_white/fl_layer_apply,g_south,y_${score.y}`,
   );
 
   const chain = parts.join("/");
