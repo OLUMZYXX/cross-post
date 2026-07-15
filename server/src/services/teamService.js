@@ -13,9 +13,15 @@ export async function getTeamUserIds(workspaceId) {
 }
 
 export async function listMembers(workspaceId) {
-  return User.find({ teamOwnerId: workspaceId, role: "member" })
+  const members = await User.find({ teamOwnerId: workspaceId, role: "member" })
     .select("name email createdAt")
     .sort({ createdAt: -1 });
+  return members.map((member) => ({
+    id: member._id,
+    name: member.name,
+    email: member.email,
+    createdAt: member.createdAt,
+  }));
 }
 
 
