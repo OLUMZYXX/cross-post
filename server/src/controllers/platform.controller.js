@@ -1,4 +1,5 @@
 import Platform from "../models/Platform.js";
+import User from "../models/User.js";
 import { Errors } from "../utils/AppError.js";
 import {
   FACEBOOK_APP_ID,
@@ -9,6 +10,11 @@ import { createState, getState } from "../utils/oauthState.js";
 
 function workspaceId(req) {
   return req.user.teamOwnerId || req.user.id;
+}
+
+async function resolveWorkspaceId(req) {
+  const user = await User.findById(req.user.id).select("teamOwnerId");
+  return user ? (user.teamOwnerId || user._id).toString() : req.user.id;
 }
 
 const SUPPORTED_PLATFORMS = [
@@ -23,7 +29,8 @@ const SUPPORTED_PLATFORMS = [
 ];
 
 export async function listPlatforms(req, res) {
-  const platforms = await Platform.find({ userId: workspaceId(req) });
+  const wsId = await resolveWorkspaceId(req);
+  const platforms = await Platform.find({ userId: wsId });
 
   res.json({ success: true, data: { platforms } });
 }

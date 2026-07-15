@@ -34,5 +34,7 @@ export async function removeMember(workspaceId, memberId) {
   if (!member) {
     throw Errors.notFound("Team member not found");
   }
-  await User.deleteOne({ _id: member._id });
+  member.role = "owner";
+  member.teamOwnerId = member._id;
+  await member.save();
 }
