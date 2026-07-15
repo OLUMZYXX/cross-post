@@ -9,11 +9,12 @@ const SPORTSDB_URL = "https://www.thesportsdb.com/api/v1/json/3/searchteams.php"
 const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
-  region: { top: 0.37, color: "0a0d16", fillAlpha: "66" },
-  line: { thickness: 0.006, color: "ffffffe6", bottomY: 0.076 },
-  badge: { w: 0.15, edgeX: 0.1, y: 0.13 },
-  score: { w: 0.42, y: 0.14 },
-  title: { w: 0.28, y: 0.28, opacity: 95 },
+  canvasWidth: 1600,
+  region: { top: 0.4, color: "05070f", fillAlpha: "80" },
+  line: { thickness: 0.006, color: "d4af37", bottomY: 0.05 },
+  badge: { w: 0.15, edgeX: 0.08, y: 0.125, ring: "6px_solid_rgb:ffffff" },
+  score: { font: 250, y: 0.09 },
+  title: { font: 85, y: 0.315, color: "d4af37" },
 };
 
 export async function searchTeams(query) {
@@ -78,32 +79,33 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
   const photoUrl = closeInlineWatermark(rawPhotoUrl);
   if (photoUrl.indexOf(UPLOAD_MARKER) === -1) return photoUrl;
 
-  const { region, line, badge, score, title } = LAYOUT;
+  const { canvasWidth, region, line, badge, score, title } = LAYOUT;
 
   const blank = encodeURIComponent(" ");
   const lineLayer = (y) =>
     `l_text:Arial_2:${blank},c_fill,w_1.0,h_${line.thickness},fl_relative,b_rgb:${line.color}/fl_layer_apply,g_south,y_${y}`;
 
   const parts = [
+    `c_scale,w_${canvasWidth}`,
     `l_text:Arial_2:${blank},c_fill,w_1.0,h_${region.top},fl_relative,b_rgb:${region.color}${region.fillAlpha}/fl_layer_apply,g_south,y_0`,
     lineLayer(region.top.toFixed(3)),
     lineLayer(line.bottomY.toFixed(3)),
   ];
   if (homeBadgeId) {
     parts.push(
-      `l_${homeBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max/fl_layer_apply,g_south_west,x_${badge.edgeX},y_${badge.y}`,
+      `l_${homeBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max,bo_${badge.ring}/fl_layer_apply,g_south_west,x_${badge.edgeX},y_${badge.y}`,
     );
   }
   if (awayBadgeId) {
     parts.push(
-      `l_${awayBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max/fl_layer_apply,g_south_east,x_${badge.edgeX},y_${badge.y}`,
+      `l_${awayBadgeId.replace(/\//g, ":")},c_fill,ar_1.0,w_${badge.w},fl_relative,r_max,bo_${badge.ring}/fl_layer_apply,g_south_east,x_${badge.edgeX},y_${badge.y}`,
     );
   }
   parts.push(
-    `l_text:Arial_90_bold:${encodeURIComponent("FULL TIME")},co_white,w_${title.w},c_fit,fl_relative,o_${title.opacity}/fl_layer_apply,g_south,y_${title.y}`,
+    `l_text:Arial_${title.font}_bold:${encodeURIComponent("FULL TIME")},co_rgb:${title.color}/fl_layer_apply,g_south,y_${title.y},fl_relative`,
   );
   parts.push(
-    `l_text:Arial_120_bold:${encodeURIComponent(`${homeScore} - ${awayScore}`)},co_white,w_${score.w},c_fit,fl_relative/fl_layer_apply,g_south,y_${score.y}`,
+    `l_text:Arial_${score.font}_bold:${encodeURIComponent(`${homeScore} - ${awayScore}`)},co_white/fl_layer_apply,g_south,y_${score.y},fl_relative`,
   );
 
   const chain = parts.join("/");

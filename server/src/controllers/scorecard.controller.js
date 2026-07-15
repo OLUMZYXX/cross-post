@@ -7,6 +7,7 @@ import {
   uploadRemoteImage,
   buildScorecardUrl,
 } from "../services/scorecard.js";
+import { getFlagUrl } from "../utils/countryFlags.js";
 
 async function requireOwner(userId) {
   const user = await User.findById(userId);
@@ -43,8 +44,8 @@ export async function composeScorecard(req, res) {
   }
 
   const [homeUrl, awayUrl] = await Promise.all([
-    homeBadgeUrl || fetchTeamBadge(homeTeam),
-    awayBadgeUrl || fetchTeamBadge(awayTeam),
+    getFlagUrl(homeTeam) || homeBadgeUrl || fetchTeamBadge(homeTeam),
+    getFlagUrl(awayTeam) || awayBadgeUrl || fetchTeamBadge(awayTeam),
   ]);
 
   const [homeBadgeId, awayBadgeId] = await Promise.all([

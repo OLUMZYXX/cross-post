@@ -2,7 +2,10 @@ import { useState } from "react";
 import { Text, View, TouchableOpacity, ScrollView, Image, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import VideoPlayerModal from "./VideoPlayerModal";
+import ImageViewerModal from "./ImageViewerModal";
 import { useTheme } from "../constants/theme";
+
+const displayUri = (item) => item.cloudinaryUrl || item.uri;
 
 function VideoPreview({ media, isUploading, onRemove, disabled }) {
   const { colors } = useTheme();
@@ -38,17 +41,26 @@ function VideoPreview({ media, isUploading, onRemove, disabled }) {
 
 function SingleImagePreview({ media, isUploading, onRemove, disabled }) {
   const { colors } = useTheme();
+  const [showViewer, setShowViewer] = useState(false);
   return (
     <View className="rounded-2xl overflow-hidden border border-rule" style={{ backgroundColor: colors.paper }}>
-      <Image source={{ uri: media.uri }} className="w-full h-48" resizeMode="cover" />
+      <TouchableOpacity activeOpacity={0.85} onPress={() => setShowViewer(true)}>
+        <Image source={{ uri: displayUri(media) }} className="w-full h-48" resizeMode="cover" />
+        <View className="absolute bottom-2 left-2 flex-row items-center rounded-full px-2 py-1" style={{ backgroundColor: colors.ink + "b3" }}>
+          <Ionicons name="expand-outline" size={11} color={colors.paperLight} />
+          <Text className="text-[10px] font-sans-semibold ml-1" style={{ color: colors.paperLight }}>Preview</Text>
+        </View>
+      </TouchableOpacity>
       {isUploading && <UploadingOverlay />}
       <RemoveButton onPress={() => onRemove(0)} disabled={disabled} />
+      <ImageViewerModal visible={showViewer} imageUri={displayUri(media)} onClose={() => setShowViewer(false)} />
     </View>
   );
 }
 
 function MultiImagePreview({ media, isUploading, onRemove, disabled }) {
   const { colors } = useTheme();
+  const [viewerIndex, setViewerIndex] = useState(null);
   return (
     <View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 8 }}>
@@ -58,7 +70,9 @@ function MultiImagePreview({ media, isUploading, onRemove, disabled }) {
             className="rounded-xl overflow-hidden mr-2 border border-rule"
             style={{ width: 130, height: 130, backgroundColor: colors.paper }}
           >
-            <Image source={{ uri: item.uri }} className="w-full h-full" resizeMode="cover" />
+            <TouchableOpacity activeOpacity={0.85} onPress={() => setViewerIndex(index)}>
+              <Image source={{ uri: displayUri(item) }} className="w-full h-full" resizeMode="cover" />
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => onRemove(index)}
               disabled={disabled}
@@ -70,6 +84,11 @@ function MultiImagePreview({ media, isUploading, onRemove, disabled }) {
           </View>
         ))}
       </ScrollView>
+      <ImageViewerModal
+        visible={viewerIndex !== null}
+        imageUri={viewerIndex !== null ? displayUri(media[viewerIndex]) : null}
+        onClose={() => setViewerIndex(null)}
+      />
       {isUploading && (
         <View className="absolute inset-0 rounded-xl items-center justify-center" style={{ backgroundColor: colors.paper + "cc" }}>
           <ActivityIndicator color={colors.terracotta} size="large" />
