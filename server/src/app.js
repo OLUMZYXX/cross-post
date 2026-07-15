@@ -155,9 +155,18 @@ app.post(
     );
 
     let finalUrl = optimizedUrl;
-    if (resourceType === "image" && !skipWatermark && req.user?.id) {
-      const user = await User.findById(req.user.id).select("watermark");
-      finalUrl = applyWatermarkToUrl(optimizedUrl, user?.watermark);
+    if (!skipWatermark && req.user?.id) {
+      const acting = await User.findById(req.user.id).select("teamOwnerId watermark");
+      let watermark = acting?.watermark;
+      const wsId = acting?.teamOwnerId ? acting.teamOwnerId.toString() : null;
+      if (wsId && wsId !== req.user.id) {
+        const owner = await User.findById(wsId).select("watermark");
+        watermark = owner?.watermark;
+      }
+      finalUrl = applyWatermarkToUrl(optimizedUrl, watermark);
+      if (resourceType === "video" && finalUrl !== optimizedUrl) {
+        fetch(finalUrl, { headers: { Range: "bytes=0-0" } }).catch(() => {});
+      }
     }
 
     res.json({
