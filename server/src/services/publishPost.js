@@ -2,6 +2,7 @@ import Platform from "../models/Platform.js";
 import User from "../models/User.js";
 import { getWorkspaceId } from "./teamService.js";
 import { ensureValidToken } from "./tokenRefresh.js";
+import { logger } from "../utils/logger.js";
 import { publishToTwitter } from "./publishers/twitter.publisher.js";
 import { publishToFacebook } from "./publishers/facebook.publisher.js";
 import { publishToInstagram } from "./publishers/instagram.publisher.js";
@@ -34,6 +35,16 @@ const publishers = {
 };
 
 async function publishSinglePlatform(baseName, platform, publisher, post, facebookPageIds) {
+  const startedAt = Date.now();
+  const ctx = {
+    platform: baseName,
+    account: platform.platformUsername || platform.platformUserId || null,
+    user: post.userId?.toString?.() || post.userId,
+    post: post._id?.toString?.() || post._id,
+    captionLen: (post.caption || "").length,
+    mediaCount: (post.media || []).length,
+  };
+  logger.publish("ATTEMPT", ctx);
   try {
     await ensureValidToken(platform);
 
@@ -47,7 +58,9 @@ async function publishSinglePlatform(baseName, platform, publisher, post, facebo
       result = await publisher(platform, post);
     }
 
+    const ms = Date.now() - startedAt;
     if (Array.isArray(result)) {
+      logger.publish("SUCCESS", { ...ctx, ms, count: result.length });
       return result.map((r) => ({
         platform: baseName,
         success: true,
@@ -59,6 +72,7 @@ async function publishSinglePlatform(baseName, platform, publisher, post, facebo
       }));
     }
 
+    logger.publish("SUCCESS", { ...ctx, ms, externalId: result.externalId, url: result.externalUrl });
     return [{
       platform: baseName,
       success: true,
@@ -67,7 +81,14 @@ async function publishSinglePlatform(baseName, platform, publisher, post, facebo
       error: null,
     }];
   } catch (err) {
-    console.error(`Failed to publish to ${baseName}:`, err.message);
+    const ms = Date.now() - startedAt;
+    logger.publish("FAIL", {
+      ...ctx,
+      ms,
+      error: err.message,
+      detail: err.rawDetail,
+      httpStatus: err.httpStatus,
+    });
     return [{
       platform: baseName,
       success: false,
@@ -110,6 +131,14 @@ export async function publishToAllPlatforms(userId, post) {
   const workspaceId = await resolveWorkspaceId(userId);
   const connectedPlatforms = await Platform.find({ userId: workspaceId });
 
+  logger.publish("BATCH", {
+    user: userId?.toString?.() || userId,
+    workspace: workspaceId,
+    post: post._id?.toString?.() || post._id,
+    targets: platformIdentifiers.join(","),
+    connected: connectedPlatforms.map((p) => p.name).join(","),
+  });
+
   const facebookPageIds = platformIdentifiers
     .filter((p) => p.startsWith("Facebook:"))
     .map((p) => p.split(":")[1]);
@@ -142,6 +171,7 @@ export async function publishToAllPlatforms(userId, post) {
     }
 
     if (!platform) {
+      logger.publish("SKIP", { platform: baseName, reason: "not connected in workspace", workspace: workspaceId });
       results.push({
         platform: baseName,
         success: false,
@@ -154,6 +184,7 @@ export async function publishToAllPlatforms(userId, post) {
 
     const publisher = publishers[baseName];
     if (!publisher) {
+      logger.publish("SKIP", { platform: baseName, reason: "unsupported" });
       results.push({
         platform: baseName,
         success: false,

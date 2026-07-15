@@ -1,4 +1,5 @@
 import Platform from "../models/Platform.js";
+import { logger } from "../utils/logger.js";
 import {
   REDDIT_CLIENT_ID,
   REDDIT_CLIENT_SECRET,
@@ -32,12 +33,14 @@ export async function handleRedditCallback(req, res) {
 
   if (error || !code) {
     const appUrl = `crosspost://oauth/reddit/callback?error=${encodeURIComponent(error || "no_code")}`;
+    logger.connect("FAIL", { platform: "Reddit", to: appUrl });
     return res.send(buildRedirectHtml("Reddit Connection Failed", appUrl));
   }
 
   const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/reddit/callback?error=invalid_state`;
+    logger.connect("FAIL", { platform: "Reddit", to: appUrl });
     return res.send(buildRedirectHtml("Reddit Connection Failed", appUrl));
   }
 
@@ -69,6 +72,7 @@ export async function handleRedditCallback(req, res) {
     if (tokenData.error) {
       const msg = tokenData.error_description || tokenData.error;
       const appUrl = `crosspost://oauth/reddit/callback?error=${encodeURIComponent(msg)}`;
+      logger.connect("FAIL", { platform: "Reddit", to: appUrl });
       return res.send(buildRedirectHtml("Reddit Connection Failed", appUrl));
     }
 
@@ -114,9 +118,11 @@ export async function handleRedditCallback(req, res) {
     }
 
     const appUrl = `crosspost://oauth/reddit/callback?success=true&name=${encodeURIComponent(username)}`;
+    logger.connect("OK", { platform: "Reddit", to: appUrl });
     res.send(buildRedirectHtml("Reddit Connected", appUrl));
   } catch (err) {
     const appUrl = `crosspost://oauth/reddit/callback?error=server_error`;
+    logger.connect("FAIL", { platform: "Reddit", to: appUrl });
     res.send(buildRedirectHtml("Reddit Connection Failed", appUrl));
   }
 }

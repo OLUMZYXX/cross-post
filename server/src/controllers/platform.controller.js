@@ -1,4 +1,5 @@
 import Platform from "../models/Platform.js";
+import { logger } from "../utils/logger.js";
 import User from "../models/User.js";
 import { Errors } from "../utils/AppError.js";
 import {
@@ -67,6 +68,7 @@ export async function connectPlatform(req, res) {
 
   await platform.save();
 
+  logger.connect("OK", { platform: name, account: platformUsername || platformUserId });
   res.status(201).json({ success: true, data: { platform } });
 }
 
@@ -129,12 +131,14 @@ export async function handleFacebookCallback(req, res) {
 
   if (error || !code) {
     const appUrl = `crosspost://oauth/facebook/callback?error=${encodeURIComponent(error || "no_code")}`;
+    logger.connect("FAIL", { platform: "Facebook", to: appUrl });
     return res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
   }
 
   const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/facebook/callback?error=invalid_state`;
+    logger.connect("FAIL", { platform: "Facebook", to: appUrl });
     return res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
   }
 
@@ -151,6 +155,7 @@ export async function handleFacebookCallback(req, res) {
 
     if (tokenData.error) {
       const appUrl = `crosspost://oauth/facebook/callback?error=${encodeURIComponent(tokenData.error.message)}`;
+      logger.connect("FAIL", { platform: "Facebook", to: appUrl });
       return res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
     }
 
@@ -233,6 +238,7 @@ export async function handleFacebookCallback(req, res) {
       }
 
       const appUrl = `crosspost://oauth/facebook/callback?success=true&missing_pages=true&name=${encodeURIComponent(profile.name)}`;
+      logger.connect("OK", { platform: "Facebook", to: appUrl });
       return res.send(
         buildRedirectHtml("Facebook Connected (no pages)", appUrl),
       );
@@ -280,9 +286,11 @@ export async function handleFacebookCallback(req, res) {
     }
 
     const appUrl = `crosspost://oauth/facebook/callback?success=true&name=${encodeURIComponent(pageNames)}`;
+    logger.connect("OK", { platform: "Facebook", to: appUrl });
     res.send(buildRedirectHtml("Facebook Connected", appUrl));
   } catch (err) {
     const appUrl = `crosspost://oauth/facebook/callback?error=server_error`;
+    logger.connect("FAIL", { platform: "Facebook", to: appUrl });
     res.send(buildRedirectHtml("Facebook Connection Failed", appUrl));
   }
 }

@@ -1,4 +1,5 @@
 import Platform from "../models/Platform.js";
+import { logger } from "../utils/logger.js";
 import User from "../models/User.js";
 import {
   TWITTER_CLIENT_ID,
@@ -49,12 +50,14 @@ export async function handleTwitterCallback(req, res) {
 
   if (error || !code) {
     const appUrl = `crosspost://oauth/twitter/callback?error=${encodeURIComponent(error || "no_code")}`;
+    logger.connect("FAIL", { platform: "Twitter", to: appUrl });
     return res.send(buildRedirectHtml("Twitter Connection Failed", appUrl));
   }
 
   const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/twitter/callback?error=invalid_state`;
+    logger.connect("FAIL", { platform: "Twitter", to: appUrl });
     return res.send(buildRedirectHtml("Twitter Connection Failed", appUrl));
   }
 
@@ -86,6 +89,7 @@ export async function handleTwitterCallback(req, res) {
     if (tokenData.error) {
       const msg = tokenData.error_description || tokenData.error;
       const appUrl = `crosspost://oauth/twitter/callback?error=${encodeURIComponent(msg)}`;
+      logger.connect("FAIL", { platform: "Twitter", to: appUrl });
       return res.send(buildRedirectHtml("Twitter Connection Failed", appUrl));
     }
 
@@ -127,9 +131,11 @@ export async function handleTwitterCallback(req, res) {
     }
 
     const appUrl = `crosspost://oauth/twitter/callback?success=true&name=${encodeURIComponent(profile.username)}`;
+    logger.connect("OK", { platform: "Twitter", to: appUrl });
     res.send(buildRedirectHtml("Twitter Connected", appUrl));
   } catch (err) {
     const appUrl = `crosspost://oauth/twitter/callback?error=server_error`;
+    logger.connect("FAIL", { platform: "Twitter", to: appUrl });
     res.send(buildRedirectHtml("Twitter Connection Failed", appUrl));
   }
 }

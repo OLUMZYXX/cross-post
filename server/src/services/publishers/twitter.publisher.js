@@ -1,4 +1,5 @@
 import { uploadMediaToTwitter, isVideoUrl } from "./twitter.helpers.js";
+import { logger, safeBody } from "../../utils/logger.js";
 
 const TWITTER_CHAR_LIMIT = 25000;
 const TWITTER_BASIC_LIMIT = 280;
@@ -83,7 +84,16 @@ export async function publishToTwitter(platform, post) {
   const data = await response.json();
 
   if (!response.ok || data.errors) {
-    throw new Error(friendlyTwitterError(text.length, data, response.status));
+    logger.apiError("Twitter", {
+      status: response.status,
+      textLen: text.length,
+      hasMedia: !!tweetBody.media,
+      body: safeBody(data),
+    });
+    const err = new Error(friendlyTwitterError(text.length, data, response.status));
+    err.httpStatus = response.status;
+    err.rawDetail = safeBody(data, 200);
+    throw err;
   }
 
   return {

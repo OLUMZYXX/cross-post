@@ -1,4 +1,5 @@
 import Platform from "../models/Platform.js";
+import { logger } from "../utils/logger.js";
 import {
   LINKEDIN_CLIENT_ID,
   LINKEDIN_CLIENT_SECRET,
@@ -31,12 +32,14 @@ export async function handleLinkedInCallback(req, res) {
 
   if (error || !code) {
     const appUrl = `crosspost://oauth/linkedin/callback?error=${encodeURIComponent(error || "no_code")}`;
+    logger.connect("FAIL", { platform: "Linkedin", to: appUrl });
     return res.send(buildRedirectHtml("LinkedIn Connection Failed", appUrl));
   }
 
   const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/linkedin/callback?error=invalid_state`;
+    logger.connect("FAIL", { platform: "Linkedin", to: appUrl });
     return res.send(buildRedirectHtml("LinkedIn Connection Failed", appUrl));
   }
 
@@ -63,6 +66,7 @@ export async function handleLinkedInCallback(req, res) {
     if (tokenData.error) {
       const msg = tokenData.error_description || tokenData.error;
       const appUrl = `crosspost://oauth/linkedin/callback?error=${encodeURIComponent(msg)}`;
+      logger.connect("FAIL", { platform: "Linkedin", to: appUrl });
       return res.send(buildRedirectHtml("LinkedIn Connection Failed", appUrl));
     }
 
@@ -104,9 +108,11 @@ export async function handleLinkedInCallback(req, res) {
     }
 
     const appUrl = `crosspost://oauth/linkedin/callback?success=true&name=${encodeURIComponent(displayName)}`;
+    logger.connect("OK", { platform: "Linkedin", to: appUrl });
     res.send(buildRedirectHtml("LinkedIn Connected", appUrl));
   } catch (err) {
     const appUrl = `crosspost://oauth/linkedin/callback?error=server_error`;
+    logger.connect("FAIL", { platform: "Linkedin", to: appUrl });
     res.send(buildRedirectHtml("LinkedIn Connection Failed", appUrl));
   }
 }

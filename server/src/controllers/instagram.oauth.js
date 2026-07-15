@@ -1,4 +1,5 @@
 import Platform from "../models/Platform.js";
+import { logger } from "../utils/logger.js";
 import { createState, getState, peekState } from "../utils/oauthState.js";
 import {
   buildInstagramAuthUrl,
@@ -109,12 +110,14 @@ export async function handleInstagramCallback(req, res) {
   if (error || !code) {
     const errMsg = error_description || error_reason || error || "no_code";
     const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent(errMsg)}`;
+    logger.connect("FAIL", { platform: "Instagram", to: appUrl });
     return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
   }
 
   const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/instagram/callback?error=invalid_state`;
+    logger.connect("FAIL", { platform: "Instagram", to: appUrl });
     return res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
   }
 
@@ -152,9 +155,11 @@ export async function handleInstagramCallback(req, res) {
     }
 
     const appUrl = `crosspost://oauth/instagram/callback?success=true&name=${encodeURIComponent(igUsername)}`;
+    logger.connect("OK", { platform: "Instagram", to: appUrl });
     res.send(buildRedirectHtml("Instagram Connected", appUrl));
   } catch (err) {
     const appUrl = `crosspost://oauth/instagram/callback?error=${encodeURIComponent(err.message || "server_error")}`;
+    logger.connect("FAIL", { platform: "Instagram", to: appUrl });
     res.send(buildRedirectHtml("Instagram Connection Failed", appUrl));
   }
 }

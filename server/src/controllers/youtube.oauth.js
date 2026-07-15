@@ -1,4 +1,5 @@
 import Platform from "../models/Platform.js";
+import { logger } from "../utils/logger.js";
 import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
@@ -38,12 +39,14 @@ export async function handleYouTubeCallback(req, res) {
 
   if (error || !code) {
     const appUrl = `crosspost://oauth/youtube/callback?error=${encodeURIComponent(error || "no_code")}`;
+    logger.connect("FAIL", { platform: "Youtube", to: appUrl });
     return res.send(buildRedirectHtml("YouTube Connection Failed", appUrl));
   }
 
   const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/youtube/callback?error=invalid_state`;
+    logger.connect("FAIL", { platform: "Youtube", to: appUrl });
     return res.send(buildRedirectHtml("YouTube Connection Failed", appUrl));
   }
 
@@ -70,6 +73,7 @@ export async function handleYouTubeCallback(req, res) {
     if (tokenData.error) {
       const msg = tokenData.error_description || tokenData.error;
       const appUrl = `crosspost://oauth/youtube/callback?error=${encodeURIComponent(msg)}`;
+      logger.connect("FAIL", { platform: "Youtube", to: appUrl });
       return res.send(buildRedirectHtml("YouTube Connection Failed", appUrl));
     }
 
@@ -116,9 +120,11 @@ export async function handleYouTubeCallback(req, res) {
     }
 
     const appUrl = `crosspost://oauth/youtube/callback?success=true&name=${encodeURIComponent(channelName)}`;
+    logger.connect("OK", { platform: "Youtube", to: appUrl });
     res.send(buildRedirectHtml("YouTube Connected", appUrl));
   } catch (err) {
     const appUrl = `crosspost://oauth/youtube/callback?error=server_error`;
+    logger.connect("FAIL", { platform: "Youtube", to: appUrl });
     res.send(buildRedirectHtml("YouTube Connection Failed", appUrl));
   }
 }

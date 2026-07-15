@@ -8,6 +8,7 @@ import {
   REDDIT_CLIENT_ID,
   REDDIT_CLIENT_SECRET,
 } from "../config/env.js";
+import { logger } from "../utils/logger.js";
 
 const REFRESH_WINDOWS_MS = {
   Instagram: 7 * 24 * 60 * 60 * 1000,
@@ -15,6 +16,16 @@ const REFRESH_WINDOWS_MS = {
 const DEFAULT_REFRESH_WINDOW_MS = 5 * 60 * 1000;
 
 export async function ensureValidToken(platform) {
+  const account = platform.platformUsername || platform.platformUserId || null;
+  try {
+    return await runTokenRefresh(platform);
+  } catch (err) {
+    logger.token("REFRESH_FAIL", { platform: platform.name, account, error: err.message });
+    throw err;
+  }
+}
+
+async function runTokenRefresh(platform) {
   const expiresAt = platform.tokenExpiresAt
     ? new Date(platform.tokenExpiresAt).getTime()
     : null;
@@ -34,12 +45,14 @@ export async function ensureValidToken(platform) {
     if (!platform.accessToken) {
       throw new Error("Instagram access token missing. Please reconnect.");
     }
+    logger.token("REFRESH_START", { platform: "Instagram", account: platform.platformUserId });
     const newTokens = await refreshInstagramToken(platform.accessToken);
     platform.accessToken = newTokens.access_token;
     if (newTokens.expires_in) {
       platform.tokenExpiresAt = new Date(now + newTokens.expires_in * 1000);
     }
     await platform.save();
+    logger.token("REFRESH_OK", { platform: "Instagram" });
     return;
   }
 
@@ -63,6 +76,7 @@ export async function ensureValidToken(platform) {
     );
   }
 
+  logger.token("REFRESH_START", { platform: platform.name, account: platform.platformUsername || platform.platformUserId });
   const newTokens = await refresher(platform.refreshToken);
 
   if (!newTokens.access_token) {
@@ -80,6 +94,7 @@ export async function ensureValidToken(platform) {
   }
 
   await platform.save();
+  logger.token("REFRESH_OK", { platform: platform.name });
 }
 
 async function refreshInstagramToken(accessToken) {

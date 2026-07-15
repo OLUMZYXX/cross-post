@@ -1,4 +1,5 @@
 import Platform from "../models/Platform.js";
+import { logger } from "../utils/logger.js";
 import {
   TIKTOK_CLIENT_KEY,
   TIKTOK_CLIENT_SECRET,
@@ -31,12 +32,14 @@ export async function handleTikTokCallback(req, res) {
 
   if (error || !code) {
     const appUrl = `crosspost://oauth/tiktok/callback?error=${encodeURIComponent(error || "no_code")}`;
+    logger.connect("FAIL", { platform: "Tiktok", to: appUrl });
     return res.send(buildRedirectHtml("TikTok Connection Failed", appUrl));
   }
 
   const stateData = await getState(state);
   if (!stateData) {
     const appUrl = `crosspost://oauth/tiktok/callback?error=invalid_state`;
+    logger.connect("FAIL", { platform: "Tiktok", to: appUrl });
     return res.send(buildRedirectHtml("TikTok Connection Failed", appUrl));
   }
 
@@ -64,6 +67,7 @@ export async function handleTikTokCallback(req, res) {
         tokenData.error_description ||
         "token_error";
       const appUrl = `crosspost://oauth/tiktok/callback?error=${encodeURIComponent(msg)}`;
+      logger.connect("FAIL", { platform: "Tiktok", to: appUrl });
       return res.send(buildRedirectHtml("TikTok Connection Failed", appUrl));
     }
 
@@ -100,9 +104,11 @@ export async function handleTikTokCallback(req, res) {
     }
 
     const appUrl = `crosspost://oauth/tiktok/callback?success=true&name=${encodeURIComponent(displayName)}`;
+    logger.connect("OK", { platform: "Tiktok", to: appUrl });
     res.send(buildRedirectHtml("TikTok Connected", appUrl));
   } catch (err) {
     const appUrl = `crosspost://oauth/tiktok/callback?error=server_error`;
+    logger.connect("FAIL", { platform: "Tiktok", to: appUrl });
     res.send(buildRedirectHtml("TikTok Connection Failed", appUrl));
   }
 }
