@@ -22,6 +22,7 @@ import NotificationSettings from "./NotificationSettings";
 import WatermarkSettings from "./WatermarkSettings";
 import FeedScreen from "./FeedScreen";
 import TeamScreen from "./TeamScreen";
+import TeamInviteModal from "./TeamInviteModal";
 import NotificationsInbox from "./NotificationsInbox";
 import PrivacySecurity from "./PrivacySecurity";
 import HelpSupport from "./HelpSupport";
@@ -29,7 +30,7 @@ import ScreenTransition from "./ScreenTransition";
 import Paywall from "./Paywall";
 import useSubscription from "../hooks/useSubscription";
 import { useToast } from "./Toast";
-import { postAPI, platformAPI, notificationAPI, clearToken } from "../services/api";
+import { postAPI, platformAPI, notificationAPI, teamAPI, clearToken, saveToken } from "../services/api";
 import { listPending, removePending, clearStale } from "../services/pendingPublishes";
 import { getColors } from "../constants/theme";
 
@@ -62,7 +63,22 @@ export default function HomePage({
   const { isPro } = useSubscription(user);
   const [sentSubTab, setSentSubTab] = useState("published");
   const [composerEpoch, setComposerEpoch] = useState(0);
+  const [pendingInvite, setPendingInvite] = useState(null);
+  const [inviteBusy, setInviteBusy] = useState(false);
   const prevTabRef = useRef(activeTab);
+
+  useEffect(() => {
+    let cancelled = false;
+    teamAPI
+      .pendingInvites()
+      .then(({ data }) => {
+        if (!cancelled && data?.invites?.length) setPendingInvite(data.invites[0]);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const focusComposer = useCallback((draft) => {
     setEditingDraft(draft || null);
@@ -658,6 +674,37 @@ export default function HomePage({
 
   const totalDrafts = drafts.length + serverDrafts.length + scheduledPosts.length;
 
+  const handleAcceptInvite = async () => {
+    if (!pendingInvite) return;
+    setInviteBusy(true);
+    try {
+      const { data } = await teamAPI.acceptInvite(pendingInvite.id);
+      if (data?.token) await saveToken(data.token);
+      if (data?.user) onUpdateUser?.(data.user);
+      setPendingInvite(null);
+      await fetchPlatforms();
+      showToast({
+        type: "success",
+        title: "You're on the team",
+        message: "You can now post through the shared accounts.",
+      });
+    } catch (err) {
+      showToast({ type: "error", title: "Couldn't accept", message: err.message });
+    } finally {
+      setInviteBusy(false);
+    }
+  };
+
+  const handleRejectInvite = async () => {
+    if (!pendingInvite) return;
+    setInviteBusy(true);
+    try {
+      await teamAPI.rejectInvite(pendingInvite.id);
+    } catch {}
+    setPendingInvite(null);
+    setInviteBusy(false);
+  };
+
   const renderActiveTab = () => {
     if (activeTab === "sent") {
       return (
@@ -796,6 +843,14 @@ export default function HomePage({
         onClose={() => setPaywallVisible(false)}
         onSuccess={onRefresh}
         user={user}
+      />
+
+      <TeamInviteModal
+        visible={!!pendingInvite}
+        invite={pendingInvite}
+        busy={inviteBusy}
+        onAccept={handleAcceptInvite}
+        onReject={handleRejectInvite}
       />
 
       <BottomNav

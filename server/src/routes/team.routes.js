@@ -6,6 +6,10 @@ import {
   getMembers,
   addMember,
   deleteMember,
+  cancelPendingInvite,
+  getMyInvites,
+  acceptTeamInvite,
+  rejectTeamInvite,
   getPerformance,
 } from "../controllers/team.controller.js";
 
@@ -19,11 +23,17 @@ function requireTeamOwner(req, _res, next) {
 }
 
 router.use(authenticate);
+
+router.get("/invites/pending", asyncHandler(getMyInvites));
+router.post("/invites/:id/accept", asyncHandler(acceptTeamInvite));
+router.post("/invites/:id/reject", asyncHandler(rejectTeamInvite));
+
 router.use(requireTeamOwner);
 
 router.get("/members", asyncHandler(getMembers));
 router.post("/members", asyncHandler(addMember));
 router.delete("/members/:id", asyncHandler(deleteMember));
+router.delete("/invites/:id", asyncHandler(cancelPendingInvite));
 router.get("/performance", asyncHandler(getPerformance));
 
 export default router;

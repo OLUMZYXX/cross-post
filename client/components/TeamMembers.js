@@ -34,6 +34,7 @@ export default function TeamMembers() {
   const { showToast } = useToast();
   const colors = getColors();
   const [members, setMembers] = useState([]);
+  const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -42,6 +43,7 @@ export default function TeamMembers() {
     try {
       const { data } = await teamAPI.listMembers();
       setMembers(data.members || []);
+      setPending(data.pending || []);
     } catch (err) {
       showToast({ type: "error", title: "Couldn't load team", message: err.message });
     } finally {
@@ -65,14 +67,23 @@ export default function TeamMembers() {
       setEmail("");
       showToast({
         type: "success",
-        title: "Member added",
-        message: "They can sign in with Google/Apple using this email.",
+        title: "Invite sent",
+        message: "They'll see a popup to accept when they open the app.",
       });
       load();
     } catch (err) {
       showToast({ type: "error", title: "Couldn't add member", message: err.message });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const cancelInvite = async (invite) => {
+    try {
+      await teamAPI.cancelInvite(invite.id);
+      load();
+    } catch (err) {
+      showToast({ type: "error", title: "Couldn't cancel", message: err.message });
     }
   };
 
@@ -124,7 +135,32 @@ export default function TeamMembers() {
         </TouchableOpacity>
       </View>
 
-      <Text className="text-ink-soft text-[10px] tracking-[2px] uppercase font-sans-semibold ml-1 mb-2">
+      {pending.length > 0 && (
+        <>
+          <Text className="text-ink-soft text-[10px] tracking-[2px] uppercase font-sans-semibold ml-1 mb-2">
+            Pending invites ({pending.length})
+          </Text>
+          {pending.map((invite) => (
+            <View
+              key={invite.id}
+              className="flex-row items-center bg-paper-light border border-rule rounded-2xl px-4 py-3 mb-2"
+            >
+              <View className="w-10 h-10 rounded-full bg-paper-deep items-center justify-center mr-3">
+                <Ionicons name="mail-outline" size={16} color={colors.inkMuted} />
+              </View>
+              <View className="flex-1">
+                <Text className="text-ink font-sans-medium text-sm">{invite.email}</Text>
+                <Text className="text-ink-soft text-[11px]">Waiting to accept</Text>
+              </View>
+              <TouchableOpacity onPress={() => cancelInvite(invite)} className="p-2">
+                <Ionicons name="close" size={18} color={colors.inkMuted} />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </>
+      )}
+
+      <Text className="text-ink-soft text-[10px] tracking-[2px] uppercase font-sans-semibold ml-1 mb-2 mt-3">
         Members ({members.length})
       </Text>
       {loading ? (

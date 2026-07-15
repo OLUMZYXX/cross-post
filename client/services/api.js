@@ -304,8 +304,16 @@ export const teamAPI = {
 
   removeMember: (id) => api.delete(`/team/members/${id}`),
 
+  cancelInvite: (id) => api.delete(`/team/invites/${id}`),
+
   performance: (month) =>
     api.get(`/team/performance${month ? `?month=${month}` : ""}`),
+
+  pendingInvites: () => api.get("/team/invites/pending"),
+
+  acceptInvite: (id) => api.post(`/team/invites/${id}/accept`),
+
+  rejectInvite: (id) => api.post(`/team/invites/${id}/reject`),
 };
 
 export const platformAPI = {
