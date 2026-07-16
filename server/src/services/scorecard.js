@@ -10,11 +10,11 @@ const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
   canvasWidth: 1600,
-  region: { height: 430, color: "05070f", fillAlpha: "80" },
-  line: { thickness: 8, color: "d4af37", topY: 430, bottomY: 64 },
+  region: { height: 500, color: "05070f", fillAlpha: "80" },
+  line: { thickness: 8, color: "d4af37", topY: 500, bottomY: 70 },
   badge: { w: 230, edgeX: 130, y: 120, ring: "6px_solid_rgb:ffffff" },
-  score: { font: "Anton_215", y: 140 },
-  title: { font: "Anton_80", y: 330, color: "d4af37" },
+  score: { font: "Anton_200", y: 150 },
+  title: { font: "Anton_68", y: 390, color: "d4af37" },
 };
 
 export async function searchTeams(query) {
