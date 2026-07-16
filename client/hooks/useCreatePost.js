@@ -7,7 +7,7 @@ import { useToast } from "../components/Toast";
 import { postAPI, ensureServerAwake } from "../services/api";
 import { uploadToCloudinary } from "../services/cloudinary";
 import { addPending, removePending } from "../services/pendingPublishes";
-import { TWITTER_CHAR_LIMIT } from "../components/platformLimits";
+import { TWITTER_CHAR_LIMIT, PLATFORM_LIMITS } from "../components/platformLimits";
 import { applyFont } from "../utils/unicodeFonts";
 import { getPerPlatformEnabled, getTwitterLongPosts } from "../constants/composePrefs";
 
@@ -155,16 +155,21 @@ export default function useCreatePost({
 
   const resolvePlatformCaptions = async () => {
     if (Object.keys(perPlatformCaptions).length) return perPlatformCaptions;
-    if (!perPlatformEnabled || !caption.trim() || selectedPlatforms.length === 0)
-      return {};
-    try {
-      const { data } = await postAPI.rephraseMulti(caption, selectedPlatforms);
-      const captions = data.captions || {};
-      setPerPlatformCaptions(captions);
-      return captions;
-    } catch {
-      return {};
+    if (perPlatformEnabled && caption.trim() && selectedPlatforms.length) {
+      try {
+        const { data } = await postAPI.rephraseMulti(caption, selectedPlatforms);
+        const captions = data.captions || {};
+        setPerPlatformCaptions(captions);
+        return captions;
+      } catch {}
     }
+    if (hasTwitterSelected && caption.trim().length > twitterLimit) {
+      try {
+        const { data } = await postAPI.rephrase(caption, selectedTone || "casual", twitterLimit);
+        if (data?.rephrased) return { Twitter: data.rephrased };
+      } catch {}
+    }
+    return {};
   };
 
   const selectFont = (key) => {
@@ -183,8 +188,20 @@ export default function useCreatePost({
   }, [isPosting, isUploading]);
 
   const hasTwitterSelected = selectedPlatforms.some((p) => p.split(":")[0] === "Twitter");
+  const onlyTwitterSelected =
+    hasTwitterSelected &&
+    selectedPlatforms.every((p) => p.split(":")[0] === "Twitter");
 
-  const getTwitterCharLimit = () => (hasTwitterSelected ? twitterLimit : null);
+  const getComposerCaptionLimit = () => {
+    const nonTwitter = selectedPlatforms
+      .map((p) => p.split(":")[0])
+      .filter((base) => base !== "Twitter");
+    if (nonTwitter.length === 0) return hasTwitterSelected ? twitterLimit : null;
+    const limits = nonTwitter
+      .map((base) => PLATFORM_LIMITS[base]?.chars)
+      .filter((n) => typeof n === "number");
+    return limits.length ? Math.min(...limits) : null;
+  };
 
   const handleShortenForTwitter = async () => {
     const textToShorten = rephrasedText || caption;
@@ -215,7 +232,7 @@ export default function useCreatePost({
     setIsRephrasing(true);
     setRephrasedText(null);
     try {
-      const maxLength = getTwitterCharLimit();
+      const maxLength = getComposerCaptionLimit();
       const { data } = await postAPI.rephrase(caption, tone, maxLength);
       setRephrasedText(data.rephrased);
     } catch (err) {
@@ -356,11 +373,11 @@ export default function useCreatePost({
       return;
     }
     const limit = await refreshTwitterLimit();
-    if (hasTwitterSelected && caption.length > limit) {
+    if (onlyTwitterSelected && caption.length > limit) {
       showToast({
         type: "warning",
         title: "Too long for Twitter/X",
-        message: `${caption.length}/${limit} characters. Tap Rephrase → "Shorten for Twitter", or unselect Twitter/X.`,
+        message: `${caption.length}/${limit} characters. Tap Rephrase → "Shorten for Twitter", or add another platform.`,
         duration: 5000,
       });
       return;
