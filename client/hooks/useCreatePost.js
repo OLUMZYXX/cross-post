@@ -106,6 +106,7 @@ export default function useCreatePost({
   const [showPerPlatformModal, setShowPerPlatformModal] = useState(false);
   const [isTailoring, setIsTailoring] = useState(false);
   const [twitterLimit, setTwitterLimit] = useState(TWITTER_CHAR_LIMIT);
+  const [sourceCaption, setSourceCaption] = useState("");
 
   useEffect(() => {
     AsyncStorage.getItem(SELECTED_FONT_KEY)
@@ -155,20 +156,42 @@ export default function useCreatePost({
 
   const resolvePlatformCaptions = async () => {
     if (Object.keys(perPlatformCaptions).length) return perPlatformCaptions;
-    if (perPlatformEnabled && caption.trim() && selectedPlatforms.length) {
+
+    const source =
+      sourceCaption && sourceCaption.trim().length > caption.trim().length
+        ? sourceCaption
+        : caption;
+    const nonTwitterPlatforms = selectedPlatforms.filter(
+      (p) => p.split(":")[0] !== "Twitter",
+    );
+
+    if (perPlatformEnabled && source.trim() && selectedPlatforms.length) {
       try {
-        const { data } = await postAPI.rephraseMulti(caption, selectedPlatforms);
+        const { data } = await postAPI.rephraseMulti(source, selectedPlatforms);
         const captions = data.captions || {};
         setPerPlatformCaptions(captions);
         return captions;
       } catch {}
     }
+
+    if (
+      hasTwitterSelected &&
+      nonTwitterPlatforms.length &&
+      source.trim().length > caption.trim().length
+    ) {
+      try {
+        const { data } = await postAPI.rephraseMulti(source, nonTwitterPlatforms);
+        if (data?.captions && Object.keys(data.captions).length) return data.captions;
+      } catch {}
+    }
+
     if (hasTwitterSelected && caption.trim().length > twitterLimit) {
       try {
         const { data } = await postAPI.rephrase(caption, selectedTone || "casual", twitterLimit);
         if (data?.rephrased) return { Twitter: data.rephrased };
       } catch {}
     }
+
     return {};
   };
 
@@ -193,12 +216,9 @@ export default function useCreatePost({
     selectedPlatforms.every((p) => p.split(":")[0] === "Twitter");
 
   const getComposerCaptionLimit = () => {
-    const nonTwitter = selectedPlatforms
-      .map((p) => p.split(":")[0])
-      .filter((base) => base !== "Twitter");
-    if (nonTwitter.length === 0) return hasTwitterSelected ? twitterLimit : null;
-    const limits = nonTwitter
-      .map((base) => PLATFORM_LIMITS[base]?.chars)
+    if (hasTwitterSelected) return twitterLimit;
+    const limits = selectedPlatforms
+      .map((p) => PLATFORM_LIMITS[p.split(":")[0]]?.chars)
       .filter((n) => typeof n === "number");
     return limits.length ? Math.min(...limits) : null;
   };
@@ -233,6 +253,9 @@ export default function useCreatePost({
     setRephrasedText(null);
     try {
       const maxLength = getComposerCaptionLimit();
+      if (hasTwitterSelected && maxLength && caption.trim().length > maxLength) {
+        setSourceCaption(caption);
+      }
       const { data } = await postAPI.rephrase(caption, tone, maxLength);
       setRephrasedText(data.rephrased);
     } catch (err) {
