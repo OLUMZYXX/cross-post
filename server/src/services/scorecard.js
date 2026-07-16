@@ -10,7 +10,12 @@ const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
   canvasWidth: 1600,
-  overlay: { color: "05070f", fillAlpha: "80" },
+  band: { color: "05070f", height: 620, alpha: "80" },
+  fade: [
+    { y: 620, height: 80, alpha: "59" },
+    { y: 700, height: 80, alpha: "33" },
+    { y: 780, height: 80, alpha: "1a" },
+  ],
   line: { thickness: 6, color: "d4af37cc", bottomY: 70 },
   badge: { w: 260, edgeX: 140, y: 190, ring: "6px_solid_rgb:ffffff" },
   score: { font: "Anton_230", y: 237 },
@@ -79,13 +84,16 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
   const photoUrl = closeInlineWatermark(rawPhotoUrl);
   if (photoUrl.indexOf(UPLOAD_MARKER) === -1) return photoUrl;
 
-  const { canvasWidth, overlay, line, badge, score, title } = LAYOUT;
+  const { canvasWidth, band, fade, line, badge, score, title } = LAYOUT;
 
   const blank = encodeURIComponent(" ");
+  const strip = (y, height, alpha) =>
+    `l_text:Arial_2:${blank},c_fill,w_${canvasWidth},h_${height},b_rgb:${band.color}${alpha}/fl_layer_apply,g_south,y_${y}`;
 
   const parts = [
     `c_scale,w_${canvasWidth}`,
-    `l_text:Arial_2:${blank},c_fill,w_1.0,h_1.0,fl_relative,b_rgb:${overlay.color}${overlay.fillAlpha}/fl_layer_apply,g_south,y_0`,
+    strip(0, band.height, band.alpha),
+    ...fade.map((f) => strip(f.y, f.height, f.alpha)),
     `l_text:Arial_2:${blank},c_fill,w_${canvasWidth},h_${line.thickness},b_rgb:${line.color}/fl_layer_apply,g_south,y_${line.bottomY}`,
   ];
   if (homeBadgeId) {
