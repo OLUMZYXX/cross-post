@@ -10,11 +10,11 @@ const UPLOAD_MARKER = "/upload/";
 
 const LAYOUT = {
   canvasWidth: 1600,
-  region: { height: 500, color: "05070f", fillAlpha: "80" },
-  line: { thickness: 8, color: "d4af37", topY: 500, bottomY: 70 },
-  badge: { w: 230, edgeX: 130, y: 120, ring: "6px_solid_rgb:ffffff" },
-  score: { font: "Anton_200", y: 150 },
-  title: { font: "Anton_68", y: 390, color: "d4af37" },
+  overlay: { color: "05070f", fillAlpha: "80" },
+  line: { thickness: 6, color: "d4af37cc", bottomY: 70 },
+  badge: { w: 260, edgeX: 140, y: 190, ring: "6px_solid_rgb:ffffff" },
+  score: { font: "Anton_230", y: 237 },
+  title: { font: "Anton_95", y: 540, color: "d4af37" },
 };
 
 export async function searchTeams(query) {
@@ -79,17 +79,14 @@ export function buildScorecardUrl(rawPhotoUrl, options) {
   const photoUrl = closeInlineWatermark(rawPhotoUrl);
   if (photoUrl.indexOf(UPLOAD_MARKER) === -1) return photoUrl;
 
-  const { canvasWidth, region, line, badge, score, title } = LAYOUT;
+  const { canvasWidth, overlay, line, badge, score, title } = LAYOUT;
 
   const blank = encodeURIComponent(" ");
-  const lineLayer = (y) =>
-    `l_text:Arial_2:${blank},c_fill,w_${canvasWidth},h_${line.thickness},b_rgb:${line.color}/fl_layer_apply,g_south,y_${y}`;
 
   const parts = [
     `c_scale,w_${canvasWidth}`,
-    `l_text:Arial_2:${blank},c_fill,w_${canvasWidth},h_${region.height},b_rgb:${region.color}${region.fillAlpha}/fl_layer_apply,g_south,y_0`,
-    lineLayer(line.topY),
-    lineLayer(line.bottomY),
+    `l_text:Arial_2:${blank},c_fill,w_1.0,h_1.0,fl_relative,b_rgb:${overlay.color}${overlay.fillAlpha}/fl_layer_apply,g_south,y_0`,
+    `l_text:Arial_2:${blank},c_fill,w_${canvasWidth},h_${line.thickness},b_rgb:${line.color}/fl_layer_apply,g_south,y_${line.bottomY}`,
   ];
   if (homeBadgeId) {
     parts.push(
