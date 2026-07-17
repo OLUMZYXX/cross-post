@@ -1,5 +1,3 @@
-import { Share2 } from "lucide-react";
-
 const COLUMNS = [
   {
     title: "Product",
@@ -32,9 +30,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-green-500 flex items-center justify-center">
-                <Share2 size={13} className="text-white" />
-              </div>
+              <img src="/logo.png" alt="Cross-Post" className="w-7 h-7 rounded-lg" />
               <span className="text-white text-sm font-semibold">Cross-Post</span>
             </div>
             <p className="text-neutral-500 text-sm max-w-[200px]">
