@@ -85,6 +85,51 @@ export function isVideoUrl(url) {
   );
 }
 
+export function telegramMediaUrl(url) {
+  if (!url || !url.includes("res.cloudinary.com")) return url;
+  if (isVideoUrl(url)) {
+    return url.replace(/\bf_auto\b/g, "f_mp4");
+  }
+  if (/\bf_auto\b/.test(url)) {
+    return url.replace(/\bf_auto\b/g, "f_jpg,c_limit,w_2560");
+  }
+  return url.replace("/upload/", "/upload/f_jpg,c_limit,w_2560/");
+}
+
+export function friendlyTelegramError(raw) {
+  const m = (raw || "").toLowerCase();
+  if (
+    m.includes("wrong type of the web page content") ||
+    m.includes("failed to get http url content") ||
+    m.includes("wrong file identifier") ||
+    m.includes("image_process_failed") ||
+    m.includes("photo_invalid_dimensions")
+  ) {
+    return "Telegram couldn't load the media — the file may be too large or in a format Telegram doesn't accept. Try a smaller image or video.";
+  }
+  if (m.includes("chat not found")) {
+    return "Telegram channel not found. Reconnect Telegram in Settings and make sure the bot is an admin of the channel.";
+  }
+  if (
+    m.includes("not enough rights") ||
+    m.includes("administrator") ||
+    m.includes("chat_write_forbidden") ||
+    m.includes("bot is not a member")
+  ) {
+    return "The Telegram bot must be an admin of your channel with permission to post. Add it as an admin and try again.";
+  }
+  if (m.includes("bot was blocked") || m.includes("bot was kicked")) {
+    return "The Telegram bot was removed from the channel. Re-add it as an admin and reconnect Telegram.";
+  }
+  if (m.includes("too many requests") || m.includes("retry after")) {
+    return "Telegram is temporarily rate-limiting posts. Please wait a minute and try again.";
+  }
+  if (m.includes("caption is too long")) {
+    return "The caption is too long for Telegram. Shorten it and try again.";
+  }
+  return `Couldn't post to Telegram: ${raw || "unknown error"}.`;
+}
+
 export function truncateCaption(text, maxLength) {
   if (!text) return "";
   if (text.length <= maxLength) return text;

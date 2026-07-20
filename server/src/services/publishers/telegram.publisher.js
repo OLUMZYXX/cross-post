@@ -2,6 +2,8 @@ import {
   telegramApiCall,
   isVideoUrl,
   truncateCaption,
+  telegramMediaUrl,
+  friendlyTelegramError,
 } from "./telegram.helpers.js";
 
 const TEXT_MAX = 4096;
@@ -50,31 +52,37 @@ export async function publishToTelegram(platform, post) {
   const botToken = platform.accessToken;
   const chatId = platform.platformUserId;
   const caption = post.caption || "";
-  const mediaUrls = post.media || [];
+  const mediaUrls = (post.media || []).map(telegramMediaUrl);
 
-  let result;
+  try {
+    let result;
 
-  if (mediaUrls.length === 0) {
-    result = await sendTextMessage(botToken, chatId, caption);
-  } else if (mediaUrls.length === 1) {
-    const url = mediaUrls[0];
-    if (isVideoUrl(url)) {
-      result = await sendSingleVideo(botToken, chatId, url, caption);
+    if (mediaUrls.length === 0) {
+      result = await sendTextMessage(botToken, chatId, caption);
+    } else if (mediaUrls.length === 1) {
+      const url = mediaUrls[0];
+      if (isVideoUrl(url)) {
+        result = await sendSingleVideo(botToken, chatId, url, caption);
+      } else {
+        result = await sendSinglePhoto(botToken, chatId, url, caption);
+      }
     } else {
-      result = await sendSinglePhoto(botToken, chatId, url, caption);
+      result = await sendMediaGroup(botToken, chatId, mediaUrls, caption);
     }
-  } else {
-    result = await sendMediaGroup(botToken, chatId, mediaUrls, caption);
+
+    const messageId = Array.isArray(result)
+      ? result[0]?.message_id
+      : result.message_id;
+
+    return {
+      externalId: String(messageId),
+      externalUrl: null,
+    };
+  } catch (err) {
+    const friendly = new Error(friendlyTelegramError(err.message));
+    friendly.rawDetail = err.message;
+    throw friendly;
   }
-
-  const messageId = Array.isArray(result)
-    ? result[0]?.message_id
-    : result.message_id;
-
-  return {
-    externalId: String(messageId),
-    externalUrl: null,
-  };
 }
 
 export async function deleteFromTelegram(platform, externalId) {
