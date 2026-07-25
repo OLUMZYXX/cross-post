@@ -35,7 +35,10 @@ export async function logOutSubscriptions() {
 }
 
 export function isProFromInfo(info) {
-  return !!info?.entitlements?.active?.[PRO_ENTITLEMENT_ID];
+  const active = info?.entitlements?.active;
+  if (!active) return false;
+  if (active[PRO_ENTITLEMENT_ID]) return true;
+  return Object.keys(active).length > 0;
 }
 
 export async function getProStatus() {
