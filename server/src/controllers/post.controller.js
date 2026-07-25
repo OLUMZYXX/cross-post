@@ -7,6 +7,7 @@ import {
   isAllowlistedEmail,
 } from "../services/proAccess.js";
 import { resolveIsPro } from "../services/teamAccess.js";
+import { fitToCompleteSentence, endsWithSentence } from "../utils/textFit.js";
 import {
   publishToAllPlatforms,
   deleteFromAllPlatforms,
@@ -279,14 +280,6 @@ export async function schedulePost(req, res) {
   res.json({ success: true, data: { post } });
 }
 
-function trimToLimit(text, limit) {
-  if (!limit || limit <= 0 || text.length <= limit) return text;
-  let cut = text.slice(0, limit);
-  const lastSpace = cut.lastIndexOf(" ");
-  if (lastSpace > limit * 0.6) cut = cut.slice(0, lastSpace);
-  return cut.trim();
-}
-
 export async function rephraseCaption(req, res) {
   const { caption, tone, maxLength } = req.body;
 
@@ -329,9 +322,10 @@ export async function rephraseCaption(req, res) {
   const charLimit = maxLength && maxLength > 0 ? maxLength : 500;
   const isShortenMode =
     maxLength && maxLength > 0 && caption.length > maxLength;
+  const completeNote = `ALWAYS finish with a complete, properly punctuated sentence — never stop mid-sentence or leave a thought unfinished. Write fewer sentences if needed so the last one is finished within the limit.`;
   const limitNote = isShortenMode
-    ? `CRITICAL: The text is currently ${caption.length} characters and MUST be shortened to UNDER ${charLimit} characters. Cut aggressively — remove filler words, shorten sentences, use abbreviations. The final result MUST be ${charLimit} characters or fewer. Count every character including emojis and spaces.`
-    : `You MUST keep the result strictly under ${charLimit} characters (including emojis and spaces). Count carefully.`;
+    ? `CRITICAL: The text is currently ${caption.length} characters and MUST be shortened to UNDER ${charLimit} characters. Cut aggressively — remove filler words, drop less important details, and keep only what matters most. The final result MUST be ${charLimit} characters or fewer, counting emojis and spaces. ${completeNote}`
+    : `You MUST keep the result strictly under ${charLimit} characters (including emojis and spaces). Count carefully. ${completeNote}`;
 
   const instruction = isOwner
     ? "Completely rewrite this football news in your OWN original words and a fresh sentence structure — do not keep the original phrasing. Report it in the PRESENT tense as breaking news, keeping every fact accurate."
@@ -342,39 +336,55 @@ export async function rephraseCaption(req, res) {
     ? `You are a breaking-news football reporter for a football news page. FULLY REWRITE the post in your own words as an immediate breaking-news report in the PRESENT tense (e.g. "Arsenal sign...", "Real Madrid confirm...", "reports claim..."). Preserve every fact — player and club names, scores, dates, numbers, quotes and transfer details — but DO NOT reuse the source's sentences, phrasing or word order. The result MUST be original enough that it will not be flagged for copyright or plagiarism, so restructure it substantially rather than swapping a word or two. Do not invent facts or add personal opinion. Add a few (about 1 to 3) relevant emojis to give it life, without overdoing it. No hashtags unless the original already has them. Return only the rewritten text — no quotes, no explanation. ${limitNote}`
     : `You are a social media copywriter. Fully rewrite the post in your own words with a fresh structure — never return the original with only a word or two changed. Add relevant emojis naturally throughout the text. Ensure the rewritten text is 100% original and free of copyrighted content — no song lyrics, trademarked slogans, or quoted material. If the original references a brand, use the brand name with a hashtag (e.g. #Nike) instead of trademarked slogans. Return only the rewritten text — no quotes, no explanation. ${limitNote}`;
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemContent },
-        {
-          role: "user",
-          content: `${instruction}\n\nOriginal post:\n${caption}`,
-        },
-      ],
-      max_tokens: isShortenMode ? 150 : 300,
-      temperature: isShortenMode ? 0.4 : isOwner ? 0.78 : 0.8,
-    }),
-  });
+  const askOpenAI = async (userContent, temperature) => {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemContent },
+          { role: "user", content: userContent },
+        ],
+        max_tokens: 400,
+        temperature,
+      }),
+    });
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw Errors.badRequest(err?.error?.message || "AI service request failed");
-  }
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw Errors.badRequest(err?.error?.message || "AI service request failed");
+    }
 
-  const data = await response.json();
-  const raw = data.choices?.[0]?.message?.content?.trim();
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim();
+  };
+
+  let raw = await askOpenAI(
+    `${instruction}\n\nOriginal post:\n${caption}`,
+    isShortenMode ? 0.4 : isOwner ? 0.78 : 0.8,
+  );
 
   if (!raw) {
     throw Errors.badRequest("AI returned an empty response. Try again.");
   }
 
-  const rephrased = trimToLimit(raw, maxLength && maxLength > 0 ? maxLength : 0);
+  const hardLimit = maxLength && maxLength > 0 ? maxLength : 0;
+
+  if (hardLimit && (raw.length > hardLimit || !endsWithSentence(raw))) {
+    const retry = await askOpenAI(
+      `Rewrite the text below so it is UNDER ${hardLimit} characters and ends with a complete, properly punctuated sentence. Keep the most important facts and drop the rest. Return only the rewritten text.\n\nText:\n${raw}`,
+      0.35,
+    );
+    if (retry && (retry.length <= hardLimit || retry.length < raw.length)) {
+      raw = retry;
+    }
+  }
+
+  const rephrased = fitToCompleteSentence(raw, hardLimit);
 
   res.json({ success: true, data: { rephrased } });
 }
@@ -438,8 +448,8 @@ export async function rephraseMultiCaption(req, res) {
     .join("\n");
 
   const systemContent = isOwner
-    ? "You are a breaking-news football reporter. For each platform, FULLY REWRITE the post in your own words as an immediate breaking-news report in the PRESENT tense. Preserve every fact — player and club names, scores, dates, numbers and quotes — but DO NOT reuse the source's sentences, phrasing or word order; each version must be original enough not to be flagged for copyright. Do not invent facts or add opinion. Adapt format and length to each platform under its character limit, add a few (1 to 3) relevant emojis to give it life, and use no hashtags unless the original has them. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption."
-    : "You are a social media copywriter. Fully rewrite the post for each platform in original wording, keeping the SAME information and meaning but adapting tone, format and length to each platform, staying under each character limit. Keep it original and free of copyrighted lyrics/slogans. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption.";
+    ? "You are a breaking-news football reporter. For each platform, FULLY REWRITE the post in your own words as an immediate breaking-news report in the PRESENT tense. Preserve every fact — player and club names, scores, dates, numbers and quotes — but DO NOT reuse the source's sentences, phrasing or word order; each version must be original enough not to be flagged for copyright. Do not invent facts or add opinion. Adapt format and length to each platform under its character limit, add a few (1 to 3) relevant emojis to give it life, and use no hashtags unless the original has them. Every caption MUST end with a complete, properly punctuated sentence — never cut off mid-sentence; write fewer sentences if needed to stay within the limit. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption."
+    : "You are a social media copywriter. Fully rewrite the post for each platform in original wording, keeping the SAME information and meaning but adapting tone, format and length to each platform, staying under each character limit. Keep it original and free of copyrighted lyrics/slogans. Every caption MUST end with a complete, properly punctuated sentence — never cut off mid-sentence; write fewer sentences if needed to stay within the limit. Return ONLY a valid JSON object mapping each exact platform name to its rewritten caption.";
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -480,8 +490,10 @@ export async function rephraseMultiCaption(req, res) {
 
   const result = {};
   for (const b of bases) {
-    let text = typeof captions[b] === "string" ? captions[b].trim() : caption;
-    if (text.length > PLATFORM_LIMITS[b]) text = text.slice(0, PLATFORM_LIMITS[b]);
+    const text = fitToCompleteSentence(
+      typeof captions[b] === "string" ? captions[b].trim() : caption,
+      PLATFORM_LIMITS[b],
+    );
     result[b] = text;
   }
 
