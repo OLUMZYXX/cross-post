@@ -2,8 +2,6 @@ import User from "../models/User.js";
 import Post from "../models/Post.js";
 import { getTeamUserIds } from "./teamService.js";
 
-const RECENT_LIMIT = 8;
-
 export function monthRange(month) {
   const now = new Date();
   const [year, m] = month
@@ -27,14 +25,12 @@ function emptyBucket(user) {
     succeeded: 0,
     failed: 0,
     platforms: {},
-    days: new Set(),
+    daily: {},
     lastPostAt: null,
-    recentPosts: [],
   };
 }
 
 function addPost(bucket, post, start, end) {
-  const when = post.publishedAt || post.scheduledAt || post.createdAt;
   const isPublished =
     post.status === "published" && post.publishedAt >= start && post.publishedAt < end;
   const isScheduled =
@@ -42,7 +38,8 @@ function addPost(bucket, post, start, end) {
 
   if (isPublished) {
     bucket.published += 1;
-    bucket.days.add(new Date(post.publishedAt).toISOString().slice(0, 10));
+    const day = new Date(post.publishedAt).getDate();
+    bucket.daily[day] = (bucket.daily[day] || 0) + 1;
     if (!bucket.lastPostAt || post.publishedAt > bucket.lastPostAt) {
       bucket.lastPostAt = post.publishedAt;
     }
@@ -59,32 +56,29 @@ function addPost(bucket, post, start, end) {
     }
   }
 
-  if (bucket.recentPosts.length < RECENT_LIMIT) {
-    bucket.recentPosts.push({
-      id: post._id,
-      date: when,
-      status: post.status,
-      caption: (post.caption || "").slice(0, 90),
-      platforms: [
-        ...new Set((post.publishResults || []).map((r) => (r.platform || "").split(":")[0])),
-      ].filter(Boolean),
-      failedCount: (post.publishResults || []).filter((r) => !r.success).length,
-    });
-  }
 }
 
-function finalize(bucket) {
+function finalize(bucket, daysInMonth) {
   const attempts = bucket.succeeded + bucket.failed;
-  const { days, ...rest } = bucket;
+  const { daily, ...rest } = bucket;
+  const series = [];
+  for (let day = 1; day <= daysInMonth; day++) {
+    series.push({ day, count: daily[day] || 0 });
+  }
+  const activeDays = series.filter((d) => d.count > 0).length;
   return {
     ...rest,
-    activeDays: days.size,
+    daily: series,
+    activeDays,
+    busiestDay: series.reduce((a, b) => (b.count > a.count ? b : a), series[0] || null),
+    avgPerActiveDay: activeDays ? Number((bucket.published / activeDays).toFixed(1)) : 0,
     successRate: attempts ? Math.round((bucket.succeeded / attempts) * 100) : null,
   };
 }
 
 export async function buildTeamPerformance(workspaceId, month) {
   const { label, start, end } = monthRange(month);
+  const daysInMonth = new Date(end.getTime() - 1).getDate();
   const teamUserIds = await getTeamUserIds(workspaceId);
 
   const users = await User.find({ _id: { $in: teamUserIds } }).select("name email role");
@@ -95,7 +89,7 @@ export async function buildTeamPerformance(workspaceId, month) {
       { scheduledAt: { $gte: start, $lt: end } },
     ],
   })
-    .select("userId status publishResults publishedAt scheduledAt createdAt caption")
+    .select("userId status publishResults publishedAt scheduledAt createdAt")
     .sort({ publishedAt: -1, scheduledAt: -1, createdAt: -1 });
 
   const byUser = {};
@@ -107,7 +101,7 @@ export async function buildTeamPerformance(workspaceId, month) {
   }
 
   const members = Object.values(byUser)
-    .map(finalize)
+    .map((b) => finalize(b, daysInMonth))
     .sort(
       (a, b) =>
         b.published - a.published ||

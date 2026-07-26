@@ -5,6 +5,8 @@ import { getColors } from "../constants/theme";
 import { useToast } from "./Toast";
 import { teamAPI } from "../services/api";
 import TeamMemberCard from "./TeamMemberCard";
+import TeamMemberAnalytics from "./TeamMemberAnalytics";
+import PostingBarChart from "./PostingBarChart";
 
 function monthLabel(month) {
   const [y, m] = month.split("-").map(Number);
@@ -37,6 +39,7 @@ export default function TeamPerformance() {
   const [month, setMonth] = useState(currentMonth());
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
 
   const load = useCallback(
     async (targetMonth) => {
@@ -61,7 +64,18 @@ export default function TeamPerformance() {
   const members = data?.members || [];
   const ranked = members.filter((m) => m.rank);
   const topPlatforms = Object.entries(data?.topPlatforms || {}).sort((a, b) => b[1] - a[1]);
+  const teamDaily = (members[0]?.daily || []).map((d, i) => ({
+    day: d.day,
+    count: members.reduce((sum, m) => sum + (m.daily?.[i]?.count || 0), 0),
+  }));
   const isCurrent = month >= currentMonth();
+
+  if (selected) {
+    const fresh = members.find((m) => m.id === selected.id) || selected;
+    return (
+      <TeamMemberAnalytics member={fresh} month={month} onBack={() => setSelected(null)} />
+    );
+  }
 
   return (
     <View>
@@ -110,6 +124,8 @@ export default function TeamPerformance() {
             </View>
           ) : null}
 
+          <PostingBarChart daily={teamDaily} title="TEAM POSTS PER DAY" />
+
           {topPlatforms.length > 0 && (
             <View className="bg-paper-light border border-rule rounded-2xl px-4 py-3 mb-5">
               <Text className="text-ink-soft text-[9px] tracking-[1.5px] uppercase mb-2">
@@ -132,7 +148,9 @@ export default function TeamPerformance() {
           {members.length === 0 ? (
             <Text className="text-ink-muted text-sm text-center mt-4">No activity this month.</Text>
           ) : (
-            members.map((member) => <TeamMemberCard key={member.id} member={member} />)
+            members.map((member) => (
+              <TeamMemberCard key={member.id} member={member} onPress={setSelected} />
+            ))
           )}
         </>
       )}

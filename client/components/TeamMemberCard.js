@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getColors } from "../constants/theme";
@@ -9,19 +8,8 @@ const RANK_STYLE = {
   3: { bg: "#CD7F3233", text: "#B4712C", icon: "medal" },
 };
 
-const PLATFORM_ICON = {
-  Twitter: "logo-twitter",
-  Instagram: "logo-instagram",
-  Facebook: "logo-facebook",
-  LinkedIn: "logo-linkedin",
-  TikTok: "logo-tiktok",
-  YouTube: "logo-youtube",
-  Reddit: "logo-reddit",
-  Telegram: "paper-plane",
-};
-
 function formatDate(value) {
-  if (!value) return "—";
+  if (!value) return "no posts yet";
   return new Date(value).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -58,19 +46,16 @@ function RankBadge({ rank }) {
   );
 }
 
-export default function TeamMemberCard({ member }) {
+export default function TeamMemberCard({ member, onPress }) {
   const colors = getColors();
-  const [open, setOpen] = useState(false);
-  const platforms = Object.entries(member.platforms || {}).sort((a, b) => b[1] - a[1]);
-  const posts = member.recentPosts || [];
 
   return (
-    <View className="bg-paper-light border border-rule rounded-2xl px-4 py-3 mb-2">
-      <TouchableOpacity
-        onPress={() => setOpen((v) => !v)}
-        activeOpacity={0.7}
-        className="flex-row items-center"
-      >
+    <TouchableOpacity
+      onPress={() => onPress?.(member)}
+      activeOpacity={0.7}
+      className="bg-paper-light border border-rule rounded-2xl px-4 py-3 mb-2"
+    >
+      <View className="flex-row items-center">
         <RankBadge rank={member.rank} />
         <View className="flex-1">
           <View className="flex-row items-center">
@@ -87,12 +72,8 @@ export default function TeamMemberCard({ member }) {
             Last post: {formatDate(member.lastPostAt)}
           </Text>
         </View>
-        <Ionicons
-          name={open ? "chevron-up" : "chevron-down"}
-          size={16}
-          color={colors.inkMuted}
-        />
-      </TouchableOpacity>
+        <Ionicons name="chevron-forward" size={16} color={colors.inkMuted} />
+      </View>
 
       <View className="flex-row mt-3">
         <Stat value={member.published} label="Posts" color={colors.ink} />
@@ -104,61 +85,6 @@ export default function TeamMemberCard({ member }) {
           color={member.failed > 0 ? colors.terracotta : colors.olive}
         />
       </View>
-
-      {open && (
-        <View className="mt-3 pt-3 border-t border-rule">
-          {platforms.length > 0 && (
-            <View className="flex-row flex-wrap mb-3">
-              {platforms.map(([name, count]) => (
-                <View
-                  key={name}
-                  className="flex-row items-center bg-paper-deep rounded-full px-2.5 py-1 mr-2 mb-2"
-                >
-                  <Ionicons
-                    name={PLATFORM_ICON[name] || "globe-outline"}
-                    size={11}
-                    color={colors.ink}
-                  />
-                  <Text className="text-ink text-[11px] font-sans-semibold ml-1.5">{count}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-
-          <Text className="text-ink-soft text-[9px] tracking-[1.5px] uppercase mb-2">
-            Recent activity
-          </Text>
-          {posts.length === 0 ? (
-            <Text className="text-ink-muted text-xs">No posts this month.</Text>
-          ) : (
-            posts.map((post) => (
-              <View key={post.id} className="flex-row items-start mb-2.5">
-                <View className="w-1.5 h-1.5 rounded-full bg-olive mt-1.5 mr-2.5" />
-                <View className="flex-1">
-                  <Text className="text-ink text-[12px] leading-4" numberOfLines={2}>
-                    {post.caption || "(media only)"}
-                  </Text>
-                  <View className="flex-row items-center mt-0.5">
-                    <Text className="text-ink-soft text-[10px]">{formatDate(post.date)}</Text>
-                    {post.platforms?.length ? (
-                      <Text className="text-ink-soft text-[10px]">
-                        {" · "}
-                        {post.platforms.join(", ")}
-                      </Text>
-                    ) : null}
-                    {post.failedCount > 0 ? (
-                      <Text className="text-terracotta text-[10px] font-sans-semibold">
-                        {" · "}
-                        {post.failedCount} failed
-                      </Text>
-                    ) : null}
-                  </View>
-                </View>
-              </View>
-            ))
-          )}
-        </View>
-      )}
-    </View>
+    </TouchableOpacity>
   );
 }
