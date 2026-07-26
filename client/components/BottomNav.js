@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import {
   View,
   Pressable,
@@ -12,6 +11,8 @@ import {
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../constants/theme";
+import useSpringScale from "../hooks/useSpringScale";
+import NavFab from "./NavFab";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -40,13 +41,6 @@ function glass(resolved) {
     activeBg: dark ? "rgba(255,255,255,0.16)" : "rgba(0,0,0,0.06)",
     highlight: dark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.55)",
   };
-}
-
-function useSpringScale() {
-  const scale = useRef(new Animated.Value(1)).current;
-  const animateTo = (toValue, bounciness = 0) =>
-    Animated.spring(scale, { toValue, useNativeDriver: true, speed: 50, bounciness }).start();
-  return { scale, animateTo };
 }
 
 function NavItem({ tab, isActive, onPress, colors, g }) {
@@ -101,30 +95,7 @@ function NavItem({ tab, isActive, onPress, colors, g }) {
   );
 }
 
-function ComposeFab({ onPress, colors, shadowProps }) {
-  const { scale, animateTo } = useSpringScale();
-
-  return (
-    <Pressable onPress={onPress} onPressIn={() => animateTo(0.9)} onPressOut={() => animateTo(1, 6)}>
-      <Animated.View
-        style={{
-          transform: [{ scale }],
-          width: 58,
-          height: 58,
-          borderRadius: 29,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: colors.ink,
-          ...shadowProps,
-        }}
-      >
-        <Ionicons name="add" size={30} color={colors.paper} />
-      </Animated.View>
-    </Pressable>
-  );
-}
-
-export default function BottomNav({ activeTab, onTabChange, onCompose }) {
+export default function BottomNav({ activeTab, onTabChange, onCompose, isTeamOwner, onTeam }) {
   const { colors, resolved } = useTheme();
   const g = glass(resolved);
   const tabs = TABS;
@@ -200,7 +171,18 @@ export default function BottomNav({ activeTab, onTabChange, onCompose }) {
         </View>
       </View>
 
-      <ComposeFab onPress={onCompose} colors={colors} shadowProps={shadowProps} />
+      {isTeamOwner ? (
+        <NavFab
+          onPress={onTeam}
+          colors={colors}
+          shadowProps={shadowProps}
+          icon="people"
+          iconSize={22}
+          label="TEAM"
+        />
+      ) : (
+        <NavFab onPress={onCompose} colors={colors} shadowProps={shadowProps} />
+      )}
     </View>
   );
 }

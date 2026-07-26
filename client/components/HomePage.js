@@ -861,6 +861,11 @@ export default function HomePage({
       <BottomNav
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        isTeamOwner={user?.isOwner && user?.isTeamOwner}
+        onTeam={() => {
+          setActiveTab("settings");
+          setSettingsScreen("team");
+        }}
         onCompose={() => {
           if (activeTab !== "home") focusComposer();
         }}

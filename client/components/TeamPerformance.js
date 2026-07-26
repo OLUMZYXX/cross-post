@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { getColors } from "../constants/theme";
 import { useToast } from "./Toast";
 import { teamAPI } from "../services/api";
+import TeamMemberCard from "./TeamMemberCard";
 
 function monthLabel(month) {
   const [y, m] = month.split("-").map(Number);
@@ -37,27 +38,30 @@ export default function TeamPerformance() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async (targetMonth) => {
-    setLoading(true);
-    try {
-      const { data: res } = await teamAPI.performance(targetMonth);
-      setData(res);
-    } catch (err) {
-      showToast({ type: "error", title: "Couldn't load performance", message: err.message });
-    } finally {
-      setLoading(false);
-    }
-  }, [showToast]);
+  const load = useCallback(
+    async (targetMonth) => {
+      setLoading(true);
+      try {
+        const { data: res } = await teamAPI.performance(targetMonth);
+        setData(res);
+      } catch (err) {
+        showToast({ type: "error", title: "Couldn't load performance", message: err.message });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [showToast],
+  );
 
   useEffect(() => {
     load(month);
   }, [month, load]);
 
-  const totals = data?.totals || { published: 0, scheduled: 0, succeeded: 0, failed: 0 };
+  const totals = data?.totals || {};
   const members = data?.members || [];
-  const rate = totals.succeeded + totals.failed
-    ? Math.round((totals.succeeded / (totals.succeeded + totals.failed)) * 100)
-    : null;
+  const ranked = members.filter((m) => m.rank);
+  const topPlatforms = Object.entries(data?.topPlatforms || {}).sort((a, b) => b[1] - a[1]);
+  const isCurrent = month >= currentMonth();
 
   return (
     <View>
@@ -70,7 +74,11 @@ export default function TeamPerformance() {
           onPress={() => setMonth((m) => (m >= currentMonth() ? m : shiftMonth(m, 1)))}
           className="p-2"
         >
-          <Ionicons name="chevron-forward" size={20} color={month >= currentMonth() ? colors.inkSoft : colors.ink} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={isCurrent ? colors.inkSoft : colors.ink}
+          />
         </TouchableOpacity>
       </View>
 
@@ -78,35 +86,53 @@ export default function TeamPerformance() {
         <ActivityIndicator color={colors.olive} className="mt-6" />
       ) : (
         <>
-          <View className="bg-paper-light border border-rule rounded-2xl p-4 mb-5 flex-row">
-            <Stat value={totals.published} label="Published" color={colors.ink} />
-            <Stat value={totals.scheduled} label="Scheduled" color={colors.info} />
-            <Stat value={rate === null ? "—" : `${rate}%`} label="Success" color={colors.olive} />
+          <View className="bg-paper-light border border-rule rounded-2xl p-4 mb-2 flex-row">
+            <Stat value={totals.published || 0} label="Published" color={colors.ink} />
+            <Stat value={totals.scheduled || 0} label="Scheduled" color={colors.info} />
+            <Stat
+              value={totals.successRate === null || totals.successRate === undefined ? "—" : `${totals.successRate}%`}
+              label="Success"
+              color={colors.olive}
+            />
+            <Stat
+              value={totals.activeMembers || 0}
+              label="Active"
+              color={colors.terracotta}
+            />
           </View>
 
+          {totals.failed > 0 ? (
+            <View className="flex-row items-center bg-terracotta-soft/25 border border-terracotta/30 rounded-2xl px-4 py-2.5 mb-2">
+              <Ionicons name="alert-circle" size={15} color={colors.terracotta} />
+              <Text className="text-ink-muted text-[11px] ml-2 flex-1">
+                {totals.failed} failed delivery{totals.failed === 1 ? "" : "ies"} this month
+              </Text>
+            </View>
+          ) : null}
+
+          {topPlatforms.length > 0 && (
+            <View className="bg-paper-light border border-rule rounded-2xl px-4 py-3 mb-5">
+              <Text className="text-ink-soft text-[9px] tracking-[1.5px] uppercase mb-2">
+                Where the team posted
+              </Text>
+              <View className="flex-row flex-wrap">
+                {topPlatforms.map(([name, count]) => (
+                  <View key={name} className="flex-row items-center mr-4 mb-1">
+                    <Text className="text-ink font-sans-bold text-sm">{count}</Text>
+                    <Text className="text-ink-muted text-[11px] ml-1.5">{name}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
           <Text className="text-ink-soft text-[10px] tracking-[2px] uppercase font-sans-semibold ml-1 mb-2">
-            By member
+            Ranking ({ranked.length})
           </Text>
           {members.length === 0 ? (
             <Text className="text-ink-muted text-sm text-center mt-4">No activity this month.</Text>
           ) : (
-            members.map((m) => (
-              <View key={m.id} className="bg-paper-light border border-rule rounded-2xl px-4 py-3 mb-2">
-                <View className="flex-row items-center justify-between mb-2">
-                  <Text className="text-ink font-sans-bold text-sm">{m.name}</Text>
-                  {m.role === "owner" ? (
-                    <View className="bg-olive/15 rounded-full px-2 py-0.5">
-                      <Text className="text-olive text-[10px] font-sans-bold">OWNER</Text>
-                    </View>
-                  ) : null}
-                </View>
-                <View className="flex-row">
-                  <Stat value={m.published} label="Published" color={colors.ink} />
-                  <Stat value={m.scheduled} label="Scheduled" color={colors.info} />
-                  <Stat value={m.failed} label="Failed" color={colors.terracotta} />
-                </View>
-              </View>
-            ))
+            members.map((member) => <TeamMemberCard key={member.id} member={member} />)
           )}
         </>
       )}
