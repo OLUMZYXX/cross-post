@@ -93,7 +93,18 @@ export default function TeamMemberAnalytics({ member, month, onBack }) {
         />
       </View>
 
-      <PostingBarChart daily={member.daily} />
+      <PostingBarChart
+        data={(member.daily || []).map((d) => ({ key: d.day, label: String(d.day), count: d.count }))}
+        title="POSTS PER DAY"
+        caption="Day of month"
+      />
+
+      <PostingBarChart
+        data={member.weekly || []}
+        title="WEEKLY ACTIVITY"
+        labelMode="all"
+        caption={member.bestWeekday ? `Most active on ${member.bestWeekday}` : undefined}
+      />
 
       <View className="bg-paper-light border border-rule rounded-2xl p-4 mb-3 flex-row">
         <Stat

@@ -65,8 +65,13 @@ export default function TeamPerformance() {
   const ranked = members.filter((m) => m.rank);
   const topPlatforms = Object.entries(data?.topPlatforms || {}).sort((a, b) => b[1] - a[1]);
   const teamDaily = (members[0]?.daily || []).map((d, i) => ({
-    day: d.day,
+    key: d.day,
+    label: String(d.day),
     count: members.reduce((sum, m) => sum + (m.daily?.[i]?.count || 0), 0),
+  }));
+  const teamWeekly = (members[0]?.weekly || []).map((w, i) => ({
+    label: w.label,
+    count: members.reduce((sum, m) => sum + (m.weekly?.[i]?.count || 0), 0),
   }));
   const isCurrent = month >= currentMonth();
 
@@ -124,7 +129,9 @@ export default function TeamPerformance() {
             </View>
           ) : null}
 
-          <PostingBarChart daily={teamDaily} title="TEAM POSTS PER DAY" />
+          <PostingBarChart data={teamDaily} title="TEAM POSTS PER DAY" caption="Day of month" />
+
+          <PostingBarChart data={teamWeekly} title="TEAM WEEKLY ACTIVITY" labelMode="all" />
 
           {topPlatforms.length > 0 && (
             <View className="bg-paper-light border border-rule rounded-2xl px-4 py-3 mb-5">

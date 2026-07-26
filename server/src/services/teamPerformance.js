@@ -26,6 +26,7 @@ function emptyBucket(user) {
     failed: 0,
     platforms: {},
     daily: {},
+    weekdays: {},
     lastPostAt: null,
   };
 }
@@ -38,8 +39,11 @@ function addPost(bucket, post, start, end) {
 
   if (isPublished) {
     bucket.published += 1;
-    const day = new Date(post.publishedAt).getDate();
+    const posted = new Date(post.publishedAt);
+    const day = posted.getDate();
     bucket.daily[day] = (bucket.daily[day] || 0) + 1;
+    const dow = posted.getDay();
+    bucket.weekdays[dow] = (bucket.weekdays[dow] || 0) + 1;
     if (!bucket.lastPostAt || post.publishedAt > bucket.lastPostAt) {
       bucket.lastPostAt = post.publishedAt;
     }
@@ -58,17 +62,34 @@ function addPost(bucket, post, start, end) {
 
 }
 
+const WEEK_ORDER = [
+  { dow: 1, label: "Mon" },
+  { dow: 2, label: "Tue" },
+  { dow: 3, label: "Wed" },
+  { dow: 4, label: "Thu" },
+  { dow: 5, label: "Fri" },
+  { dow: 6, label: "Sat" },
+  { dow: 0, label: "Sun" },
+];
+
 function finalize(bucket, daysInMonth) {
   const attempts = bucket.succeeded + bucket.failed;
-  const { daily, ...rest } = bucket;
+  const { daily, weekdays, ...rest } = bucket;
   const series = [];
   for (let day = 1; day <= daysInMonth; day++) {
     series.push({ day, count: daily[day] || 0 });
   }
   const activeDays = series.filter((d) => d.count > 0).length;
+  const weekly = WEEK_ORDER.map(({ dow, label }) => ({
+    label,
+    count: weekdays[dow] || 0,
+  }));
+  const bestWeekday = weekly.reduce((a, b) => (b.count > a.count ? b : a), weekly[0]);
   return {
     ...rest,
     daily: series,
+    weekly,
+    bestWeekday: bestWeekday.count > 0 ? bestWeekday.label : null,
     activeDays,
     busiestDay: series.reduce((a, b) => (b.count > a.count ? b : a), series[0] || null),
     avgPerActiveDay: activeDays ? Number((bucket.published / activeDays).toFixed(1)) : 0,

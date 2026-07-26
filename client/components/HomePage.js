@@ -33,6 +33,7 @@ import { useToast } from "./Toast";
 import { postAPI, platformAPI, notificationAPI, teamAPI, clearToken, saveToken } from "../services/api";
 import { listPending, removePending, clearStale } from "../services/pendingPublishes";
 import { getColors } from "../constants/theme";
+import useSwipeBack from "../hooks/useSwipeBack";
 
 export default function HomePage({
   user,
@@ -239,31 +240,39 @@ export default function HomePage({
     return () => clearInterval(interval);
   }, [fetchRecentActivities, fetchUnreadCount]);
 
-  useEffect(() => {
-    const handler = () => {
-      if (showNotifications) {
-        setShowNotifications(false);
-        return true;
-      }
-      if (activeTab === "settings" && settingsScreen) {
-        setSettingsScreen(null);
-        return true;
-      }
-      if (activeTab !== "home") {
-        prevTabRef.current = "home";
-        setActiveTab("home");
-        return true;
-      }
-      if (editingDraft) {
-        setEditingDraft(null);
-        return true;
-      }
-      return false;
-    };
-
-    const subscription = BackHandler.addEventListener("hardwareBackPress", handler);
-    return () => subscription.remove();
+  const goBack = useCallback(() => {
+    if (showNotifications) {
+      setShowNotifications(false);
+      return true;
+    }
+    if (activeTab === "settings" && settingsScreen) {
+      setSettingsScreen(null);
+      return true;
+    }
+    if (activeTab !== "home") {
+      prevTabRef.current = "home";
+      setActiveTab("home");
+      return true;
+    }
+    if (editingDraft) {
+      setEditingDraft(null);
+      return true;
+    }
+    return false;
   }, [showNotifications, activeTab, settingsScreen, editingDraft]);
+
+  const canGoBack =
+    showNotifications ||
+    (activeTab === "settings" && !!settingsScreen) ||
+    activeTab !== "home" ||
+    !!editingDraft;
+
+  const swipeBack = useSwipeBack(goBack, canGoBack);
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener("hardwareBackPress", goBack);
+    return () => subscription.remove();
+  }, [goBack]);
 
   const reconcilePending = useCallback(async () => {
     await clearStale();
@@ -625,9 +634,15 @@ export default function HomePage({
     onLogout();
   };
 
+  const withSwipe = (node) => (
+    <View style={{ flex: 1 }} {...swipeBack}>
+      {node}
+    </View>
+  );
+
   if (showNotifications) {
     return (
-      <View className="flex-1 bg-paper">
+      <View className="flex-1 bg-paper" {...swipeBack}>
         <NotificationsInbox
           onBack={() => {
             setShowNotifications(false);
@@ -640,41 +655,41 @@ export default function HomePage({
   }
 
   if (activeTab === "settings" && settingsScreen === "editProfile") {
-    return <EditProfile user={user} onBack={() => setSettingsScreen(null)} onUpdateUser={onUpdateUser} />;
+    return withSwipe(<EditProfile user={user} onBack={() => setSettingsScreen(null)} onUpdateUser={onUpdateUser} />);
   }
   if (activeTab === "settings" && settingsScreen === "connectedAccounts") {
-    return (
+    return withSwipe(
       <ConnectedAccounts
         onBack={() => { setSettingsScreen(null); fetchPlatforms(); }}
         onOpenConnectModal={() => { setSettingsScreen(null); setModalVisible(true); }}
-      />
+      />,
     );
   }
   if (activeTab === "settings" && settingsScreen === "notifications") {
-    return <NotificationSettings onBack={() => setSettingsScreen(null)} />;
+    return withSwipe(<NotificationSettings onBack={() => setSettingsScreen(null)} />);
   }
   if (activeTab === "settings" && settingsScreen === "watermark") {
-    return <WatermarkSettings user={user} onBack={() => setSettingsScreen(null)} onUpdateUser={onUpdateUser} />;
+    return withSwipe(<WatermarkSettings user={user} onBack={() => setSettingsScreen(null)} onUpdateUser={onUpdateUser} />);
   }
   if (activeTab === "settings" && settingsScreen === "privacy") {
-    return <PrivacySecurity onBack={() => setSettingsScreen(null)} user={user} />;
+    return withSwipe(<PrivacySecurity onBack={() => setSettingsScreen(null)} user={user} />);
   }
   if (activeTab === "settings" && settingsScreen === "help") {
-    return <HelpSupport onBack={() => setSettingsScreen(null)} />;
+    return withSwipe(<HelpSupport onBack={() => setSettingsScreen(null)} />);
   }
   if (activeTab === "settings" && settingsScreen === "feed") {
-    return (
+    return withSwipe(
       <FeedScreen
         onBack={() => setSettingsScreen(null)}
         onCompose={(draft) => {
           setSettingsScreen(null);
           focusComposer({ ...draft, platforms: [...connectedPlatforms] });
         }}
-      />
+      />,
     );
   }
   if (activeTab === "settings" && settingsScreen === "team") {
-    return <TeamScreen onBack={() => setSettingsScreen(null)} />;
+    return withSwipe(<TeamScreen onBack={() => setSettingsScreen(null)} />);
   }
 
   const totalDrafts = drafts.length + serverDrafts.length + scheduledPosts.length;
@@ -806,7 +821,7 @@ export default function HomePage({
   };
 
   return (
-    <View className="flex-1 bg-paper">
+    <View className="flex-1 bg-paper" {...swipeBack}>
       <ScreenTransition activeKey={activeTab}>
         {renderActiveTab()}
       </ScreenTransition>
