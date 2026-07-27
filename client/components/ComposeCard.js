@@ -1,10 +1,13 @@
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { FONTS, useTheme } from "../constants/theme";
 
 export default function ComposeCard({
   caption,
   onChangeCaption,
   editable = true,
+  onClear,
+  canClear = false,
   children,
 }) {
   const { colors, resolved } = useTheme();
@@ -44,9 +47,24 @@ export default function ComposeCard({
         <Text className="text-ink-muted font-sans text-[11px] tracking-[1.5px]">
           DRAFT
         </Text>
-        <Text className="text-ink-muted font-sans text-[12px]">
-          <Text className="font-sans-bold text-ink">{charCount}</Text> characters
-        </Text>
+        <View className="flex-row items-center">
+          <Text className="text-ink-muted font-sans text-[12px]">
+            <Text className="font-sans-bold text-ink">{charCount}</Text> characters
+          </Text>
+          {canClear && onClear ? (
+            <TouchableOpacity
+              onPress={onClear}
+              disabled={!editable}
+              activeOpacity={0.7}
+              className="flex-row items-center ml-3 pl-3 border-l border-rule"
+            >
+              <Ionicons name="close-circle" size={14} color={colors.terracotta} />
+              <Text className="text-terracotta font-sans-semibold text-[12px] ml-1">
+                Clear
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
 
       {children}

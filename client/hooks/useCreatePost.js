@@ -106,6 +106,7 @@ export default function useCreatePost({
   const [showPerPlatformModal, setShowPerPlatformModal] = useState(false);
   const [isTailoring, setIsTailoring] = useState(false);
   const [twitterLimit, setTwitterLimit] = useState(TWITTER_CHAR_LIMIT);
+  const [pendingSplit, setPendingSplit] = useState(null);
   const [sourceCaption, setSourceCaption] = useState("");
 
   useEffect(() => {
@@ -119,6 +120,12 @@ export default function useCreatePost({
       setTwitterLimit(on ? TWITTER_PREMIUM_LIMIT : TWITTER_CHAR_LIMIT),
     );
   }, []);
+
+  const applyCaptionText = (text) => {
+    setCaption(
+      selectedFont && selectedFont !== "plain" ? applyFont(text, selectedFont) : text,
+    );
+  };
 
   const handleCaptionChange = (text) => {
     setCaption(
@@ -251,11 +258,32 @@ export default function useCreatePost({
     setSelectedTone(tone);
     setIsRephrasing(true);
     setRephrasedText(null);
+    setPendingSplit(null);
     try {
-      const maxLength = getComposerCaptionLimit();
-      if (hasTwitterSelected && maxLength && caption.trim().length > maxLength) {
+      const nonTwitter = selectedPlatforms.filter((p) => p.split(":")[0] !== "Twitter");
+      const needsSplit =
+        hasTwitterSelected &&
+        nonTwitter.length > 0 &&
+        caption.trim().length > twitterLimit;
+
+      if (needsSplit) {
         setSourceCaption(caption);
+        const { data } = await postAPI.rephraseMulti(caption, selectedPlatforms);
+        const captions = data.captions || {};
+        const others = { ...captions };
+        delete others.Twitter;
+
+        let twitterText = captions.Twitter;
+        if (!twitterText) {
+          const { data: short } = await postAPI.rephrase(caption, tone, twitterLimit);
+          twitterText = short.rephrased;
+        }
+        if (Object.keys(others).length) setPendingSplit(others);
+        setRephrasedText(twitterText);
+        return;
       }
+
+      const maxLength = getComposerCaptionLimit();
       const { data } = await postAPI.rephrase(caption, tone, maxLength);
       setRephrasedText(data.rephrased);
     } catch (err) {
@@ -266,8 +294,21 @@ export default function useCreatePost({
   };
 
   const applyRephrase = () => {
-    if (rephrasedText) handleCaptionChange(rephrasedText);
+    if (rephrasedText) applyCaptionText(rephrasedText);
+    if (pendingSplit) setPerPlatformCaptions(pendingSplit);
+    setPendingSplit(null);
     setShowRephraseModal(false);
+    setRephrasedText(null);
+    setSelectedTone(null);
+  };
+
+  const clearComposer = () => {
+    setCaption("");
+    setSelectedMedia([]);
+    setMediaType(null);
+    setPerPlatformCaptions({});
+    setPendingSplit(null);
+    setSourceCaption("");
     setRephrasedText(null);
     setSelectedTone(null);
   };
@@ -553,6 +594,6 @@ export default function useCreatePost({
     handleSaveDraft, handleMediaSelect, removeMedia, applyScorecard,
     perPlatformEnabled, perPlatformCaptions, showPerPlatformModal,
     setShowPerPlatformModal, isTailoring, generatePerPlatform,
-    updatePerPlatformCaption, twitterLimit,
+    updatePerPlatformCaption, twitterLimit, clearComposer,
   };
 }

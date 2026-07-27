@@ -118,6 +118,7 @@ export default function HomeScreen({
           getDisplayName={composer.getDisplayName}
           onAddPlatform={onAddPlatform}
           handlePostPress={composer.handlePostPress}
+          clearComposer={composer.clearComposer}
         />
 
         {composer.perPlatformEnabled && (

@@ -29,6 +29,7 @@ export default function HomeCompose({
   getDisplayName,
   onAddPlatform,
   handlePostPress,
+  clearComposer,
 }) {
   const [showFontPicker, setShowFontPicker] = useState(false);
   const canPublish =
@@ -40,7 +41,13 @@ export default function HomeCompose({
 
   return (
     <View>
-      <ComposeCard caption={caption} onChangeCaption={handleCaptionChange} editable={!isPosting}>
+      <ComposeCard
+        caption={caption}
+        onChangeCaption={handleCaptionChange}
+        editable={!isPosting}
+        onClear={clearComposer}
+        canClear={caption.length > 0 || selectedMedia.length > 0}
+      >
         <MediaPreview
           media={selectedMedia}
           mediaType={mediaType}
