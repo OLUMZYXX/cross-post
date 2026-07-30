@@ -5,9 +5,10 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "Platforms", href: "#platforms" },
+  { label: "Features", href: "/features" },
+  { label: "How it works", href: "/how-it-works" },
   { label: "Pricing", href: "#pricing" },
+  { label: "About", href: "/about" },
   { label: "Support", href: "/support" },
 ];
 

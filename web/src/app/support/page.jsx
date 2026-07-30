@@ -27,7 +27,22 @@ const FAQS = [
   {
     question: "How much does Cross-Post cost?",
     answer:
-      "Cross-Post is completely free to use. There are no subscriptions or in-app purchases.",
+      "The core features are free to use. Cross-Post Pro is an optional subscription that unlocks Twitter/X posting and the advanced features, and it can be managed or cancelled at any time from your App Store or Google Play account.",
+  },
+  {
+    question: "Which platforms can I publish to?",
+    answer:
+      "Twitter/X, Instagram, Facebook, LinkedIn, TikTok, YouTube, Reddit and Telegram. You can connect more than one account on the same platform and choose which ones receive each post.",
+  },
+  {
+    question: "Why did a post fail on one platform but work on others?",
+    answer:
+      "Each platform has its own rules and limits, so one can reject a post while the rest succeed. Common reasons are a caption that is too long, a platform that does not accept the media type, an expired connection, or the platform rate limiting posts. Open the post to see the exact reason and retry just that platform.",
+  },
+  {
+    question: "Can I schedule posts in advance?",
+    answer:
+      "Yes. Choose 'Schedule for Later' when publishing, pick a date and time, and Cross-Post sends the post for you. Scheduled posts are listed separately so you can see what is queued.",
   },
 ];
 
