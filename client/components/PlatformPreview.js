@@ -75,6 +75,7 @@ export default function PlatformPreview({
   mediaType,
   getPlatformStyle,
   getDisplayName,
+  platformCaptions = {},
 }) {
   const { colors } = useTheme();
   if (selectedPlatforms.length === 0 || (caption.length === 0 && selectedMedia.length === 0)) {
@@ -88,9 +89,12 @@ export default function PlatformPreview({
         {selectedPlatforms.map((platform) => {
           const baseName = platform.split(":")[0];
           const style = getPlatformStyle(platform);
-          const { isOver, limit } = getCaptionStatus(baseName, caption.length);
+          const override = platformCaptions[baseName];
+          const isTailored = typeof override === "string" && override.trim().length > 0;
+          const text = isTailored ? override : caption;
+          const { isOver, limit } = getCaptionStatus(baseName, text.length);
           const mediaNote = getMediaNote(baseName, mediaType, selectedMedia.length);
-          const displayCaption = isOver ? caption.slice(0, limit - 3) + "..." : caption;
+          const displayCaption = isOver ? text.slice(0, limit - 3) + "..." : text;
 
           return (
             <View
@@ -108,15 +112,22 @@ export default function PlatformPreview({
                   </Text>
                   <Text className="text-ink-muted text-xs font-sans">{baseName}</Text>
                 </View>
+                {isTailored && (
+                  <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: colors.oliveSoft }}>
+                    <Text className="text-[9px] font-sans-bold" style={{ color: colors.olive }}>
+                      TAILORED
+                    </Text>
+                  </View>
+                )}
               </View>
 
-              {caption.length > 0 && (
-                <Text className="text-ink text-[14px] font-sans mb-1" numberOfLines={3} style={{ lineHeight: 20 }}>
+              {text.length > 0 && (
+                <Text className="text-ink text-[14px] font-sans mb-1" numberOfLines={8} style={{ lineHeight: 20 }}>
                   {displayCaption}
                 </Text>
               )}
 
-              <CharCounter platformName={baseName} captionLength={caption.length} />
+              <CharCounter platformName={baseName} captionLength={text.length} />
 
               {mediaNote && (
                 <View className="flex-row items-center mt-2">

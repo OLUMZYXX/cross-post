@@ -162,6 +162,7 @@ export default function HomeScreen({
             mediaType={composer.mediaType}
             getPlatformStyle={composer.getPlatformStyle}
             getDisplayName={composer.getDisplayName}
+            platformCaptions={composer.perPlatformCaptions}
           />
         </View>
 
