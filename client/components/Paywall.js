@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { getColors } from "../constants/theme";
 import { useToast } from "./Toast";
 import useSubscription from "../hooks/useSubscription";
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "../constants/legal";
 
 const PLAN_ORDER = { ANNUAL: 0, SIX_MONTH: 1, MONTHLY: 2 };
 
@@ -29,8 +30,6 @@ const FEATURES = [
   "Advanced analytics & priority support",
 ];
 
-const TERMS_URL = "https://cross-post-web.vercel.app/terms";
-const PRIVACY_URL = "https://cross-post-web.vercel.app/privacy";
 
 export default function Paywall({ visible, onClose, onSuccess, user }) {
   const { packages, loadError, loading, purchase, restore, isPro } = useSubscription(user);
@@ -149,10 +148,10 @@ export default function Paywall({ visible, onClose, onSuccess, user }) {
               Subscriptions auto-renew until cancelled. Manage or cancel anytime in your App Store settings.
             </Text>
             <View className="flex-row justify-center gap-5 mt-3">
-              <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)}>
+              <TouchableOpacity onPress={() => Linking.openURL(TERMS_OF_SERVICE_URL)}>
                 <Text className="text-ink-muted text-[11px] underline">Terms</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)}>
+              <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
                 <Text className="text-ink-muted text-[11px] underline">Privacy</Text>
               </TouchableOpacity>
             </View>
