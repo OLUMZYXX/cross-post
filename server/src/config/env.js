@@ -14,6 +14,13 @@ export const INSTAGRAM_APP_ID = process.env.INSTAGRAM_APP_ID;
 export const INSTAGRAM_APP_SECRET = process.env.INSTAGRAM_APP_SECRET;
 export const TIKTOK_CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY;
 export const TIKTOK_CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET;
+export const TIKTOK_VERIFICATION_CODES = (
+  process.env.TIKTOK_VERIFICATION_CODES ||
+  "sjU2flTW2wY5Cz8uW8PYxfs5y79JZxlL,TVssDthWJMF8UjrWVyBnipOVhEILvmMg"
+)
+  .split(",")
+  .map((code) => code.trim())
+  .filter(Boolean);
 export const LINKEDIN_CLIENT_ID = process.env.LINKEDIN_CLIENT_ID;
 export const LINKEDIN_CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;

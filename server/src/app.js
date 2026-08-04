@@ -11,6 +11,7 @@ import scorecardRoutes from "./routes/scorecard.routes.js";
 import feedRoutes from "./routes/feed.routes.js";
 import teamRoutes from "./routes/team.routes.js";
 import mediaRoutes from "./routes/media.routes.js";
+import verificationRoutes from "./routes/verification.routes.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { uploadToGridFS } from "./utils/gridfs.js";
 import {
@@ -30,14 +31,7 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 app.use(express.static("public"));
 
-app.get("/tiktoksjU2flTW2wY5Cz8uW8PYxfs5y79JZxlL.txt", (_req, res) =>
-  res
-    .type("text/plain")
-    .send(
-      "tiktok-developers-site-verification=sjU2flTW2wY5Cz8uW8PYxfs5y79JZxlL",
-    ),
-);
-
+app.use(verificationRoutes);
 app.use("/media", mediaRoutes);
 
 const uploadSingle = multer({
