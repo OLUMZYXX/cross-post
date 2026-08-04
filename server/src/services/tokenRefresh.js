@@ -148,10 +148,13 @@ async function refreshTikTokToken(refreshToken) {
   });
 
   const data = await res.json();
-  if (data.error || !data.data?.access_token) {
-    throw new Error(data.error?.message || "TikTok token refresh failed");
+  const tokens = data.data?.access_token ? data.data : data;
+  if (!tokens.access_token) {
+    throw new Error(
+      data.error_description || data.error?.message || data.error || "TikTok token refresh failed",
+    );
   }
-  return data.data;
+  return tokens;
 }
 
 async function refreshGoogleToken(refreshToken) {

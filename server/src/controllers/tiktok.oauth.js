@@ -61,10 +61,11 @@ export async function handleTikTokCallback(req, res) {
     );
 
     const tokenData = await tokenResponse.json().catch(() => ({}));
+    const tokens = tokenData.data?.access_token ? tokenData.data : tokenData;
     const tokenError =
       typeof tokenData.error === "string" ? tokenData.error : tokenData.error?.code;
 
-    if (tokenError || !tokenData.data?.access_token) {
+    if (tokenError || !tokens.access_token) {
       const msg =
         tokenData.error_description ||
         tokenData.error?.message ||
@@ -82,7 +83,7 @@ export async function handleTikTokCallback(req, res) {
       return res.send(buildRedirectHtml("TikTok Connection Failed", appUrl));
     }
 
-    const { access_token, refresh_token, open_id } = tokenData.data;
+    const { access_token, refresh_token, open_id } = tokens;
 
     const profileResponse = await fetch(
       "https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url",
