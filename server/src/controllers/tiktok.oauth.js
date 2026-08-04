@@ -1,5 +1,5 @@
 import Platform from "../models/Platform.js";
-import { logger } from "../utils/logger.js";
+import { logger, safeBody } from "../utils/logger.js";
 import {
   TIKTOK_CLIENT_KEY,
   TIKTOK_CLIENT_SECRET,
@@ -60,12 +60,23 @@ export async function handleTikTokCallback(req, res) {
       },
     );
 
-    const tokenData = await tokenResponse.json();
-    if (tokenData.error || !tokenData.data?.access_token) {
+    const tokenData = await tokenResponse.json().catch(() => ({}));
+    const tokenError =
+      typeof tokenData.error === "string" ? tokenData.error : tokenData.error?.code;
+
+    if (tokenError || !tokenData.data?.access_token) {
       const msg =
-        tokenData.error?.message ||
         tokenData.error_description ||
+        tokenData.error?.message ||
+        tokenError ||
         "token_error";
+      logger.apiError("TikTok", {
+        stage: "token_exchange",
+        status: tokenResponse.status,
+        redirectUri,
+        clientKeyPrefix: (TIKTOK_CLIENT_KEY || "").slice(0, 6),
+        body: safeBody(tokenData),
+      });
       const appUrl = `crosspost://oauth/tiktok/callback?error=${encodeURIComponent(msg)}`;
       logger.connect("FAIL", { platform: "Tiktok", to: appUrl });
       return res.send(buildRedirectHtml("TikTok Connection Failed", appUrl));
