@@ -5,7 +5,7 @@ export const PLATFORM_LIMITS = {
   Instagram: { chars: 2200, maxImages: 10, maxVideos: 1, note: null },
   LinkedIn: { chars: 3000, maxImages: 9, maxVideos: 0, note: "No video" },
   Facebook: { chars: 63206, maxImages: 10, maxVideos: 1, note: null },
-  TikTok: { chars: 150, maxImages: 0, maxVideos: 1, note: "Video only" },
+  TikTok: { chars: 150, maxImages: 35, maxVideos: 1, note: null },
   YouTube: { chars: 100, maxImages: 0, maxVideos: 1, note: "Video only" },
   Reddit: { chars: 300, maxImages: 0, maxVideos: 0, note: "Text only" },
   Telegram: { chars: 4096, maxImages: 10, maxVideos: 1, note: null },

@@ -10,12 +10,9 @@ import subscriptionRoutes from "./routes/subscription.routes.js";
 import scorecardRoutes from "./routes/scorecard.routes.js";
 import feedRoutes from "./routes/feed.routes.js";
 import teamRoutes from "./routes/team.routes.js";
+import mediaRoutes from "./routes/media.routes.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
-import {
-  uploadToGridFS,
-  downloadFromGridFS,
-  findFileById,
-} from "./utils/gridfs.js";
+import { uploadToGridFS } from "./utils/gridfs.js";
 import {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY,
@@ -41,26 +38,7 @@ app.get("/tiktoksjU2flTW2wY5Cz8uW8PYxfs5y79JZxlL.txt", (_req, res) =>
     ),
 );
 
-app.get("/media/:fileId", async (req, res) => {
-  try {
-    const file = await findFileById(req.params.fileId);
-    if (!file) {
-      return res
-        .status(404)
-        .json({ success: false, message: "File not found" });
-    }
-
-    res.set("Content-Type", file.contentType || "application/octet-stream");
-    res.set("Content-Length", file.length);
-    res.set("Cache-Control", "public, max-age=86400");
-
-    const stream = downloadFromGridFS(req.params.fileId);
-    stream.on("error", () => res.status(404).end());
-    stream.pipe(res);
-  } catch {
-    res.status(404).json({ success: false, message: "File not found" });
-  }
-});
+app.use("/media", mediaRoutes);
 
 const uploadSingle = multer({
   storage: multer.memoryStorage(),

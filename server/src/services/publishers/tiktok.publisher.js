@@ -1,7 +1,11 @@
 import { logger, safeBody } from "../../utils/logger.js";
-
-const INIT_URL = "https://open.tiktokapis.com/v2/post/publish/video/init/";
-const TITLE_MAX = 150;
+import { publishPhotosToTikTok } from "./tiktok.photo.js";
+import {
+  VIDEO_INIT_URL,
+  VIDEO_TITLE_MAX,
+  friendlyTikTokError,
+  isVideoUrl,
+} from "./tiktok.helpers.js";
 
 async function downloadVideo(url) {
   const res = await fetch(url);
@@ -12,7 +16,7 @@ async function downloadVideo(url) {
 }
 
 async function initUpload(accessToken, caption, size) {
-  const res = await fetch(INIT_URL, {
+  const res = await fetch(VIDEO_INIT_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -20,7 +24,7 @@ async function initUpload(accessToken, caption, size) {
     },
     body: JSON.stringify({
       post_info: {
-        title: caption ? caption.slice(0, TITLE_MAX) : "",
+        title: caption ? caption.slice(0, VIDEO_TITLE_MAX) : "",
         privacy_level: "SELF_ONLY",
       },
       source_info: {
@@ -34,7 +38,7 @@ async function initUpload(accessToken, caption, size) {
 
   const data = await res.json().catch(() => ({}));
 
-  if (!res.ok || data.error?.code) {
+  if (!res.ok || (data.error?.code && data.error.code !== "ok")) {
     logger.apiError("TikTok", { stage: "init", status: res.status, body: safeBody(data) });
     const err = new Error(friendlyTikTokError(data, res.status));
     err.rawDetail = safeBody(data, 200);
@@ -62,29 +66,7 @@ async function uploadVideoBytes(uploadUrl, buffer) {
   }
 }
 
-function friendlyTikTokError(data, status) {
-  const raw = `${data?.error?.code || ""} ${data?.error?.message || ""}`.toLowerCase();
-
-  if (raw.includes("unaudited_client")) {
-    return "While your TikTok app is still under review, TikTok only allows posting to a private TikTok account. Set that account to Private in TikTok (Settings and privacy > Privacy > Private account), then try again.";
-  }
-  if (raw.includes("spam_risk") || raw.includes("daily_post_cap")) {
-    return "TikTok has reached its posting limit for this account today. Try again tomorrow.";
-  }
-  if (raw.includes("scope") || raw.includes("permission") || status === 403) {
-    return "Your TikTok connection is missing posting permission. Reconnect TikTok in Settings.";
-  }
-  if (raw.includes("access_token") || raw.includes("token") || status === 401) {
-    return "Your TikTok connection has expired. Please reconnect TikTok in Settings.";
-  }
-  if (raw.includes("spam") || raw.includes("rate")) {
-    return "TikTok is temporarily limiting posts from this account. Wait a few minutes and try again.";
-  }
-  if (raw.includes("privacy") || raw.includes("unaudited")) {
-    return "TikTok requires this account to be verified for public posting. The post was created as private.";
-  }
-  return data?.error?.message || "We couldn't post this to TikTok. Please try again.";
-}
+const toUrl = (item) => (typeof item === "string" ? item : item?.uri);
 
 export async function publishToTikTok(platform, post) {
   const { accessToken } = platform;
@@ -92,14 +74,26 @@ export async function publishToTikTok(platform, post) {
 
   if (!media || media.length === 0) {
     throw new Error(
-      "TikTok requires a video to publish. Text-only posts are not supported.",
+      "TikTok requires a video or photo to publish. Text-only posts are not supported.",
     );
   }
 
-  const mediaUrl = typeof media[0] === "string" ? media[0] : media[0]?.uri;
+  const mediaUrls = media.map(toUrl).filter((url) => url && url.startsWith("http"));
 
-  if (!mediaUrl || !mediaUrl.startsWith("http")) {
-    throw new Error("TikTok requires an uploaded video. Attach a video and try again.");
+  if (mediaUrls.length === 0) {
+    throw new Error(
+      "TikTok requires uploaded media. Attach a video or photo and try again.",
+    );
+  }
+
+  const mediaUrl = mediaUrls[0];
+
+  if (!isVideoUrl(mediaUrl)) {
+    return publishPhotosToTikTok(
+      accessToken,
+      caption,
+      mediaUrls.filter((url) => !isVideoUrl(url)),
+    );
   }
 
   const buffer = await downloadVideo(mediaUrl);
