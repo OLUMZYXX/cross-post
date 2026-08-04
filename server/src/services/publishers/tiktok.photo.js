@@ -7,8 +7,23 @@ import {
   PHOTO_TITLE_MAX,
   friendlyTikTokError,
 } from "./tiktok.helpers.js";
+import { waitForPublish } from "./tiktok.status.js";
 
 const ALLOWED_HOSTS = ["res.cloudinary.com"];
+const PHOTO_TRANSFORM =
+  "if_ar_gt_1.0/c_limit,w_1920,h_1080/if_else/c_limit,w_1080,h_1920/if_end/f_jpg,q_auto";
+
+function withPhotoTransform(url) {
+  const parts = url.match(/^(.*\/image\/upload\/)(.*)$/);
+  if (!parts) return url;
+
+  const rest = parts[2];
+  const versioned = rest.match(/^(.*?)(v\d+\/.*)$/);
+
+  return versioned
+    ? `${parts[1]}${versioned[1]}${PHOTO_TRANSFORM}/${versioned[2]}`
+    : `${parts[1]}${PHOTO_TRANSFORM}/${rest}`;
+}
 
 export function isProxyableImage(url) {
   try {
@@ -21,7 +36,8 @@ export function isProxyableImage(url) {
 
 export function toProxiedImageUrl(url) {
   if (!isProxyableImage(url)) return url;
-  return `${SERVER_URL}/media/tiktok-image?src=${encodeURIComponent(url)}`;
+  const sized = withPhotoTransform(url);
+  return `${SERVER_URL}/media/tiktok-image?src=${encodeURIComponent(sized)}`;
 }
 
 export async function streamProxiedImage(rawUrl, res) {
@@ -88,8 +104,14 @@ export async function publishPhotosToTikTok(accessToken, caption, imageUrls) {
     throw err;
   }
 
+  const publishId = data.data?.publish_id;
+
+  if (publishId) {
+    await waitForPublish(accessToken, publishId);
+  }
+
   return {
-    externalId: data.data?.publish_id || "pending",
+    externalId: publishId || "pending",
     externalUrl: "https://www.tiktok.com",
   };
 }
