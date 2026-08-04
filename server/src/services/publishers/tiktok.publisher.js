@@ -65,6 +65,12 @@ async function uploadVideoBytes(uploadUrl, buffer) {
 function friendlyTikTokError(data, status) {
   const raw = `${data?.error?.code || ""} ${data?.error?.message || ""}`.toLowerCase();
 
+  if (raw.includes("unaudited_client")) {
+    return "While your TikTok app is still under review, TikTok only allows posting to a private TikTok account. Set that account to Private in TikTok (Settings and privacy > Privacy > Private account), then try again.";
+  }
+  if (raw.includes("spam_risk") || raw.includes("daily_post_cap")) {
+    return "TikTok has reached its posting limit for this account today. Try again tomorrow.";
+  }
   if (raw.includes("scope") || raw.includes("permission") || status === 403) {
     return "Your TikTok connection is missing posting permission. Reconnect TikTok in Settings.";
   }
