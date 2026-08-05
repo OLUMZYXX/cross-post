@@ -24,7 +24,11 @@ const PLATFORM_STYLES = {
   Telegram: { icon: "paper-plane", bg: "bg-paper-deep", color: "#0ea5e9" },
 };
 
-export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
+export default function ConnectedAccounts({
+  onBack,
+  onOpenConnectModal,
+  refreshKey = 0,
+}) {
   const [platforms, setPlatforms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagePickerVisible, setPagePickerVisible] = useState(false);
@@ -74,7 +78,7 @@ export default function ConnectedAccounts({ onBack, onOpenConnectModal }) {
 
   useEffect(() => {
     fetchPlatforms();
-  }, [fetchPlatforms]);
+  }, [fetchPlatforms, refreshKey]);
 
   const handleDisconnect = async (platform) => {
     try {

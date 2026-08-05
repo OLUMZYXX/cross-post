@@ -1,3 +1,5 @@
+import { friendlyFacebookError } from "./facebook.errors.js";
+
 const GRAPH_URL = "https://graph.facebook.com/v18.0";
 
 const isVideo = (url) =>
@@ -42,7 +44,7 @@ async function postToSinglePage(finalPageId, finalPageToken, caption, media) {
   console.log("Facebook final response:", JSON.stringify(data));
 
   if (data.error) {
-    throw new Error(data.error.message || "Failed to post to Facebook");
+    throw new Error(friendlyFacebookError(data.error));
   }
 
   const postId = data.id || data.post_id;
@@ -89,7 +91,9 @@ async function postMultiImage(pageId, token, caption, imageUrls) {
     const photoData = await photoRes.json();
     console.log("Facebook unpublished photo:", JSON.stringify(photoData));
     if (photoData.error) {
-      throw new Error(photoData.error.message || "Failed to upload photo to Facebook");
+      throw new Error(
+        friendlyFacebookError(photoData.error, "Failed to upload photo to Facebook"),
+      );
     }
     photoIds.push(photoData.id);
   }

@@ -2,12 +2,10 @@
   Text,
   View,
   TouchableOpacity,
-  Modal,
   BackHandler,
   AppState,
 } from "react-native";
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import TelegramConnectModal from "./TelegramConnectModal";
 import SentPosts from "./SentPosts";
@@ -18,6 +16,7 @@ import SettingsScreen from "./SettingsScreen";
 import BottomNav from "./BottomNav";
 import EditProfile from "./EditProfile";
 import ConnectedAccounts from "./ConnectedAccounts";
+import ConnectPlatformModal from "./ConnectPlatformModal";
 import NotificationSettings from "./NotificationSettings";
 import WatermarkSettings from "./WatermarkSettings";
 import FeedScreen from "./FeedScreen";
@@ -32,7 +31,6 @@ import useSubscription from "../hooks/useSubscription";
 import { useToast } from "./Toast";
 import { postAPI, platformAPI, notificationAPI, teamAPI, clearToken, saveToken } from "../services/api";
 import { listPending, removePending, clearStale } from "../services/pendingPublishes";
-import { getColors } from "../constants/theme";
 import useSwipeBack from "../hooks/useSwipeBack";
 
 export default function HomePage({
@@ -55,6 +53,8 @@ export default function HomePage({
   const [recentActivities, setRecentActivities] = useState([]);
   const [allPosts, setAllPosts] = useState([]);
   const [settingsScreen, setSettingsScreen] = useState(null);
+  const [connectingPlatform, setConnectingPlatform] = useState(null);
+  const [platformsRefreshKey, setPlatformsRefreshKey] = useState(0);
   const { showToast } = useToast();
   const [refreshing, setRefreshing] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -417,13 +417,9 @@ export default function HomePage({
 
   const EXCLUDED_FROM_ADD = ["LinkedIn", "Reddit"];
 
-  const hasFacebook = connectedPlatforms.some((p) => p.startsWith("Facebook"));
-
-  const availablePlatforms = Object.keys(allPlatforms).filter((p) => {
-    if (EXCLUDED_FROM_ADD.includes(p)) return false;
-    if (p === "Facebook") return !hasFacebook;
-    return true;
-  });
+  const availablePlatforms = Object.keys(allPlatforms).filter(
+    (p) => !EXCLUDED_FROM_ADD.includes(p),
+  );
 
   const getPlatformUsername = (platformName) => {
     const obj = connectedPlatformObjects.find((p) => p.name === platformName);
@@ -437,6 +433,8 @@ export default function HomePage({
   };
 
   const handleConnectPlatform = async (platformName) => {
+    if (connectingPlatform) return;
+
     if (platformName === "Twitter" && !isPro) {
       setModalVisible(false);
       setPaywallVisible(true);
@@ -448,6 +446,8 @@ export default function HomePage({
       setTelegramModalVisible(true);
       return;
     }
+
+    setConnectingPlatform(platformName);
 
     try {
       const oauthMethods = {
@@ -537,6 +537,9 @@ export default function HomePage({
         title: "Connection failed",
         message: err.message,
       });
+    } finally {
+      setConnectingPlatform(null);
+      setPlatformsRefreshKey((prev) => prev + 1);
     }
   };
 
@@ -640,6 +643,17 @@ export default function HomePage({
     </View>
   );
 
+  const connectModal = (
+    <ConnectPlatformModal
+      visible={modalVisible}
+      platforms={availablePlatforms}
+      platformStyles={allPlatforms}
+      connecting={connectingPlatform}
+      onSelect={handleConnectPlatform}
+      onClose={() => setModalVisible(false)}
+    />
+  );
+
   if (showNotifications) {
     return (
       <View className="flex-1 bg-paper" {...swipeBack}>
@@ -659,10 +673,14 @@ export default function HomePage({
   }
   if (activeTab === "settings" && settingsScreen === "connectedAccounts") {
     return withSwipe(
-      <ConnectedAccounts
-        onBack={() => { setSettingsScreen(null); fetchPlatforms(); }}
-        onOpenConnectModal={() => { setSettingsScreen(null); setModalVisible(true); }}
-      />,
+      <>
+        <ConnectedAccounts
+          onBack={() => { setSettingsScreen(null); fetchPlatforms(); }}
+          onOpenConnectModal={() => setModalVisible(true)}
+          refreshKey={platformsRefreshKey}
+        />
+        {connectModal}
+      </>,
     );
   }
   if (activeTab === "settings" && settingsScreen === "notifications") {
@@ -826,31 +844,7 @@ export default function HomePage({
         {renderActiveTab()}
       </ScreenTransition>
 
-      <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
-        <View className="flex-1 justify-center items-center bg-ink/60 px-6">
-          <View className="bg-paper-light rounded-3xl border border-rule p-6 w-full max-w-sm">
-            <Text className="text-terracotta text-[10px] font-sans-bold tracking-[2px] mb-1">CONNECT</Text>
-            <Text className="text-ink text-2xl font-serif-bold mb-5">Add a platform</Text>
-            {availablePlatforms.map((platform) => (
-              <TouchableOpacity
-                key={platform}
-                onPress={() => handleConnectPlatform(platform)}
-                className="flex-row items-center mb-2 bg-paper border border-rule rounded-2xl p-3"
-                activeOpacity={0.75}
-              >
-                <View className="w-10 h-10 rounded-xl bg-paper-deep items-center justify-center mr-3">
-                  <Ionicons name={allPlatforms[platform].icon} size={18} color={getColors().ink} />
-                </View>
-                <Text className="text-ink font-sans-semibold flex-1">{platform}</Text>
-                <Ionicons name="arrow-forward" size={16} color={getColors().terracotta} />
-              </TouchableOpacity>
-            ))}
-            <TouchableOpacity onPress={() => setModalVisible(false)} className="py-3 rounded-2xl mt-3 border border-rule">
-              <Text className="text-ink-muted text-center font-sans-semibold">Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {connectModal}
 
       <TelegramConnectModal
         visible={telegramModalVisible}
