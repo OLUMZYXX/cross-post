@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { SUPPORT_EMAIL } from "@/config/marketing";
 
 const COLUMNS = [
   {
@@ -41,12 +40,6 @@ export default function Footer() {
             <p className="text-white/60 mt-4 max-w-xs leading-relaxed">
               Write it once, post it everywhere.
             </p>
-            <a
-              href={`mailto:${SUPPORT_EMAIL}`}
-              className="inline-block mt-5 text-mint hover:text-white transition-colors"
-            >
-              {SUPPORT_EMAIL}
-            </a>
           </div>
 
           {COLUMNS.map((column) => (
