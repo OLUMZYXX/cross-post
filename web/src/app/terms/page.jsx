@@ -1,11 +1,14 @@
 import LegalShell from "@/components/legal/LegalShell";
+import { pageMetadata } from "@/config/seo";
 
 const SUPPORT_EMAIL = "akinwumiolumide5@gmail.com";
 
-export const metadata = {
-  title: "Terms of Service — Cross-Post",
-  description: "The terms that govern your use of Cross-Post.",
-};
+export const metadata = pageMetadata({
+  title: "Terms of Service",
+  description:
+    "The terms that govern your use of Cross-Post.",
+  path: "/terms/",
+});
 
 export default function TermsPage() {
   return (

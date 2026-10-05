@@ -2,97 +2,92 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  PenSquare,
-  Send,
-  CalendarDays,
-  BarChart3,
-  Bell,
-  Settings,
-  LogOut,
-  Plus,
-  Share2,
-} from "lucide-react";
+import { Plus, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import Wordmark from "@/components/app/Wordmark";
+import {
+  APP_NAV,
+  SIDEBAR_SECONDARY,
+  BRAND_TAGLINE,
+  isActivePath,
+  userInitials,
+} from "@/config/appNav";
 
-const MAIN_NAV = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Composer", href: "/create", icon: PenSquare },
-  { label: "Calendar", href: "/calendar", icon: CalendarDays },
-  { label: "Posts", href: "/posts", icon: Send },
-  { label: "Analytics", href: "/analytics", icon: BarChart3 },
-];
+function NavLink({ item, active, badge }) {
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[15px] border transition-colors duration-150 ${
+        active
+          ? "bg-cp-card border-cp-rule text-cp-ink font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+          : "border-transparent text-cp-muted hover:text-cp-ink hover:bg-cp-deep"
+      }`}
+    >
+      <item.icon size={19} strokeWidth={active ? 2.3 : 1.8} />
+      <span className="flex-1">{item.label}</span>
+      {badge ? (
+        <span className="min-w-5 h-5 px-1.5 rounded-full bg-cp-accent text-white text-[11px] font-bold flex items-center justify-center">
+          {badge > 9 ? "9+" : badge}
+        </span>
+      ) : null}
+    </Link>
+  );
+}
 
-const BOTTOM_NAV = [
-  { label: "Notifications", href: "/notifications", icon: Bell },
-  { label: "Settings", href: "/settings", icon: Settings },
-];
-
-export default function Sidebar() {
+export default function Sidebar({ unreadCount = 0 }) {
   const pathname = usePathname();
-  const { logout } = useAuth();
-
-  const renderLink = (item) => {
-    const isActive =
-      pathname === item.href || pathname.startsWith(item.href + "/");
-    return (
-      <Link
-        key={item.href}
-        href={item.href}
-        className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all duration-200 ${
-          isActive
-            ? "bg-green-500/10 text-green-400 font-semibold"
-            : "text-neutral-500 hover:text-neutral-300 hover:bg-white/[0.03]"
-        }`}
-      >
-        <item.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
-        <span className="font-medium">{item.label}</span>
-      </Link>
-    );
-  };
+  const { user, logout } = useAuth();
 
   return (
-    <aside className="hidden lg:flex flex-col w-[260px] bg-[#0a0a0a] border-r border-white/[0.04] h-screen sticky top-0">
-      <div className="px-6 py-6 mb-2">
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/15">
-            <Share2 size={16} className="text-black" />
-          </div>
-          <div>
-            <span className="text-base font-bold tracking-tight text-white">
-              Cross-Post
-            </span>
-            <p className="text-[10px] font-medium uppercase tracking-widest text-neutral-600">
-              Publish Everywhere
-            </p>
-          </div>
-        </Link>
+    <aside className="hidden lg:flex flex-col w-[272px] shrink-0 h-screen sticky top-0 border-r border-cp-rule px-4 py-6">
+      <div className="px-2">
+        <Wordmark />
+        <p className="text-cp-muted text-[13px] leading-snug mt-2.5 pr-4">{BRAND_TAGLINE}</p>
       </div>
 
-      <nav className="flex-1 px-3 space-y-0.5">{MAIN_NAV.map(renderLink)}</nav>
+      <Link
+        href="/create"
+        className="cp-chunky mt-7 mx-1 flex items-center justify-center gap-2 bg-cp-accent text-white font-semibold text-[15px] py-3 rounded-2xl"
+      >
+        <Plus size={18} strokeWidth={2.5} />
+        New post
+      </Link>
 
-      <div className="px-3 mt-auto space-y-0.5">
-        <Link
-          href="/create"
-          className="w-full mb-3 py-2.5 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-black rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-500/15 hover:shadow-green-500/25 transition-all duration-200 text-sm"
-        >
-          <Plus size={16} />
-          New Post
-        </Link>
+      <nav className="mt-7 space-y-1" aria-label="Main">
+        {APP_NAV.map((item) => (
+          <NavLink key={item.href} item={item} active={isActivePath(pathname, item.href)} />
+        ))}
+      </nav>
 
-        {BOTTOM_NAV.map(renderLink)}
+      <div className="mt-6 pt-6 border-t border-cp-rule space-y-1">
+        {SIDEBAR_SECONDARY.map((item) => (
+          <NavLink
+            key={item.href}
+            item={item}
+            active={isActivePath(pathname, item.href)}
+            badge={unreadCount}
+          />
+        ))}
+      </div>
 
+      <div className="mt-auto flex items-center gap-3 rounded-2xl bg-cp-card border border-cp-rule p-3">
+        <span className="w-10 h-10 rounded-full bg-cp-ink text-cp-card text-sm font-bold flex items-center justify-center shrink-0">
+          {userInitials(user?.name)}
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className="text-cp-ink text-sm font-semibold truncate">{user?.name || "Your account"}</p>
+          <p className="text-cp-soft text-xs truncate">{user?.email}</p>
+        </div>
         <button
           onClick={logout}
-          className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm text-neutral-500 hover:text-red-400 hover:bg-white/[0.03] transition-all duration-200"
+          aria-label="Sign out"
+          title="Sign out"
+          className="w-9 h-9 rounded-full flex items-center justify-center text-cp-muted hover:text-cp-accent hover:bg-cp-deep transition-colors"
         >
-          <LogOut size={18} strokeWidth={1.8} />
-          <span className="font-medium">Sign Out</span>
+          <LogOut size={17} />
         </button>
       </div>
-
-      <div className="h-4" />
     </aside>
   );
 }

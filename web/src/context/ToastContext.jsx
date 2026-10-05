@@ -11,10 +11,10 @@ const TOAST_ICONS = {
   info: Info,
 };
 
-const TOAST_COLORS = {
-  success: "bg-neutral-900 border-neutral-800 text-green-400",
-  error: "bg-neutral-900 border-neutral-800 text-red-400",
-  info: "bg-neutral-900 border-neutral-800 text-blue-400",
+const TOAST_ICON_COLORS = {
+  success: "text-cp-olive",
+  error: "text-cp-accent",
+  info: "text-cp-info",
 };
 
 export function ToastProvider({ children }) {
@@ -35,19 +35,21 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
+      <div className="fixed top-4 left-4 right-4 sm:left-auto z-[70] flex flex-col items-end gap-2 sm:max-w-sm" aria-live="polite">
         {toasts.map((toast) => {
           const Icon = TOAST_ICONS[toast.type];
           return (
             <div
               key={toast.id}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-sm animate-slide-in ${TOAST_COLORS[toast.type]}`}
+              role={toast.type === "error" ? "alert" : "status"}
+              className="w-full sm:w-auto flex items-center gap-3 pl-4 pr-3 py-3 rounded-2xl border border-cp-rule bg-cp-card text-cp-ink shadow-[0_12px_32px_-12px_rgba(0,0,0,0.25)] animate-slide-in"
             >
-              <Icon size={18} />
-              <span className="text-sm font-medium flex-1">{toast.title}</span>
+              <Icon size={18} className={TOAST_ICON_COLORS[toast.type]} />
+              <span className="text-sm font-semibold flex-1">{toast.title}</span>
               <button
                 onClick={() => dismissToast(toast.id)}
-                className="opacity-60 hover:opacity-100 transition-opacity"
+                aria-label="Dismiss"
+                className="p-1 text-cp-soft hover:text-cp-ink transition-colors"
               >
                 <X size={14} />
               </button>

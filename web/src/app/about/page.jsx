@@ -1,12 +1,14 @@
 import PageShell from "@/components/marketing/PageShell";
+import { pageMetadata } from "@/config/seo";
 
 const SUPPORT_EMAIL = "akinwumiolumide5@gmail.com";
 
-export const metadata = {
-  title: "About — Cross-Post",
+export const metadata = pageMetadata({
+  title: "About",
   description:
     "What Cross-Post is, who builds it, who it is for, and how to get in touch.",
-};
+  path: "/about/",
+});
 
 const PLATFORMS = [
   "Twitter/X",

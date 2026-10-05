@@ -25,19 +25,20 @@ export function getMonthDays(year, month) {
   return days;
 }
 
+export function postDateOf(post) {
+  const value = post.scheduledAt || post.publishedAt;
+  return value ? new Date(value) : null;
+}
+
 export function getPostsForDate(posts, targetDate) {
   return posts.filter((post) => {
-    const postDate = post.scheduledAt
-      ? new Date(post.scheduledAt)
-      : post.publishedAt
-        ? new Date(post.publishedAt)
-        : null;
-    return postDate && isSameDay(postDate, targetDate);
+    const date = postDateOf(post);
+    return date && isSameDay(date, targetDate);
   });
 }
 
 export function formatMonthYear(year, month) {
-  return new Date(year, month).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  return new Date(year, month).toLocaleDateString(undefined, { month: "long", year: "numeric" });
 }
 
 export function isSameDay(d1, d2) {

@@ -1,6 +1,9 @@
 import { Mail } from "lucide-react";
 import PageShell from "@/components/marketing/PageShell";
 import { SUPPORT_EMAIL } from "@/config/marketing";
+import { pageMetadata } from "@/config/seo";
+import JsonLd from "@/components/seo/JsonLd";
+import { faqSchema } from "@/config/structuredData";
 
 const FAQS = [
   {
@@ -45,10 +48,12 @@ const FAQS = [
   },
 ];
 
-export const metadata = {
-  title: "Support — Cross-Post",
-  description: "Get help with Cross-Post. Find answers to common questions or contact our support team.",
-};
+export const metadata = pageMetadata({
+  title: "Support",
+  description:
+    "Get help with Cross-Post. Find answers to common questions or contact our support team.",
+  path: "/support/",
+});
 
 export default function SupportPage() {
   return (
@@ -82,6 +87,7 @@ export default function SupportPage() {
           </div>
         ))}
       </div>
+      <JsonLd data={faqSchema(FAQS)} />
     </PageShell>
   );
 }

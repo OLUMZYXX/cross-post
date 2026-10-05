@@ -1,158 +1,52 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import usePostsData from "@/hooks/usePostsData";
-import { getPostsForDate, formatMonthYear } from "@/utils/calendarHelpers";
-import { PLATFORM_CONFIG } from "@/config/platforms";
+import useCalendarMonth from "@/hooks/useCalendarMonth";
+import PageHeader from "@/components/app/PageHeader";
+import SegmentedTabs from "@/components/app/SegmentedTabs";
+import CalendarToolbar from "@/components/calendar/CalendarToolbar";
 import CalendarGrid from "@/components/calendar/CalendarGrid";
 import DailyReview from "@/components/calendar/DailyReview";
+import AgendaList from "@/components/calendar/AgendaList";
 import Spinner from "@/components/ui/Spinner";
 
-const VIEWS = ["Month", "Week", "List"];
+const VIEWS = [
+  { key: "month", label: "Month" },
+  { key: "list", label: "List" },
+];
 
 export default function CalendarPage() {
-  const now = new Date();
-  const [currentMonth, setCurrentMonth] = useState(now.getMonth());
-  const [currentYear, setCurrentYear] = useState(now.getFullYear());
-  const [selectedDate, setSelectedDate] = useState(now);
-  const [viewMode, setViewMode] = useState("Month");
-  const [platformFilter, setPlatformFilter] = useState("all");
-
+  const [view, setView] = useState("month");
   const { allPosts, connectedNames, loading } = usePostsData();
+  const calendar = useCalendarMonth(allPosts);
 
-  const calendarPosts = useMemo(
-    () =>
-      allPosts.filter(
-        (p) => p.status === "scheduled" || p.status === "published",
-      ),
-    [allPosts],
-  );
-
-  const selectedDayPosts = useMemo(
-    () => getPostsForDate(calendarPosts, selectedDate),
-    [calendarPosts, selectedDate],
-  );
-
-  const prevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else setCurrentMonth(currentMonth - 1);
-  };
-
-  const nextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else setCurrentMonth(currentMonth + 1);
-  };
-
-  if (loading) return <Spinner className="py-20" />;
+  if (loading) return <Spinner className="py-24" />;
 
   return (
     <div className="animate-fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 sm:gap-4 mb-4 sm:mb-6">
-        <div>
-          <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-white font-headline">
-            Content Calendar
-          </h1>
-          <p className="text-neutral-500 text-xs sm:text-base font-medium mt-0.5 sm:mt-1">
-            Scheduling across {connectedNames.length} active channel
-            {connectedNames.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-        <div className="flex items-center gap-0.5 sm:gap-1 glass p-0.5 sm:p-1 rounded-lg sm:rounded-xl">
-          {VIEWS.map((v) => (
-            <button
-              key={v}
-              onClick={() => setViewMode(v)}
-              className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-[10px] sm:text-sm font-bold transition-all ${
-                viewMode === v
-                  ? "bg-green-500 text-black shadow-sm"
-                  : "text-neutral-500 hover:text-neutral-300"
-              }`}
-            >
-              {v}
-            </button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Plan ahead"
+        title="Calendar"
+        subtitle="Everything you've sent and everything that's queued."
+        actions={<SegmentedTabs tabs={VIEWS} value={view} onChange={setView} label="Calendar view" />}
+      />
 
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-        <div className="flex items-center gap-1.5 sm:gap-2 mr-2 sm:mr-4">
-          <button
-            onClick={prevMonth}
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-neutral-400 hover:text-white transition-all duration-200"
-          >
-            <ChevronLeft size={14} className="sm:hidden" />
-            <ChevronLeft size={16} className="hidden sm:block" />
-          </button>
-          <span className="text-white font-bold text-xs sm:text-sm min-w-[110px] sm:min-w-[140px] text-center font-headline">
-            {formatMonthYear(currentYear, currentMonth)}
-          </span>
-          <button
-            onClick={nextMonth}
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-neutral-400 hover:text-white transition-all duration-200"
-          >
-            <ChevronRight size={14} className="sm:hidden" />
-            <ChevronRight size={16} className="hidden sm:block" />
-          </button>
-        </div>
+      <CalendarToolbar calendar={calendar} platformNames={connectedNames} />
 
-        <button
-          onClick={() => setPlatformFilter("all")}
-          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
-            platformFilter === "all"
-              ? "bg-green-500/15 text-green-400 border-green-500/30"
-              : "bg-white/[0.03] text-neutral-500 border-white/[0.06] hover:border-white/[0.1]"
-          }`}
-        >
-          All Channels
-        </button>
-        {connectedNames.map((name) => {
-          const config = PLATFORM_CONFIG[name.toLowerCase()] || {};
-          const active = platformFilter === name.toLowerCase();
-          return (
-            <button
-              key={name}
-              onClick={() =>
-                setPlatformFilter(active ? "all" : name.toLowerCase())
-              }
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
-                active
-                  ? "bg-green-500/15 text-green-400 border-green-500/30"
-                  : "bg-white/[0.03] text-neutral-500 border-white/[0.06] hover:border-white/[0.1]"
-              }`}
-            >
-              {config.label || name}
-            </button>
-          );
-        })}
-      </div>
-
-      {viewMode === "Month" ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-          <div className="lg:col-span-8">
-            <CalendarGrid
-              currentYear={currentYear}
-              currentMonth={currentMonth}
-              posts={calendarPosts}
-              selectedDate={selectedDate}
-              onSelectDate={setSelectedDate}
-              platformFilter={platformFilter}
-            />
-          </div>
-          <div className="lg:col-span-4">
-            <DailyReview selectedDate={selectedDate} posts={selectedDayPosts} />
-          </div>
+      {view === "month" ? (
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
+          <CalendarGrid
+            year={calendar.year}
+            month={calendar.month}
+            posts={calendar.posts}
+            selectedDate={calendar.selectedDate}
+            onSelectDate={calendar.setSelectedDate}
+          />
+          <DailyReview selectedDate={calendar.selectedDate} posts={calendar.selectedPosts} />
         </div>
       ) : (
-        <div className="glass rounded-xl sm:rounded-2xl p-5 sm:p-8 text-center">
-          <p className="text-neutral-500 text-xs sm:text-sm">
-            {viewMode} view coming soon
-          </p>
-        </div>
+        <AgendaList posts={calendar.monthPosts} />
       )}
     </div>
   );

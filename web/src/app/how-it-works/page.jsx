@@ -1,10 +1,12 @@
 import PageShell from "@/components/marketing/PageShell";
+import { pageMetadata } from "@/config/seo";
 
-export const metadata = {
-  title: "How it works — Cross-Post",
+export const metadata = pageMetadata({
+  title: "How it works",
   description:
     "A step by step guide to Cross-Post: create an account, connect your social platforms, compose a post, publish or schedule it, and review how it performed.",
-};
+  path: "/how-it-works/",
+});
 
 const STEPS = [
   {

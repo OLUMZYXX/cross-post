@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { postAPI } from "@/services/postService";
 import { platformAPI } from "@/services/platformService";
+import { expandPlatforms } from "@/utils/platforms";
 
 export default function usePostsData() {
   const [allPosts, setAllPosts] = useState([]);
@@ -17,25 +18,7 @@ export default function usePostsData() {
       ]);
       setAllPosts(postsRes.data?.posts || []);
 
-      const raw = platformsRes.data?.platforms || [];
-      const expanded = [];
-      for (const p of raw) {
-        if (p.name === "Facebook" && p.pages?.length > 0 && p.selectedPageIds?.length > 0) {
-          const selected = p.pages.filter((pg) => p.selectedPageIds.includes(pg.pageId));
-          for (const page of selected) {
-            expanded.push({
-              ...p,
-              _id: `${p._id}_page_${page.pageId}`,
-              _parentId: p._id,
-              platformUsername: page.pageName,
-              _pageId: page.pageId,
-            });
-          }
-        } else {
-          expanded.push(p);
-        }
-      }
-      setPlatforms(expanded);
+      setPlatforms(expandPlatforms(platformsRes.data?.platforms || []));
     } catch {} finally {
       setLoading(false);
     }
@@ -48,7 +31,7 @@ export default function usePostsData() {
   const scheduledPosts = allPosts.filter((p) => p.status === "scheduled");
   const connectedNames = platforms.map((p) => p.name);
 
-  const refresh = () => { setLoading(true); fetchData(); };
+  const refresh = () => { fetchData(); };
 
   const deletePost = async (id) => {
     await postAPI.delete(id);

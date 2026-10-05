@@ -8,6 +8,9 @@ import Pricing from "@/components/landing/Pricing";
 import Faq from "@/components/landing/Faq";
 import CtaBanner from "@/components/landing/CtaBanner";
 import Footer from "@/components/landing/Footer";
+import JsonLd from "@/components/seo/JsonLd";
+import { HOME_FAQS } from "@/config/faqs";
+import { organizationSchema, websiteSchema, appSchema, faqSchema } from "@/config/structuredData";
 
 export default function LandingPage() {
   return (
@@ -24,6 +27,7 @@ export default function LandingPage() {
         <CtaBanner />
       </main>
       <Footer />
+      <JsonLd data={[organizationSchema(), websiteSchema(), appSchema(), faqSchema(HOME_FAQS)]} />
     </div>
   );
 }

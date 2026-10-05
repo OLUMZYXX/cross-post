@@ -1,0 +1,125 @@
+:root {
+  --cp-paper: #fafafa;
+  --cp-card: #ffffff;
+  --cp-deep: #f4f4f5;
+  --cp-ink: #18181b;
+  --cp-muted: #52525b;
+  --cp-soft: #71717a;
+  --cp-accent: #b14026;
+  --cp-accent-dark: #8e311b;
+  --cp-accent-soft: #f0d7cc;
+  --cp-olive: #4f573a;
+  --cp-olive-soft: #dde2cf;
+  --cp-info: #3f576a;
+  --cp-info-soft: #d7e0e8;
+  --cp-rule: #e4e4e7;
+  --cp-rule-soft: #f1f1f3;
+  --cp-chip-shadow: #000000;
+  --cp-glass: rgba(255, 255, 255, 0.72);
+}
+
+@media (prefers-color-scheme: dark) {
+  .app {
+    --cp-paper: #0b141a;
+    --cp-card: #161f25;
+    --cp-deep: #1a252c;
+    --cp-ink: #e9edef;
+    --cp-muted: #a4b2bc;
+    --cp-soft: #6e7c85;
+    --cp-accent: #d9613f;
+    --cp-accent-dark: #a53a20;
+    --cp-accent-soft: #3a2a24;
+    --cp-olive: #a2ac81;
+    --cp-olive-soft: #3a4030;
+    --cp-info: #86a4b8;
+    --cp-info-soft: #2a3d4a;
+    --cp-rule: #2a3942;
+    --cp-rule-soft: #202c33;
+    --cp-chip-shadow: #000000;
+    --cp-glass: rgba(22, 31, 37, 0.72);
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-cp-paper: var(--cp-paper);
+  --color-cp-card: var(--cp-card);
+  --color-cp-deep: var(--cp-deep);
+  --color-cp-ink: var(--cp-ink);
+  --color-cp-muted: var(--cp-muted);
+  --color-cp-soft: var(--cp-soft);
+  --color-cp-accent: var(--cp-accent);
+  --color-cp-accent-dark: var(--cp-accent-dark);
+  --color-cp-accent-soft: var(--cp-accent-soft);
+  --color-cp-olive: var(--cp-olive);
+  --color-cp-olive-soft: var(--cp-olive-soft);
+  --color-cp-info: var(--cp-info);
+  --color-cp-info-soft: var(--cp-info-soft);
+  --color-cp-rule: var(--cp-rule);
+  --color-cp-rule-soft: var(--cp-rule-soft);
+}
+
+.app {
+  background: var(--cp-paper);
+  color: var(--cp-ink);
+  font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.app ::selection {
+  background: var(--cp-accent-soft);
+  color: var(--cp-ink);
+}
+
+.app * {
+  scrollbar-color: var(--cp-rule) transparent;
+}
+
+.app *::-webkit-scrollbar-thumb {
+  background: var(--cp-rule);
+}
+
+.cp-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cp-muted);
+}
+
+.cp-dashed {
+  border-top: 1px dashed var(--cp-rule);
+}
+
+.cp-chunky {
+  box-shadow: 0 3px 0 var(--chunky-shadow, var(--cp-accent-dark));
+  transform: translateY(-1px);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.cp-chunky:active:not(:disabled) {
+  box-shadow: 0 1px 0 var(--chunky-shadow, var(--cp-accent-dark));
+  transform: translateY(1px);
+}
+
+.cp-glass {
+  background: var(--cp-glass);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+}
+
+.cp-press {
+  transition: transform 0.15s ease;
+}
+
+.cp-press:active {
+  transform: scale(0.96);
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+}

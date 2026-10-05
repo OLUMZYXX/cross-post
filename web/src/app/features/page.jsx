@@ -1,10 +1,12 @@
 import PageShell from "@/components/marketing/PageShell";
+import { pageMetadata } from "@/config/seo";
 
-export const metadata = {
-  title: "Features — Cross-Post",
+export const metadata = pageMetadata({
+  title: "Features",
   description:
     "Everything Cross-Post does: publish to eight platforms at once, schedule posts, tailor captions per platform with AI, add watermarks, and track performance.",
-};
+  path: "/features/",
+});
 
 const GROUPS = [
   {

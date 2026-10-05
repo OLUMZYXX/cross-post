@@ -1,138 +1,90 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-  getMonthDays,
-  getPostsForDate,
-  isSameDay,
-} from "@/utils/calendarHelpers";
-import { PLATFORM_CONFIG } from "@/config/platforms";
+import { getMonthDays, getPostsForDate, isSameDay } from "@/utils/calendarHelpers";
 
 const DAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-export default function CalendarGrid({
-  currentYear,
-  currentMonth,
-  posts,
-  selectedDate,
-  onSelectDate,
-  platformFilter,
-}) {
-  const days = useMemo(
-    () => getMonthDays(currentYear, currentMonth),
-    [currentYear, currentMonth],
-  );
+const STATUS_DOT = {
+  published: "bg-cp-olive",
+  scheduled: "bg-cp-info",
+};
 
-  const filteredPosts = useMemo(() => {
-    if (!platformFilter || platformFilter === "all") return posts;
-    return posts.filter((p) =>
-      (p.platforms || []).some((plat) =>
-        plat.toLowerCase().includes(platformFilter.toLowerCase()),
-      ),
-    );
-  }, [posts, platformFilter]);
+const STATUS_CHIP = {
+  published: "bg-cp-olive-soft text-cp-olive",
+  scheduled: "bg-cp-info-soft text-cp-info",
+};
+
+function DayCell({ day, posts, selected, onSelect }) {
+  const label = day.date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
 
   return (
-    <div>
-      <div className="calendar-grid border-b border-white/[0.04] pb-1.5 sm:pb-2 mb-1">
-        {DAY_HEADERS.map((d, i) => (
-          <div
-            key={d}
-            className={`py-1 sm:py-2 text-center text-[8px] sm:text-[10px] font-extrabold uppercase tracking-widest ${
-              i >= 5 ? "text-green-500/60" : "text-neutral-600"
-            }`}
-          >
-            {d}
+    <button
+      type="button"
+      onClick={() => onSelect(day.date)}
+      aria-pressed={selected}
+      aria-label={`${label}${posts.length ? `, ${posts.length} posts` : ""}`}
+      className={`relative flex flex-col items-start justify-start text-left p-1.5 sm:p-2.5 min-h-[58px] sm:min-h-[104px] transition-colors ${
+        selected ? "bg-cp-accent-soft/50" : "bg-cp-card hover:bg-cp-deep"
+      } ${day.isCurrentMonth ? "" : "opacity-40"}`}
+    >
+      {selected ? <span className="absolute inset-0 ring-2 ring-inset ring-cp-accent pointer-events-none" /> : null}
+      <span
+        className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-[13px] font-semibold ${
+          day.isToday ? "bg-cp-ink text-cp-card" : "text-cp-ink"
+        }`}
+      >
+        {day.date.getDate()}
+      </span>
+
+      {posts.length > 0 ? (
+        <>
+          <div className="hidden sm:block w-full mt-1.5 space-y-1">
+            {posts.slice(0, 2).map((post) => (
+              <span
+                key={post._id}
+                className={`block truncate rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${STATUS_CHIP[post.status]}`}
+              >
+                {post.caption || "Post"}
+              </span>
+            ))}
+            {posts.length > 2 ? (
+              <span className="block text-[11px] text-cp-muted font-semibold px-1">+{posts.length - 2} more</span>
+            ) : null}
+          </div>
+          <div className="sm:hidden flex gap-0.5 mt-1 px-1">
+            {posts.slice(0, 3).map((post) => (
+              <span key={post._id} className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[post.status]}`} />
+            ))}
+          </div>
+        </>
+      ) : null}
+    </button>
+  );
+}
+
+export default function CalendarGrid({ year, month, posts, selectedDate, onSelectDate }) {
+  const days = useMemo(() => getMonthDays(year, month), [year, month]);
+
+  return (
+    <div className="rounded-3xl border border-cp-rule overflow-hidden bg-cp-rule">
+      <div className="grid grid-cols-7 bg-cp-paper">
+        {DAY_HEADERS.map((label) => (
+          <div key={label} className="py-2.5 text-center cp-eyebrow !text-[10px]">
+            {label}
           </div>
         ))}
       </div>
-
-      <div className="calendar-grid gap-px bg-white/[0.02] rounded-xl sm:rounded-2xl overflow-hidden border border-white/[0.06]">
-        {days.map((day, idx) => {
-          const dayPosts = getPostsForDate(filteredPosts, day.date);
-          const isSelected = selectedDate && isSameDay(day.date, selectedDate);
-          const isWeekend = day.date.getDay() === 0 || day.date.getDay() === 6;
-
-          return (
-            <div
-              key={idx}
-              onClick={() => onSelectDate(day.date)}
-              className={`p-1.5 sm:p-2.5 min-h-[60px] sm:min-h-[100px] cursor-pointer transition-all duration-200 ${
-                isSelected
-                  ? "bg-green-500/5 border-2 border-green-500/50 ring-2 ring-inset ring-[#0a0a0a] z-10 shadow-sm"
-                  : "bg-white/[0.01] hover:bg-white/[0.03]"
-              } ${!day.isCurrentMonth ? "opacity-30" : ""}`}
-            >
-              <span
-                className={`text-[10px] sm:text-xs font-bold ${
-                  day.isToday
-                    ? "text-green-400"
-                    : isSelected
-                      ? "text-green-400"
-                      : isWeekend && day.isCurrentMonth
-                        ? "text-green-500/60"
-                        : "text-neutral-400"
-                }`}
-              >
-                {day.date.getDate()}
-              </span>
-
-              {dayPosts.length > 0 && (
-                <div className="mt-1 sm:mt-1.5 space-y-0.5 sm:space-y-1">
-                  {dayPosts.slice(0, 2).map((post) => {
-                    const platformName = (post.platforms?.[0] || "")
-                      .split(":")[0]
-                      .toLowerCase();
-                    const config = PLATFORM_CONFIG[platformName] || {};
-                    return (
-                      <div
-                        key={post._id}
-                        className="hidden sm:flex items-center gap-1 rounded-sm p-0.5 text-[9px]"
-                        style={{
-                          backgroundColor: `${config.color || "#666"}15`,
-                          borderLeft: `2px solid ${config.color || "#666"}`,
-                        }}
-                      >
-                        <span
-                          className="truncate font-bold"
-                          style={{ color: config.color || "#999" }}
-                        >
-                          {post.caption?.slice(0, 16) || "Post"}
-                        </span>
-                      </div>
-                    );
-                  })}
-                  <div className="sm:hidden flex gap-0.5">
-                    {dayPosts.slice(0, 3).map((post) => {
-                      const platformName = (post.platforms?.[0] || "")
-                        .split(":")[0]
-                        .toLowerCase();
-                      const config = PLATFORM_CONFIG[platformName] || {};
-                      return (
-                        <div
-                          key={post._id}
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ backgroundColor: config.color || "#666" }}
-                        />
-                      );
-                    })}
-                  </div>
-                  {dayPosts.length > 2 && (
-                    <span className="hidden sm:inline text-[9px] text-neutral-500 font-medium">
-                      +{dayPosts.length - 2} more
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {dayPosts.length === 0 && day.isCurrentMonth && isSelected && (
-                <div className="hidden sm:flex mt-2 h-10 bg-white/[0.03] rounded-lg items-center justify-center border border-dashed border-white/[0.06]">
-                  <span className="text-neutral-600 text-[10px]">No posts</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-7 gap-px">
+        {days.map((day) => (
+          <DayCell
+            key={day.date.toISOString()}
+            day={day}
+            posts={getPostsForDate(posts, day.date)}
+            selected={selectedDate && isSameDay(day.date, selectedDate)}
+            onSelect={onSelectDate}
+          />
+        ))}
       </div>
     </div>
   );

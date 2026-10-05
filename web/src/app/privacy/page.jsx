@@ -1,11 +1,14 @@
 import LegalShell from "@/components/legal/LegalShell";
+import { pageMetadata } from "@/config/seo";
 
 const SUPPORT_EMAIL = "akinwumiolumide5@gmail.com";
 
-export const metadata = {
-  title: "Privacy Policy — Cross-Post",
-  description: "How Cross-Post collects, uses, shares, and protects your data.",
-};
+export const metadata = pageMetadata({
+  title: "Privacy Policy",
+  description:
+    "How Cross-Post collects, uses, shares, and protects your data.",
+  path: "/privacy/",
+});
 
 export default function PrivacyPage() {
   return (

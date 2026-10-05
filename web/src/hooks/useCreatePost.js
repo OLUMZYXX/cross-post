@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/context/ToastContext";
 import { postAPI } from "@/services/postService";
 import { uploadToCloudinary } from "@/services/uploadService";
@@ -18,9 +18,18 @@ export default function useCreatePost({ connectedPlatforms, onSuccess }) {
   const [rephrasedText, setRephrasedText] = useState(null);
   const [selectedTone, setSelectedTone] = useState(null);
 
+  const selectionTouched = useRef(false);
+  const connectedKey = connectedPlatforms.join("|");
+
+  useEffect(() => {
+    if (selectionTouched.current) return;
+    setSelectedPlatforms(connectedKey ? connectedKey.split("|") : []);
+  }, [connectedKey]);
+
   const hasTwitterSelected = selectedPlatforms.some((p) => p.split(":")[0] === "Twitter");
 
   const togglePlatform = (name) => {
+    selectionTouched.current = true;
     setSelectedPlatforms((prev) =>
       prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name],
     );
@@ -90,6 +99,7 @@ export default function useCreatePost({ connectedPlatforms, onSuccess }) {
       if (failed.length === 0) showToast({ type: "success", title: "Post published!" });
       else if (failed.length < results.length) showToast({ type: "info", title: `Partially published. ${failed.length} failed.` });
       else showToast({ type: "error", title: failed[0]?.error || "Publish failed" });
+      reset();
       onSuccess?.();
     } catch (err) {
       showToast({ type: "error", title: err.message || "Publish failed" });
@@ -111,6 +121,7 @@ export default function useCreatePost({ connectedPlatforms, onSuccess }) {
       });
       await postAPI.schedule(createData.post._id, date.toISOString());
       showToast({ type: "success", title: "Post scheduled!" });
+      reset();
       onSuccess?.();
     } catch (err) {
       showToast({ type: "error", title: err.message || "Scheduling failed" });
@@ -129,13 +140,23 @@ export default function useCreatePost({ connectedPlatforms, onSuccess }) {
         caption, media: mediaUrls, platforms: selectedPlatforms, status: "draft",
       });
       showToast({ type: "success", title: "Draft saved" });
+      reset();
       onSuccess?.();
     } catch {
       showToast({ type: "error", title: "Failed to save draft" });
     }
   };
 
+  const reset = () => {
+    setCaption("");
+    setMediaUrls([]);
+    setMediaFiles([]);
+    setRephrasedText(null);
+    setSelectedTone(null);
+  };
+
   return {
+    reset,
     caption, setCaption, selectedPlatforms, togglePlatform,
     mediaFiles, mediaUrls, handleMediaSelect, removeMedia,
     isUploading, isPosting, hasTwitterSelected,

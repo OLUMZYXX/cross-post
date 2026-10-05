@@ -1,7 +1,11 @@
-export const metadata = {
-  title: "Create your account — Cross-Post",
-  description: "Create a free Cross-Post account and post to eight social platforms from one place.",
-};
+import { pageMetadata } from "@/config/seo";
+
+export const metadata = pageMetadata({
+  title: "Create your account",
+  description:
+    "Create a free Cross-Post account and post to eight social platforms from one place.",
+  path: "/signup/",
+});
 
 export default function SignUpLayout({ children }) {
   return children;

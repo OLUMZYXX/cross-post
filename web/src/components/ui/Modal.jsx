@@ -1,45 +1,51 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
-export default function Modal({
-  open,
-  onClose,
-  title,
-  children,
-  className = "",
-}) {
+export default function Modal({ open, onClose, title, eyebrow, children, className = "" }) {
   useEffect(() => {
-    if (open) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
+    if (!open) return undefined;
+    document.body.style.overflow = "hidden";
+    const handleKey = (event) => {
+      if (event.key === "Escape") onClose?.();
+    };
+    window.addEventListener("keydown", handleKey);
     return () => {
       document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKey);
     };
-  }, [open]);
+  }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  return createPortal(
+    <div className="app fixed inset-0 z-[60] !bg-transparent flex items-end sm:items-center justify-center sm:p-4">
+      <div className="absolute inset-0 bg-black/45 backdrop-blur-[2px] animate-fade-in" onClick={onClose} />
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <div
-        className={`relative glass bg-[#111111] border border-white/[0.06] rounded-xl sm:rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto animate-fade-in ${className}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={`relative bg-cp-card border border-cp-rule rounded-t-[28px] sm:rounded-[28px] w-full sm:max-w-md max-h-[88vh] overflow-y-auto shadow-2xl animate-fade-in-up ${className}`}
       >
-        <div className="flex items-center justify-between p-3.5 sm:p-5 border-b border-white/[0.06]">
-          <h3 className="text-white font-semibold text-xs sm:text-sm">{title}</h3>
+        <div className="sm:hidden mx-auto mt-2.5 h-1 w-10 rounded-full bg-cp-rule" />
+        <div className="flex items-start justify-between gap-4 px-6 pt-5 pb-2">
+          <div>
+            {eyebrow ? <p className="cp-eyebrow !text-cp-accent mb-1">{eyebrow}</p> : null}
+            <h3 className="font-display text-cp-ink text-[22px] leading-tight font-semibold">{title}</h3>
+          </div>
           <button
             onClick={onClose}
-            className="text-neutral-500 hover:text-white transition-colors duration-200"
+            aria-label="Close"
+            className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-cp-muted hover:text-cp-ink hover:bg-cp-deep transition-colors"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </div>
-        <div className="p-3.5 sm:p-5">{children}</div>
+        <div className="px-6 pb-6 pt-3">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

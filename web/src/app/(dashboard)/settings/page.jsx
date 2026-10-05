@@ -1,151 +1,78 @@
 "use client";
 
 import Link from "next/link";
-import {
-  User,
-  Link2,
-  Bell,
-  Shield,
-  HelpCircle,
-  LogOut,
-  ChevronRight,
-} from "lucide-react";
+import { User, Link2, Bell, Shield, HelpCircle, LogOut, FileText } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import usePostsData from "@/hooks/usePostsData";
+import SettingsGroup, { SettingsRow } from "@/components/settings/SettingsGroup";
+import { userInitials } from "@/config/appNav";
 
-const SECTIONS = [
-  {
-    label: "Account",
-    items: [
-      {
-        label: "Edit Profile",
-        desc: "Name and email",
-        href: "/settings/profile",
-        icon: User,
-      },
-      {
-        label: "Connected Accounts",
-        desc: "Manage linked platforms",
-        href: "/settings/accounts",
-        icon: Link2,
-        showCount: true,
-      },
-      {
-        label: "Notifications",
-        desc: "Alert preferences",
-        href: "/settings/notifications",
-        icon: Bell,
-      },
-    ],
-  },
-  {
-    label: "General",
-    items: [
-      {
-        label: "Privacy & Security",
-        desc: "Password, 2FA",
-        href: "/settings/security",
-        icon: Shield,
-      },
-      {
-        label: "Help & Support",
-        desc: "FAQs, contact",
-        href: "#",
-        icon: HelpCircle,
-      },
-    ],
-  },
+const ACCOUNT_ITEMS = [
+  { label: "Edit profile", desc: "Your name and email", href: "/settings/profile", icon: User },
+  { label: "Connected accounts", desc: "Platforms you post to", href: "/settings/accounts", icon: Link2, showCount: true },
+  { label: "Notifications", desc: "What we alert you about", href: "/settings/notifications", icon: Bell },
+];
+
+const GENERAL_ITEMS = [
+  { label: "Privacy & security", desc: "Two-factor authentication", href: "/settings/security", icon: Shield },
+  { label: "Help & support", desc: "Answers and contact", href: "/support", icon: HelpCircle },
+  { label: "Terms & privacy", desc: "How we handle your data", href: "/privacy", icon: FileText },
 ];
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
   const { platforms } = usePostsData();
-
-  const initials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : "U";
+  const memberSince = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString(undefined, { month: "long", year: "numeric" })
+    : null;
 
   return (
     <div className="animate-fade-in max-w-2xl">
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-headline mb-4 sm:mb-5">
-        Settings
-      </h1>
-
+      <h1 className="sr-only">Profile</h1>
+      <p className="cp-eyebrow !text-cp-accent mb-2" aria-hidden="true">Profile</p>
       <Link
         href="/settings/profile"
-        className="flex items-center gap-3 glass rounded-2xl p-3 sm:p-4 mb-4 sm:mb-5 hover:border-white/[0.1] transition-all duration-200"
+        className="flex items-center gap-4 rounded-[28px] bg-cp-card border border-cp-rule p-5 hover:bg-cp-deep transition-colors"
       >
-        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/[0.06] flex items-center justify-center text-neutral-300 text-xs sm:text-sm font-medium">
-          {initials}
-        </div>
-        <div className="flex-1">
-          <p className="text-white text-xs sm:text-sm font-medium">
-            {user?.name || "User"}
-          </p>
-          <p className="text-neutral-500 text-[10px] sm:text-xs">
-            {user?.email || ""}
-          </p>
-        </div>
-        <ChevronRight size={16} className="text-neutral-600" />
+        <span className="w-16 h-16 rounded-full bg-cp-ink text-cp-card text-xl font-bold flex items-center justify-center shrink-0">
+          {userInitials(user?.name)}
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="block font-display text-cp-ink text-2xl font-semibold truncate">{user?.name || "Your account"}</span>
+          <span className="block text-cp-muted text-sm truncate">{user?.email}</span>
+          {memberSince ? <span className="block text-cp-soft text-xs mt-1">Member since {memberSince}</span> : null}
+        </span>
       </Link>
 
-      {SECTIONS.map((section) => (
-        <div key={section.label} className="mb-3 sm:mb-4">
-          <p className="text-neutral-600 text-[9px] sm:text-[10px] uppercase tracking-wider mb-1.5 sm:mb-2 ml-1">
-            {section.label}
-          </p>
-          <div className="glass rounded-2xl overflow-hidden">
-            {section.items.map((item, i) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 hover:bg-white/[0.03] transition-all duration-200 ${
-                  i < section.items.length - 1
-                    ? "border-b border-white/[0.04]"
-                    : ""
-                }`}
-              >
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/[0.06] flex items-center justify-center">
-                  <item.icon size={14} className="text-neutral-400 sm:hidden" />
-                  <item.icon
-                    size={15}
-                    className="text-neutral-400 hidden sm:block"
-                  />
-                </div>
-                <div className="flex-1">
-                  <p className="text-white text-xs sm:text-sm">{item.label}</p>
-                  <p className="text-neutral-600 text-[10px] sm:text-[11px]">
-                    {item.desc}
-                  </p>
-                </div>
-                {item.showCount && (
-                  <span className="text-neutral-500 text-[11px] bg-white/[0.06] rounded-full px-2 py-0.5 mr-1">
-                    {platforms.length}
-                  </span>
-                )}
-                <ChevronRight size={14} className="text-neutral-700" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      ))}
+      <SettingsGroup label="Account">
+        {ACCOUNT_ITEMS.map((item) => (
+          <SettingsRow
+            key={item.href}
+            item={item}
+            trailing={
+              item.showCount ? (
+                <span className="min-w-6 h-6 px-2 rounded-full bg-cp-ink text-cp-card text-xs font-bold flex items-center justify-center">
+                  {platforms.length}
+                </span>
+              ) : null
+            }
+          />
+        ))}
+      </SettingsGroup>
+
+      <SettingsGroup label="General">
+        {GENERAL_ITEMS.map((item) => (
+          <SettingsRow key={item.href} item={item} />
+        ))}
+      </SettingsGroup>
 
       <button
         onClick={logout}
-        className="flex items-center justify-center gap-2 w-full glass rounded-2xl py-2.5 sm:py-3 text-red-400 text-xs sm:text-sm hover:bg-red-500/5 hover:border-red-500/20 transition-all duration-200"
+        className="cp-press mt-7 w-full flex items-center justify-center gap-2 rounded-3xl border border-cp-rule bg-cp-card py-4 text-cp-accent font-semibold hover:bg-cp-accent-soft/40 transition-colors"
       >
-        <LogOut size={15} />
-        Sign Out
+        <LogOut size={17} />
+        Sign out
       </button>
-
-      <p className="text-center text-neutral-700 text-[10px] mt-4">
-        Cross-Post v1.0.0
-      </p>
     </div>
   );
 }
