@@ -1,7 +1,6 @@
-import Link from "next/link";
-import { Mail, ArrowLeft } from "lucide-react";
-
-const SUPPORT_EMAIL = "akinwumiolumide5@gmail.com";
+import { Mail } from "lucide-react";
+import PageShell from "@/components/marketing/PageShell";
+import { SUPPORT_EMAIL } from "@/config/marketing";
 
 const FAQS = [
   {
@@ -53,60 +52,36 @@ export const metadata = {
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] px-4 md:px-6 py-12 md:py-20">
-      <div className="max-w-3xl mx-auto">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-neutral-500 hover:text-neutral-300 text-sm mb-8 transition-colors duration-200"
+    <PageShell
+      eyebrow="Support"
+      title="How can we help?"
+      intro="Find answers to common questions below, or email us directly."
+    >
+      <div className="rounded-3xl bg-forest p-7 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <h2 className="font-display text-white text-2xl font-semibold">Contact us</h2>
+          <p className="text-white/70 mt-2">Account, billing, or a post that didn&apos;t go out, we can help.</p>
+        </div>
+        <a
+          href={`mailto:${SUPPORT_EMAIL}`}
+          className="inline-flex items-center justify-center gap-2 bg-mint text-forest px-6 py-3.5 rounded-full font-semibold hover:bg-white transition-colors break-all"
         >
-          <ArrowLeft size={16} />
-          Back to home
-        </Link>
-
-        <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3 tracking-tight">
-          Support
-        </h1>
-        <p className="text-neutral-400 text-sm md:text-base mb-10">
-          Need help with Cross-Post? Find answers below or reach out to us directly.
-        </p>
-
-        <div className="glass gradient-border bg-white/[0.03] rounded-2xl p-5 md:p-7 mb-10">
-          <h2 className="text-white text-lg font-bold mb-2">Contact us</h2>
-          <p className="text-neutral-400 text-sm mb-4">
-            Email our support team and we'll get back to you as soon as possible.
-          </p>
-          <a
-            href={`mailto:${SUPPORT_EMAIL}`}
-            className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-neutral-200 transition-all duration-200"
-          >
-            <Mail size={16} />
-            {SUPPORT_EMAIL}
-          </a>
-        </div>
-
-        <h2 className="text-white text-lg font-bold mb-4">Frequently asked questions</h2>
-        <div className="space-y-3 md:space-y-4">
-          {FAQS.map((faq, i) => (
-            <div key={i} className="glass rounded-xl md:rounded-2xl p-4 md:p-6">
-              <h3 className="text-white text-sm md:text-[15px] font-semibold mb-1.5 md:mb-2">
-                {faq.question}
-              </h3>
-              <p className="text-neutral-500 text-xs md:text-sm leading-relaxed">
-                {faq.answer}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-6 mt-12 text-sm">
-          <Link href="/privacy" className="text-neutral-500 hover:text-neutral-300 transition-colors duration-200">
-            Privacy Policy
-          </Link>
-          <Link href="/terms" className="text-neutral-500 hover:text-neutral-300 transition-colors duration-200">
-            Terms of Service
-          </Link>
-        </div>
+          <Mail size={17} className="shrink-0" />
+          {SUPPORT_EMAIL}
+        </a>
       </div>
-    </div>
+
+      <h2 className="font-display text-ink text-2xl font-semibold mt-16 mb-2">
+        Frequently asked questions
+      </h2>
+      <div className="border-t border-line mt-6">
+        {FAQS.map((faq) => (
+          <div key={faq.question} className="py-6 border-b border-line">
+            <h3 className="text-ink text-lg font-medium">{faq.question}</h3>
+            <p className="text-ink-soft leading-relaxed mt-2">{faq.answer}</p>
+          </div>
+        ))}
+      </div>
+    </PageShell>
   );
 }

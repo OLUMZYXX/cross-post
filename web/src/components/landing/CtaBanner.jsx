@@ -1,55 +1,35 @@
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
-
-const POINTS = [
-  "Publish to 8+ platforms in one click",
-  "Schedule and plan your content ahead",
-  "Free to start — 7-day Pro trial included",
-];
+import { ArrowRight } from "lucide-react";
+import Reveal from "@/components/ui/Reveal";
 
 export default function CtaBanner() {
   return (
-    <section className="py-24 md:py-36 px-5 md:px-6 border-t border-white/[0.06]">
-      <div className="relative max-w-[1240px] mx-auto rounded-3xl border border-white/[0.08] px-7 py-12 md:px-16 md:py-20 overflow-hidden">
+    <section className="px-4 md:px-6 pb-24 md:pb-32">
+      <Reveal variant="scale" className="relative max-w-[1200px] mx-auto rounded-[32px] overflow-hidden bg-forest">
         <img
-          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&q=80&auto=format&fit=crop"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-[0.13]"
+          src="/images/cta-friends.webp"
+          alt="Two friends reacting with excitement to a post on a phone"
+          className="absolute inset-0 w-full h-full object-cover object-[80%_35%]"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/85 via-[#0a0a0a]/60 to-[#0a0a0a]/85" />
-        <div className="relative grid md:grid-cols-2 gap-10 items-center">
-          <div>
-            <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-              Ready to simplify your social media?
-            </h2>
-            <p className="text-neutral-400 text-base md:text-lg mb-7">
-              Join creators who save hours every week with Cross-Post.
-            </p>
-            <Link
-              href="/signup"
-              className="group inline-flex items-center gap-2 bg-green-500 text-white font-medium px-6 py-3 rounded-xl hover:bg-green-600 transition-colors duration-200 text-sm"
-            >
-              Start for free
-              <ArrowRight
-                size={16}
-                className="group-hover:translate-x-0.5 transition-transform"
-              />
-            </Link>
-          </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-forest via-forest/85 to-forest/10" />
 
-          <ul className="space-y-4">
-            {POINTS.map((point) => (
-              <li key={point} className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                  <Check size={12} className="text-green-400" />
-                </span>
-                <span className="text-neutral-300 text-base">{point}</span>
-              </li>
-            ))}
-          </ul>
+        <div className="relative px-7 py-16 md:px-14 md:py-24 max-w-xl">
+          <h2 className="font-display text-white text-[2.25rem] md:text-5xl leading-[1.05] font-medium tracking-[-0.02em]">
+            Your next post could already be everywhere.
+          </h2>
+          <p className="text-white/75 text-lg mt-5">
+            Set up takes a couple of minutes. Free to start, with 7 days of Pro on us.
+          </p>
+          <Link
+            href="/signup"
+            className="group mt-9 inline-flex items-center gap-2 bg-mint text-forest font-semibold px-7 py-4 rounded-full hover:bg-white transition-colors"
+          >
+            Create your free account
+            <ArrowRight size={17} className="group-hover:translate-x-0.5 transition-transform" />
+          </Link>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

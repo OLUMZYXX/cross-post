@@ -1,62 +1,57 @@
-import { Link2, PenSquare, Rocket } from "lucide-react";
+import Reveal from "@/components/ui/Reveal";
+import SectionHeading from "@/components/landing/SectionHeading";
 
 const STEPS = [
   {
-    number: "01",
-    icon: Link2,
-    title: "Connect platforms",
-    description:
-      "Link your Facebook, Instagram, TikTok, Twitter/X, LinkedIn, YouTube, Reddit, and Telegram accounts in seconds.",
+    title: "Connect your accounts",
+    body: "Sign in to each platform once. Cross-Post never sees your passwords, and you can disconnect any account at any time.",
   },
   {
-    number: "02",
-    icon: PenSquare,
-    title: "Create content",
-    description:
-      "Write your post, upload media, and use AI to rephrase for each platform's tone and audience.",
+    title: "Write your post",
+    body: "Add your caption, photos or video, then let AI tailor the wording for each platform if you want it to.",
   },
   {
-    number: "03",
-    icon: Rocket,
-    title: "Publish everywhere",
-    description:
-      "Hit publish or schedule for later. Cross-Post handles formatting and delivery to every platform at once.",
+    title: "Publish or schedule",
+    body: "Send it everywhere now or pick a time. You get a notification as each platform goes live.",
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="py-24 md:py-36 px-5 md:px-6 border-t border-white/[0.06] bg-white/[0.015]">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="text-center max-w-2xl mx-auto mb-14 md:mb-20">
-          <p className="text-green-400 text-sm font-semibold tracking-[0.15em] uppercase mb-4">
-            How it works
-          </p>
-          <h2 className="font-headline text-3xl md:text-4xl font-bold tracking-tight text-white">
-            Three simple steps
-          </h2>
+    <section id="how-it-works" className="bg-forest px-4 md:px-6 py-24 md:py-32">
+      <div className="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+        <div>
+          <Reveal>
+            <SectionHeading
+              tone="dark"
+              eyebrow="How it works"
+              title="From draft to every feed in three steps."
+            />
+          </Reveal>
+
+          <ol className="mt-12 space-y-9">
+            {STEPS.map((step, index) => (
+              <Reveal as="li" key={step.title} delay={index * 130} className="grid grid-cols-[3rem_1fr] gap-4">
+                <span className="font-display italic text-mint text-4xl leading-none">
+                  {index + 1}
+                </span>
+                <div>
+                  <h3 className="text-white text-lg font-semibold">{step.title}</h3>
+                  <p className="text-white/65 leading-relaxed mt-1.5">{step.body}</p>
+                </div>
+              </Reveal>
+            ))}
+          </ol>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 md:gap-10">
-          {STEPS.map((step) => (
-            <div key={step.number}>
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-11 h-11 rounded-xl bg-green-500/10 flex items-center justify-center">
-                  <step.icon size={19} className="text-green-400" />
-                </div>
-                <span className="text-white/15 text-3xl font-bold select-none">
-                  {step.number}
-                </span>
-              </div>
-              <h3 className="text-white font-semibold text-lg mb-2">
-                {step.title}
-              </h3>
-              <p className="text-neutral-400 text-[15px] leading-relaxed">
-                {step.description}
-              </p>
-            </div>
-          ))}
-        </div>
+        <Reveal variant="right" delay={150} className="rounded-[28px] overflow-hidden aspect-[4/3] bg-forest-soft">
+          <img
+            src="/images/planning-laptop.webp"
+            alt="A man planning his posts on a laptop in a café"
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </Reveal>
       </div>
     </section>
   );

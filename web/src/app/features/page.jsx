@@ -93,21 +93,22 @@ export default function FeaturesPage() {
   return (
     <PageShell
       eyebrow="Features"
+      width="max-w-[1200px]"
       title="Everything Cross-Post can do"
       intro="Cross-Post is a social media management tool for people who publish the same content to several places. Here is what it handles for you."
     >
       <div className="space-y-14">
         {GROUPS.map((group) => (
           <section key={group.title}>
-            <h2 className="text-white text-xl font-bold mb-6">{group.title}</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <h2 className="font-display text-ink text-2xl font-semibold mb-6">{group.title}</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {group.items.map((item) => (
                 <div
                   key={item.name}
-                  className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5"
+                  className="rounded-2xl border border-line bg-white p-6"
                 >
-                  <h3 className="text-white text-[15px] font-semibold mb-2">{item.name}</h3>
-                  <p className="text-neutral-400 text-sm leading-relaxed">{item.body}</p>
+                  <h3 className="text-ink text-base font-semibold mb-2">{item.name}</h3>
+                  <p className="text-ink-soft text-base leading-relaxed">{item.body}</p>
                 </div>
               ))}
             </div>

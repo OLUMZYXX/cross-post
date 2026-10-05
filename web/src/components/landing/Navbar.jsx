@@ -3,96 +3,89 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-
-const NAV_LINKS = [
-  { label: "Features", href: "/features" },
-  { label: "How it works", href: "/how-it-works" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "About", href: "/about" },
-  { label: "Support", href: "/support" },
-];
+import { NAV_LINKS } from "@/config/marketing";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/[0.06]">
-      <div className="max-w-[1400px] mx-auto px-5 md:px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <img
-            src="/logo.png"
-            alt="Cross-Post"
-            className="w-8 h-8 rounded-lg"
-          />
-          <span className="text-white font-semibold text-[15px] tracking-tight">
+    <header className="sticky top-0 z-50 bg-paper/85 backdrop-blur-md border-b border-line/70">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5" onClick={closeMenu}>
+          <img src="/logo.png" alt="Cross-Post" className="w-8 h-8 rounded-lg" />
+          <span className="font-display text-ink font-semibold text-[17px] tracking-tight">
             Cross-Post
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-9">
+        <nav className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
-              className="text-neutral-400 hover:text-white text-sm transition-colors duration-200"
+              className="text-ink-soft hover:text-ink text-[15px] transition-colors"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
-        </div>
+        </nav>
 
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-1">
           <Link
             href="/signin"
-            className="text-neutral-400 hover:text-white text-sm px-4 py-2 transition-colors duration-200"
+            className="text-ink-soft hover:text-ink text-[15px] px-4 py-2 transition-colors"
           >
-            Sign In
+            Sign in
           </Link>
           <Link
             href="/signup"
-            className="bg-green-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-green-600 transition-colors duration-200"
+            className="bg-forest text-white text-[15px] font-medium px-5 py-2.5 rounded-full hover:bg-forest-soft transition-colors"
           >
-            Start your free trial
+            Get started
           </Link>
         </div>
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-neutral-400 hover:text-white transition-colors"
+          className="md:hidden text-ink p-2 -mr-2"
           aria-label="Toggle menu"
+          aria-expanded={menuOpen}
         >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
       {menuOpen && (
-        <div className="md:hidden bg-[#0a0a0a] border-t border-white/[0.06] px-5 py-4 animate-fade-in">
+        <div className="md:hidden border-t border-line bg-paper px-4 pb-5 pt-2">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className="block text-neutral-400 hover:text-white text-sm py-2.5 transition-colors"
+              onClick={closeMenu}
+              className="block text-ink text-base py-3 border-b border-line/60"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
-          <div className="flex gap-2.5 mt-3 pt-4 border-t border-white/[0.06]">
+          <div className="flex gap-3 mt-5">
             <Link
               href="/signin"
-              className="flex-1 text-center text-neutral-300 text-sm py-2.5 rounded-xl border border-white/10 hover:border-white/20 transition-colors"
+              onClick={closeMenu}
+              className="flex-1 text-center text-ink text-sm font-medium py-3 rounded-full border border-line"
             >
-              Sign In
+              Sign in
             </Link>
             <Link
               href="/signup"
-              className="flex-1 text-center bg-green-500 text-white text-sm font-medium py-2.5 rounded-xl"
+              onClick={closeMenu}
+              className="flex-1 text-center bg-forest text-white text-sm font-medium py-3 rounded-full"
             >
-              Get Started
+              Get started
             </Link>
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 }

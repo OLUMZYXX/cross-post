@@ -1,19 +1,22 @@
+import Link from "next/link";
+import { SUPPORT_EMAIL } from "@/config/marketing";
+
 const COLUMNS = [
   {
     title: "Product",
     links: [
       { label: "Features", href: "/features" },
       { label: "How it works", href: "/how-it-works" },
-      { label: "Platforms", href: "#platforms" },
-      { label: "Pricing", href: "#pricing" },
+      { label: "Pricing", href: "/#pricing" },
+      { label: "FAQ", href: "/#faq" },
     ],
   },
   {
-    title: "Resources",
+    title: "Company",
     links: [
       { label: "About", href: "/about" },
-      { label: "FAQ", href: "#faq" },
       { label: "Support", href: "/support" },
+      { label: "Sign in", href: "/signin" },
     ],
   },
   {
@@ -27,33 +30,34 @@ const COLUMNS = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/[0.06] px-5 md:px-6 pt-16 pb-10">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+    <footer className="bg-forest text-white px-4 md:px-6 pt-20 pb-10">
+      <div className="max-w-[1200px] mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-[1.6fr_1fr_1fr_1fr] gap-10">
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2.5 mb-3">
-              <img src="/logo.png" alt="Cross-Post" className="w-7 h-7 rounded-lg" />
-              <span className="text-white text-sm font-semibold">Cross-Post</span>
-            </div>
-            <p className="text-neutral-500 text-sm max-w-[200px]">
-              Write once, publish everywhere.
+            <Link href="/" className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="Cross-Post" className="w-9 h-9 rounded-lg" />
+              <span className="font-display text-lg font-semibold">Cross-Post</span>
+            </Link>
+            <p className="text-white/60 mt-4 max-w-xs leading-relaxed">
+              Write it once, post it everywhere.
             </p>
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              className="inline-block mt-5 text-mint hover:text-white transition-colors"
+            >
+              {SUPPORT_EMAIL}
+            </a>
           </div>
 
-          {COLUMNS.map((col) => (
-            <div key={col.title}>
-              <p className="text-neutral-500 text-xs font-semibold tracking-wider uppercase mb-4">
-                {col.title}
-              </p>
+          {COLUMNS.map((column) => (
+            <div key={column.title}>
+              <p className="text-white/45 text-sm mb-4">{column.title}</p>
               <ul className="space-y-3">
-                {col.links.map((link) => (
+                {column.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-neutral-400 hover:text-white text-sm transition-colors duration-200"
-                    >
+                    <Link href={link.href} className="text-white/85 hover:text-mint transition-colors">
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -61,21 +65,9 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-8 border-t border-white/[0.06]">
-          <p className="text-neutral-600 text-xs">
-            &copy; {new Date().getFullYear()} Cross-Post. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6">
-            <a href="/terms" className="text-neutral-500 hover:text-white text-xs transition-colors duration-200">
-              Terms
-            </a>
-            <a href="/privacy" className="text-neutral-500 hover:text-white text-xs transition-colors duration-200">
-              Privacy
-            </a>
-            <a href="/support" className="text-neutral-500 hover:text-white text-xs transition-colors duration-200">
-              Support
-            </a>
-          </div>
+        <div className="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between gap-3 text-sm text-white/45">
+          <p>&copy; {new Date().getFullYear()} Cross-Post. All rights reserved.</p>
+          <p>cross-post.xyz</p>
         </div>
       </div>
     </footer>

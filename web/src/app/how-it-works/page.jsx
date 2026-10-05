@@ -61,18 +61,18 @@ export default function HowItWorksPage() {
         {STEPS.map((item) => (
           <section key={item.step} className="flex gap-5">
             <div className="shrink-0">
-              <div className="w-11 h-11 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-                <span className="text-green-400 text-sm font-bold">{item.step}</span>
+              <div className="w-11 h-11 rounded-xl bg-forest flex items-center justify-center">
+                <span className="text-mint text-sm font-semibold">{item.step}</span>
               </div>
             </div>
             <div className="flex-1">
-              <h2 className="text-white text-lg font-bold mb-2">{item.title}</h2>
-              <p className="text-neutral-400 text-sm leading-relaxed">{item.body}</p>
+              <h2 className="font-display text-ink text-2xl font-semibold mb-2">{item.title}</h2>
+              <p className="text-ink-soft text-base leading-relaxed">{item.body}</p>
               {item.detail ? (
                 <ul className="mt-3 space-y-1.5">
                   {item.detail.map((line) => (
-                    <li key={line} className="text-neutral-500 text-sm leading-relaxed flex gap-2">
-                      <span className="text-green-400 mt-0.5">&bull;</span>
+                    <li key={line} className="text-ink-soft text-[15px] leading-relaxed flex gap-2">
+                      <span className="text-leaf mt-0.5">&bull;</span>
                       <span>{line}</span>
                     </li>
                   ))}
@@ -83,9 +83,9 @@ export default function HowItWorksPage() {
         ))}
       </div>
 
-      <section className="mt-16 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
-        <h2 className="text-white text-lg font-bold mb-2">Requirements</h2>
-        <p className="text-neutral-400 text-sm leading-relaxed">
+      <section className="mt-16 rounded-2xl border border-line bg-white p-6">
+        <h2 className="font-display text-ink text-2xl font-semibold mb-2">Requirements</h2>
+        <p className="text-ink-soft text-base leading-relaxed">
           Cross-Post runs on iOS and Android. You need an account on each social platform you want
           to publish to, and permission to post on any Page or channel you connect. Publishing
           depends on those platforms&apos; own APIs and rate limits, so a network can occasionally
