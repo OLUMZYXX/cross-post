@@ -20,6 +20,7 @@ import { SERVER_URL, OPENAI_API_KEY } from "../config/env.js";
 import { uploadToGridFS, deleteFromGridFS } from "../utils/gridfs.js";
 import { hashCaption } from "../utils/contentHash.js";
 import { findDuplicatePost } from "../services/duplicatePost.js";
+import { sanitizeTikTokSettings } from "../services/tiktokSettings.js";
 
 export async function listPosts(req, res) {
   const posts = await Post.find({ userId: req.user.id }).sort({
@@ -41,6 +42,7 @@ export async function getPost(req, res) {
 
 export async function createPost(req, res) {
   const { caption, platforms, status, mediaUrls: cloudinaryUrls, platformCaptions } = req.body;
+  const tiktokSettings = sanitizeTikTokSettings(req.body.tiktokSettings);
 
   const mediaUrls = [];
   if (cloudinaryUrls && cloudinaryUrls.length > 0) {
@@ -83,6 +85,7 @@ export async function createPost(req, res) {
     Object.keys(parsedCaptions).length
       ? { platformCaptions: parsedCaptions }
       : {}),
+    ...(tiktokSettings ? { tiktokSettings } : {}),
   });
 
   await post.save();
@@ -113,6 +116,9 @@ export async function updatePost(req, res) {
     );
   if (platforms !== undefined) post.platforms = platforms;
   if (status !== undefined) post.status = status;
+  if (req.body.tiktokSettings !== undefined) {
+    post.tiktokSettings = sanitizeTikTokSettings(req.body.tiktokSettings) || undefined;
+  }
 
   await post.save();
 

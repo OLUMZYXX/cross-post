@@ -5,13 +5,14 @@ export const postAPI = {
 
   get: (id) => api.get(`/posts/${id}`),
 
-  create: ({ caption, media, platforms, status }) =>
+  create: ({ caption, media, platforms, status, tiktokSettings }) =>
     fetchJSON("/posts", {
       body: {
         caption,
         status,
         platforms,
         ...(media && media.length > 0 && { mediaUrls: media }),
+        ...(tiktokSettings && { tiktokSettings }),
       },
     }),
 

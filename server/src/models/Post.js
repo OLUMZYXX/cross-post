@@ -18,6 +18,24 @@ const postSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  tiktokSettings: {
+    type: new mongoose.Schema(
+      {
+        privacyLevel: {
+          type: String,
+          enum: ["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "FOLLOWER_OF_CREATOR", "SELF_ONLY"],
+        },
+        allowComment: { type: Boolean, default: false },
+        allowDuet: { type: Boolean, default: false },
+        allowStitch: { type: Boolean, default: false },
+        discloseContent: { type: Boolean, default: false },
+        yourBrand: { type: Boolean, default: false },
+        brandedContent: { type: Boolean, default: false },
+      },
+      { _id: false },
+    ),
+    default: undefined,
+  },
   media: [
     {
       type: String,

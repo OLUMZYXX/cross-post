@@ -11,8 +11,11 @@ export const isVideoUrl = (url) =>
 export function friendlyTikTokError(data, status) {
   const raw = `${data?.error?.code || ""} ${data?.error?.message || ""}`.toLowerCase();
 
+  if (raw.includes("privacy_level_option_mismatch")) {
+    return "That audience option isn't available for this TikTok account. Pick another one and try again.";
+  }
   if (raw.includes("unaudited_client")) {
-    return "While your TikTok app is still under review, TikTok only allows posting to a private TikTok account. Set that account to Private in TikTok (Settings and privacy > Privacy > Private account), then try again.";
+    return "TikTok is still treating this app as unreviewed. Set your TikTok account to Private, or try again once TikTok finishes switching the app to approved.";
   }
   if (raw.includes("url_ownership_unverified")) {
     return "TikTok has not verified this server's domain yet, so it cannot fetch your photos. Verify the domain in the TikTok developer portal, then try again.";
@@ -29,8 +32,8 @@ export function friendlyTikTokError(data, status) {
   if (raw.includes("spam") || raw.includes("rate")) {
     return "TikTok is temporarily limiting posts from this account. Wait a few minutes and try again.";
   }
-  if (raw.includes("privacy") || raw.includes("unaudited")) {
-    return "TikTok requires this account to be verified for public posting. The post was created as private.";
+  if (raw.includes("privacy")) {
+    return "TikTok didn't accept that audience setting for this account. Pick another one and try again.";
   }
   return data?.error?.message || "We couldn't post this to TikTok. Please try again.";
 }

@@ -82,7 +82,7 @@ export default function useCreatePost({ connectedPlatforms, onSuccess }) {
     setSelectedTone(null);
   };
 
-  const publishNow = async () => {
+  const publishNow = async (tiktokSettings) => {
     if (selectedPlatforms.length === 0) {
       showToast({ type: "info", title: "Select at least one platform" });
       return;
@@ -92,6 +92,7 @@ export default function useCreatePost({ connectedPlatforms, onSuccess }) {
       await ensureServerAwake();
       const { data: createData } = await postAPI.create({
         caption, media: mediaUrls, platforms: selectedPlatforms, status: "draft",
+        ...(tiktokSettings && { tiktokSettings }),
       });
       const { data: publishData } = await postAPI.publish(createData.post._id);
       const results = publishData.publishResults || [];
@@ -108,7 +109,7 @@ export default function useCreatePost({ connectedPlatforms, onSuccess }) {
     }
   };
 
-  const schedulePost = async (date) => {
+  const schedulePost = async (date, tiktokSettings) => {
     if (selectedPlatforms.length === 0) {
       showToast({ type: "info", title: "Select at least one platform" });
       return;
@@ -118,6 +119,7 @@ export default function useCreatePost({ connectedPlatforms, onSuccess }) {
       await ensureServerAwake();
       const { data: createData } = await postAPI.create({
         caption, media: mediaUrls, platforms: selectedPlatforms, status: "draft",
+        ...(tiktokSettings && { tiktokSettings }),
       });
       await postAPI.schedule(createData.post._id, date.toISOString());
       showToast({ type: "success", title: "Post scheduled!" });

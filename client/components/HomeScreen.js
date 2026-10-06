@@ -11,6 +11,7 @@ import HomeCompose from "./HomeCompose";
 import HomePreview from "./HomePreview";
 import PlatformPreview from "./PlatformPreview";
 import ScheduleModal from "./ScheduleModal";
+import TikTokPostSheet from "./TikTokPostSheet";
 import RephraseModal from "./RephraseModal";
 import CopyrightModal from "./CopyrightModal";
 import DuplicateModal from "./DuplicateModal";
@@ -186,6 +187,8 @@ export default function HomeScreen({
         isTailoring={composer.isTailoring}
         onRegenerate={composer.generatePerPlatform}
       />
+
+      <TikTokPostSheet tiktok={composer.tiktok} />
 
       <ScheduleModal
         visible={composer.showScheduleModal}

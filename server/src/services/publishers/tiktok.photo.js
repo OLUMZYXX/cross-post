@@ -8,6 +8,7 @@ import {
   friendlyTikTokError,
 } from "./tiktok.helpers.js";
 import { waitForPublish } from "./tiktok.status.js";
+import { photoPostInfo } from "../tiktokSettings.js";
 
 const ALLOWED_HOSTS = ["res.cloudinary.com"];
 const PHOTO_TRANSFORM =
@@ -59,7 +60,7 @@ export async function streamProxiedImage(rawUrl, res) {
   res.send(buffer);
 }
 
-export async function publishPhotosToTikTok(accessToken, caption, imageUrls) {
+export async function publishPhotosToTikTok(accessToken, caption, imageUrls, settings) {
   const photoImages = imageUrls.slice(0, PHOTO_MAX_COUNT).map(toProxiedImageUrl);
 
   const unreachable = photoImages.find((url) => !url.startsWith(SERVER_URL));
@@ -83,8 +84,7 @@ export async function publishPhotosToTikTok(accessToken, caption, imageUrls) {
       post_info: {
         title: caption ? caption.slice(0, PHOTO_TITLE_MAX) : "",
         description: caption ? caption.slice(0, PHOTO_DESCRIPTION_MAX) : "",
-        privacy_level: "SELF_ONLY",
-        disable_comment: false,
+        ...photoPostInfo(settings),
         auto_add_music: true,
       },
       source_info: {

@@ -10,6 +10,7 @@ import { addPending, removePending } from "../services/pendingPublishes";
 import { TWITTER_CHAR_LIMIT, PLATFORM_LIMITS } from "../components/platformLimits";
 import { applyFont } from "../utils/unicodeFonts";
 import { getPerPlatformEnabled, getTwitterLongPosts } from "../constants/composePrefs";
+import useTikTokSettings from "./useTikTokSettings";
 
 const TWITTER_PREMIUM_LIMIT = 25000;
 
@@ -108,6 +109,12 @@ export default function useCreatePost({
   const [twitterLimit, setTwitterLimit] = useState(TWITTER_CHAR_LIMIT);
   const [pendingSplit, setPendingSplit] = useState(null);
   const [sourceCaption, setSourceCaption] = useState("");
+  const tiktok = useTikTokSettings({
+    selectedPlatforms,
+    selectedMedia,
+    onConfirmed: () => setShowScheduleModal(true),
+  });
+  const openPublishOptions = () => (tiktok.needsSettings ? tiktok.open() : setShowScheduleModal(true));
 
   useEffect(() => {
     AsyncStorage.getItem(SELECTED_FONT_KEY)
@@ -346,6 +353,7 @@ export default function useCreatePost({
       const { data: createData } = await postAPI.create({
         caption, media: selectedMedia, platforms: selectedPlatforms, status: "draft",
         ...(Object.keys(platformCaptions).length && { platformCaptions }),
+        ...(tiktok.payload && { tiktokSettings: tiktok.payload }),
       });
       pendingPostId = createData.post._id;
       await addPending(pendingPostId, {
@@ -400,6 +408,7 @@ export default function useCreatePost({
       const { data: createData } = await postAPI.create({
         caption, media: selectedMedia, platforms: selectedPlatforms, status: "draft",
         ...(Object.keys(platformCaptions).length && { platformCaptions }),
+        ...(tiktok.payload && { tiktokSettings: tiktok.payload }),
       });
       await postAPI.schedule(createData.post._id, date.toISOString());
       showToast({ type: "info", title: "Post scheduled!", message: `Will publish on ${label}.`, duration: 4000 });
@@ -425,7 +434,7 @@ export default function useCreatePost({
     } catch {
       showToast({ type: "warning", title: "Copyright check unavailable", message: "Proceeding without analysis.", duration: 2000 });
       setShowCopyrightModal(false);
-      setShowScheduleModal(true);
+      openPublishOptions();
     } finally {
       setIsCopyrightChecking(false);
     }
@@ -449,7 +458,7 @@ export default function useCreatePost({
     const imageUrls = selectedMedia.filter((m) => m.type === "image" && m.cloudinaryUrl).map((m) => m.cloudinaryUrl);
     const hasCaption = caption?.trim().length > 0;
     const hasImages = imageUrls.length > 0;
-    if (!hasCaption && !hasImages) { setShowScheduleModal(true); return; }
+    if (!hasCaption && !hasImages) { openPublishOptions(); return; }
 
     if (hasCaption) {
       try {
@@ -476,7 +485,7 @@ export default function useCreatePost({
     setDuplicateInfo(null);
   };
 
-  const handleCopyrightProceed = () => { setShowCopyrightModal(false); setCopyrightResult(null); setShowScheduleModal(true); };
+  const handleCopyrightProceed = () => { setShowCopyrightModal(false); setCopyrightResult(null); openPublishOptions(); };
   const handleCopyrightEdit = () => { setShowCopyrightModal(false); setCopyrightResult(null); };
   const handleUseSafeVersion = () => {
     if (copyrightResult?.safeVersion) handleCaptionChange(copyrightResult.safeVersion);
@@ -546,7 +555,7 @@ export default function useCreatePost({
       if (type === "video") {
         try { const { uri } = await VideoThumbnails.getThumbnailAsync(asset.uri, { time: 500 }); thumbnail = uri; } catch {}
       }
-      newItems.push({ type, uri: asset.uri, thumbnail, name: asset.fileName || `selected_${type}.${type === "image" ? "jpg" : "mp4"}`, width: asset.width, height: asset.height, mimeType: asset.mimeType, fileName: asset.fileName });
+      newItems.push({ type, uri: asset.uri, thumbnail, duration: asset.duration || null, name: asset.fileName || `selected_${type}.${type === "image" ? "jpg" : "mp4"}`, width: asset.width, height: asset.height, mimeType: asset.mimeType, fileName: asset.fileName });
     }
 
     const firstType = newItems[0].type;
@@ -577,6 +586,7 @@ export default function useCreatePost({
   };
 
   return {
+    tiktok,
     caption, setCaption, selectedPlatforms, selectedMedia, mediaType,
     isUploading, isPosting,
     showScheduleModal, setShowScheduleModal,

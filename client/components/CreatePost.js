@@ -9,6 +9,7 @@ import PlatformPreview from "./PlatformPreview";
 import PlatformSelector from "./PlatformSelector";
 import MediaPreview from "./MediaPreview";
 import ScheduleModal from "./ScheduleModal";
+import TikTokPostSheet from "./TikTokPostSheet";
 import RephraseModal from "./RephraseModal";
 import CopyrightModal from "./CopyrightModal";
 import DuplicateModal from "./DuplicateModal";
@@ -39,7 +40,7 @@ export default function CreatePost({
     selectedFont, selectFont, handleCaptionChange,
     getPlatformStyle, getDisplayName, togglePlatform, hasTwitterSelected,
     handleRephrase, applyRephrase, openRephraseModal, handleShortenForTwitter,
-    publishNow, schedulePost, handlePostPress,
+    publishNow, schedulePost, handlePostPress, tiktok,
     handleDuplicateProceed, handleDuplicateCancel,
     handleCopyrightProceed, handleCopyrightEdit, handleUseSafeVersion, handleAddHashtag,
     handleSaveDraft, handleMediaSelect, removeMedia, twitterLimit,
@@ -162,6 +163,8 @@ export default function CreatePost({
           getDisplayName={getDisplayName}
         />
       </ScrollView>
+
+      <TikTokPostSheet tiktok={tiktok} />
 
       <ScheduleModal
         visible={showScheduleModal}

@@ -38,6 +38,7 @@ import {
   handleRedditCallback,
 } from "../controllers/reddit.oauth.js";
 import { connectTelegram } from "../controllers/telegram.controller.js";
+import { getCreatorInfo } from "../controllers/tiktok.controller.js";
 
 const router = express.Router();
 
@@ -67,6 +68,7 @@ router.post(
   asyncHandler(confirmInstagramConnection),
 );
 router.get("/auth/tiktok", asyncHandler(initiateTikTokAuth));
+router.get("/tiktok/creator-info", asyncHandler(getCreatorInfo));
 router.get("/auth/linkedin", asyncHandler(initiateLinkedInAuth));
 router.get("/auth/youtube", asyncHandler(initiateYouTubeAuth));
 router.get("/auth/reddit", asyncHandler(initiateRedditAuth));

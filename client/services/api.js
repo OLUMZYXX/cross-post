@@ -171,7 +171,7 @@ export const postAPI = {
 
   get: (id) => api.get(`/posts/${id}`),
 
-  create: async ({ caption, media, platforms, status, platformCaptions }) => {
+  create: async ({ caption, media, platforms, status, platformCaptions, tiktokSettings }) => {
     const hasRawFiles =
       media && media.length > 0 && !media.every((m) => m.cloudinaryUrl);
 
@@ -183,6 +183,7 @@ export const postAPI = {
           platforms,
           ...(platformCaptions &&
             Object.keys(platformCaptions).length && { platformCaptions }),
+          ...(tiktokSettings && { tiktokSettings }),
           ...(media && media.length > 0 && {
             mediaUrls: media.map((m) => m.cloudinaryUrl),
           }),
@@ -198,6 +199,9 @@ export const postAPI = {
     }
     if (platformCaptions && Object.keys(platformCaptions).length) {
       formData.append("platformCaptions", JSON.stringify(platformCaptions));
+    }
+    if (tiktokSettings) {
+      formData.append("tiktokSettings", JSON.stringify(tiktokSettings));
     }
     if (media && media.length > 0) {
       media.forEach((item) => {
@@ -345,6 +349,9 @@ export const platformAPI = {
     api.post("/platforms/auth/instagram/confirm", { stateId }),
 
   initiateTikTokAuth: () => api.get("/platforms/auth/tiktok"),
+
+  getTikTokCreatorInfo: (platformId) =>
+    api.get(`/platforms/tiktok/creator-info${platformId ? `?platformId=${encodeURIComponent(platformId)}` : ""}`),
 
   initiateLinkedInAuth: () => api.get("/platforms/auth/linkedin"),
 

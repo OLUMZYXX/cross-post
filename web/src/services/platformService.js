@@ -27,6 +27,9 @@ export const platformAPI = {
 
   initiateTikTokAuth: () => api.get("/platforms/auth/tiktok"),
 
+  getTikTokCreatorInfo: (platformId) =>
+    api.get(`/platforms/tiktok/creator-info${platformId ? `?platformId=${encodeURIComponent(platformId)}` : ""}`),
+
   initiateLinkedInAuth: () => api.get("/platforms/auth/linkedin"),
 
   initiateYouTubeAuth: () => api.get("/platforms/auth/youtube"),

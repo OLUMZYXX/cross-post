@@ -6,6 +6,7 @@ import {
   friendlyTikTokError,
   isVideoUrl,
 } from "./tiktok.helpers.js";
+import { resolveTikTokSettings, videoPostInfo } from "../tiktokSettings.js";
 
 async function downloadVideo(url) {
   const res = await fetch(url);
@@ -15,7 +16,7 @@ async function downloadVideo(url) {
   return Buffer.from(await res.arrayBuffer());
 }
 
-async function initUpload(accessToken, caption, size) {
+async function initUpload(accessToken, caption, size, settings) {
   const res = await fetch(VIDEO_INIT_URL, {
     method: "POST",
     headers: {
@@ -25,7 +26,7 @@ async function initUpload(accessToken, caption, size) {
     body: JSON.stringify({
       post_info: {
         title: caption ? caption.slice(0, VIDEO_TITLE_MAX) : "",
-        privacy_level: "SELF_ONLY",
+        ...videoPostInfo(settings),
       },
       source_info: {
         source: "FILE_UPLOAD",
@@ -87,19 +88,21 @@ export async function publishToTikTok(platform, post) {
   }
 
   const mediaUrl = mediaUrls[0];
+  const settings = resolveTikTokSettings(post);
 
   if (!isVideoUrl(mediaUrl)) {
     return publishPhotosToTikTok(
       accessToken,
       caption,
       mediaUrls.filter((url) => !isVideoUrl(url)),
+      settings,
     );
   }
 
   const buffer = await downloadVideo(mediaUrl);
   logger.info("TIKTOK:UPLOAD", { bytes: buffer.length, source: "FILE_UPLOAD" });
 
-  const { publishId, uploadUrl } = await initUpload(accessToken, caption, buffer.length);
+  const { publishId, uploadUrl } = await initUpload(accessToken, caption, buffer.length, settings);
 
   if (!uploadUrl) {
     throw new Error("TikTok did not return an upload URL. Please try again.");

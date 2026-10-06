@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { Send, Clock, Save } from "lucide-react";
 import useCreatePost from "@/hooks/useCreatePost";
+import useTikTokSettings from "@/hooks/useTikTokSettings";
 import ComposeCard from "@/components/compose/ComposeCard";
 import SendTo from "@/components/compose/SendTo";
 import RephraseModal from "@/components/compose/RephraseModal";
 import ScheduleModal from "@/components/compose/ScheduleModal";
+import TikTokSettingsModal from "@/components/compose/TikTokSettingsModal";
 import Button from "@/components/ui/Button";
 
 export default function Composer({ platforms, connectedNames, onDone }) {
@@ -15,6 +17,9 @@ export default function Composer({ platforms, connectedNames, onDone }) {
   const composer = useCreatePost({ connectedPlatforms: connectedNames, onSuccess: onDone });
   const { isPosting, isUploading, selectedPlatforms } = composer;
   const nothingSelected = selectedPlatforms.length === 0;
+  const tiktok = useTikTokSettings({ selectedPlatforms, mediaUrls: composer.mediaUrls });
+  const publish = () => tiktok.runWithSettings((settings) => composer.publishNow(settings));
+  const openSchedule = () => tiktok.runWithSettings(() => setShowSchedule(true));
 
   return (
     <div>
@@ -31,7 +36,7 @@ export default function Composer({ platforms, connectedNames, onDone }) {
         <Button
           variant="accent"
           size="lg"
-          onClick={composer.publishNow}
+          onClick={publish}
           loading={isPosting}
           disabled={isUploading || nothingSelected}
           className="flex-1"
@@ -43,7 +48,7 @@ export default function Composer({ platforms, connectedNames, onDone }) {
           <Button
             variant="secondary"
             size="lg"
-            onClick={() => setShowSchedule(true)}
+            onClick={openSchedule}
             disabled={isPosting || isUploading || nothingSelected}
             className="flex-1"
           >
@@ -63,11 +68,12 @@ export default function Composer({ platforms, connectedNames, onDone }) {
       </div>
 
       <RephraseModal open={showRephrase} onClose={() => setShowRephrase(false)} composer={composer} />
+      <TikTokSettingsModal tiktok={tiktok} />
       <ScheduleModal
         open={showSchedule}
         onClose={() => setShowSchedule(false)}
-        onPublishNow={composer.publishNow}
-        onSchedule={composer.schedulePost}
+        onPublishNow={() => composer.publishNow(tiktok.payload)}
+        onSchedule={(date) => composer.schedulePost(date, tiktok.payload)}
         busy={isPosting}
       />
     </div>
