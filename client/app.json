@@ -47,6 +47,8 @@
     "plugins": [
       "expo-apple-authentication",
       "expo-web-browser",
+      "./plugins/withPodDeploymentTarget",
+      "./plugins/withSceneDelegate",
       [
         "expo-notifications",
         {
