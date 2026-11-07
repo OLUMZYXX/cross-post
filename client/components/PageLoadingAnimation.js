@@ -1,16 +1,10 @@
-﻿import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { getColors } from "../constants/theme";
+import { LOADING_PLATFORMS } from "../constants/loadingPlatforms";
 import { View, Animated, Easing } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const PLATFORMS = [
-  { icon: "logo-twitter", color: getColors().olive },
-  { icon: "logo-instagram", color: getColors().terracotta },
-  { icon: "logo-facebook", color: getColors().olive },
-  { icon: "logo-tiktok", color: "#e5e7eb" },
-  { icon: "logo-youtube", color: getColors().terracotta },
-  { icon: "logo-linkedin", color: getColors().olive },
-];
+const PLATFORMS = LOADING_PLATFORMS;
 
 export default function PageLoadingAnimation({ onFinish }) {
   const logoScale = useRef(new Animated.Value(0.3)).current;
@@ -140,10 +134,10 @@ export default function PageLoadingAnimation({ onFinish }) {
           }}
         >
           <View
-            style={{ backgroundColor: `${platform.color}20` }}
+            style={{ backgroundColor: `${getColors()[platform.colorKey]}20` }}
             className="w-10 h-10 rounded-full items-center justify-center"
           >
-            <Ionicons name={platform.icon} size={18} color={platform.color} />
+            <Ionicons name={platform.icon} size={18} color={getColors()[platform.colorKey]} />
           </View>
         </Animated.View>
       ))}

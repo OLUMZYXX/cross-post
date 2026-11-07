@@ -4,6 +4,13 @@ import PlatformChip from "./PlatformChip";
 import SectionRule from "./SectionRule";
 import { useTheme } from "../constants/theme";
 
+const GRID_GAP = 8;
+const GRID_CELL_STYLE = {
+  width: "50%",
+  paddingHorizontal: GRID_GAP / 2,
+  marginBottom: GRID_GAP,
+};
+
 export default function PlatformSelector({
   connectedPlatforms,
   selectedPlatforms,
@@ -34,50 +41,53 @@ export default function PlatformSelector({
         </View>
       </View>
 
-      <View className="flex-row flex-wrap">
+      <View className="flex-row flex-wrap" style={{ marginHorizontal: -GRID_GAP / 2 }}>
         {connectedPlatforms.map((platform) => {
           const isSelected = selectedPlatforms.includes(platform);
           return (
-            <PlatformChip
-              key={platform}
-              name={platform}
-              label={getDisplayName(platform)}
-              selected={isSelected}
-              onPress={() => !disabled && onToggle(platform)}
-            />
+            <View key={platform} style={GRID_CELL_STYLE}>
+              <PlatformChip
+                name={platform}
+                label={getDisplayName(platform)}
+                selected={isSelected}
+                onPress={() => !disabled && onToggle(platform)}
+                fullWidth
+              />
+            </View>
           );
         })}
 
         {onAddPlatform && (
-          <TouchableOpacity
-            onPress={onAddPlatform}
-            disabled={disabled}
-            activeOpacity={0.75}
-            style={{
-              paddingVertical: 9,
-              paddingHorizontal: 14,
-              borderRadius: 999,
-              borderWidth: 1,
-              borderColor: colors.rule,
-              borderStyle: "dashed",
-              flexDirection: "row",
-              alignItems: "center",
-              marginRight: 8,
-              marginBottom: 8,
-            }}
-          >
-            <Ionicons name="add" size={14} color={colors.terracotta} />
-            <Text
+          <View style={GRID_CELL_STYLE}>
+            <TouchableOpacity
+              onPress={onAddPlatform}
+              disabled={disabled}
+              activeOpacity={0.75}
               style={{
-                color: colors.terracotta,
-                fontFamily: "HankenGrotesk_700Bold",
-                fontSize: 13,
-                marginLeft: 6,
+                paddingVertical: 9,
+                paddingHorizontal: 14,
+                borderRadius: 999,
+                borderWidth: 1,
+                borderColor: colors.rule,
+                borderStyle: "dashed",
+                flexDirection: "row",
+                alignItems: "center",
+                alignSelf: "flex-start",
               }}
             >
-              Add
-            </Text>
-          </TouchableOpacity>
+              <Ionicons name="add" size={14} color={colors.terracotta} />
+              <Text
+                style={{
+                  color: colors.terracotta,
+                  fontFamily: "HankenGrotesk_700Bold",
+                  fontSize: 13,
+                  marginLeft: 6,
+                }}
+              >
+                Add
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 

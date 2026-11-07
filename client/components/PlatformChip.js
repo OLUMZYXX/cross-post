@@ -16,7 +16,7 @@ const PLATFORM_ICONS = {
   Threads: "at-outline",
 };
 
-export default function PlatformChip({ name, label, selected, onPress }) {
+export default function PlatformChip({ name, label, selected, onPress, fullWidth = false }) {
   const { colors } = useTheme();
   const palette = getPalette(selected, colors);
   const iconName = PLATFORM_ICONS[name?.split(":")[0]] || "ellipse-outline";
@@ -34,7 +34,7 @@ export default function PlatformChip({ name, label, selected, onPress }) {
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={{ marginRight: 8, marginBottom: 8 }}
+      style={fullWidth ? { width: "100%" } : { marginRight: 8, marginBottom: 8 }}
     >
       <Animated.View style={{ transform: [{ scale }] }}>
         <View
@@ -58,11 +58,14 @@ export default function PlatformChip({ name, label, selected, onPress }) {
           >
             <Ionicons name={iconName} size={14} color={palette.icon} />
             <Text
+              numberOfLines={1}
               style={{
                 color: palette.text,
                 fontFamily: "HankenGrotesk_600SemiBold",
                 fontSize: 13,
                 marginLeft: 7,
+                flexShrink: 1,
+                ...(fullWidth && { flex: 1 }),
               }}
             >
               {displayLabel}
